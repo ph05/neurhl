@@ -1,0 +1,13 @@
+{
+  "K": 6.0,
+  "H": 35.0,
+  "phi_s": 0.7,
+  "w": 0.6,
+  "phi1": 0.85,
+  "phi2": 0.75,
+  "sigma1": 30.0,
+  "sigma2": 40.0,
+  "expansion_init": 1470.0,
+  "train_through": 2017,
+  "frozen": true
+}

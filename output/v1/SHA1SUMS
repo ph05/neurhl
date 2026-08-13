@@ -1,0 +1,5 @@
+d323ed230f63a9a2c704f3ff71b1a79f9263485c  output/v1/backtest_playoff_calibration.csv
+81ca6b1e4308b68a5b4e5a0c6402bfe46f10f62d  output/v1/backtest_seasons.csv
+9abd0b78d28dab49be29c214934dec5745ff591f  output/v1/nhl_2027_28_projections.xlsx
+709144f3f36382edd6dbb37ffccd183c5550502b  output/v1/params.json
+32ccb7ea6c509f8c78810cac011a58840cdff6ff  output/v1/projections_2027_28.csv

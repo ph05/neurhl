@@ -1,0 +1,1399 @@
+date,away,away_g,home,home_g,ot,game_type,season_end
+2024-10-04,New Jersey Devils,4,Buffalo Sabres,1,,R,2025
+2024-10-05,Buffalo Sabres,1,New Jersey Devils,3,,R,2025
+2024-10-08,Boston Bruins,4,Florida Panthers,6,,R,2025
+2024-10-08,St. Louis Blues,3,Seattle Kraken,2,,R,2025
+2024-10-08,Chicago Blackhawks,2,Utah Hockey Club,5,,R,2025
+2024-10-09,Winnipeg Jets,6,Edmonton Oilers,0,,R,2025
+2024-10-09,Toronto Maple Leafs,0,Montreal Canadiens,1,,R,2025
+2024-10-09,New York Rangers,6,Pittsburgh Penguins,0,,R,2025
+2024-10-09,Calgary Flames,6,Vancouver Canucks,5,OT,R,2025
+2024-10-09,Colorado Avalanche,4,Vegas Golden Knights,8,,R,2025
+2024-10-10,Montreal Canadiens,4,Boston Bruins,6,,R,2025
+2024-10-10,Los Angeles Kings,3,Buffalo Sabres,1,,R,2025
+2024-10-10,Pittsburgh Penguins,6,Detroit Red Wings,3,,R,2025
+2024-10-10,Columbus Blue Jackets,2,Minnesota Wild,3,,R,2025
+2024-10-10,Toronto Maple Leafs,4,New Jersey Devils,2,,R,2025
+2024-10-10,Dallas Stars,4,Nashville Predators,3,,R,2025
+2024-10-10,Utah Hockey Club,5,New York Islanders,4,OT,R,2025
+2024-10-10,Florida Panthers,1,Ottawa Senators,3,,R,2025
+2024-10-10,St. Louis Blues,5,San Jose Sharks,4,OT,R,2025
+2024-10-11,Tampa Bay Lightning,4,Carolina Hurricanes,1,,R,2025
+2024-10-11,Philadelphia Flyers,3,Vancouver Canucks,2,SO,R,2025
+2024-10-11,St. Louis Blues,3,Vegas Golden Knights,4,,R,2025
+2024-10-11,Chicago Blackhawks,1,Winnipeg Jets,2,OT,R,2025
+2024-10-12,Los Angeles Kings,1,Boston Bruins,2,OT,R,2025
+2024-10-12,Florida Panthers,2,Buffalo Sabres,5,,R,2025
+2024-10-12,Philadelphia Flyers,3,Calgary Flames,6,,R,2025
+2024-10-12,Columbus Blue Jackets,6,Colorado Avalanche,4,,R,2025
+2024-10-12,New York Islanders,0,Dallas Stars,3,,R,2025
+2024-10-12,Nashville Predators,0,Detroit Red Wings,3,,R,2025
+2024-10-12,Chicago Blackhawks,5,Edmonton Oilers,2,,R,2025
+2024-10-12,Seattle Kraken,5,Minnesota Wild,4,SO,R,2025
+2024-10-12,Ottawa Senators,1,Montreal Canadiens,4,,R,2025
+2024-10-12,Utah Hockey Club,6,New York Rangers,5,OT,R,2025
+2024-10-12,Anaheim Ducks,2,San Jose Sharks,0,,R,2025
+2024-10-12,Pittsburgh Penguins,2,Toronto Maple Leafs,4,,R,2025
+2024-10-12,New Jersey Devils,5,Washington Capitals,3,,R,2025
+2024-10-13,Seattle Kraken,0,Dallas Stars,2,,R,2025
+2024-10-13,Calgary Flames,4,Edmonton Oilers,1,,R,2025
+2024-10-13,Anaheim Ducks,1,Vegas Golden Knights,3,,R,2025
+2024-10-13,Minnesota Wild,1,Winnipeg Jets,2,OT,R,2025
+2024-10-14,Florida Panthers,4,Boston Bruins,3,,R,2025
+2024-10-14,New York Islanders,6,Colorado Avalanche,2,,R,2025
+2024-10-14,Pittsburgh Penguins,6,Montreal Canadiens,3,,R,2025
+2024-10-14,Utah Hockey Club,0,New Jersey Devils,3,,R,2025
+2024-10-14,Detroit Red Wings,1,New York Rangers,4,,R,2025
+2024-10-14,Los Angeles Kings,7,Ottawa Senators,8,OT,R,2025
+2024-10-15,New Jersey Devils,2,Carolina Hurricanes,4,,R,2025
+2024-10-15,Florida Panthers,4,Columbus Blue Jackets,3,,R,2025
+2024-10-15,Chicago Blackhawks,1,Calgary Flames,3,,R,2025
+2024-10-15,San Jose Sharks,2,Dallas Stars,3,SO,R,2025
+2024-10-15,Philadelphia Flyers,3,Edmonton Oilers,4,OT,R,2025
+2024-10-15,Seattle Kraken,7,Nashville Predators,3,,R,2025
+2024-10-15,Minnesota Wild,4,St. Louis Blues,1,,R,2025
+2024-10-15,Vancouver Canucks,1,Tampa Bay Lightning,4,,R,2025
+2024-10-15,Vegas Golden Knights,2,Washington Capitals,4,,R,2025
+2024-10-16,Utah Hockey Club,4,Anaheim Ducks,5,OT,R,2025
+2024-10-16,Boston Bruins,5,Colorado Avalanche,3,,R,2025
+2024-10-16,Buffalo Sabres,5,Pittsburgh Penguins,6,OT,R,2025
+2024-10-16,Los Angeles Kings,2,Toronto Maple Leafs,6,,R,2025
+2024-10-17,Buffalo Sabres,4,Columbus Blue Jackets,6,,R,2025
+2024-10-17,San Jose Sharks,2,Chicago Blackhawks,4,,R,2025
+2024-10-17,New York Rangers,5,Detroit Red Wings,2,,R,2025
+2024-10-17,Vancouver Canucks,3,Florida Panthers,2,OT,R,2025
+2024-10-17,Los Angeles Kings,4,Montreal Canadiens,1,,R,2025
+2024-10-17,Edmonton Oilers,4,Nashville Predators,2,,R,2025
+2024-10-17,New Jersey Devils,3,Ottawa Senators,1,,R,2025
+2024-10-17,Philadelphia Flyers,4,Seattle Kraken,6,,R,2025
+2024-10-17,New York Islanders,0,St. Louis Blues,1,OT,R,2025
+2024-10-17,Vegas Golden Knights,3,Tampa Bay Lightning,4,,R,2025
+2024-10-17,Dallas Stars,2,Washington Capitals,3,,R,2025
+2024-10-18,Anaheim Ducks,3,Colorado Avalanche,4,OT,R,2025
+2024-10-18,Carolina Hurricanes,4,Pittsburgh Penguins,1,,R,2025
+2024-10-18,San Jose Sharks,3,Winnipeg Jets,8,,R,2025
+2024-10-19,Minnesota Wild,3,Columbus Blue Jackets,1,,R,2025
+2024-10-19,Buffalo Sabres,4,Chicago Blackhawks,2,,R,2025
+2024-10-19,Edmonton Oilers,1,Dallas Stars,4,,R,2025
+2024-10-19,Vegas Golden Knights,3,Florida Panthers,4,OT,R,2025
+2024-10-19,Washington Capitals,6,New Jersey Devils,5,OT,R,2025
+2024-10-19,Detroit Red Wings,5,Nashville Predators,2,,R,2025
+2024-10-19,Montreal Canadiens,3,New York Islanders,4,SO,R,2025
+2024-10-19,Tampa Bay Lightning,4,Ottawa Senators,5,,R,2025
+2024-10-19,Vancouver Canucks,3,Philadelphia Flyers,0,,R,2025
+2024-10-19,Calgary Flames,1,Seattle Kraken,2,OT,R,2025
+2024-10-19,Carolina Hurricanes,3,St. Louis Blues,4,,R,2025
+2024-10-19,New York Rangers,4,Toronto Maple Leafs,1,,R,2025
+2024-10-19,Boston Bruins,1,Utah Hockey Club,2,OT,R,2025
+2024-10-20,Los Angeles Kings,4,Anaheim Ducks,1,,R,2025
+2024-10-20,Colorado Avalanche,4,San Jose Sharks,1,,R,2025
+2024-10-20,Pittsburgh Penguins,3,Winnipeg Jets,6,,R,2025
+2024-10-21,Tampa Bay Lightning,2,Toronto Maple Leafs,5,,R,2025
+2024-10-22,San Jose Sharks,1,Anaheim Ducks,3,,R,2025
+2024-10-22,Dallas Stars,2,Buffalo Sabres,4,,R,2025
+2024-10-22,Toronto Maple Leafs,2,Columbus Blue Jackets,6,,R,2025
+2024-10-22,Pittsburgh Penguins,3,Calgary Flames,4,SO,R,2025
+2024-10-22,Vancouver Canucks,6,Chicago Blackhawks,3,,R,2025
+2024-10-22,Carolina Hurricanes,3,Edmonton Oilers,2,OT,R,2025
+2024-10-22,Minnesota Wild,5,Florida Panthers,1,,R,2025
+2024-10-22,New York Rangers,7,Montreal Canadiens,2,,R,2025
+2024-10-22,Tampa Bay Lightning,8,New Jersey Devils,5,,R,2025
+2024-10-22,Boston Bruins,0,Nashville Predators,4,,R,2025
+2024-10-22,Detroit Red Wings,1,New York Islanders,0,,R,2025
+2024-10-22,Washington Capitals,4,Philadelphia Flyers,1,,R,2025
+2024-10-22,Colorado Avalanche,3,Seattle Kraken,2,,R,2025
+2024-10-22,Winnipeg Jets,3,St. Louis Blues,2,,R,2025
+2024-10-22,Ottawa Senators,4,Utah Hockey Club,0,,R,2025
+2024-10-22,Los Angeles Kings,1,Vegas Golden Knights,6,,R,2025
+2024-10-23,Philadelphia Flyers,3,Washington Capitals,6,,R,2025
+2024-10-24,Dallas Stars,5,Boston Bruins,2,,R,2025
+2024-10-24,Carolina Hurricanes,4,Calgary Flames,2,,R,2025
+2024-10-24,New Jersey Devils,3,Detroit Red Wings,5,,R,2025
+2024-10-24,San Jose Sharks,2,Los Angeles Kings,3,,R,2025
+2024-10-24,Florida Panthers,3,New York Rangers,1,,R,2025
+2024-10-24,Winnipeg Jets,4,Seattle Kraken,3,OT,R,2025
+2024-10-24,Minnesota Wild,4,Tampa Bay Lightning,2,,R,2025
+2024-10-24,St. Louis Blues,5,Toronto Maple Leafs,1,,R,2025
+2024-10-24,Colorado Avalanche,5,Utah Hockey Club,1,,R,2025
+2024-10-25,Nashville Predators,3,Chicago Blackhawks,2,,R,2025
+2024-10-25,Pittsburgh Penguins,0,Edmonton Oilers,4,,R,2025
+2024-10-25,New York Islanders,4,New Jersey Devils,3,OT,R,2025
+2024-10-25,Ottawa Senators,4,Vegas Golden Knights,6,,R,2025
+2024-10-26,Toronto Maple Leafs,3,Boston Bruins,4,OT,R,2025
+2024-10-26,Detroit Red Wings,3,Buffalo Sabres,5,,R,2025
+2024-10-26,Winnipeg Jets,5,Calgary Flames,3,,R,2025
+2024-10-26,Chicago Blackhawks,2,Dallas Stars,4,,R,2025
+2024-10-26,Utah Hockey Club,2,Los Angeles Kings,3,,R,2025
+2024-10-26,St. Louis Blues,2,Montreal Canadiens,5,,R,2025
+2024-10-26,Columbus Blue Jackets,3,Nashville Predators,4,OT,R,2025
+2024-10-26,Florida Panthers,6,New York Islanders,3,,R,2025
+2024-10-26,Anaheim Ducks,1,New York Rangers,2,,R,2025
+2024-10-26,Minnesota Wild,5,Philadelphia Flyers,7,,R,2025
+2024-10-26,Carolina Hurricanes,4,Seattle Kraken,1,,R,2025
+2024-10-26,Washington Capitals,0,Tampa Bay Lightning,3,,R,2025
+2024-10-26,Pittsburgh Penguins,3,Vancouver Canucks,4,,R,2025
+2024-10-26,San Jose Sharks,3,Vegas Golden Knights,7,,R,2025
+2024-10-27,Ottawa Senators,4,Colorado Avalanche,5,,R,2025
+2024-10-27,Edmonton Oilers,3,Detroit Red Wings,2,OT,R,2025
+2024-10-27,Anaheim Ducks,2,New Jersey Devils,6,,R,2025
+2024-10-27,Montreal Canadiens,4,Philadelphia Flyers,3,,R,2025
+2024-10-28,Florida Panthers,5,Buffalo Sabres,2,,R,2025
+2024-10-28,Edmonton Oilers,1,Columbus Blue Jackets,6,,R,2025
+2024-10-28,Chicago Blackhawks,5,Colorado Avalanche,2,,R,2025
+2024-10-28,Nashville Predators,2,Tampa Bay Lightning,3,OT,R,2025
+2024-10-28,San Jose Sharks,5,Utah Hockey Club,4,OT,R,2025
+2024-10-28,Carolina Hurricanes,4,Vancouver Canucks,3,OT,R,2025
+2024-10-28,Calgary Flames,0,Vegas Golden Knights,5,,R,2025
+2024-10-28,Toronto Maple Leafs,6,Winnipeg Jets,4,,R,2025
+2024-10-29,Philadelphia Flyers,2,Boston Bruins,0,,R,2025
+2024-10-29,Seattle Kraken,8,Montreal Canadiens,2,,R,2025
+2024-10-29,Anaheim Ducks,3,New York Islanders,1,,R,2025
+2024-10-29,St. Louis Blues,1,Ottawa Senators,8,,R,2025
+2024-10-29,Minnesota Wild,5,Pittsburgh Penguins,3,,R,2025
+2024-10-29,Los Angeles Kings,2,San Jose Sharks,4,,R,2025
+2024-10-29,New York Rangers,3,Washington Capitals,5,,R,2025
+2024-10-30,New York Islanders,0,Columbus Blue Jackets,2,,R,2025
+2024-10-30,Tampa Bay Lightning,5,Colorado Avalanche,2,,R,2025
+2024-10-30,Winnipeg Jets,6,Detroit Red Wings,2,,R,2025
+2024-10-30,Vegas Golden Knights,3,Los Angeles Kings,6,,R,2025
+2024-10-30,Calgary Flames,1,Utah Hockey Club,5,,R,2025
+2024-10-30,New Jersey Devils,6,Vancouver Canucks,0,,R,2025
+2024-10-31,Boston Bruins,2,Carolina Hurricanes,8,,R,2025
+2024-10-31,Edmonton Oilers,5,Nashville Predators,1,,R,2025
+2024-10-31,St. Louis Blues,1,Philadelphia Flyers,2,,R,2025
+2024-10-31,Anaheim Ducks,1,Pittsburgh Penguins,2,OT,R,2025
+2024-10-31,Chicago Blackhawks,2,San Jose Sharks,3,,R,2025
+2024-10-31,Seattle Kraken,1,Toronto Maple Leafs,4,,R,2025
+2024-10-31,Montreal Canadiens,3,Washington Capitals,6,,R,2025
+2024-11-01,New York Islanders,4,Buffalo Sabres,3,,R,2025
+2024-11-01,Winnipeg Jets,6,Columbus Blue Jackets,2,,R,2025
+2024-11-01,New Jersey Devils,0,Calgary Flames,3,,R,2025
+2024-11-01,Florida Panthers,6,Dallas Stars,4,,R,2025
+2024-11-01,Tampa Bay Lightning,3,Minnesota Wild,5,,R,2025
+2024-11-01,Ottawa Senators,1,New York Rangers,2,,R,2025
+2024-11-02,Buffalo Sabres,1,Detroit Red Wings,2,,R,2025
+2024-11-02,Dallas Stars,2,Florida Panthers,4,,R,2025
+2024-11-02,Chicago Blackhawks,4,Los Angeles Kings,3,SO,R,2025
+2024-11-02,Colorado Avalanche,2,Nashville Predators,5,,R,2025
+2024-11-02,Seattle Kraken,0,Ottawa Senators,3,,R,2025
+2024-11-02,Boston Bruins,3,Philadelphia Flyers,0,,R,2025
+2024-11-02,Montreal Canadiens,1,Pittsburgh Penguins,3,,R,2025
+2024-11-02,Vancouver Canucks,3,San Jose Sharks,2,,R,2025
+2024-11-02,Toronto Maple Leafs,2,St. Louis Blues,4,,R,2025
+2024-11-02,Utah Hockey Club,3,Vegas Golden Knights,4,OT,R,2025
+2024-11-02,Columbus Blue Jackets,2,Washington Capitals,7,,R,2025
+2024-11-03,Chicago Blackhawks,4,Anaheim Ducks,2,,R,2025
+2024-11-03,Seattle Kraken,0,Boston Bruins,2,,R,2025
+2024-11-03,Washington Capitals,2,Carolina Hurricanes,4,,R,2025
+2024-11-03,Edmonton Oilers,4,Calgary Flames,2,,R,2025
+2024-11-03,Toronto Maple Leafs,1,Minnesota Wild,2,OT,R,2025
+2024-11-03,New York Islanders,2,New York Rangers,5,,R,2025
+2024-11-03,Tampa Bay Lightning,4,Winnipeg Jets,7,,R,2025
+2024-11-04,New Jersey Devils,3,Edmonton Oilers,0,,R,2025
+2024-11-04,Los Angeles Kings,3,Nashville Predators,0,,R,2025
+2024-11-05,Vancouver Canucks,5,Anaheim Ducks,1,,R,2025
+2024-11-05,Ottawa Senators,1,Buffalo Sabres,5,,R,2025
+2024-11-05,Philadelphia Flyers,4,Carolina Hurricanes,6,,R,2025
+2024-11-05,Seattle Kraken,3,Colorado Avalanche,6,,R,2025
+2024-11-05,Los Angeles Kings,5,Minnesota Wild,1,,R,2025
+2024-11-05,Calgary Flames,3,Montreal Canadiens,2,OT,R,2025
+2024-11-05,Pittsburgh Penguins,3,New York Islanders,4,SO,R,2025
+2024-11-05,Columbus Blue Jackets,1,San Jose Sharks,2,OT,R,2025
+2024-11-05,Tampa Bay Lightning,2,St. Louis Blues,3,,R,2025
+2024-11-05,Boston Bruins,0,Toronto Maple Leafs,4,,R,2025
+2024-11-05,Utah Hockey Club,0,Winnipeg Jets,3,,R,2025
+2024-11-06,Detroit Red Wings,4,Chicago Blackhawks,1,,R,2025
+2024-11-06,Vegas Golden Knights,4,Edmonton Oilers,2,,R,2025
+2024-11-06,Nashville Predators,2,Washington Capitals,3,,R,2025
+2024-11-07,Calgary Flames,3,Boston Bruins,4,OT,R,2025
+2024-11-07,Pittsburgh Penguins,1,Carolina Hurricanes,5,,R,2025
+2024-11-07,Chicago Blackhawks,1,Dallas Stars,3,,R,2025
+2024-11-07,Nashville Predators,2,Florida Panthers,6,,R,2025
+2024-11-07,Vancouver Canucks,4,Los Angeles Kings,2,,R,2025
+2024-11-07,Montreal Canadiens,3,New Jersey Devils,5,,R,2025
+2024-11-07,Buffalo Sabres,6,New York Rangers,1,,R,2025
+2024-11-07,New York Islanders,4,Ottawa Senators,2,,R,2025
+2024-11-07,Minnesota Wild,5,San Jose Sharks,2,,R,2025
+2024-11-07,Utah Hockey Club,4,St. Louis Blues,2,,R,2025
+2024-11-07,Philadelphia Flyers,2,Tampa Bay Lightning,1,SO,R,2025
+2024-11-07,Colorado Avalanche,0,Winnipeg Jets,1,,R,2025
+2024-11-08,Minnesota Wild,5,Anaheim Ducks,2,,R,2025
+2024-11-08,Vegas Golden Knights,3,Seattle Kraken,4,OT,R,2025
+2024-11-08,Detroit Red Wings,1,Toronto Maple Leafs,3,,R,2025
+2024-11-08,Pittsburgh Penguins,4,Washington Capitals,2,,R,2025
+2024-11-09,Ottawa Senators,3,Boston Bruins,2,OT,R,2025
+2024-11-09,Calgary Flames,2,Buffalo Sabres,3,SO,R,2025
+2024-11-09,Carolina Hurricanes,4,Colorado Avalanche,6,,R,2025
+2024-11-09,New York Rangers,4,Detroit Red Wings,0,,R,2025
+2024-11-09,Philadelphia Flyers,3,Florida Panthers,4,SO,R,2025
+2024-11-09,Columbus Blue Jackets,2,Los Angeles Kings,5,,R,2025
+2024-11-09,Utah Hockey Club,0,Nashville Predators,4,,R,2025
+2024-11-09,New Jersey Devils,4,New York Islanders,3,OT,R,2025
+2024-11-09,Washington Capitals,8,St. Louis Blues,1,,R,2025
+2024-11-09,Montreal Canadiens,1,Toronto Maple Leafs,4,,R,2025
+2024-11-09,Edmonton Oilers,7,Vancouver Canucks,3,,R,2025
+2024-11-09,Dallas Stars,1,Winnipeg Jets,4,,R,2025
+2024-11-10,Columbus Blue Jackets,2,Anaheim Ducks,4,,R,2025
+2024-11-10,Minnesota Wild,1,Chicago Blackhawks,2,OT,R,2025
+2024-11-10,San Jose Sharks,1,New Jersey Devils,0,,R,2025
+2024-11-11,Montreal Canadiens,7,Buffalo Sabres,5,,R,2025
+2024-11-11,Los Angeles Kings,1,Calgary Flames,3,,R,2025
+2024-11-11,Nashville Predators,2,Colorado Avalanche,3,OT,R,2025
+2024-11-11,San Jose Sharks,3,Philadelphia Flyers,4,SO,R,2025
+2024-11-11,Dallas Stars,7,Pittsburgh Penguins,1,,R,2025
+2024-11-11,Carolina Hurricanes,5,Vegas Golden Knights,2,,R,2025
+2024-11-12,New York Islanders,3,Edmonton Oilers,4,OT,R,2025
+2024-11-12,New Jersey Devils,4,Florida Panthers,1,,R,2025
+2024-11-12,Winnipeg Jets,6,New York Rangers,3,,R,2025
+2024-11-12,Columbus Blue Jackets,2,Seattle Kraken,5,,R,2025
+2024-11-12,Boston Bruins,3,St. Louis Blues,2,,R,2025
+2024-11-12,Ottawa Senators,3,Toronto Maple Leafs,0,,R,2025
+2024-11-12,Calgary Flames,1,Vancouver Canucks,3,,R,2025
+2024-11-13,Vegas Golden Knights,3,Anaheim Ducks,2,,R,2025
+2024-11-13,Los Angeles Kings,2,Colorado Avalanche,4,,R,2025
+2024-11-13,Detroit Red Wings,3,Pittsburgh Penguins,2,OT,R,2025
+2024-11-13,Carolina Hurricanes,1,Utah Hockey Club,4,,R,2025
+2024-11-13,Toronto Maple Leafs,4,Washington Capitals,3,OT,R,2025
+2024-11-14,St. Louis Blues,3,Buffalo Sabres,4,OT,R,2025
+2024-11-14,Boston Bruins,2,Dallas Stars,7,,R,2025
+2024-11-14,Nashville Predators,2,Edmonton Oilers,3,OT,R,2025
+2024-11-14,New Jersey Devils,6,Florida Panthers,2,,R,2025
+2024-11-14,Montreal Canadiens,0,Minnesota Wild,3,,R,2025
+2024-11-14,San Jose Sharks,2,New York Rangers,3,,R,2025
+2024-11-14,Philadelphia Flyers,5,Ottawa Senators,4,OT,R,2025
+2024-11-14,Chicago Blackhawks,1,Seattle Kraken,3,,R,2025
+2024-11-14,Winnipeg Jets,1,Tampa Bay Lightning,4,,R,2025
+2024-11-14,New York Islanders,5,Vancouver Canucks,2,,R,2025
+2024-11-15,Detroit Red Wings,4,Anaheim Ducks,6,,R,2025
+2024-11-15,Pittsburgh Penguins,2,Columbus Blue Jackets,6,,R,2025
+2024-11-15,Nashville Predators,0,Calgary Flames,2,,R,2025
+2024-11-15,Washington Capitals,5,Colorado Avalanche,2,,R,2025
+2024-11-15,Vegas Golden Knights,4,Utah Hockey Club,2,,R,2025
+2024-11-16,St. Louis Blues,3,Boston Bruins,2,OT,R,2025
+2024-11-16,Ottawa Senators,0,Carolina Hurricanes,4,,R,2025
+2024-11-16,Winnipeg Jets,0,Florida Panthers,5,,R,2025
+2024-11-16,Detroit Red Wings,1,Los Angeles Kings,4,,R,2025
+2024-11-16,Dallas Stars,2,Minnesota Wild,1,,R,2025
+2024-11-16,Columbus Blue Jackets,1,Montreal Canadiens,5,,R,2025
+2024-11-16,Buffalo Sabres,2,Philadelphia Flyers,5,,R,2025
+2024-11-16,San Jose Sharks,3,Pittsburgh Penguins,4,SO,R,2025
+2024-11-16,New York Islanders,2,Seattle Kraken,3,,R,2025
+2024-11-16,New Jersey Devils,0,Tampa Bay Lightning,4,,R,2025
+2024-11-16,Edmonton Oilers,3,Toronto Maple Leafs,4,OT,R,2025
+2024-11-16,Chicago Blackhawks,1,Vancouver Canucks,4,,R,2025
+2024-11-17,St. Louis Blues,1,Carolina Hurricanes,4,,R,2025
+2024-11-17,New York Rangers,2,Seattle Kraken,0,,R,2025
+2024-11-17,Nashville Predators,5,Vancouver Canucks,3,,R,2025
+2024-11-17,Washington Capitals,5,Vegas Golden Knights,2,,R,2025
+2024-11-18,Columbus Blue Jackets,5,Boston Bruins,1,,R,2025
+2024-11-18,Anaheim Ducks,4,Dallas Stars,2,,R,2025
+2024-11-18,Edmonton Oilers,0,Montreal Canadiens,3,,R,2025
+2024-11-18,Colorado Avalanche,3,Philadelphia Flyers,2,,R,2025
+2024-11-18,Detroit Red Wings,4,San Jose Sharks,5,OT,R,2025
+2024-11-18,Washington Capitals,6,Utah Hockey Club,2,,R,2025
+2024-11-19,New York Islanders,1,Calgary Flames,2,SO,R,2025
+2024-11-19,Anaheim Ducks,3,Chicago Blackhawks,2,,R,2025
+2024-11-19,Edmonton Oilers,5,Ottawa Senators,2,,R,2025
+2024-11-19,Tampa Bay Lightning,3,Pittsburgh Penguins,2,OT,R,2025
+2024-11-19,Minnesota Wild,4,St. Louis Blues,2,,R,2025
+2024-11-19,New York Rangers,4,Vancouver Canucks,3,,R,2025
+2024-11-19,Florida Panthers,3,Winnipeg Jets,6,,R,2025
+2024-11-20,San Jose Sharks,2,Dallas Stars,5,,R,2025
+2024-11-20,Buffalo Sabres,1,Los Angeles Kings,0,,R,2025
+2024-11-20,Carolina Hurricanes,4,Philadelphia Flyers,1,,R,2025
+2024-11-20,Nashville Predators,0,Seattle Kraken,3,,R,2025
+2024-11-20,Vegas Golden Knights,0,Toronto Maple Leafs,3,,R,2025
+2024-11-21,Utah Hockey Club,0,Boston Bruins,1,,R,2025
+2024-11-21,Tampa Bay Lightning,6,Columbus Blue Jackets,7,OT,R,2025
+2024-11-21,New York Rangers,2,Calgary Flames,3,,R,2025
+2024-11-21,Florida Panthers,1,Chicago Blackhawks,3,,R,2025
+2024-11-21,New York Islanders,1,Detroit Red Wings,2,,R,2025
+2024-11-21,Minnesota Wild,5,Edmonton Oilers,3,,R,2025
+2024-11-21,Carolina Hurricanes,2,New Jersey Devils,4,,R,2025
+2024-11-21,Vegas Golden Knights,3,Ottawa Senators,2,,R,2025
+2024-11-21,San Jose Sharks,2,St. Louis Blues,3,SO,R,2025
+2024-11-21,Colorado Avalanche,2,Washington Capitals,1,,R,2025
+2024-11-22,Buffalo Sabres,3,Anaheim Ducks,2,OT,R,2025
+2024-11-22,Winnipeg Jets,4,Pittsburgh Penguins,1,,R,2025
+2024-11-23,Carolina Hurricanes,4,Columbus Blue Jackets,5,SO,R,2025
+2024-11-23,Minnesota Wild,3,Calgary Flames,4,SO,R,2025
+2024-11-23,Boston Bruins,2,Detroit Red Wings,1,,R,2025
+2024-11-23,New York Rangers,2,Edmonton Oilers,6,,R,2025
+2024-11-23,Colorado Avalanche,7,Florida Panthers,4,,R,2025
+2024-11-23,Seattle Kraken,1,Los Angeles Kings,2,,R,2025
+2024-11-23,Vegas Golden Knights,6,Montreal Canadiens,2,,R,2025
+2024-11-23,Winnipeg Jets,1,Nashville Predators,4,,R,2025
+2024-11-23,St. Louis Blues,1,New York Islanders,3,,R,2025
+2024-11-23,Vancouver Canucks,4,Ottawa Senators,3,,R,2025
+2024-11-23,Chicago Blackhawks,2,Philadelphia Flyers,3,OT,R,2025
+2024-11-23,Utah Hockey Club,6,Pittsburgh Penguins,1,,R,2025
+2024-11-23,Buffalo Sabres,4,San Jose Sharks,2,,R,2025
+2024-11-23,Dallas Stars,4,Tampa Bay Lightning,2,,R,2025
+2024-11-23,New Jersey Devils,3,Washington Capitals,2,,R,2025
+2024-11-24,Utah Hockey Club,2,Toronto Maple Leafs,3,,R,2025
+2024-11-25,Seattle Kraken,3,Anaheim Ducks,2,,R,2025
+2024-11-25,Dallas Stars,4,Carolina Hurricanes,6,,R,2025
+2024-11-25,Washington Capitals,4,Florida Panthers,1,,R,2025
+2024-11-25,Winnipeg Jets,4,Minnesota Wild,1,,R,2025
+2024-11-25,Nashville Predators,2,New Jersey Devils,5,,R,2025
+2024-11-25,Detroit Red Wings,4,New York Islanders,2,,R,2025
+2024-11-25,St. Louis Blues,5,New York Rangers,2,,R,2025
+2024-11-25,Calgary Flames,3,Ottawa Senators,4,,R,2025
+2024-11-25,Vegas Golden Knights,5,Philadelphia Flyers,4,SO,R,2025
+2024-11-25,Los Angeles Kings,2,San Jose Sharks,7,,R,2025
+2024-11-25,Colorado Avalanche,2,Tampa Bay Lightning,8,,R,2025
+2024-11-26,Vancouver Canucks,2,Boston Bruins,0,,R,2025
+2024-11-26,Utah Hockey Club,3,Montreal Canadiens,2,OT,R,2025
+2024-11-27,Minnesota Wild,1,Buffalo Sabres,0,,R,2025
+2024-11-27,New York Rangers,3,Carolina Hurricanes,4,,R,2025
+2024-11-27,Montreal Canadiens,4,Columbus Blue Jackets,3,OT,R,2025
+2024-11-27,Dallas Stars,2,Chicago Blackhawks,6,,R,2025
+2024-11-27,Vegas Golden Knights,1,Colorado Avalanche,2,SO,R,2025
+2024-11-27,Calgary Flames,1,Detroit Red Wings,2,OT,R,2025
+2024-11-27,Toronto Maple Leafs,1,Florida Panthers,5,,R,2025
+2024-11-27,Winnipeg Jets,1,Los Angeles Kings,4,,R,2025
+2024-11-27,St. Louis Blues,3,New Jersey Devils,0,,R,2025
+2024-11-27,Philadelphia Flyers,3,Nashville Predators,2,OT,R,2025
+2024-11-27,Boston Bruins,6,New York Islanders,3,,R,2025
+2024-11-27,Vancouver Canucks,4,Pittsburgh Penguins,5,,R,2025
+2024-11-27,Anaheim Ducks,5,Seattle Kraken,2,,R,2025
+2024-11-27,Ottawa Senators,4,San Jose Sharks,3,,R,2025
+2024-11-27,Washington Capitals,5,Tampa Bay Lightning,4,,R,2025
+2024-11-29,Los Angeles Kings,2,Anaheim Ducks,1,,R,2025
+2024-11-29,Pittsburgh Penguins,2,Boston Bruins,1,,R,2025
+2024-11-29,Vancouver Canucks,4,Buffalo Sabres,3,OT,R,2025
+2024-11-29,Florida Panthers,6,Carolina Hurricanes,3,,R,2025
+2024-11-29,Calgary Flames,2,Columbus Blue Jackets,5,,R,2025
+2024-11-29,Colorado Avalanche,3,Dallas Stars,5,,R,2025
+2024-11-29,New Jersey Devils,5,Detroit Red Wings,4,,R,2025
+2024-11-29,Chicago Blackhawks,2,Minnesota Wild,3,,R,2025
+2024-11-29,Tampa Bay Lightning,3,Nashville Predators,2,OT,R,2025
+2024-11-29,New York Rangers,1,Philadelphia Flyers,3,,R,2025
+2024-11-29,Seattle Kraken,5,San Jose Sharks,8,,R,2025
+2024-11-29,Edmonton Oilers,4,Utah Hockey Club,3,OT,R,2025
+2024-11-29,Winnipeg Jets,3,Vegas Golden Knights,4,,R,2025
+2024-11-29,New York Islanders,4,Washington Capitals,5,OT,R,2025
+2024-11-30,Edmonton Oilers,4,Colorado Avalanche,1,,R,2025
+2024-11-30,Carolina Hurricanes,0,Florida Panthers,6,,R,2025
+2024-11-30,Ottawa Senators,2,Los Angeles Kings,5,,R,2025
+2024-11-30,Nashville Predators,2,Minnesota Wild,3,OT,R,2025
+2024-11-30,Washington Capitals,6,New Jersey Devils,5,,R,2025
+2024-11-30,Buffalo Sabres,0,New York Islanders,3,,R,2025
+2024-11-30,Montreal Canadiens,3,New York Rangers,4,,R,2025
+2024-11-30,Calgary Flames,2,Pittsburgh Penguins,6,,R,2025
+2024-11-30,San Jose Sharks,4,Seattle Kraken,2,,R,2025
+2024-11-30,Philadelphia Flyers,3,St. Louis Blues,2,OT,R,2025
+2024-11-30,Toronto Maple Leafs,5,Tampa Bay Lightning,3,,R,2025
+2024-11-30,Utah Hockey Club,6,Vegas Golden Knights,0,,R,2025
+2024-12-01,Ottawa Senators,3,Anaheim Ducks,4,SO,R,2025
+2024-12-01,Montreal Canadiens,3,Boston Bruins,6,,R,2025
+2024-12-01,Columbus Blue Jackets,6,Chicago Blackhawks,3,,R,2025
+2024-12-01,Winnipeg Jets,1,Dallas Stars,3,,R,2025
+2024-12-01,Vancouver Canucks,5,Detroit Red Wings,4,OT,R,2025
+2024-12-02,New Jersey Devils,5,New York Rangers,1,,R,2025
+2024-12-02,Chicago Blackhawks,1,Toronto Maple Leafs,4,,R,2025
+2024-12-02,Dallas Stars,2,Utah Hockey Club,1,,R,2025
+2024-12-03,Detroit Red Wings,2,Boston Bruins,3,OT,R,2025
+2024-12-03,Colorado Avalanche,5,Buffalo Sabres,4,,R,2025
+2024-12-03,Seattle Kraken,4,Carolina Hurricanes,2,,R,2025
+2024-12-03,Columbus Blue Jackets,0,Calgary Flames,3,,R,2025
+2024-12-03,Vancouver Canucks,2,Minnesota Wild,3,OT,R,2025
+2024-12-03,New York Islanders,1,Montreal Canadiens,2,OT,R,2025
+2024-12-03,Florida Panthers,4,Pittsburgh Penguins,5,OT,R,2025
+2024-12-03,Edmonton Oilers,0,Vegas Golden Knights,1,,R,2025
+2024-12-03,St. Louis Blues,4,Winnipeg Jets,1,,R,2025
+2024-12-03,San Jose Sharks,2,Washington Capitals,1,OT,R,2025
+2024-12-04,Vegas Golden Knights,4,Anaheim Ducks,1,,R,2025
+2024-12-04,Boston Bruins,4,Chicago Blackhawks,2,,R,2025
+2024-12-04,Dallas Stars,2,Los Angeles Kings,3,,R,2025
+2024-12-04,Nashville Predators,2,Toronto Maple Leafs,3,,R,2025
+2024-12-05,Winnipeg Jets,3,Buffalo Sabres,2,OT,R,2025
+2024-12-05,Colorado Avalanche,3,Carolina Hurricanes,5,,R,2025
+2024-12-05,St. Louis Blues,4,Calgary Flames,3,OT,R,2025
+2024-12-05,Columbus Blue Jackets,3,Edmonton Oilers,6,,R,2025
+2024-12-05,Nashville Predators,0,Montreal Canadiens,3,,R,2025
+2024-12-05,Seattle Kraken,5,New York Islanders,2,,R,2025
+2024-12-05,Detroit Red Wings,1,Ottawa Senators,2,,R,2025
+2024-12-05,Florida Panthers,7,Philadelphia Flyers,5,,R,2025
+2024-12-05,San Jose Sharks,1,Tampa Bay Lightning,8,,R,2025
+2024-12-06,Minnesota Wild,5,Anaheim Ducks,1,,R,2025
+2024-12-06,Seattle Kraken,2,New Jersey Devils,3,,R,2025
+2024-12-06,Pittsburgh Penguins,2,New York Rangers,4,,R,2025
+2024-12-06,Washington Capitals,3,Toronto Maple Leafs,1,,R,2025
+2024-12-06,Columbus Blue Jackets,2,Vancouver Canucks,5,,R,2025
+2024-12-06,Dallas Stars,2,Vegas Golden Knights,3,,R,2025
+2024-12-07,Philadelphia Flyers,3,Boston Bruins,4,OT,R,2025
+2024-12-07,Utah Hockey Club,5,Buffalo Sabres,2,,R,2025
+2024-12-07,Winnipeg Jets,4,Chicago Blackhawks,2,,R,2025
+2024-12-07,Colorado Avalanche,2,Detroit Red Wings,1,,R,2025
+2024-12-07,St. Louis Blues,2,Edmonton Oilers,4,,R,2025
+2024-12-07,San Jose Sharks,1,Florida Panthers,3,,R,2025
+2024-12-07,Minnesota Wild,1,Los Angeles Kings,4,,R,2025
+2024-12-07,Washington Capitals,4,Montreal Canadiens,2,,R,2025
+2024-12-07,Carolina Hurricanes,3,New York Islanders,4,,R,2025
+2024-12-07,Nashville Predators,1,Ottawa Senators,3,,R,2025
+2024-12-07,Toronto Maple Leafs,2,Pittsburgh Penguins,5,,R,2025
+2024-12-08,Calgary Flames,2,Dallas Stars,6,,R,2025
+2024-12-08,Colorado Avalanche,4,New Jersey Devils,0,,R,2025
+2024-12-08,Seattle Kraken,7,New York Rangers,5,,R,2025
+2024-12-08,New York Islanders,4,Ottawa Senators,2,,R,2025
+2024-12-08,Utah Hockey Club,4,Philadelphia Flyers,2,,R,2025
+2024-12-08,Tampa Bay Lightning,4,Vancouver Canucks,2,,R,2025
+2024-12-08,Columbus Blue Jackets,4,Winnipeg Jets,1,,R,2025
+2024-12-09,Detroit Red Wings,6,Buffalo Sabres,5,SO,R,2025
+2024-12-09,Anaheim Ducks,2,Montreal Canadiens,3,SO,R,2025
+2024-12-09,Chicago Blackhawks,2,New York Rangers,1,,R,2025
+2024-12-10,San Jose Sharks,2,Carolina Hurricanes,3,,R,2025
+2024-12-10,Philadelphia Flyers,5,Columbus Blue Jackets,3,,R,2025
+2024-12-10,Tampa Bay Lightning,1,Edmonton Oilers,2,,R,2025
+2024-12-10,Toronto Maple Leafs,2,New Jersey Devils,1,OT,R,2025
+2024-12-10,Calgary Flames,4,Nashville Predators,3,,R,2025
+2024-12-10,Los Angeles Kings,3,New York Islanders,1,,R,2025
+2024-12-10,Colorado Avalanche,6,Pittsburgh Penguins,2,,R,2025
+2024-12-10,Florida Panthers,2,Seattle Kraken,1,SO,R,2025
+2024-12-10,Minnesota Wild,5,Utah Hockey Club,4,SO,R,2025
+2024-12-10,St. Louis Blues,4,Vancouver Canucks,3,OT,R,2025
+2024-12-10,Boston Bruins,1,Winnipeg Jets,8,,R,2025
+2024-12-11,New York Rangers,3,Buffalo Sabres,2,,R,2025
+2024-12-11,Anaheim Ducks,1,Ottawa Senators,5,,R,2025
+2024-12-12,Washington Capitals,2,Columbus Blue Jackets,1,OT,R,2025
+2024-12-12,Tampa Bay Lightning,8,Calgary Flames,3,,R,2025
+2024-12-12,Utah Hockey Club,4,Colorado Avalanche,1,,R,2025
+2024-12-12,Nashville Predators,4,Dallas Stars,1,,R,2025
+2024-12-12,Edmonton Oilers,7,Minnesota Wild,1,,R,2025
+2024-12-12,Pittsburgh Penguins,9,Montreal Canadiens,2,,R,2025
+2024-12-12,Los Angeles Kings,1,New Jersey Devils,3,,R,2025
+2024-12-12,Chicago Blackhawks,4,New York Islanders,5,,R,2025
+2024-12-12,Detroit Red Wings,1,Philadelphia Flyers,4,,R,2025
+2024-12-12,Boston Bruins,1,Seattle Kraken,5,,R,2025
+2024-12-12,San Jose Sharks,4,St. Louis Blues,3,,R,2025
+2024-12-12,Anaheim Ducks,2,Toronto Maple Leafs,3,,R,2025
+2024-12-12,Florida Panthers,0,Vancouver Canucks,4,,R,2025
+2024-12-12,Vegas Golden Knights,3,Winnipeg Jets,2,OT,R,2025
+2024-12-13,Ottawa Senators,3,Carolina Hurricanes,0,,R,2025
+2024-12-14,Anaheim Ducks,4,Columbus Blue Jackets,3,OT,R,2025
+2024-12-14,Florida Panthers,0,Calgary Flames,3,,R,2025
+2024-12-14,Nashville Predators,2,Colorado Avalanche,5,,R,2025
+2024-12-14,St. Louis Blues,1,Dallas Stars,2,OT,R,2025
+2024-12-14,Toronto Maple Leafs,2,Detroit Red Wings,4,,R,2025
+2024-12-14,Vegas Golden Knights,3,Edmonton Oilers,6,,R,2025
+2024-12-14,Philadelphia Flyers,1,Minnesota Wild,4,,R,2025
+2024-12-14,Chicago Blackhawks,1,New Jersey Devils,4,,R,2025
+2024-12-14,Los Angeles Kings,5,New York Rangers,1,,R,2025
+2024-12-14,Pittsburgh Penguins,2,Ottawa Senators,3,OT,R,2025
+2024-12-14,Tampa Bay Lightning,5,Seattle Kraken,1,,R,2025
+2024-12-14,Utah Hockey Club,4,San Jose Sharks,3,,R,2025
+2024-12-14,Boston Bruins,5,Vancouver Canucks,1,,R,2025
+2024-12-14,Montreal Canadiens,2,Winnipeg Jets,4,,R,2025
+2024-12-14,Buffalo Sabres,2,Washington Capitals,4,,R,2025
+2024-12-15,Columbus Blue Jackets,1,Carolina Hurricanes,4,,R,2025
+2024-12-15,New York Islanders,3,Chicago Blackhawks,5,,R,2025
+2024-12-15,Vegas Golden Knights,3,Minnesota Wild,2,,R,2025
+2024-12-15,New York Rangers,2,St. Louis Blues,3,,R,2025
+2024-12-15,Buffalo Sabres,3,Toronto Maple Leafs,5,,R,2025
+2024-12-16,Washington Capitals,1,Dallas Stars,3,,R,2025
+2024-12-16,Florida Panthers,6,Edmonton Oilers,5,,R,2025
+2024-12-16,Colorado Avalanche,1,Vancouver Canucks,3,,R,2025
+2024-12-17,New York Islanders,0,Carolina Hurricanes,4,,R,2025
+2024-12-17,Boston Bruins,4,Calgary Flames,3,OT,R,2025
+2024-12-17,Washington Capitals,2,Chicago Blackhawks,3,,R,2025
+2024-12-17,Buffalo Sabres,1,Montreal Canadiens,6,,R,2025
+2024-12-17,New York Rangers,0,Nashville Predators,2,,R,2025
+2024-12-17,Los Angeles Kings,2,Pittsburgh Penguins,3,OT,R,2025
+2024-12-17,Ottawa Senators,3,Seattle Kraken,0,,R,2025
+2024-12-17,Winnipeg Jets,4,San Jose Sharks,3,,R,2025
+2024-12-17,New Jersey Devils,4,St. Louis Blues,1,,R,2025
+2024-12-17,Columbus Blue Jackets,3,Tampa Bay Lightning,5,,R,2025
+2024-12-18,Winnipeg Jets,2,Anaheim Ducks,3,,R,2025
+2024-12-18,Toronto Maple Leafs,5,Dallas Stars,3,,R,2025
+2024-12-18,Philadelphia Flyers,4,Detroit Red Wings,6,,R,2025
+2024-12-18,Florida Panthers,6,Minnesota Wild,1,,R,2025
+2024-12-18,Vancouver Canucks,2,Utah Hockey Club,3,OT,R,2025
+2024-12-19,New Jersey Devils,2,Columbus Blue Jackets,4,,R,2025
+2024-12-19,Ottawa Senators,3,Calgary Flames,2,OT,R,2025
+2024-12-19,Seattle Kraken,1,Chicago Blackhawks,3,,R,2025
+2024-12-19,Boston Bruins,2,Edmonton Oilers,3,OT,R,2025
+2024-12-19,Pittsburgh Penguins,5,Nashville Predators,4,OT,R,2025
+2024-12-19,Los Angeles Kings,7,Philadelphia Flyers,3,,R,2025
+2024-12-19,Colorado Avalanche,4,San Jose Sharks,2,,R,2025
+2024-12-19,St. Louis Blues,1,Tampa Bay Lightning,3,,R,2025
+2024-12-19,Vancouver Canucks,1,Vegas Golden Knights,3,,R,2025
+2024-12-20,Colorado Avalanche,4,Anaheim Ducks,2,,R,2025
+2024-12-20,Toronto Maple Leafs,6,Buffalo Sabres,3,,R,2025
+2024-12-20,New York Rangers,3,Dallas Stars,1,,R,2025
+2024-12-20,Montreal Canadiens,4,Detroit Red Wings,3,,R,2025
+2024-12-20,St. Louis Blues,1,Florida Panthers,2,OT,R,2025
+2024-12-20,Utah Hockey Club,2,Minnesota Wild,1,,R,2025
+2024-12-20,Carolina Hurricanes,1,Washington Capitals,3,,R,2025
+2024-12-21,Buffalo Sabres,1,Boston Bruins,3,,R,2025
+2024-12-21,Chicago Blackhawks,4,Calgary Flames,6,,R,2025
+2024-12-21,San Jose Sharks,2,Edmonton Oilers,3,OT,R,2025
+2024-12-21,Detroit Red Wings,1,Montreal Canadiens,5,,R,2025
+2024-12-21,Pittsburgh Penguins,0,New Jersey Devils,3,,R,2025
+2024-12-21,Los Angeles Kings,2,Nashville Predators,3,OT,R,2025
+2024-12-21,Columbus Blue Jackets,4,Philadelphia Flyers,5,OT,R,2025
+2024-12-21,New York Islanders,6,Toronto Maple Leafs,3,,R,2025
+2024-12-21,Ottawa Senators,5,Vancouver Canucks,4,OT,R,2025
+2024-12-21,Seattle Kraken,2,Vegas Golden Knights,6,,R,2025
+2024-12-21,Minnesota Wild,0,Winnipeg Jets,5,,R,2025
+2024-12-22,Seattle Kraken,2,Colorado Avalanche,5,,R,2025
+2024-12-22,Ottawa Senators,1,Edmonton Oilers,3,,R,2025
+2024-12-22,Carolina Hurricanes,3,New York Rangers,1,,R,2025
+2024-12-22,Florida Panthers,4,Tampa Bay Lightning,2,,R,2025
+2024-12-22,Anaheim Ducks,5,Utah Hockey Club,4,SO,R,2025
+2024-12-22,Los Angeles Kings,1,Washington Capitals,3,,R,2025
+2024-12-23,Washington Capitals,1,Boston Bruins,4,,R,2025
+2024-12-23,Montreal Canadiens,4,Columbus Blue Jackets,5,,R,2025
+2024-12-23,St. Louis Blues,4,Detroit Red Wings,0,,R,2025
+2024-12-23,Tampa Bay Lightning,4,Florida Panthers,0,,R,2025
+2024-12-23,Chicago Blackhawks,3,Minnesota Wild,4,,R,2025
+2024-12-23,New York Rangers,0,New Jersey Devils,5,,R,2025
+2024-12-23,Carolina Hurricanes,2,Nashville Predators,5,,R,2025
+2024-12-23,Buffalo Sabres,7,New York Islanders,1,,R,2025
+2024-12-23,Philadelphia Flyers,3,Pittsburgh Penguins,7,,R,2025
+2024-12-23,Winnipeg Jets,5,Toronto Maple Leafs,2,,R,2025
+2024-12-23,Dallas Stars,3,Utah Hockey Club,2,,R,2025
+2024-12-23,San Jose Sharks,3,Vancouver Canucks,4,,R,2025
+2024-12-23,Anaheim Ducks,1,Vegas Golden Knights,3,,R,2025
+2024-12-27,Chicago Blackhawks,2,Buffalo Sabres,6,,R,2025
+2024-12-27,Boston Bruins,2,Columbus Blue Jackets,6,,R,2025
+2024-12-27,Minnesota Wild,3,Dallas Stars,2,OT,R,2025
+2024-12-27,Toronto Maple Leafs,5,Detroit Red Wings,2,,R,2025
+2024-12-27,Carolina Hurricanes,2,New Jersey Devils,4,,R,2025
+2024-12-27,Vegas Golden Knights,6,San Jose Sharks,3,,R,2025
+2024-12-27,Nashville Predators,4,St. Louis Blues,7,,R,2025
+2024-12-27,Colorado Avalanche,4,Utah Hockey Club,1,,R,2025
+2024-12-28,Philadelphia Flyers,3,Anaheim Ducks,1,,R,2025
+2024-12-28,Columbus Blue Jackets,0,Boston Bruins,4,,R,2025
+2024-12-28,New Jersey Devils,2,Carolina Hurricanes,5,,R,2025
+2024-12-28,Montreal Canadiens,4,Florida Panthers,0,,R,2025
+2024-12-28,Edmonton Oilers,3,Los Angeles Kings,4,OT,R,2025
+2024-12-28,Pittsburgh Penguins,3,New York Islanders,6,,R,2025
+2024-12-28,Calgary Flames,3,San Jose Sharks,1,,R,2025
+2024-12-28,New York Rangers,2,Tampa Bay Lightning,6,,R,2025
+2024-12-28,Washington Capitals,5,Toronto Maple Leafs,2,,R,2025
+2024-12-28,Seattle Kraken,5,Vancouver Canucks,4,OT,R,2025
+2024-12-28,Ottawa Senators,2,Winnipeg Jets,4,,R,2025
+2024-12-29,Edmonton Oilers,3,Anaheim Ducks,5,,R,2025
+2024-12-29,Dallas Stars,5,Chicago Blackhawks,1,,R,2025
+2024-12-29,Washington Capitals,2,Detroit Red Wings,4,,R,2025
+2024-12-29,Philadelphia Flyers,4,Los Angeles Kings,5,,R,2025
+2024-12-29,Ottawa Senators,3,Minnesota Wild,1,,R,2025
+2024-12-29,New York Islanders,2,Pittsburgh Penguins,3,,R,2025
+2024-12-29,Buffalo Sabres,4,St. Louis Blues,2,,R,2025
+2024-12-29,Montreal Canadiens,5,Tampa Bay Lightning,2,,R,2025
+2024-12-29,Calgary Flames,0,Vegas Golden Knights,3,,R,2025
+2024-12-30,New York Rangers,3,Florida Panthers,5,,R,2025
+2024-12-30,Utah Hockey Club,2,Seattle Kraken,5,,R,2025
+2024-12-30,Nashville Predators,0,Winnipeg Jets,3,,R,2025
+2024-12-31,New Jersey Devils,2,Anaheim Ducks,3,,R,2025
+2024-12-31,Carolina Hurricanes,3,Columbus Blue Jackets,4,SO,R,2025
+2024-12-31,Vancouver Canucks,1,Calgary Flames,3,,R,2025
+2024-12-31,St. Louis Blues,6,Chicago Blackhawks,2,,R,2025
+2024-12-31,Winnipeg Jets,2,Colorado Avalanche,5,,R,2025
+2024-12-31,Buffalo Sabres,2,Dallas Stars,4,,R,2025
+2024-12-31,Pittsburgh Penguins,2,Detroit Red Wings,4,,R,2025
+2024-12-31,Utah Hockey Club,1,Edmonton Oilers,4,,R,2025
+2024-12-31,Nashville Predators,3,Minnesota Wild,5,,R,2025
+2024-12-31,Philadelphia Flyers,4,San Jose Sharks,0,,R,2025
+2024-12-31,New York Islanders,1,Toronto Maple Leafs,3,,R,2025
+2024-12-31,Montreal Canadiens,3,Vegas Golden Knights,2,,R,2025
+2024-12-31,Boston Bruins,1,Washington Capitals,3,,R,2025
+2025-01-01,New Jersey Devils,0,Los Angeles Kings,3,,R,2025
+2025-01-02,Detroit Red Wings,5,Columbus Blue Jackets,4,,R,2025
+2025-01-02,Utah Hockey Club,5,Calgary Flames,3,,R,2025
+2025-01-02,Buffalo Sabres,5,Colorado Avalanche,6,OT,R,2025
+2025-01-02,Ottawa Senators,2,Dallas Stars,4,,R,2025
+2025-01-02,Carolina Hurricanes,3,Florida Panthers,1,,R,2025
+2025-01-02,Toronto Maple Leafs,2,New York Islanders,1,,R,2025
+2025-01-02,Boston Bruins,1,New York Rangers,2,,R,2025
+2025-01-02,Vancouver Canucks,4,Seattle Kraken,3,SO,R,2025
+2025-01-02,Tampa Bay Lightning,1,San Jose Sharks,2,,R,2025
+2025-01-02,Philadelphia Flyers,2,Vegas Golden Knights,5,,R,2025
+2025-01-02,Anaheim Ducks,4,Winnipeg Jets,3,OT,R,2025
+2025-01-02,Minnesota Wild,4,Washington Capitals,3,SO,R,2025
+2025-01-03,Montreal Canadiens,2,Chicago Blackhawks,4,,R,2025
+2025-01-03,Anaheim Ducks,2,Edmonton Oilers,3,,R,2025
+2025-01-03,Pittsburgh Penguins,2,Florida Panthers,3,SO,R,2025
+2025-01-03,Ottawa Senators,0,St. Louis Blues,4,,R,2025
+2025-01-03,Nashville Predators,3,Vancouver Canucks,0,,R,2025
+2025-01-04,Minnesota Wild,4,Carolina Hurricanes,0,,R,2025
+2025-01-04,St. Louis Blues,4,Columbus Blue Jackets,6,,R,2025
+2025-01-04,Nashville Predators,4,Calgary Flames,1,,R,2025
+2025-01-04,Montreal Canadiens,2,Colorado Avalanche,1,SO,R,2025
+2025-01-04,Utah Hockey Club,2,Dallas Stars,3,OT,R,2025
+2025-01-04,Tampa Bay Lightning,1,Los Angeles Kings,2,,R,2025
+2025-01-04,Edmonton Oilers,4,Seattle Kraken,2,,R,2025
+2025-01-04,New Jersey Devils,2,San Jose Sharks,3,,R,2025
+2025-01-04,Boston Bruins,4,Toronto Maple Leafs,6,,R,2025
+2025-01-04,Buffalo Sabres,1,Vegas Golden Knights,3,,R,2025
+2025-01-04,Detroit Red Wings,4,Winnipeg Jets,2,,R,2025
+2025-01-04,New York Rangers,4,Washington Capitals,7,,R,2025
+2025-01-05,Tampa Bay Lightning,1,Anaheim Ducks,4,,R,2025
+2025-01-05,New York Islanders,5,Boston Bruins,4,OT,R,2025
+2025-01-05,Pittsburgh Penguins,3,Carolina Hurricanes,4,OT,R,2025
+2025-01-05,New York Rangers,6,Chicago Blackhawks,2,,R,2025
+2025-01-05,Philadelphia Flyers,2,Toronto Maple Leafs,3,OT,R,2025
+2025-01-06,Washington Capitals,3,Buffalo Sabres,4,SO,R,2025
+2025-01-06,Florida Panthers,1,Colorado Avalanche,3,,R,2025
+2025-01-06,Vancouver Canucks,4,Montreal Canadiens,5,OT,R,2025
+2025-01-06,New Jersey Devils,3,Seattle Kraken,2,,R,2025
+2025-01-07,Calgary Flames,3,Anaheim Ducks,2,OT,R,2025
+2025-01-07,Edmonton Oilers,4,Boston Bruins,0,,R,2025
+2025-01-07,Ottawa Senators,2,Detroit Red Wings,3,OT,R,2025
+2025-01-07,St. Louis Blues,4,Minnesota Wild,6,,R,2025
+2025-01-07,Dallas Stars,5,New York Rangers,4,OT,R,2025
+2025-01-07,Toronto Maple Leafs,3,Philadelphia Flyers,2,,R,2025
+2025-01-07,Columbus Blue Jackets,4,Pittsburgh Penguins,3,SO,R,2025
+2025-01-07,Vegas Golden Knights,4,San Jose Sharks,2,,R,2025
+2025-01-07,Carolina Hurricanes,2,Tampa Bay Lightning,3,,R,2025
+2025-01-07,Nashville Predators,2,Winnipeg Jets,5,,R,2025
+2025-01-08,Colorado Avalanche,1,Chicago Blackhawks,3,,R,2025
+2025-01-08,Florida Panthers,4,Utah Hockey Club,1,,R,2025
+2025-01-08,Vancouver Canucks,1,Washington Capitals,2,OT,R,2025
+2025-01-09,Toronto Maple Leafs,3,Carolina Hurricanes,6,,R,2025
+2025-01-09,Seattle Kraken,2,Columbus Blue Jackets,6,,R,2025
+2025-01-09,Colorado Avalanche,6,Minnesota Wild,1,,R,2025
+2025-01-09,New Jersey Devils,2,New York Rangers,3,OT,R,2025
+2025-01-09,Buffalo Sabres,4,Ottawa Senators,0,,R,2025
+2025-01-09,Dallas Stars,4,Philadelphia Flyers,1,,R,2025
+2025-01-09,Edmonton Oilers,3,Pittsburgh Penguins,5,,R,2025
+2025-01-09,Anaheim Ducks,2,St. Louis Blues,6,,R,2025
+2025-01-09,Boston Bruins,1,Tampa Bay Lightning,4,,R,2025
+2025-01-09,New York Islanders,4,Vegas Golden Knights,0,,R,2025
+2025-01-10,Vancouver Canucks,0,Carolina Hurricanes,2,,R,2025
+2025-01-10,Chicago Blackhawks,3,Detroit Red Wings,5,,R,2025
+2025-01-10,San Jose Sharks,1,Utah Hockey Club,2,,R,2025
+2025-01-10,Los Angeles Kings,2,Winnipeg Jets,1,OT,R,2025
+2025-01-10,Montreal Canadiens,3,Washington Capitals,2,OT,R,2025
+2025-01-11,Seattle Kraken,6,Buffalo Sabres,2,,R,2025
+2025-01-11,Los Angeles Kings,1,Calgary Flames,2,,R,2025
+2025-01-11,Edmonton Oilers,4,Chicago Blackhawks,3,,R,2025
+2025-01-11,Boston Bruins,4,Florida Panthers,3,OT,R,2025
+2025-01-11,Dallas Stars,2,Montreal Canadiens,1,SO,R,2025
+2025-01-11,Tampa Bay Lightning,2,New Jersey Devils,3,OT,R,2025
+2025-01-11,Washington Capitals,4,Nashville Predators,1,,R,2025
+2025-01-11,Anaheim Ducks,0,Philadelphia Flyers,6,,R,2025
+2025-01-11,Ottawa Senators,5,Pittsburgh Penguins,0,,R,2025
+2025-01-11,Minnesota Wild,3,San Jose Sharks,1,,R,2025
+2025-01-11,Columbus Blue Jackets,2,St. Louis Blues,1,,R,2025
+2025-01-11,Vancouver Canucks,3,Toronto Maple Leafs,0,,R,2025
+2025-01-11,New York Islanders,2,Utah Hockey Club,1,,R,2025
+2025-01-11,New York Rangers,2,Vegas Golden Knights,1,,R,2025
+2025-01-11,Colorado Avalanche,0,Winnipeg Jets,3,,R,2025
+2025-01-12,Anaheim Ducks,3,Carolina Hurricanes,2,OT,R,2025
+2025-01-12,Seattle Kraken,2,Detroit Red Wings,6,,R,2025
+2025-01-12,Dallas Stars,2,Ottawa Senators,3,,R,2025
+2025-01-12,Tampa Bay Lightning,5,Pittsburgh Penguins,2,,R,2025
+2025-01-12,Minnesota Wild,1,Vegas Golden Knights,4,,R,2025
+2025-01-13,Calgary Flames,5,Chicago Blackhawks,2,,R,2025
+2025-01-13,Los Angeles Kings,0,Edmonton Oilers,1,,R,2025
+2025-01-13,Florida Panthers,3,Philadelphia Flyers,4,,R,2025
+2025-01-14,Tampa Bay Lightning,2,Boston Bruins,6,,R,2025
+2025-01-14,Philadelphia Flyers,2,Columbus Blue Jackets,3,SO,R,2025
+2025-01-14,New York Rangers,2,Colorado Avalanche,3,OT,R,2025
+2025-01-14,San Jose Sharks,6,Detroit Red Wings,3,,R,2025
+2025-01-14,Florida Panthers,2,New Jersey Devils,1,SO,R,2025
+2025-01-14,Vegas Golden Knights,3,Nashville Predators,5,,R,2025
+2025-01-14,Ottawa Senators,2,New York Islanders,0,,R,2025
+2025-01-14,Seattle Kraken,4,Pittsburgh Penguins,2,,R,2025
+2025-01-14,Calgary Flames,1,St. Louis Blues,2,,R,2025
+2025-01-14,Dallas Stars,4,Toronto Maple Leafs,1,,R,2025
+2025-01-14,Montreal Canadiens,5,Utah Hockey Club,3,,R,2025
+2025-01-14,Vancouver Canucks,1,Winnipeg Jets,6,,R,2025
+2025-01-14,Anaheim Ducks,0,Washington Capitals,3,,R,2025
+2025-01-15,Carolina Hurricanes,2,Buffalo Sabres,4,,R,2025
+2025-01-15,Edmonton Oilers,5,Minnesota Wild,3,,R,2025
+2025-01-16,San Jose Sharks,1,Columbus Blue Jackets,4,,R,2025
+2025-01-16,Edmonton Oilers,4,Colorado Avalanche,3,,R,2025
+2025-01-16,Montreal Canadiens,3,Dallas Stars,1,,R,2025
+2025-01-16,Detroit Red Wings,5,Florida Panthers,2,,R,2025
+2025-01-16,Chicago Blackhawks,2,Nashville Predators,3,SO,R,2025
+2025-01-16,Philadelphia Flyers,5,New York Islanders,3,,R,2025
+2025-01-16,Washington Capitals,1,Ottawa Senators,0,OT,R,2025
+2025-01-16,Calgary Flames,1,St. Louis Blues,4,,R,2025
+2025-01-16,Anaheim Ducks,3,Tampa Bay Lightning,4,SO,R,2025
+2025-01-16,New Jersey Devils,3,Toronto Maple Leafs,4,OT,R,2025
+2025-01-16,New York Rangers,5,Utah Hockey Club,3,,R,2025
+2025-01-16,Los Angeles Kings,5,Vancouver Canucks,1,,R,2025
+2025-01-16,Seattle Kraken,1,Winnipeg Jets,2,,R,2025
+2025-01-17,Pittsburgh Penguins,5,Buffalo Sabres,2,,R,2025
+2025-01-17,Vegas Golden Knights,2,Carolina Hurricanes,3,,R,2025
+2025-01-18,Vegas Golden Knights,3,Chicago Blackhawks,5,,R,2025
+2025-01-18,Dallas Stars,3,Colorado Avalanche,6,,R,2025
+2025-01-18,Anaheim Ducks,0,Florida Panthers,3,,R,2025
+2025-01-18,Toronto Maple Leafs,7,Montreal Canadiens,3,,R,2025
+2025-01-18,Philadelphia Flyers,3,New Jersey Devils,1,,R,2025
+2025-01-18,Minnesota Wild,2,Nashville Predators,6,,R,2025
+2025-01-18,San Jose Sharks,1,New York Islanders,4,,R,2025
+2025-01-18,Columbus Blue Jackets,0,New York Rangers,1,SO,R,2025
+2025-01-18,Boston Bruins,5,Ottawa Senators,6,SO,R,2025
+2025-01-18,Los Angeles Kings,2,Seattle Kraken,4,,R,2025
+2025-01-18,Detroit Red Wings,1,Tampa Bay Lightning,5,,R,2025
+2025-01-18,St. Louis Blues,2,Utah Hockey Club,4,,R,2025
+2025-01-18,Edmonton Oilers,2,Vancouver Canucks,3,,R,2025
+2025-01-18,Calgary Flames,3,Winnipeg Jets,1,,R,2025
+2025-01-18,Pittsburgh Penguins,1,Washington Capitals,4,,R,2025
+2025-01-19,Detroit Red Wings,1,Dallas Stars,4,,R,2025
+2025-01-19,New York Rangers,4,Montreal Canadiens,5,OT,R,2025
+2025-01-19,Ottawa Senators,2,New Jersey Devils,1,,R,2025
+2025-01-20,San Jose Sharks,3,Boston Bruins,6,,R,2025
+2025-01-20,Carolina Hurricanes,4,Chicago Blackhawks,3,OT,R,2025
+2025-01-20,Minnesota Wild,3,Colorado Avalanche,1,,R,2025
+2025-01-20,Pittsburgh Penguins,5,Los Angeles Kings,1,,R,2025
+2025-01-20,Columbus Blue Jackets,1,New York Islanders,3,,R,2025
+2025-01-20,Buffalo Sabres,4,Seattle Kraken,6,,R,2025
+2025-01-20,Tampa Bay Lightning,3,Toronto Maple Leafs,5,,R,2025
+2025-01-20,Winnipeg Jets,2,Utah Hockey Club,5,,R,2025
+2025-01-20,St. Louis Blues,5,Vegas Golden Knights,4,SO,R,2025
+2025-01-21,Florida Panthers,5,Anaheim Ducks,2,,R,2025
+2025-01-21,Carolina Hurricanes,2,Dallas Stars,1,,R,2025
+2025-01-21,Washington Capitals,3,Edmonton Oilers,2,,R,2025
+2025-01-21,Tampa Bay Lightning,2,Montreal Canadiens,3,,R,2025
+2025-01-21,San Jose Sharks,5,Nashville Predators,7,,R,2025
+2025-01-21,Ottawa Senators,0,New York Rangers,5,,R,2025
+2025-01-21,Detroit Red Wings,1,Philadelphia Flyers,2,OT,R,2025
+2025-01-21,Buffalo Sabres,3,Vancouver Canucks,2,,R,2025
+2025-01-22,Winnipeg Jets,3,Colorado Avalanche,2,OT,R,2025
+2025-01-22,Florida Panthers,1,Los Angeles Kings,2,,R,2025
+2025-01-22,Boston Bruins,1,New Jersey Devils,5,,R,2025
+2025-01-22,Columbus Blue Jackets,5,Toronto Maple Leafs,1,,R,2025
+2025-01-23,Pittsburgh Penguins,1,Anaheim Ducks,5,,R,2025
+2025-01-23,Ottawa Senators,0,Boston Bruins,2,,R,2025
+2025-01-23,Columbus Blue Jackets,4,Carolina Hurricanes,7,,R,2025
+2025-01-23,Buffalo Sabres,2,Calgary Flames,5,,R,2025
+2025-01-23,Montreal Canadiens,2,Detroit Red Wings,4,,R,2025
+2025-01-23,Vancouver Canucks,2,Edmonton Oilers,6,,R,2025
+2025-01-23,Utah Hockey Club,4,Minnesota Wild,0,,R,2025
+2025-01-23,Philadelphia Flyers,1,New York Rangers,6,,R,2025
+2025-01-23,Washington Capitals,3,Seattle Kraken,0,,R,2025
+2025-01-23,Nashville Predators,6,San Jose Sharks,5,,R,2025
+2025-01-23,Vegas Golden Knights,4,St. Louis Blues,2,,R,2025
+2025-01-24,Tampa Bay Lightning,4,Chicago Blackhawks,3,OT,R,2025
+2025-01-24,Vegas Golden Knights,3,Dallas Stars,4,,R,2025
+2025-01-24,Philadelphia Flyers,1,New York Islanders,3,,R,2025
+2025-01-24,Utah Hockey Club,2,Winnipeg Jets,5,,R,2025
+2025-01-25,Nashville Predators,2,Anaheim Ducks,5,,R,2025
+2025-01-25,Colorado Avalanche,1,Boston Bruins,3,,R,2025
+2025-01-25,Los Angeles Kings,2,Columbus Blue Jackets,3,OT,R,2025
+2025-01-25,Tampa Bay Lightning,0,Detroit Red Wings,2,,R,2025
+2025-01-25,Buffalo Sabres,2,Edmonton Oilers,3,,R,2025
+2025-01-25,Calgary Flames,5,Minnesota Wild,4,,R,2025
+2025-01-25,New Jersey Devils,4,Montreal Canadiens,3,OT,R,2025
+2025-01-25,Carolina Hurricanes,2,New York Islanders,3,OT,R,2025
+2025-01-25,Toronto Maple Leafs,1,Ottawa Senators,2,,R,2025
+2025-01-25,Pittsburgh Penguins,1,Seattle Kraken,4,,R,2025
+2025-01-25,Florida Panthers,7,San Jose Sharks,2,,R,2025
+2025-01-25,Dallas Stars,2,St. Louis Blues,0,,R,2025
+2025-01-25,Washington Capitals,1,Vancouver Canucks,2,,R,2025
+2025-01-26,Minnesota Wild,4,Chicago Blackhawks,2,,R,2025
+2025-01-26,Colorado Avalanche,5,New York Rangers,4,,R,2025
+2025-01-26,Utah Hockey Club,1,Ottawa Senators,3,,R,2025
+2025-01-26,Florida Panthers,1,Vegas Golden Knights,4,,R,2025
+2025-01-26,Calgary Flames,2,Winnipeg Jets,5,,R,2025
+2025-01-27,Los Angeles Kings,2,Detroit Red Wings,5,,R,2025
+2025-01-27,Seattle Kraken,2,Edmonton Oilers,4,,R,2025
+2025-01-27,New Jersey Devils,2,Philadelphia Flyers,4,,R,2025
+2025-01-27,Pittsburgh Penguins,1,San Jose Sharks,2,,R,2025
+2025-01-27,Vancouver Canucks,5,St. Louis Blues,2,,R,2025
+2025-01-28,Boston Bruins,2,Buffalo Sabres,7,,R,2025
+2025-01-28,Washington Capitals,3,Calgary Flames,1,,R,2025
+2025-01-28,Winnipeg Jets,4,Montreal Canadiens,1,,R,2025
+2025-01-28,Colorado Avalanche,2,New York Islanders,5,,R,2025
+2025-01-28,Carolina Hurricanes,4,New York Rangers,0,,R,2025
+2025-01-28,Anaheim Ducks,6,Seattle Kraken,4,,R,2025
+2025-01-28,Chicago Blackhawks,4,Tampa Bay Lightning,1,,R,2025
+2025-01-28,Dallas Stars,4,Vegas Golden Knights,3,OT,R,2025
+2025-01-29,Los Angeles Kings,0,Florida Panthers,3,,R,2025
+2025-01-29,Philadelphia Flyers,0,New Jersey Devils,5,,R,2025
+2025-01-29,Vancouver Canucks,3,Nashville Predators,1,,R,2025
+2025-01-29,Minnesota Wild,3,Toronto Maple Leafs,1,,R,2025
+2025-01-29,Pittsburgh Penguins,3,Utah Hockey Club,2,OT,R,2025
+2025-01-30,Winnipeg Jets,6,Boston Bruins,2,,R,2025
+2025-01-30,Chicago Blackhawks,2,Carolina Hurricanes,3,,R,2025
+2025-01-30,Anaheim Ducks,1,Calgary Flames,4,,R,2025
+2025-01-30,Detroit Red Wings,3,Edmonton Oilers,2,SO,R,2025
+2025-01-30,Minnesota Wild,4,Montreal Canadiens,0,,R,2025
+2025-01-30,Washington Capitals,4,Ottawa Senators,5,OT,R,2025
+2025-01-30,New York Islanders,3,Philadelphia Flyers,0,,R,2025
+2025-01-30,San Jose Sharks,2,Seattle Kraken,6,,R,2025
+2025-01-30,Los Angeles Kings,0,Tampa Bay Lightning,3,,R,2025
+2025-01-30,Columbus Blue Jackets,2,Vegas Golden Knights,1,OT,R,2025
+2025-01-31,Nashville Predators,3,Buffalo Sabres,4,,R,2025
+2025-01-31,St. Louis Blues,0,Colorado Avalanche,5,,R,2025
+2025-01-31,Vancouver Canucks,3,Dallas Stars,5,,R,2025
+2025-01-31,Columbus Blue Jackets,3,Utah Hockey Club,2,OT,R,2025
+2025-02-01,New York Rangers,3,Boston Bruins,6,,R,2025
+2025-02-01,Los Angeles Kings,4,Carolina Hurricanes,2,,R,2025
+2025-02-01,Detroit Red Wings,3,Calgary Flames,1,,R,2025
+2025-02-01,Toronto Maple Leafs,4,Edmonton Oilers,3,,R,2025
+2025-02-01,Chicago Blackhawks,1,Florida Panthers,5,,R,2025
+2025-02-01,Minnesota Wild,0,Ottawa Senators,6,,R,2025
+2025-02-01,Nashville Predators,0,Pittsburgh Penguins,3,,R,2025
+2025-02-01,New York Islanders,3,Tampa Bay Lightning,2,OT,R,2025
+2025-02-01,Winnipeg Jets,5,Washington Capitals,4,OT,R,2025
+2025-02-02,Montreal Canadiens,2,Anaheim Ducks,3,,R,2025
+2025-02-02,New Jersey Devils,3,Buffalo Sabres,4,,R,2025
+2025-02-02,Philadelphia Flyers,0,Colorado Avalanche,2,,R,2025
+2025-02-02,Columbus Blue Jackets,3,Dallas Stars,5,,R,2025
+2025-02-02,New York Islanders,3,Florida Panthers,6,,R,2025
+2025-02-02,Vegas Golden Knights,2,New York Rangers,4,,R,2025
+2025-02-02,Calgary Flames,3,Seattle Kraken,2,,R,2025
+2025-02-02,St. Louis Blues,2,Utah Hockey Club,1,,R,2025
+2025-02-02,Detroit Red Wings,3,Vancouver Canucks,2,OT,R,2025
+2025-02-03,Ottawa Senators,5,Nashville Predators,2,,R,2025
+2025-02-04,Dallas Stars,1,Anaheim Ducks,2,,R,2025
+2025-02-04,Minnesota Wild,0,Boston Bruins,3,,R,2025
+2025-02-04,Columbus Blue Jackets,2,Buffalo Sabres,3,,R,2025
+2025-02-04,Toronto Maple Leafs,6,Calgary Flames,3,,R,2025
+2025-02-04,Vegas Golden Knights,1,New York Islanders,2,,R,2025
+2025-02-04,New Jersey Devils,3,Pittsburgh Penguins,2,SO,R,2025
+2025-02-04,Detroit Red Wings,5,Seattle Kraken,4,SO,R,2025
+2025-02-04,Montreal Canadiens,4,San Jose Sharks,3,,R,2025
+2025-02-04,Edmonton Oilers,3,St. Louis Blues,2,OT,R,2025
+2025-02-04,Ottawa Senators,3,Tampa Bay Lightning,4,,R,2025
+2025-02-04,Philadelphia Flyers,2,Utah Hockey Club,3,OT,R,2025
+2025-02-04,Colorado Avalanche,0,Vancouver Canucks,3,,R,2025
+2025-02-04,Carolina Hurricanes,0,Winnipeg Jets,3,,R,2025
+2025-02-04,Florida Panthers,3,Washington Capitals,6,,R,2025
+2025-02-05,Edmonton Oilers,4,Chicago Blackhawks,3,OT,R,2025
+2025-02-05,Montreal Canadiens,3,Los Angeles Kings,6,,R,2025
+2025-02-05,Boston Bruins,2,New York Rangers,3,,R,2025
+2025-02-06,Utah Hockey Club,3,Columbus Blue Jackets,2,OT,R,2025
+2025-02-06,Colorado Avalanche,4,Calgary Flames,2,,R,2025
+2025-02-06,Carolina Hurricanes,1,Minnesota Wild,2,,R,2025
+2025-02-06,Vegas Golden Knights,3,New Jersey Devils,1,,R,2025
+2025-02-06,Washington Capitals,4,Philadelphia Flyers,3,,R,2025
+2025-02-06,Toronto Maple Leafs,3,Seattle Kraken,1,,R,2025
+2025-02-06,Vancouver Canucks,2,San Jose Sharks,1,OT,R,2025
+2025-02-06,Florida Panthers,3,St. Louis Blues,2,,R,2025
+2025-02-06,Ottawa Senators,1,Tampa Bay Lightning,5,,R,2025
+2025-02-07,Nashville Predators,2,Chicago Blackhawks,6,,R,2025
+2025-02-07,Colorado Avalanche,5,Edmonton Oilers,4,,R,2025
+2025-02-07,Dallas Stars,4,Los Angeles Kings,5,SO,R,2025
+2025-02-07,Pittsburgh Penguins,3,New York Rangers,2,,R,2025
+2025-02-07,New York Islanders,3,Winnipeg Jets,4,,R,2025
+2025-02-08,Vegas Golden Knights,4,Boston Bruins,3,,R,2025
+2025-02-08,Utah Hockey Club,3,Carolina Hurricanes,7,,R,2025
+2025-02-08,New York Rangers,4,Columbus Blue Jackets,3,,R,2025
+2025-02-08,Seattle Kraken,3,Calgary Flames,2,OT,R,2025
+2025-02-08,Tampa Bay Lightning,6,Detroit Red Wings,3,,R,2025
+2025-02-08,Ottawa Senators,1,Florida Panthers,5,,R,2025
+2025-02-08,Anaheim Ducks,2,Los Angeles Kings,1,SO,R,2025
+2025-02-08,New York Islanders,3,Minnesota Wild,6,,R,2025
+2025-02-08,New Jersey Devils,4,Montreal Canadiens,0,,R,2025
+2025-02-08,Buffalo Sabres,4,Nashville Predators,6,,R,2025
+2025-02-08,Pittsburgh Penguins,2,Philadelphia Flyers,3,,R,2025
+2025-02-08,Dallas Stars,8,San Jose Sharks,3,,R,2025
+2025-02-08,Chicago Blackhawks,5,St. Louis Blues,6,SO,R,2025
+2025-02-08,Toronto Maple Leafs,1,Vancouver Canucks,2,,R,2025
+2025-02-09,Tampa Bay Lightning,5,Montreal Canadiens,3,,R,2025
+2025-02-09,Utah Hockey Club,5,Washington Capitals,4,SO,R,2025
+2025-02-22,Anaheim Ducks,3,Boston Bruins,2,OT,R,2025
+2025-02-22,New York Rangers,2,Buffalo Sabres,8,,R,2025
+2025-02-22,Chicago Blackhawks,1,Columbus Blue Jackets,5,,R,2025
+2025-02-22,Minnesota Wild,4,Detroit Red Wings,3,OT,R,2025
+2025-02-22,Seattle Kraken,2,Florida Panthers,1,,R,2025
+2025-02-22,Utah Hockey Club,3,Los Angeles Kings,5,,R,2025
+2025-02-22,Dallas Stars,4,New Jersey Devils,2,,R,2025
+2025-02-22,Colorado Avalanche,1,Nashville Predators,2,,R,2025
+2025-02-22,Montreal Canadiens,5,Ottawa Senators,2,,R,2025
+2025-02-22,Edmonton Oilers,3,Philadelphia Flyers,6,,R,2025
+2025-02-22,Washington Capitals,8,Pittsburgh Penguins,3,,R,2025
+2025-02-22,Winnipeg Jets,4,St. Louis Blues,3,SO,R,2025
+2025-02-22,Carolina Hurricanes,3,Toronto Maple Leafs,6,,R,2025
+2025-02-22,Vancouver Canucks,1,Vegas Golden Knights,3,,R,2025
+2025-02-23,San Jose Sharks,2,Calgary Flames,3,,R,2025
+2025-02-23,Toronto Maple Leafs,5,Chicago Blackhawks,2,,R,2025
+2025-02-23,Anaheim Ducks,4,Detroit Red Wings,5,OT,R,2025
+2025-02-23,New Jersey Devils,5,Nashville Predators,0,,R,2025
+2025-02-23,Dallas Stars,4,New York Islanders,3,,R,2025
+2025-02-23,New York Rangers,5,Pittsburgh Penguins,3,,R,2025
+2025-02-23,Colorado Avalanche,1,St. Louis Blues,3,,R,2025
+2025-02-23,Seattle Kraken,1,Tampa Bay Lightning,4,,R,2025
+2025-02-23,Vancouver Canucks,1,Utah Hockey Club,2,,R,2025
+2025-02-23,Edmonton Oilers,3,Washington Capitals,7,,R,2025
+2025-02-24,Vegas Golden Knights,2,Los Angeles Kings,5,,R,2025
+2025-02-24,San Jose Sharks,1,Winnipeg Jets,2,OT,R,2025
+2025-02-25,Toronto Maple Leafs,5,Boston Bruins,4,OT,R,2025
+2025-02-25,Anaheim Ducks,2,Buffalo Sabres,3,,R,2025
+2025-02-25,Dallas Stars,4,Columbus Blue Jackets,6,,R,2025
+2025-02-25,Detroit Red Wings,3,Minnesota Wild,2,,R,2025
+2025-02-25,Carolina Hurricanes,0,Montreal Canadiens,4,,R,2025
+2025-02-25,Florida Panthers,4,Nashville Predators,1,,R,2025
+2025-02-25,New York Rangers,5,New York Islanders,1,,R,2025
+2025-02-25,Pittsburgh Penguins,1,Philadelphia Flyers,6,,R,2025
+2025-02-25,Seattle Kraken,2,St. Louis Blues,7,,R,2025
+2025-02-25,Edmonton Oilers,1,Tampa Bay Lightning,4,,R,2025
+2025-02-25,Chicago Blackhawks,1,Utah Hockey Club,2,,R,2025
+2025-02-25,Calgary Flames,3,Washington Capitals,1,,R,2025
+2025-02-26,New Jersey Devils,1,Colorado Avalanche,5,,R,2025
+2025-02-26,Vancouver Canucks,3,Los Angeles Kings,2,OT,R,2025
+2025-02-26,Winnipeg Jets,4,Ottawa Senators,1,,R,2025
+2025-02-27,Vancouver Canucks,2,Anaheim Ducks,5,,R,2025
+2025-02-27,New York Islanders,2,Boston Bruins,1,,R,2025
+2025-02-27,Buffalo Sabres,2,Carolina Hurricanes,5,,R,2025
+2025-02-27,Columbus Blue Jackets,5,Detroit Red Wings,2,,R,2025
+2025-02-27,Edmonton Oilers,3,Florida Panthers,4,,R,2025
+2025-02-27,San Jose Sharks,3,Montreal Canadiens,4,OT,R,2025
+2025-02-27,Winnipeg Jets,1,Nashville Predators,2,,R,2025
+2025-02-27,Philadelphia Flyers,4,Pittsburgh Penguins,5,OT,R,2025
+2025-02-27,Calgary Flames,0,Tampa Bay Lightning,3,,R,2025
+2025-02-27,Minnesota Wild,1,Utah Hockey Club,6,,R,2025
+2025-02-27,Chicago Blackhawks,5,Vegas Golden Knights,7,,R,2025
+2025-02-27,St. Louis Blues,5,Washington Capitals,2,,R,2025
+2025-02-28,Minnesota Wild,2,Colorado Avalanche,5,,R,2025
+2025-02-28,Los Angeles Kings,2,Dallas Stars,6,,R,2025
+2025-02-28,Toronto Maple Leafs,3,New York Rangers,2,,R,2025
+2025-03-01,Chicago Blackhawks,6,Anaheim Ducks,3,,R,2025
+2025-03-01,Montreal Canadiens,4,Buffalo Sabres,2,,R,2025
+2025-03-01,Edmonton Oilers,3,Carolina Hurricanes,1,,R,2025
+2025-03-01,Detroit Red Wings,3,Columbus Blue Jackets,5,,R,2025
+2025-03-01,Calgary Flames,0,Florida Panthers,3,,R,2025
+2025-03-01,Nashville Predators,4,New York Islanders,7,,R,2025
+2025-03-01,San Jose Sharks,3,Ottawa Senators,5,,R,2025
+2025-03-01,Boston Bruins,3,Pittsburgh Penguins,2,,R,2025
+2025-03-01,Vancouver Canucks,3,Seattle Kraken,6,,R,2025
+2025-03-01,Los Angeles Kings,1,St. Louis Blues,4,,R,2025
+2025-03-01,New Jersey Devils,3,Utah Hockey Club,1,,R,2025
+2025-03-01,Philadelphia Flyers,2,Winnipeg Jets,1,SO,R,2025
+2025-03-01,Tampa Bay Lightning,3,Washington Capitals,1,,R,2025
+2025-03-02,Calgary Flames,1,Carolina Hurricanes,2,OT,R,2025
+2025-03-02,St. Louis Blues,3,Dallas Stars,6,,R,2025
+2025-03-02,Boston Bruins,0,Minnesota Wild,1,,R,2025
+2025-03-02,Nashville Predators,0,New York Rangers,4,,R,2025
+2025-03-02,Toronto Maple Leafs,6,Pittsburgh Penguins,5,OT,R,2025
+2025-03-02,New Jersey Devils,0,Vegas Golden Knights,2,,R,2025
+2025-03-03,Los Angeles Kings,1,Chicago Blackhawks,5,,R,2025
+2025-03-03,Tampa Bay Lightning,1,Florida Panthers,2,,R,2025
+2025-03-03,Buffalo Sabres,3,Montreal Canadiens,4,OT,R,2025
+2025-03-03,New York Islanders,0,New York Rangers,4,,R,2025
+2025-03-03,San Jose Sharks,3,Toronto Maple Leafs,2,SO,R,2025
+2025-03-03,Ottawa Senators,4,Washington Capitals,5,SO,R,2025
+2025-03-04,Nashville Predators,6,Boston Bruins,3,,R,2025
+2025-03-04,San Jose Sharks,6,Buffalo Sabres,2,,R,2025
+2025-03-04,Pittsburgh Penguins,1,Colorado Avalanche,4,,R,2025
+2025-03-04,New Jersey Devils,3,Dallas Stars,4,,R,2025
+2025-03-04,Carolina Hurricanes,2,Detroit Red Wings,1,,R,2025
+2025-03-04,Anaheim Ducks,6,Edmonton Oilers,2,,R,2025
+2025-03-04,Winnipeg Jets,2,New York Islanders,3,,R,2025
+2025-03-04,Calgary Flames,6,Philadelphia Flyers,3,,R,2025
+2025-03-04,Minnesota Wild,4,Seattle Kraken,3,,R,2025
+2025-03-04,Columbus Blue Jackets,2,Tampa Bay Lightning,6,,R,2025
+2025-03-05,Ottawa Senators,4,Chicago Blackhawks,3,OT,R,2025
+2025-03-05,St. Louis Blues,3,Los Angeles Kings,2,SO,R,2025
+2025-03-05,Washington Capitals,3,New York Rangers,2,OT,R,2025
+2025-03-05,Anaheim Ducks,2,Vancouver Canucks,3,,R,2025
+2025-03-05,Toronto Maple Leafs,2,Vegas Golden Knights,5,,R,2025
+2025-03-06,Boston Bruins,2,Carolina Hurricanes,3,,R,2025
+2025-03-06,San Jose Sharks,3,Colorado Avalanche,7,,R,2025
+2025-03-06,Calgary Flames,2,Dallas Stars,3,OT,R,2025
+2025-03-06,Utah Hockey Club,4,Detroit Red Wings,2,,R,2025
+2025-03-06,Montreal Canadiens,2,Edmonton Oilers,3,OT,R,2025
+2025-03-06,Columbus Blue Jackets,0,Florida Panthers,3,,R,2025
+2025-03-06,Seattle Kraken,3,Nashville Predators,5,,R,2025
+2025-03-06,Winnipeg Jets,4,Philadelphia Flyers,1,,R,2025
+2025-03-06,Buffalo Sabres,5,Tampa Bay Lightning,6,,R,2025
+2025-03-07,St. Louis Blues,4,Anaheim Ducks,3,,R,2025
+2025-03-07,Utah Hockey Club,3,Chicago Blackhawks,4,OT,R,2025
+2025-03-07,Winnipeg Jets,6,New Jersey Devils,1,,R,2025
+2025-03-07,Minnesota Wild,1,Vancouver Canucks,3,,R,2025
+2025-03-07,Pittsburgh Penguins,0,Vegas Golden Knights,4,,R,2025
+2025-03-07,Detroit Red Wings,2,Washington Capitals,5,,R,2025
+2025-03-08,Montreal Canadiens,0,Calgary Flames,1,,R,2025
+2025-03-08,Toronto Maple Leafs,4,Colorado Avalanche,7,,R,2025
+2025-03-08,Dallas Stars,4,Edmonton Oilers,5,,R,2025
+2025-03-08,Buffalo Sabres,0,Florida Panthers,4,,R,2025
+2025-03-08,St. Louis Blues,1,Los Angeles Kings,2,OT,R,2025
+2025-03-08,Chicago Blackhawks,2,Nashville Predators,3,OT,R,2025
+2025-03-08,New York Rangers,3,Ottawa Senators,4,OT,R,2025
+2025-03-08,Seattle Kraken,4,Philadelphia Flyers,1,,R,2025
+2025-03-08,New York Islanders,4,San Jose Sharks,2,,R,2025
+2025-03-08,Boston Bruins,4,Tampa Bay Lightning,0,,R,2025
+2025-03-09,New York Islanders,1,Anaheim Ducks,4,,R,2025
+2025-03-09,Winnipeg Jets,2,Carolina Hurricanes,4,,R,2025
+2025-03-09,Pittsburgh Penguins,3,Minnesota Wild,1,,R,2025
+2025-03-09,Columbus Blue Jackets,7,New York Rangers,3,,R,2025
+2025-03-09,New Jersey Devils,3,Philadelphia Flyers,1,,R,2025
+2025-03-09,Dallas Stars,4,Vancouver Canucks,1,,R,2025
+2025-03-09,Los Angeles Kings,6,Vegas Golden Knights,5,,R,2025
+2025-03-09,Seattle Kraken,2,Washington Capitals,4,,R,2025
+2025-03-10,Edmonton Oilers,2,Buffalo Sabres,3,,R,2025
+2025-03-10,Chicago Blackhawks,0,Colorado Avalanche,3,,R,2025
+2025-03-10,Detroit Red Wings,1,Ottawa Senators,2,,R,2025
+2025-03-10,Toronto Maple Leafs,4,Utah Hockey Club,3,SO,R,2025
+2025-03-11,Washington Capitals,7,Anaheim Ducks,4,,R,2025
+2025-03-11,Florida Panthers,2,Boston Bruins,3,,R,2025
+2025-03-11,Tampa Bay Lightning,1,Carolina Hurricanes,4,,R,2025
+2025-03-11,New York Islanders,1,Los Angeles Kings,4,,R,2025
+2025-03-11,Colorado Avalanche,1,Minnesota Wild,2,SO,R,2025
+2025-03-11,Columbus Blue Jackets,3,New Jersey Devils,5,,R,2025
+2025-03-11,Ottawa Senators,5,Philadelphia Flyers,2,,R,2025
+2025-03-11,Vegas Golden Knights,2,Pittsburgh Penguins,3,OT,R,2025
+2025-03-11,Nashville Predators,3,San Jose Sharks,2,,R,2025
+2025-03-11,Montreal Canadiens,4,Vancouver Canucks,2,,R,2025
+2025-03-11,New York Rangers,1,Winnipeg Jets,2,,R,2025
+2025-03-12,Vancouver Canucks,4,Calgary Flames,3,SO,R,2025
+2025-03-12,Buffalo Sabres,3,Detroit Red Wings,7,,R,2025
+2025-03-12,Montreal Canadiens,4,Seattle Kraken,5,OT,R,2025
+2025-03-12,Anaheim Ducks,2,Utah Hockey Club,3,,R,2025
+2025-03-13,Vegas Golden Knights,4,Columbus Blue Jackets,0,,R,2025
+2025-03-13,Washington Capitals,0,Los Angeles Kings,3,,R,2025
+2025-03-13,New York Rangers,3,Minnesota Wild,2,OT,R,2025
+2025-03-13,Edmonton Oilers,2,New Jersey Devils,3,,R,2025
+2025-03-13,Boston Bruins,3,Ottawa Senators,6,,R,2025
+2025-03-13,Tampa Bay Lightning,3,Philadelphia Flyers,4,SO,R,2025
+2025-03-13,St. Louis Blues,3,Pittsburgh Penguins,5,,R,2025
+2025-03-13,Chicago Blackhawks,2,San Jose Sharks,4,,R,2025
+2025-03-13,Florida Panthers,3,Toronto Maple Leafs,2,,R,2025
+2025-03-14,Nashville Predators,1,Anaheim Ducks,2,,R,2025
+2025-03-14,Detroit Red Wings,2,Carolina Hurricanes,4,,R,2025
+2025-03-14,Colorado Avalanche,4,Calgary Flames,2,,R,2025
+2025-03-14,Edmonton Oilers,2,New York Islanders,1,OT,R,2025
+2025-03-14,Utah Hockey Club,2,Seattle Kraken,4,,R,2025
+2025-03-14,Dallas Stars,1,Winnipeg Jets,4,,R,2025
+2025-03-15,Tampa Bay Lightning,6,Boston Bruins,2,,R,2025
+2025-03-15,Vegas Golden Knights,3,Buffalo Sabres,4,SO,R,2025
+2025-03-15,New York Rangers,4,Columbus Blue Jackets,0,,R,2025
+2025-03-15,Nashville Predators,0,Los Angeles Kings,1,OT,R,2025
+2025-03-15,St. Louis Blues,5,Minnesota Wild,1,,R,2025
+2025-03-15,Florida Panthers,1,Montreal Canadiens,3,,R,2025
+2025-03-15,Carolina Hurricanes,5,Philadelphia Flyers,0,,R,2025
+2025-03-15,New Jersey Devils,3,Pittsburgh Penguins,7,,R,2025
+2025-03-15,Washington Capitals,5,San Jose Sharks,1,,R,2025
+2025-03-15,Ottawa Senators,4,Toronto Maple Leafs,2,,R,2025
+2025-03-15,Chicago Blackhawks,2,Vancouver Canucks,6,,R,2025
+2025-03-16,Dallas Stars,3,Colorado Avalanche,4,OT,R,2025
+2025-03-16,Vegas Golden Knights,0,Detroit Red Wings,3,,R,2025
+2025-03-16,Florida Panthers,2,New York Islanders,4,,R,2025
+2025-03-16,Edmonton Oilers,3,New York Rangers,1,,R,2025
+2025-03-16,Winnipeg Jets,3,Seattle Kraken,2,OT,R,2025
+2025-03-16,Anaheim Ducks,2,St. Louis Blues,7,,R,2025
+2025-03-16,Utah Hockey Club,3,Vancouver Canucks,1,,R,2025
+2025-03-17,Buffalo Sabres,3,Boston Bruins,2,OT,R,2025
+2025-03-17,New Jersey Devils,2,Columbus Blue Jackets,1,,R,2025
+2025-03-17,Los Angeles Kings,1,Minnesota Wild,3,,R,2025
+2025-03-17,Philadelphia Flyers,0,Tampa Bay Lightning,2,,R,2025
+2025-03-17,Calgary Flames,2,Toronto Maple Leafs,6,,R,2025
+2025-03-18,Seattle Kraken,6,Chicago Blackhawks,2,,R,2025
+2025-03-18,Anaheim Ducks,3,Dallas Stars,4,OT,R,2025
+2025-03-18,Utah Hockey Club,1,Edmonton Oilers,7,,R,2025
+2025-03-18,Ottawa Senators,3,Montreal Canadiens,6,,R,2025
+2025-03-18,St. Louis Blues,4,Nashville Predators,1,,R,2025
+2025-03-18,Calgary Flames,2,New York Rangers,1,,R,2025
+2025-03-18,New York Islanders,4,Pittsburgh Penguins,2,,R,2025
+2025-03-18,Winnipeg Jets,2,Vancouver Canucks,6,,R,2025
+2025-03-18,Detroit Red Wings,1,Washington Capitals,4,,R,2025
+2025-03-19,Seattle Kraken,0,Minnesota Wild,4,,R,2025
+2025-03-19,Colorado Avalanche,1,Toronto Maple Leafs,2,,R,2025
+2025-03-20,Florida Panthers,1,Columbus Blue Jackets,0,OT,R,2025
+2025-03-20,Los Angeles Kings,3,Chicago Blackhawks,1,,R,2025
+2025-03-20,Tampa Bay Lightning,3,Dallas Stars,2,SO,R,2025
+2025-03-20,Winnipeg Jets,4,Edmonton Oilers,3,OT,R,2025
+2025-03-20,Calgary Flames,5,New Jersey Devils,3,,R,2025
+2025-03-20,Anaheim Ducks,4,Nashville Predators,1,,R,2025
+2025-03-20,Montreal Canadiens,3,New York Islanders,4,OT,R,2025
+2025-03-20,Toronto Maple Leafs,4,New York Rangers,3,,R,2025
+2025-03-20,Colorado Avalanche,5,Ottawa Senators,1,,R,2025
+2025-03-20,Carolina Hurricanes,3,San Jose Sharks,1,,R,2025
+2025-03-20,Vancouver Canucks,3,St. Louis Blues,4,OT,R,2025
+2025-03-20,Buffalo Sabres,2,Utah Hockey Club,5,,R,2025
+2025-03-20,Boston Bruins,1,Vegas Golden Knights,5,,R,2025
+2025-03-20,Philadelphia Flyers,2,Washington Capitals,3,,R,2025
+2025-03-21,Columbus Blue Jackets,3,Pittsburgh Penguins,6,,R,2025
+2025-03-22,Philadelphia Flyers,2,Dallas Stars,3,OT,R,2025
+2025-03-22,Seattle Kraken,4,Edmonton Oilers,5,,R,2025
+2025-03-22,Carolina Hurricanes,2,Los Angeles Kings,7,,R,2025
+2025-03-22,Buffalo Sabres,1,Minnesota Wild,4,,R,2025
+2025-03-22,Colorado Avalanche,5,Montreal Canadiens,4,SO,R,2025
+2025-03-22,Ottawa Senators,3,New Jersey Devils,2,,R,2025
+2025-03-22,Toronto Maple Leafs,2,Nashville Predators,5,,R,2025
+2025-03-22,Calgary Flames,4,New York Islanders,3,OT,R,2025
+2025-03-22,Vancouver Canucks,3,New York Rangers,5,,R,2025
+2025-03-22,Boston Bruins,1,San Jose Sharks,3,,R,2025
+2025-03-22,Chicago Blackhawks,1,St. Louis Blues,4,,R,2025
+2025-03-22,Tampa Bay Lightning,4,Utah Hockey Club,6,,R,2025
+2025-03-22,Detroit Red Wings,3,Vegas Golden Knights,6,,R,2025
+2025-03-22,Florida Panthers,3,Washington Capitals,6,,R,2025
+2025-03-23,Carolina Hurricanes,5,Anaheim Ducks,2,,R,2025
+2025-03-23,Philadelphia Flyers,4,Chicago Blackhawks,7,,R,2025
+2025-03-23,Pittsburgh Penguins,3,Florida Panthers,4,SO,R,2025
+2025-03-23,Boston Bruins,2,Los Angeles Kings,7,,R,2025
+2025-03-23,Nashville Predators,1,St. Louis Blues,4,,R,2025
+2025-03-23,Tampa Bay Lightning,2,Vegas Golden Knights,4,,R,2025
+2025-03-23,Buffalo Sabres,5,Winnipeg Jets,3,,R,2025
+2025-03-24,Minnesota Wild,0,Dallas Stars,3,,R,2025
+2025-03-24,Vancouver Canucks,4,New Jersey Devils,3,SO,R,2025
+2025-03-24,Columbus Blue Jackets,4,New York Islanders,3,SO,R,2025
+2025-03-24,Detroit Red Wings,5,Utah Hockey Club,1,,R,2025
+2025-03-25,Ottawa Senators,2,Buffalo Sabres,3,,R,2025
+2025-03-25,Nashville Predators,3,Carolina Hurricanes,1,,R,2025
+2025-03-25,Seattle Kraken,3,Calgary Flames,4,OT,R,2025
+2025-03-25,Detroit Red Wings,2,Colorado Avalanche,5,,R,2025
+2025-03-25,New York Rangers,1,Los Angeles Kings,3,,R,2025
+2025-03-25,Vegas Golden Knights,5,Minnesota Wild,1,,R,2025
+2025-03-25,Montreal Canadiens,1,St. Louis Blues,6,,R,2025
+2025-03-25,Pittsburgh Penguins,1,Tampa Bay Lightning,6,,R,2025
+2025-03-25,Philadelphia Flyers,2,Toronto Maple Leafs,7,,R,2025
+2025-03-25,Washington Capitals,2,Winnipeg Jets,3,OT,R,2025
+2025-03-26,Boston Bruins,2,Anaheim Ducks,6,,R,2025
+2025-03-26,New Jersey Devils,5,Chicago Blackhawks,3,,R,2025
+2025-03-26,Dallas Stars,4,Edmonton Oilers,3,,R,2025
+2025-03-26,Vancouver Canucks,5,New York Islanders,2,,R,2025
+2025-03-27,Pittsburgh Penguins,3,Buffalo Sabres,7,,R,2025
+2025-03-27,Dallas Stars,5,Calgary Flames,2,,R,2025
+2025-03-27,Los Angeles Kings,0,Colorado Avalanche,4,,R,2025
+2025-03-27,Ottawa Senators,4,Detroit Red Wings,3,,R,2025
+2025-03-27,Washington Capitals,2,Minnesota Wild,4,,R,2025
+2025-03-27,St. Louis Blues,3,Nashville Predators,2,,R,2025
+2025-03-27,Montreal Canadiens,4,Philadelphia Flyers,6,,R,2025
+2025-03-27,Edmonton Oilers,1,Seattle Kraken,6,,R,2025
+2025-03-27,Toronto Maple Leafs,5,San Jose Sharks,6,SO,R,2025
+2025-03-27,Utah Hockey Club,0,Tampa Bay Lightning,8,,R,2025
+2025-03-28,New York Rangers,4,Anaheim Ducks,5,OT,R,2025
+2025-03-28,Montreal Canadiens,1,Carolina Hurricanes,4,,R,2025
+2025-03-28,Vancouver Canucks,6,Columbus Blue Jackets,7,SO,R,2025
+2025-03-28,Vegas Golden Knights,5,Chicago Blackhawks,3,,R,2025
+2025-03-28,Utah Hockey Club,1,Florida Panthers,2,OT,R,2025
+2025-03-28,New Jersey Devils,0,Winnipeg Jets,4,,R,2025
+2025-03-29,St. Louis Blues,2,Colorado Avalanche,1,,R,2025
+2025-03-29,Boston Bruins,1,Detroit Red Wings,2,,R,2025
+2025-03-29,Calgary Flames,2,Edmonton Oilers,3,OT,R,2025
+2025-03-29,Toronto Maple Leafs,3,Los Angeles Kings,1,,R,2025
+2025-03-29,New Jersey Devils,5,Minnesota Wild,2,,R,2025
+2025-03-29,Vegas Golden Knights,3,Nashville Predators,1,,R,2025
+2025-03-29,Columbus Blue Jackets,2,Ottawa Senators,3,,R,2025
+2025-03-29,Buffalo Sabres,4,Philadelphia Flyers,7,,R,2025
+2025-03-29,Dallas Stars,5,Seattle Kraken,1,,R,2025
+2025-03-29,New York Rangers,6,San Jose Sharks,1,,R,2025
+2025-03-29,New York Islanders,3,Tampa Bay Lightning,5,,R,2025
+2025-03-30,Toronto Maple Leafs,3,Anaheim Ducks,2,,R,2025
+2025-03-30,New York Islanders,4,Carolina Hurricanes,6,,R,2025
+2025-03-30,Utah Hockey Club,5,Chicago Blackhawks,2,,R,2025
+2025-03-30,Montreal Canadiens,4,Florida Panthers,2,,R,2025
+2025-03-30,San Jose Sharks,1,Los Angeles Kings,8,,R,2025
+2025-03-30,Ottawa Senators,0,Pittsburgh Penguins,1,OT,R,2025
+2025-03-30,Vancouver Canucks,1,Winnipeg Jets,3,,R,2025
+2025-03-30,Buffalo Sabres,8,Washington Capitals,5,,R,2025
+2025-03-31,Calgary Flames,3,Colorado Avalanche,2,SO,R,2025
+2025-03-31,Minnesota Wild,2,New Jersey Devils,3,SO,R,2025
+2025-03-31,Nashville Predators,1,Philadelphia Flyers,2,,R,2025
+2025-03-31,Dallas Stars,3,Seattle Kraken,1,,R,2025
+2025-04-01,San Jose Sharks,3,Anaheim Ducks,4,SO,R,2025
+2025-04-01,Washington Capitals,4,Boston Bruins,3,,R,2025
+2025-04-01,Nashville Predators,4,Columbus Blue Jackets,8,,R,2025
+2025-04-01,Winnipeg Jets,1,Los Angeles Kings,4,,R,2025
+2025-04-01,Florida Panthers,2,Montreal Canadiens,3,OT,R,2025
+2025-04-01,Tampa Bay Lightning,4,New York Islanders,1,,R,2025
+2025-04-01,Buffalo Sabres,5,Ottawa Senators,2,,R,2025
+2025-04-01,Detroit Red Wings,1,St. Louis Blues,2,OT,R,2025
+2025-04-01,Calgary Flames,1,Utah Hockey Club,3,,R,2025
+2025-04-01,Edmonton Oilers,3,Vegas Golden Knights,2,,R,2025
+2025-04-02,Washington Capitals,1,Carolina Hurricanes,5,,R,2025
+2025-04-02,Colorado Avalanche,3,Chicago Blackhawks,2,SO,R,2025
+2025-04-02,Minnesota Wild,4,New York Rangers,5,OT,R,2025
+2025-04-02,Florida Panthers,2,Toronto Maple Leafs,3,,R,2025
+2025-04-02,Seattle Kraken,5,Vancouver Canucks,0,,R,2025
+2025-04-03,Colorado Avalanche,7,Columbus Blue Jackets,3,,R,2025
+2025-04-03,Anaheim Ducks,1,Calgary Flames,4,,R,2025
+2025-04-03,Nashville Predators,1,Dallas Stars,5,,R,2025
+2025-04-03,Boston Bruins,1,Montreal Canadiens,4,,R,2025
+2025-04-03,Tampa Bay Lightning,1,Ottawa Senators,2,,R,2025
+2025-04-03,Edmonton Oilers,3,San Jose Sharks,2,,R,2025
+2025-04-03,Pittsburgh Penguins,4,St. Louis Blues,5,OT,R,2025
+2025-04-03,Los Angeles Kings,4,Utah Hockey Club,2,,R,2025
+2025-04-03,Winnipeg Jets,4,Vegas Golden Knights,0,,R,2025
+2025-04-04,Carolina Hurricanes,3,Detroit Red Wings,5,,R,2025
+2025-04-04,Minnesota Wild,1,New York Islanders,3,,R,2025
+2025-04-04,Chicago Blackhawks,3,Washington Capitals,5,,R,2025
+2025-04-05,Carolina Hurricanes,1,Boston Bruins,5,,R,2025
+2025-04-05,Tampa Bay Lightning,2,Buffalo Sabres,3,SO,R,2025
+2025-04-05,Vegas Golden Knights,3,Calgary Flames,2,OT,R,2025
+2025-04-05,Pittsburgh Penguins,5,Dallas Stars,3,,R,2025
+2025-04-05,Edmonton Oilers,0,Los Angeles Kings,3,,R,2025
+2025-04-05,Philadelphia Flyers,2,Montreal Canadiens,3,,R,2025
+2025-04-05,New York Rangers,0,New Jersey Devils,4,,R,2025
+2025-04-05,Florida Panthers,0,Ottawa Senators,3,,R,2025
+2025-04-05,Seattle Kraken,5,San Jose Sharks,1,,R,2025
+2025-04-05,Colorado Avalanche,4,St. Louis Blues,5,,R,2025
+2025-04-05,Columbus Blue Jackets,0,Toronto Maple Leafs,5,,R,2025
+2025-04-05,Winnipeg Jets,1,Utah Hockey Club,4,,R,2025
+2025-04-05,Anaheim Ducks,2,Vancouver Canucks,6,,R,2025
+2025-04-06,Boston Bruins,3,Buffalo Sabres,6,,R,2025
+2025-04-06,Pittsburgh Penguins,1,Chicago Blackhawks,3,,R,2025
+2025-04-06,Florida Panthers,1,Detroit Red Wings,2,,R,2025
+2025-04-06,Dallas Stars,2,Minnesota Wild,3,OT,R,2025
+2025-04-06,Montreal Canadiens,2,Nashville Predators,1,,R,2025
+2025-04-06,Washington Capitals,1,New York Islanders,4,,R,2025
+2025-04-06,Columbus Blue Jackets,0,Ottawa Senators,4,,R,2025
+2025-04-06,Vegas Golden Knights,3,Vancouver Canucks,2,,R,2025
+2025-04-07,Edmonton Oilers,2,Anaheim Ducks,3,,R,2025
+2025-04-07,Seattle Kraken,2,Los Angeles Kings,1,,R,2025
+2025-04-07,Tampa Bay Lightning,5,New York Rangers,1,,R,2025
+2025-04-07,Calgary Flames,3,San Jose Sharks,2,,R,2025
+2025-04-07,St. Louis Blues,1,Winnipeg Jets,3,,R,2025
+2025-04-08,Carolina Hurricanes,0,Buffalo Sabres,3,,R,2025
+2025-04-08,Ottawa Senators,2,Columbus Blue Jackets,5,,R,2025
+2025-04-08,Vegas Golden Knights,2,Colorado Avalanche,3,SO,R,2025
+2025-04-08,Vancouver Canucks,6,Dallas Stars,5,OT,R,2025
+2025-04-08,Toronto Maple Leafs,1,Florida Panthers,3,,R,2025
+2025-04-08,Detroit Red Wings,1,Montreal Canadiens,4,,R,2025
+2025-04-08,Boston Bruins,7,New Jersey Devils,2,,R,2025
+2025-04-08,New York Islanders,6,Nashville Predators,7,OT,R,2025
+2025-04-08,Chicago Blackhawks,0,Pittsburgh Penguins,5,,R,2025
+2025-04-08,Seattle Kraken,1,Utah Hockey Club,7,,R,2025
+2025-04-09,Calgary Flames,3,Anaheim Ducks,4,OT,R,2025
+2025-04-09,St. Louis Blues,3,Edmonton Oilers,4,,R,2025
+2025-04-09,San Jose Sharks,7,Minnesota Wild,8,OT,R,2025
+2025-04-09,Philadelphia Flyers,8,New York Rangers,5,,R,2025
+2025-04-09,Toronto Maple Leafs,4,Tampa Bay Lightning,3,OT,R,2025
+2025-04-10,Chicago Blackhawks,5,Boston Bruins,2,,R,2025
+2025-04-10,Buffalo Sabres,2,Columbus Blue Jackets,3,,R,2025
+2025-04-10,Vancouver Canucks,4,Colorado Avalanche,1,,R,2025
+2025-04-10,Winnipeg Jets,4,Dallas Stars,0,,R,2025
+2025-04-10,Detroit Red Wings,1,Florida Panthers,4,,R,2025
+2025-04-10,Anaheim Ducks,1,Los Angeles Kings,6,,R,2025
+2025-04-10,New York Rangers,9,New York Islanders,2,,R,2025
+2025-04-10,Nashville Predators,4,Utah Hockey Club,3,SO,R,2025
+2025-04-10,Seattle Kraken,1,Vegas Golden Knights,2,,R,2025
+2025-04-10,Carolina Hurricanes,4,Washington Capitals,5,SO,R,2025
+2025-04-11,Minnesota Wild,2,Calgary Flames,4,,R,2025
+2025-04-11,San Jose Sharks,2,Edmonton Oilers,4,,R,2025
+2025-04-11,Pittsburgh Penguins,4,New Jersey Devils,2,,R,2025
+2025-04-11,Montreal Canadiens,2,Ottawa Senators,5,,R,2025
+2025-04-11,Detroit Red Wings,4,Tampa Bay Lightning,3,OT,R,2025
+2025-04-12,New York Rangers,3,Carolina Hurricanes,7,,R,2025
+2025-04-12,Washington Capitals,0,Columbus Blue Jackets,7,,R,2025
+2025-04-12,Winnipeg Jets,5,Chicago Blackhawks,4,SO,R,2025
+2025-04-12,Utah Hockey Club,5,Dallas Stars,3,,R,2025
+2025-04-12,Buffalo Sabres,2,Florida Panthers,3,SO,R,2025
+2025-04-12,Colorado Avalanche,4,Los Angeles Kings,5,,R,2025
+2025-04-12,New York Islanders,3,Philadelphia Flyers,4,SO,R,2025
+2025-04-12,St. Louis Blues,3,Seattle Kraken,4,SO,R,2025
+2025-04-12,Montreal Canadiens,0,Toronto Maple Leafs,1,OT,R,2025
+2025-04-12,Minnesota Wild,3,Vancouver Canucks,2,OT,R,2025
+2025-04-12,Nashville Predators,3,Vegas Golden Knights,5,,R,2025
+2025-04-13,Colorado Avalanche,4,Anaheim Ducks,2,,R,2025
+2025-04-13,Toronto Maple Leafs,4,Carolina Hurricanes,1,,R,2025
+2025-04-13,San Jose Sharks,2,Calgary Flames,5,,R,2025
+2025-04-13,New York Islanders,1,New Jersey Devils,0,,R,2025
+2025-04-13,Philadelphia Flyers,3,Ottawa Senators,4,OT,R,2025
+2025-04-13,Boston Bruins,4,Pittsburgh Penguins,1,,R,2025
+2025-04-13,Buffalo Sabres,4,Tampa Bay Lightning,7,,R,2025
+2025-04-13,Edmonton Oilers,4,Winnipeg Jets,1,,R,2025
+2025-04-13,Columbus Blue Jackets,4,Washington Capitals,1,,R,2025
+2025-04-14,Dallas Stars,4,Detroit Red Wings,6,,R,2025
+2025-04-14,Los Angeles Kings,5,Edmonton Oilers,0,,R,2025
+2025-04-14,New York Rangers,5,Florida Panthers,3,,R,2025
+2025-04-14,Chicago Blackhawks,4,Montreal Canadiens,3,SO,R,2025
+2025-04-14,Utah Hockey Club,7,Nashville Predators,3,,R,2025
+2025-04-14,San Jose Sharks,1,Vancouver Canucks,2,OT,R,2025
+2025-04-15,New Jersey Devils,5,Boston Bruins,4,OT,R,2025
+2025-04-15,Toronto Maple Leafs,4,Buffalo Sabres,0,,R,2025
+2025-04-15,Vegas Golden Knights,4,Calgary Flames,5,SO,R,2025
+2025-04-15,Anaheim Ducks,2,Minnesota Wild,3,OT,R,2025
+2025-04-15,Washington Capitals,3,New York Islanders,1,,R,2025
+2025-04-15,Chicago Blackhawks,4,Ottawa Senators,3,OT,R,2025
+2025-04-15,Columbus Blue Jackets,3,Philadelphia Flyers,0,,R,2025
+2025-04-15,Los Angeles Kings,6,Seattle Kraken,5,,R,2025
+2025-04-15,Utah Hockey Club,1,St. Louis Blues,6,,R,2025
+2025-04-15,Florida Panthers,1,Tampa Bay Lightning,5,,R,2025
+2025-04-16,Carolina Hurricanes,2,Montreal Canadiens,4,,R,2025
+2025-04-16,Detroit Red Wings,5,New Jersey Devils,2,,R,2025
+2025-04-16,Dallas Stars,1,Nashville Predators,5,,R,2025
+2025-04-16,Edmonton Oilers,3,San Jose Sharks,0,,R,2025
+2025-04-16,Vegas Golden Knights,4,Vancouver Canucks,1,,R,2025
+2025-04-16,Anaheim Ducks,1,Winnipeg Jets,2,OT,R,2025
+2025-04-17,Philadelphia Flyers,4,Buffalo Sabres,5,,R,2025
+2025-04-17,New York Islanders,1,Columbus Blue Jackets,6,,R,2025
+2025-04-17,Calgary Flames,5,Los Angeles Kings,1,,R,2025
+2025-04-17,Tampa Bay Lightning,0,New York Rangers,4,,R,2025
+2025-04-17,Carolina Hurricanes,5,Ottawa Senators,7,,R,2025
+2025-04-17,Washington Capitals,2,Pittsburgh Penguins,5,,R,2025
+2025-04-17,Detroit Red Wings,3,Toronto Maple Leafs,4,OT,R,2025
+2025-04-19,St. Louis Blues,3,Winnipeg Jets,5,,P,2025
+2025-04-19,Colorado Avalanche,5,Dallas Stars,1,,P,2025
+2025-04-20,New Jersey Devils,1,Carolina Hurricanes,4,,P,2025
+2025-04-20,Ottawa Senators,2,Toronto Maple Leafs,6,,P,2025
+2025-04-20,Minnesota Wild,2,Vegas Golden Knights,4,,P,2025
+2025-04-21,Colorado Avalanche,3,Dallas Stars,4,OT,P,2025
+2025-04-21,Edmonton Oilers,5,Los Angeles Kings,6,,P,2025
+2025-04-21,St. Louis Blues,1,Winnipeg Jets,2,,P,2025
+2025-04-21,Montreal Canadiens,2,Washington Capitals,3,OT,P,2025
+2025-04-22,Ottawa Senators,2,Toronto Maple Leafs,3,OT,P,2025
+2025-04-22,Minnesota Wild,5,Vegas Golden Knights,2,,P,2025
+2025-04-22,Florida Panthers,6,Tampa Bay Lightning,2,,P,2025
+2025-04-22,New Jersey Devils,1,Carolina Hurricanes,3,,P,2025
+2025-04-23,Dallas Stars,2,Colorado Avalanche,1,OT,P,2025
+2025-04-23,Edmonton Oilers,2,Los Angeles Kings,6,,P,2025
+2025-04-23,Montreal Canadiens,1,Washington Capitals,3,,P,2025
+2025-04-24,Vegas Golden Knights,2,Minnesota Wild,5,,P,2025
+2025-04-24,Toronto Maple Leafs,3,Ottawa Senators,2,OT,P,2025
+2025-04-24,Winnipeg Jets,2,St. Louis Blues,7,,P,2025
+2025-04-24,Florida Panthers,2,Tampa Bay Lightning,0,,P,2025
+2025-04-25,Washington Capitals,3,Montreal Canadiens,6,,P,2025
+2025-04-25,Carolina Hurricanes,2,New Jersey Devils,3,2OT,P,2025
+2025-04-25,Los Angeles Kings,4,Edmonton Oilers,7,,P,2025
+2025-04-26,Dallas Stars,0,Colorado Avalanche,4,,P,2025
+2025-04-26,Tampa Bay Lightning,5,Florida Panthers,1,,P,2025
+2025-04-26,Vegas Golden Knights,4,Minnesota Wild,3,OT,P,2025
+2025-04-26,Toronto Maple Leafs,3,Ottawa Senators,4,OT,P,2025
+2025-04-27,Los Angeles Kings,3,Edmonton Oilers,4,OT,P,2025
+2025-04-27,Washington Capitals,5,Montreal Canadiens,2,,P,2025
+2025-04-27,Carolina Hurricanes,5,New Jersey Devils,2,,P,2025
+2025-04-27,Winnipeg Jets,1,St. Louis Blues,5,,P,2025
+2025-04-28,Tampa Bay Lightning,2,Florida Panthers,4,,P,2025
+2025-04-28,Colorado Avalanche,2,Dallas Stars,6,,P,2025
+2025-04-29,New Jersey Devils,4,Carolina Hurricanes,5,2OT,P,2025
+2025-04-29,Edmonton Oilers,3,Los Angeles Kings,1,,P,2025
+2025-04-29,Ottawa Senators,4,Toronto Maple Leafs,0,,P,2025
+2025-04-29,Minnesota Wild,2,Vegas Golden Knights,3,OT,P,2025
+2025-04-30,Florida Panthers,6,Tampa Bay Lightning,3,,P,2025
+2025-04-30,St. Louis Blues,3,Winnipeg Jets,5,,P,2025
+2025-04-30,Montreal Canadiens,1,Washington Capitals,4,,P,2025
+2025-05-01,Toronto Maple Leafs,4,Ottawa Senators,2,,P,2025
+2025-05-01,Vegas Golden Knights,3,Minnesota Wild,2,,P,2025
+2025-05-01,Dallas Stars,4,Colorado Avalanche,7,,P,2025
+2025-05-01,Los Angeles Kings,4,Edmonton Oilers,6,,P,2025
+2025-05-02,Winnipeg Jets,2,St. Louis Blues,5,,P,2025
+2025-05-03,Colorado Avalanche,2,Dallas Stars,4,,P,2025
+2025-05-04,St. Louis Blues,3,Winnipeg Jets,4,2OT,P,2025
+2025-05-05,Florida Panthers,4,Toronto Maple Leafs,5,,P,2025
+2025-05-06,Edmonton Oilers,4,Vegas Golden Knights,2,,P,2025
+2025-05-06,Carolina Hurricanes,2,Washington Capitals,1,OT,P,2025
+2025-05-07,Florida Panthers,3,Toronto Maple Leafs,4,,P,2025
+2025-05-07,Dallas Stars,3,Winnipeg Jets,2,,P,2025
+2025-05-08,Edmonton Oilers,5,Vegas Golden Knights,4,OT,P,2025
+2025-05-08,Carolina Hurricanes,1,Washington Capitals,3,,P,2025
+2025-05-09,Toronto Maple Leafs,4,Florida Panthers,5,OT,P,2025
+2025-05-09,Dallas Stars,0,Winnipeg Jets,4,,P,2025
+2025-05-10,Washington Capitals,0,Carolina Hurricanes,4,,P,2025
+2025-05-10,Vegas Golden Knights,4,Edmonton Oilers,3,,P,2025
+2025-05-11,Winnipeg Jets,2,Dallas Stars,5,,P,2025
+2025-05-11,Toronto Maple Leafs,0,Florida Panthers,2,,P,2025
+2025-05-12,Washington Capitals,2,Carolina Hurricanes,5,,P,2025
+2025-05-12,Vegas Golden Knights,0,Edmonton Oilers,3,,P,2025
+2025-05-13,Winnipeg Jets,1,Dallas Stars,3,,P,2025
+2025-05-14,Edmonton Oilers,1,Vegas Golden Knights,0,OT,P,2025
+2025-05-14,Florida Panthers,6,Toronto Maple Leafs,1,,P,2025
+2025-05-15,Dallas Stars,0,Winnipeg Jets,4,,P,2025
+2025-05-15,Carolina Hurricanes,3,Washington Capitals,1,,P,2025
+2025-05-16,Toronto Maple Leafs,2,Florida Panthers,0,,P,2025
+2025-05-17,Winnipeg Jets,1,Dallas Stars,2,OT,P,2025
+2025-05-18,Florida Panthers,6,Toronto Maple Leafs,1,,P,2025
+2025-05-20,Florida Panthers,5,Carolina Hurricanes,2,,P,2025
+2025-05-21,Edmonton Oilers,3,Dallas Stars,6,,P,2025
+2025-05-22,Florida Panthers,5,Carolina Hurricanes,0,,P,2025
+2025-05-23,Edmonton Oilers,3,Dallas Stars,0,,P,2025
+2025-05-24,Carolina Hurricanes,2,Florida Panthers,6,,P,2025
+2025-05-25,Dallas Stars,1,Edmonton Oilers,6,,P,2025
+2025-05-26,Carolina Hurricanes,3,Florida Panthers,0,,P,2025
+2025-05-27,Dallas Stars,1,Edmonton Oilers,4,,P,2025
+2025-05-28,Florida Panthers,5,Carolina Hurricanes,3,,P,2025
+2025-05-29,Edmonton Oilers,6,Dallas Stars,3,,P,2025
+2025-06-04,Florida Panthers,3,Edmonton Oilers,4,OT,P,2025
+2025-06-06,Florida Panthers,5,Edmonton Oilers,4,2OT,P,2025
+2025-06-09,Edmonton Oilers,1,Florida Panthers,6,,P,2025
+2025-06-12,Edmonton Oilers,5,Florida Panthers,4,OT,P,2025
+2025-06-14,Florida Panthers,5,Edmonton Oilers,2,,P,2025
+2025-06-17,Edmonton Oilers,1,Florida Panthers,5,,P,2025
