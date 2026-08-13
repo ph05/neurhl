@@ -331,7 +331,7 @@ def main():
     results["2027_28"].to_csv(OUT / "projections_2027_28_v2.csv", index=False)
 
     # v1 preservation check
-    chk = subprocess.run(["shasum", "-c", "SHA1SUMS"], cwd=OUT / "v1",
+    chk = subprocess.run(["shasum", "-c", "output/v1/SHA1SUMS"], cwd=PROJ,
                          capture_output=True, text=True)
     assert chk.returncode == 0, f"v1 outputs modified!\n{chk.stdout}{chk.stderr}"
     print("v1 snapshot verified byte-identical")
