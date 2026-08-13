@@ -1,0 +1,65 @@
+{
+  "goalie_hp": {
+    "delta": 0.8,
+    "nu0": 8.0,
+    "window": 4
+  },
+  "skater_delta": 0.7,
+  "lams": {
+    "h1": {
+      "base": 1.0,
+      "full": 64.0,
+      "r2": 64.0
+    },
+    "h2": {
+      "base": 32.0,
+      "full": 64.0,
+      "r2": 32.0
+    }
+  },
+  "sigma_c": {
+    "h1": 40.0,
+    "h2": 50.0
+  },
+  "hetero": {
+    "keep": false,
+    "spread": {
+      "uniform": 0.06666666666666665,
+      "hetero": 0.06666666666666665
+    },
+    "shots_pg": 30.0
+  },
+  "ledger_note": "see output/feature_ledger.csv",
+  "k": 87.23896567391714,
+  "c": 0.2267834219683977,
+  "train_mae": {
+    "h1": {
+      "base": 9.531,
+      "r2": 9.626,
+      "full": 9.86
+    },
+    "h2": {
+      "base": 10.633,
+      "r2": 10.474,
+      "full": 10.581
+    }
+  },
+  "stage_t_seconds": 85.9,
+  "prereg": {
+    "written_before_confirm": true,
+    "confirm_gate": "h1 deviation-MAE excl 2021: rung MAE <= v1_MAE + 0.10 AND spearman >= v1 - 0.02; adopt highest qualifying rung (R3>R2>R1)",
+    "final_window": "2022-2026, single scripted run, no decisions taken on it",
+    "overlay_rule": "apply iff rho_hat in [0.3,1.2] and |placebo| < rho_hat/2; rho* = clip(0.5*rho_hat, 0, 0.75); dElo = clip(rho**k*x/82, +-25), recentered; never inside backtests",
+    "hetero_rule": "keep iff train 80% coverage tertile spread improves vs uniform (result: keep=False)",
+    "mechanism": {
+      "rho_hat": 0.743,
+      "se": 0.224,
+      "placebo": -0.528,
+      "n": 150,
+      "chain": 0.241,
+      "ppg": 1.93
+    },
+    "overlay_applied": false,
+    "rho_star": 0.0
+  }
+}

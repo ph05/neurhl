@@ -304,10 +304,14 @@ def _series(higher: int, lower: int, strengths: np.ndarray, om: dict,
     return higher if rng.random() < p_series else lower
 
 
-def simulate_season(ratings_mean: dict, sigma: float, sched: pd.DataFrame, om: dict,
+def simulate_season(ratings_mean: dict, sigma, sched: pd.DataFrame, om: dict,
                     divisions: dict, n_sims: int, rng: np.random.Generator,
                     playoffs: bool = True, chunk: int = 2000):
+    """sigma: scalar Elo strength noise, or dict team->sigma (heteroscedastic)."""
     teams = sorted(ratings_mean)
+    if isinstance(sigma, dict):
+        sigma = np.array([sigma[t] for t in teams], dtype=float)
+        assert sigma.shape == (len(teams),) and (sigma >= 0).all()
     n = len(teams)
     idx = {t: i for i, t in enumerate(teams)}
     div_of = {t: dv for dv, ts_ in divisions.items() for t in ts_}
