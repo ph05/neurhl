@@ -61,5 +61,280 @@
     },
     "overlay_applied": false,
     "rho_star": 0.0
+  },
+  "confirm_result": {
+    "gate": {
+      "R3": [
+        8.784,
+        0.648
+      ],
+      "R2": [
+        8.741,
+        0.616
+      ],
+      "R1": [
+        9.167,
+        0.569
+      ]
+    },
+    "choice": "R3",
+    "detail": {
+      "h1": {
+        "R3": [
+          {
+            "horizon": 1,
+            "season": 2018,
+            "mae": 10.614,
+            "spearman": 0.625
+          },
+          {
+            "horizon": 1,
+            "season": 2019,
+            "mae": 8.057,
+            "spearman": 0.701
+          },
+          {
+            "horizon": 1,
+            "season": 2020,
+            "mae": 7.679,
+            "spearman": 0.619
+          },
+          {
+            "horizon": 1,
+            "season": 2021,
+            "mae": 13.17,
+            "spearman": 0.661
+          }
+        ],
+        "R2": [
+          {
+            "horizon": 1,
+            "season": 2018,
+            "mae": 10.588,
+            "spearman": 0.615
+          },
+          {
+            "horizon": 1,
+            "season": 2019,
+            "mae": 8.026,
+            "spearman": 0.635
+          },
+          {
+            "horizon": 1,
+            "season": 2020,
+            "mae": 7.608,
+            "spearman": 0.598
+          },
+          {
+            "horizon": 1,
+            "season": 2021,
+            "mae": 13.488,
+            "spearman": 0.644
+          }
+        ],
+        "R1": [
+          {
+            "horizon": 1,
+            "season": 2018,
+            "mae": 11.775,
+            "spearman": 0.441
+          },
+          {
+            "horizon": 1,
+            "season": 2019,
+            "mae": 8.264,
+            "spearman": 0.598
+          },
+          {
+            "horizon": 1,
+            "season": 2020,
+            "mae": 7.463,
+            "spearman": 0.667
+          },
+          {
+            "horizon": 1,
+            "season": 2021,
+            "mae": 12.904,
+            "spearman": 0.698
+          }
+        ]
+      },
+      "h2": {
+        "R3": [
+          {
+            "horizon": 2,
+            "season": 2018,
+            "mae": 12.517,
+            "spearman": 0.277
+          },
+          {
+            "horizon": 2,
+            "season": 2019,
+            "mae": 10.028,
+            "spearman": 0.477
+          },
+          {
+            "horizon": 2,
+            "season": 2020,
+            "mae": 9.161,
+            "spearman": 0.389
+          },
+          {
+            "horizon": 2,
+            "season": 2021,
+            "mae": 14.721,
+            "spearman": 0.438
+          }
+        ],
+        "R2": [
+          {
+            "horizon": 2,
+            "season": 2018,
+            "mae": 12.585,
+            "spearman": 0.237
+          },
+          {
+            "horizon": 2,
+            "season": 2019,
+            "mae": 10.096,
+            "spearman": 0.37
+          },
+          {
+            "horizon": 2,
+            "season": 2020,
+            "mae": 9.023,
+            "spearman": 0.479
+          },
+          {
+            "horizon": 2,
+            "season": 2021,
+            "mae": 14.274,
+            "spearman": 0.508
+          }
+        ],
+        "R1": [
+          {
+            "horizon": 2,
+            "season": 2018,
+            "mae": 11.533,
+            "spearman": 0.365
+          },
+          {
+            "horizon": 2,
+            "season": 2019,
+            "mae": 10.519,
+            "spearman": 0.317
+          },
+          {
+            "horizon": 2,
+            "season": 2020,
+            "mae": 9.296,
+            "spearman": 0.449
+          },
+          {
+            "horizon": 2,
+            "season": 2021,
+            "mae": 13.298,
+            "spearman": 0.596
+          }
+        ]
+      }
+    }
+  },
+  "final_result": {
+    "h1": [
+      {
+        "season": 2022,
+        "mae_v2": 12.603,
+        "mae_v1": 12.291,
+        "mae_regressed": 12.876,
+        "mae_uniform": 17.562,
+        "spearman_v2": 0.703,
+        "spearman_v1": 0.706
+      },
+      {
+        "season": 2023,
+        "mae_v2": 11.3,
+        "mae_v1": 11.089,
+        "mae_regressed": 12.171,
+        "mae_uniform": 14.945,
+        "spearman_v2": 0.659,
+        "spearman_v1": 0.655
+      },
+      {
+        "season": 2024,
+        "mae_v2": 9.542,
+        "mae_v1": 8.87,
+        "mae_regressed": 9.837,
+        "mae_uniform": 13.875,
+        "spearman_v2": 0.71,
+        "spearman_v1": 0.732
+      },
+      {
+        "season": 2025,
+        "mae_v2": 10.558,
+        "mae_v1": 10.401,
+        "mae_regressed": 10.172,
+        "mae_uniform": 11.752,
+        "spearman_v2": 0.427,
+        "spearman_v1": 0.476
+      },
+      {
+        "season": 2026,
+        "mae_v2": 11.585,
+        "mae_v1": 11.896,
+        "mae_regressed": 10.85,
+        "mae_uniform": 9.898,
+        "spearman_v2": 0.167,
+        "spearman_v1": 0.135
+      }
+    ],
+    "h2": [
+      {
+        "season": 2022,
+        "mae_v2": 15.163,
+        "mae_v1": 14.444,
+        "mae_regressed": 15.169,
+        "mae_uniform": 17.562,
+        "spearman_v2": 0.485,
+        "spearman_v1": 0.51
+      },
+      {
+        "season": 2023,
+        "mae_v2": 12.275,
+        "mae_v1": 12.429,
+        "mae_regressed": 13.243,
+        "mae_uniform": 14.945,
+        "spearman_v2": 0.641,
+        "spearman_v1": 0.577
+      },
+      {
+        "season": 2024,
+        "mae_v2": 10.402,
+        "mae_v1": 9.855,
+        "mae_regressed": 10.642,
+        "mae_uniform": 13.875,
+        "spearman_v2": 0.654,
+        "spearman_v1": 0.683
+      },
+      {
+        "season": 2025,
+        "mae_v2": 10.879,
+        "mae_v1": 10.697,
+        "mae_regressed": 10.806,
+        "mae_uniform": 11.752,
+        "spearman_v2": 0.508,
+        "spearman_v1": 0.487
+      },
+      {
+        "season": 2026,
+        "mae_v2": 12.02,
+        "mae_v1": 12.243,
+        "mae_regressed": 10.675,
+        "mae_uniform": 9.898,
+        "spearman_v2": 0.149,
+        "spearman_v1": 0.087
+      }
+    ]
   }
 }

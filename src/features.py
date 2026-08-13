@@ -184,10 +184,13 @@ class FeatureBuilder:
         df["toi_age"] = df.toi_age.fillna(27.0)
         return df
 
-    def target(self, T: int) -> pd.Series:
-        t = self.ts.xs(T, level="season_end")
-        y = (t.pts_pct - t.pts_pct.mean()) * 164
-        return y
+    def target(self, T: int) -> pd.Series | None:
+        """Per-82 points deviation for season T; None if T not yet played."""
+        try:
+            t = self.ts.xs(T, level="season_end")
+        except KeyError:
+            return None
+        return (t.pts_pct - t.pts_pct.mean()) * 164
 
     def feature_matrix(self, predict_seasons: list[int], h: int):
         """Stack pairs (V=T-h -> T). Centering within V; scaling by expanding sd over
@@ -207,11 +210,12 @@ class FeatureBuilder:
             hist = raw[raw._V <= V]
             scale = hist[FEATURES].std(ddof=1).replace(0, 1.0)
             y = self.target(T)
-            teams_T = y.index
+            teams_T = y.index if y is not None else cur.index  # future season: vantage teams
+            yv = y.to_numpy(float) if y is not None else np.full(len(teams_T), np.nan)
             Xt = cur[FEATURES].reindex(teams_T)
             Xt = (Xt / scale).fillna(0.0)  # expansion debuts -> league-average vector
             X_parts.append(Xt.to_numpy(float))
-            metas.append(pd.DataFrame({"team": teams_T, "T": T, "y": y.to_numpy(float)}))
+            metas.append(pd.DataFrame({"team": teams_T, "T": T, "y": yv}))
         X = np.vstack(X_parts)
         meta = pd.concat(metas, ignore_index=True)
         return X, meta.y.to_numpy(float), meta

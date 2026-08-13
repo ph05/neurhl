@@ -100,3 +100,21 @@ PARAMS: K=6, H=35, phi_s=0.7, w=0.6 (Elo) / 0.4 (xG_all), phi1=0.85, phi2=0.75, 
 - Trajectory term NULL: gamma=0 optimal on train two-ahead (9.910 at 0 vs 9.926-9.988 elsewhere). Dropped.
 - 2025-26 was a hard season for everyone (uniform beat all skill models; spearman 0.14) - parity year;
   relevant caveat for 2027-28: league spread is compressing.
+
+## v2 (pieces-driven) findings — 2026-08-13
+Player EDA:
+- Goalie talent (GSAx/shot) stabilization n0 ~ 5,000 shots; per-goalie projection beats
+  predict-league-average by ~9% wMSE (goalies are voodoo, but not pure noise).
+- Consistency C (DerSimonian-Laird tau2 ratio): Shesterkin 0.57 / Hellebuyck 0.61 steady elite;
+  one-great-season profiles >1.3. C quantiles [0.57, 1.0, 1.66].
+- Age curves (player FE, TOI-weighted): F peak 27 (-0.30 pts60 by 32, -0.65 by 36), D flatter.
+  Delta-method cross-check sign-agrees.
+Stage T (train <=2017): h1 base(elo+xg) 9.53 vs full 9.86 (pieces add noise at h1 in-train);
+  h2 base 10.63 vs R2 10.47 (pieces help decay). lambda=64/32. sigma_c 40/50.
+  Heteroscedastic goalie sigma: prereg coverage test -> DROPPED (no tertile improvement).
+Overlay mechanism: rho=0.743 (t~3.3) but placebo -0.528 -> BLOCKED (buyers are selected
+  underperformers; mean reversion confound). Movers valued+published, 0 Elo applied.
+Confirm (2018-2021, prereg gate): R3 8.78 / R2 8.74 / v1 9.17 -> R3 adopted.
+Final (2022-2026, single run): h1 v2 11.12 vs v1 10.91 vs regressed 11.18; h2 v2 12.15 / v1 11.93.
+VERDICT: v2 ~ v1 on accuracy (inside noise both directions); v2 adds attribution, goalie/age/
+player sheets, tested nulls. 2026 parity season: uniform beats all skill models (again).
