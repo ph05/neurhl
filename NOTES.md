@@ -145,3 +145,15 @@ Four narrative claims converted to features, screened vs train LOSO residuals:
 3. Young-team right-tail skew: skew +0.07, tails equal across age tertiles -> NULL.
 4. 3yr pedigree beyond current rating: r=+0.03 -> NULL.
 v3.1 headline: CAR 107.6 back on top (COL -6.5 overlay), WSH into top-9 (+13), TOR to 89.8.
+
+## Hypothesis batch 2 — 2026-08-14 (all train-screened, confirmation where warranted)
+5. Star aging (DiD, stars vs rest, old vs young): -0.050 pts60, t~-1.0 -> NULL (no star
+   longevity premium; folk claim is survivorship of visible legends).
+6. Playoff star leverage: train +6.13 (t 1.5) -> held-out 2018-2026 CONFIRMATION: -6.26
+   (t -1.9), pooled -1.42+-2.48 -> NULL BY SIGN FLIP. The single best object lesson in the
+   project: a suggestive in-sample coefficient reversed entirely out of sample.
+7. Cup hangover (14+ playoff games, next season vs model): +1.05 +- 1.63 -> NULL
+   (deep runs if anything slightly positive; "hangover" = regression + expectations).
+8. Goalie workload fatigue: corr +0.11 (t 1.1), heavy starters NOT worse next season -> NULL.
+Running ledger: 4 shipped (finishing, PP process, availability, roster overlay-amended) +
+v2 core blocks; 11 tested nulls, all documented with numbers.
