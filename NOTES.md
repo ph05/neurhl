@@ -118,3 +118,19 @@ Confirm (2018-2021, prereg gate): R3 8.78 / R2 8.74 / v1 9.17 -> R3 adopted.
 Final (2022-2026, single run): h1 v2 11.12 vs v1 10.91 vs regressed 11.18; h2 v2 12.15 / v1 11.93.
 VERDICT: v2 ~ v1 on accuracy (inside noise both directions); v2 adds attribution, goalie/age/
 player sheets, tested nulls. 2026 parity season: uniform beats all skill models (again).
+
+## v3 (three commissioned enhancements) — 2026-08-13
+1. FINISHING: EB (G-ixG)/shot, YoY r=0.306, n0~510 shots. GATE PASSED (dMAE -0.028, 5/5 stable).
+   Leaders: Draisaitl +3.4/100, Geekie, Panarin, Thompson, Nylander. In model.
+2. AVAILABILITY: beta-binomial GP by age (24x overdispersed; P(miss15+) 29->42% by age).
+   Zero-mean top-9 draws in sims. GATE PASSED (coverage 0.861). sigma_c3=40.
+   Also: st_pp KEPT (+0.015), st_pk DROPPED (+0.053) per gate.
+3. LIVING MODEL: n0 tuned to 5 (grid floor) and validation shows pure in-season Elo ~ blend:
+   carried-over Elo ALREADY embeds the prior optimally (K/carryover were tuned for it).
+   Honest near-null for the extra layer; the real deliverable is the replay/odds machinery:
+   playoff Brier tightens 0.171 (gp10) -> 0.083 (gp60) on 2022-2026 replays. live.py operational
+   (python src/live.py update), consumes output/v3_prior_ratings.csv.
+v3 headline moves vs v2: DAL 4th (+2.9 finishing/PP), EDM 8th (+3.5), OTT 6th (-2.9 finishing),
+CAR behind COL (-1.3 finishing). TBL most fragile roster (avail SD 12 Elo), CGY least (4.1).
+DEFERRED to v3.1 (documented, not built): goalie-start rotation in game sim, prospect arrival
+curves (draft name-join), UFA/RFA heuristic flags, GBM bake-off vs ridge.
