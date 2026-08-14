@@ -108,5 +108,7 @@
     "history": "prereg placebo blocked raw estimate (rho 0.743, placebo -0.528); amendment path named in advance: partial regression controlling prior-season residual; result rho_partial=1.011 (se 0.260, n=150), reversion coef +0.006 -> identified",
     "rho_star_applied": 0.506,
     "post_hoc_amendment": true
-  }
+  },
+  "b2b_elo": 38.0,
+  "hypothesis_batches": "see NOTES.md: 15 nulls, 5 shipped mechanisms as of 2026-08-14"
 }

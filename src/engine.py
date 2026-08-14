@@ -321,6 +321,8 @@ def simulate_season(ratings_mean: dict, sigma, sched: pd.DataFrame, om: dict,
     mu = np.array([ratings_mean[t] for t in teams])
     hi = sched.home.map(idx).to_numpy()
     ai = sched.away.map(idx).to_numpy()
+    # optional per-game Elo adjustment (e.g. back-to-back rest effects), home perspective
+    d_adj = sched["d_adj"].to_numpy() if "d_adj" in sched.columns else 0.0
 
     pts_all = np.zeros((n_sims, n), dtype=np.float32)
     rw_all = np.zeros((n_sims, n), dtype=np.float32)
@@ -338,7 +340,7 @@ def simulate_season(ratings_mean: dict, sigma, sched: pd.DataFrame, om: dict,
         if extra_noise is not None:
             S = S + extra_noise(m, rng)
         strengths_store[done:done + m] = S
-        d = S[:, hi] - S[:, ai]
+        d = S[:, hi] - S[:, ai] + d_adj
         p_ot, p_reg, p_otw = game_probs(d, om)
         u1, u2, u3 = rng.random((3, m, len(hi)))
         is_ot = u1 < p_ot

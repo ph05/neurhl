@@ -27,6 +27,23 @@ V_PROD = 2026
 BLOCKS_V3 = dict(BLOCKS)
 BLOCKS_V3["Contrib Finishing/PP"] = ["finishing", "st_pp"]
 
+B2B_ELO = 38.0  # measured: back-to-back costs ~6% win prob (t 5-7, 20k games 2010-2026)
+
+
+def real_schedule_b2b() -> pd.DataFrame:
+    """Real 2026-27 schedule with per-game rest adjustment (home perspective)."""
+    df = pd.read_csv(RAW / "nhl_schedule_20262027.csv", parse_dates=["date"]) \
+        .sort_values(["date", "game_id"]).reset_index(drop=True)
+    last = {}
+    hb2b, ab2b = [], []
+    for gm in df.itertuples():
+        hb2b.append(1.0 if (gm.home in last and (gm.date - last[gm.home]).days <= 1) else 0.0)
+        ab2b.append(1.0 if (gm.away in last and (gm.date - last[gm.away]).days <= 1) else 0.0)
+        last[gm.home] = gm.date
+        last[gm.away] = gm.date
+    df["d_adj"] = B2B_ELO * (np.array(ab2b) - np.array(hb2b))
+    return df[["home", "away", "d_adj"]]
+
 
 def production_predictions(fb, feats, lam, h, target_T):
     pred_seasons = list(range(2012 + (h - 1), 2027)) + [target_T]
@@ -102,7 +119,7 @@ def main():
         ratings = {t: 1505.0 + yhat[t] / c + ov_scale * float(delo.get(t, 0.0))
                    for t in yhat.index}
         rng = np.random.default_rng(seed)
-        sched = real_schedule() if h == 1 else E.synthetic_schedule_84(E.DIVISIONS_CURRENT, rng)
+        sched = real_schedule_b2b() if h == 1 else E.synthetic_schedule_84(E.DIVISIONS_CURRENT, rng)
         assert sorted(ratings) == sorted(noise_teams)
         sim = E.simulate_season(ratings, sigma, sched, om, E.DIVISIONS_CURRENT, N_SIMS, rng,
                                 playoffs=True, extra_noise=noise_fn if use_noise else None)

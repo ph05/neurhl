@@ -157,3 +157,17 @@ v3.1 headline: CAR 107.6 back on top (COL -6.5 overlay), WSH into top-9 (+13), T
 8. Goalie workload fatigue: corr +0.11 (t 1.1), heavy starters NOT worse next season -> NULL.
 Running ledger: 4 shipped (finishing, PP process, availability, roster overlay-amended) +
 v2 core blocks; 11 tested nulls, all documented with numbers.
+
+## Hypothesis batch 3 (outside-the-box) — 2026-08-14
+A. REST/B2B: -6% win prob on back-to-back (t 5-7, both sides, Elo-equiv -/+38). SHIPPED into
+   2026-27 sims (real schedule dates) as per-game d_adj; documented for live.py.
+   [Bug caught en route: unstable sort misaligned Elo within same-date games -> attenuated
+   slope faked a -444 Elo tank effect; keyed alignment fixed it.]
+B. Tanking (dead teams, last 12 games): -26 Elo, t 1.3 -> NULL (Elo already absorbs selloffs).
+C. Divisional familiarity: interaction t 1.0, wrong sign for the claim -> NULL (84g CBA safe).
+D. Team-specific HFA incl. altitude: no Bonferroni survivors of 32; COL +1.4% t 0.7 -> NULL.
+E. Heavy playoff hockey: -0.07/10lb, t -0.3, n=270 series -> NULL (myth dead).
+F. Relative-age survivors: Q4-born +0.10 pts60 over Q1 (t 2.3) -> suggestive, unshipped
+   (marginal under 7 tests; no model surface beyond draft curves).
+G. Shootout team skill: YoY r=0.17 -> real but worth <0.2 pts/season -> unshipped, documented.
+Running totals: 5 shipped mechanisms, 15 documented nulls/unshipped.
