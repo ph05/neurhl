@@ -21,6 +21,7 @@ FEATURES = ["elo_dev", "xg_dev", "gsax_1yr", "gsax_marcel", "tandem_gsax",
             "goalie_consistency", "goalie_age", "goalie_trend", "toi_age", "share_u23",
             "share_32p", "prod_age_exp", "returning_toi", "star_share", "draft_cap",
             "player_points_proj"]
+FEATURES_V3 = FEATURES + ["finishing", "st_pp", "st_pk"]
 TANDEM_SHARES = np.array([0.58, 0.30, 0.12])
 
 
@@ -167,6 +168,38 @@ class FeatureBuilder:
         return pd.Series(pts, index=roster.team.to_numpy()).groupby(level=0).sum() \
             .rename("player_points_proj")
 
+    def team_finishing(self, V: int) -> pd.Series:
+        """Roster expected goals-above-xG per season (EB-shrunk shooters, majority team)."""
+        if not hasattr(self, "_fin_cache"):
+            self._fin_cache = {}
+        if V not in self._fin_cache:
+            fin = P.finishing_project(self.sk, V).set_index("playerId")
+            roster = P.majority_team(self.skt[self.skt.season_end == V])
+            roster = roster[roster.playerId.isin(fin.index)]
+            g_extra = (fin.theta_fin.reindex(roster.playerId)
+                       * fin.sog82.reindex(roster.playerId)).to_numpy()
+            self._fin_cache[V] = pd.Series(g_extra, index=roster.team.to_numpy()) \
+                .groupby(level=0).sum().rename("finishing")
+        return self._fin_cache[V]
+
+    def team_st(self, V: int) -> pd.DataFrame:
+        """Special teams process rates at vantage: PP xGF/60 (5on4), PK -xGA/60 (4on5)."""
+        if not hasattr(self, "_st_cache"):
+            self._st_cache = {}
+        if V not in self._st_cache:
+            f = RAW / f"mp_teams_{V - 1}.csv"
+            mp = pd.read_csv(f, usecols=["team", "situation", "iceTime",
+                                         "xGoalsFor", "xGoalsAgainst"])
+            mp["team"] = mp.team.replace(P.MP_FRAN)
+            pp = mp[mp.situation == "5on4"].set_index("team")
+            pk = mp[mp.situation == "4on5"].set_index("team")
+            out = pd.DataFrame({
+                "st_pp": pp.xGoalsFor / (pp.iceTime / 3600.0),
+                "st_pk": -(pk.xGoalsAgainst / (pk.iceTime / 3600.0)),
+            })
+            self._st_cache[V] = out
+        return self._st_cache[V]
+
     # ---------------- assemble ----------------
     def team_features(self, V: int, h: int) -> pd.DataFrame:
         teams = sorted(self.end_r[V].keys())
@@ -180,6 +213,8 @@ class FeatureBuilder:
         df = df.join(self.team_returning_toi(V), how="left")
         df = df.join(self.team_draft_cap(V, teams), how="left")
         df = df.join(self.team_player_points(V, h), how="left")
+        df = df.join(self.team_finishing(V), how="left")
+        df = df.join(self.team_st(V), how="left")
         df["goalie_age"] = df.goalie_age.fillna(28.0)
         df["toi_age"] = df.toi_age.fillna(27.0)
         return df
@@ -192,9 +227,10 @@ class FeatureBuilder:
             return None
         return (t.pts_pct - t.pts_pct.mean()) * 164
 
-    def feature_matrix(self, predict_seasons: list[int], h: int):
+    def feature_matrix(self, predict_seasons: list[int], h: int, feats: list[str] | None = None):
         """Stack pairs (V=T-h -> T). Centering within V; scaling by expanding sd over
         vantages <= V; missing (expansion debut in T) -> 0 vector."""
+        FEATURES = feats or globals()["FEATURES"]
         frames = []
         for T in predict_seasons:
             V = T - h

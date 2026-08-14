@@ -1,0 +1,107 @@
+{
+  "prereg_v3": {
+    "gate_features": "add-one-in LOSO dMAE(h1,train) <= +0.02 and sign_stability >= 0.67 per candidate; final set LOSO <= v2 set + 0.05 else fallback",
+    "gate_availability": "80% train coverage in [0.72,0.90] with noise on and refit sigma_c; fragility-tertile spread <= uniform spread + 0.02",
+    "windows": "train <= 2017 only; 2018-2026 untouched; 2026-27 live = true holdout"
+  },
+  "final_feature_set": [
+    "elo_dev",
+    "xg_dev",
+    "gsax_1yr",
+    "gsax_marcel",
+    "tandem_gsax",
+    "goalie_consistency",
+    "goalie_age",
+    "goalie_trend",
+    "toi_age",
+    "share_u23",
+    "share_32p",
+    "prod_age_exp",
+    "returning_toi",
+    "star_share",
+    "draft_cap",
+    "player_points_proj",
+    "finishing",
+    "st_pp"
+  ],
+  "kept_new_features": [
+    "finishing",
+    "st_pp"
+  ],
+  "lam_h1": 64.0,
+  "lam_h2": 64.0,
+  "train_mae_h1": {
+    "v2_set": 9.86,
+    "v3_set": 9.84
+  },
+  "availability": {
+    "keep": true,
+    "sigma_c3": 40.0,
+    "coverage": 0.861,
+    "tertile_spread": 0.1
+  },
+  "ledger_v3": [
+    {
+      "feature": "finishing",
+      "horizon": 1,
+      "add_one_in_dMAE": -0.0275,
+      "sign_stability": 1.0,
+      "status": "in model (v3)"
+    },
+    {
+      "feature": "st_pp",
+      "horizon": 1,
+      "add_one_in_dMAE": 0.0153,
+      "sign_stability": 1.0,
+      "status": "in model (v3)"
+    },
+    {
+      "feature": "st_pk",
+      "horizon": 1,
+      "add_one_in_dMAE": 0.0525,
+      "sign_stability": 1.0,
+      "status": "dropped (v3 gate)"
+    }
+  ],
+  "seconds": 12.0,
+  "living_model": {
+    "n0": 5.0,
+    "tune_table": {
+      "5": 11.4728,
+      "10": 11.4983,
+      "15": 11.5292,
+      "20": 11.5605,
+      "25": 11.5908,
+      "30": 11.6179,
+      "40": 11.6641
+    },
+    "validation_mae": {
+      "10": {
+        "blend": 10.8,
+        "pure_elo": 10.775,
+        "pure_prior": 11.585
+      },
+      "20": {
+        "blend": 10.947,
+        "pure_elo": 10.839,
+        "pure_prior": 12.013
+      },
+      "41": {
+        "blend": 10.706,
+        "pure_elo": 10.57,
+        "pure_prior": 13.148
+      },
+      "60": {
+        "blend": 13.673,
+        "pure_elo": 13.539,
+        "pure_prior": 16.544
+      }
+    },
+    "brier_by_checkpoint": {
+      "10": 0.1713,
+      "20": 0.1376,
+      "41": 0.1075,
+      "60": 0.0825
+    }
+  }
+}

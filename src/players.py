@@ -31,7 +31,9 @@ SKATER_WINDOW = 3
 def build_panels():
     PROC.mkdir(parents=True, exist_ok=True)
     sk_cols = ["playerId", "season", "name", "team", "position", "situation",
-               "games_played", "icetime", "I_F_points", "I_F_goals"]
+               "games_played", "icetime", "I_F_points", "I_F_goals",
+               "I_F_shotsOnGoal", "I_F_xGoals",
+               "onIce_xGoalsPercentage", "offIce_xGoalsPercentage"]
     go_cols = ["playerId", "season", "name", "team", "position", "situation",
                "games_played", "icetime", "xGoals", "goals", "ongoal"]
     sk_frames, go_frames = [], []
@@ -54,11 +56,17 @@ def build_panels():
                   "ongoal", "xGoals", "goals"]].copy()
 
     # player-season aggregates
+    sk["_w_on"] = sk.onIce_xGoalsPercentage * sk.toi_min
+    sk["_w_off"] = sk.offIce_xGoalsPercentage * sk.toi_min
     skaters = sk.groupby(["playerId", "season_end"], as_index=False).agg(
         name=("name", "first"), position=("position", "first"),
         gp=("games_played", "sum"), toi_min=("toi_min", "sum"),
-        points=("I_F_points", "sum"), goals=("I_F_goals", "sum"))
+        points=("I_F_points", "sum"), goals=("I_F_goals", "sum"),
+        sog=("I_F_shotsOnGoal", "sum"), ixg=("I_F_xGoals", "sum"),
+        _w_on=("_w_on", "sum"), _w_off=("_w_off", "sum"))
     skaters["pts60"] = 60.0 * skaters.points / skaters.toi_min.clip(lower=1.0)
+    skaters["rel_xg"] = (skaters._w_on - skaters._w_off) / skaters.toi_min.clip(lower=1.0)
+    skaters = skaters.drop(columns=["_w_on", "_w_off"])
     skaters["pos_group"] = np.where(skaters.position == "D", "D", "F")
 
     goalies = go.groupby(["playerId", "season_end"], as_index=False).agg(
@@ -341,6 +349,47 @@ def skater_marcel(skaters: pd.DataFrame, bios: pd.DataFrame, vantage: int,
         res["age_adj"] = 1.0
         res["proj_pts60"] = res.theta_pts60
     res["proj_points"] = res.proj_pts60 * res.toi82_proj / 60.0
+    return res
+
+
+def finishing_project(skaters: pd.DataFrame, vantage: int, delta: float = 0.8,
+                      window: int = 4) -> pd.DataFrame:
+    """EB posterior on per-shot finishing talent (goals - ixG)/SOG, season-centered.
+    Same machinery as the goalie module (YoY r=0.31 justifies it)."""
+    s = skaters[(skaters.season_end <= vantage) & (skaters.sog >= 50)].copy()
+    lg = s.groupby("season_end").agg(G=("goals", "sum"), SOG=("sog", "sum"),
+                                     XG=("ixg", "sum"))
+    lg["p"] = lg.G / lg.SOG
+    lg["r_lg"] = (lg.G - lg.XG) / lg.SOG
+    s["r"] = (s.goals - s.ixg) / s.sog - s.season_end.map(lg.r_lg)
+    p = s.season_end.map(lg.p)
+    s["v"] = p * (1 - p) / s.sog
+    # population talent variance by moments (careers >= 400 SOG)
+    car = s.groupby("playerId").agg(sog=("sog", "sum"))
+    car = car[car.sog >= 400]
+    means, samp, wts = [], [], []
+    for pid in car.index:
+        d = s[s.playerId == pid]
+        w = 1.0 / d.v
+        means.append(float((w * d.r).sum() / w.sum()))
+        samp.append(float(1.0 / w.sum()))
+        wts.append(float(d.sog.sum()))
+    means, samp, wts = np.array(means), np.array(samp), np.array(wts)
+    mu = np.average(means, weights=wts)
+    tau2 = max(np.average((means - mu) ** 2, weights=wts) - np.average(samp, weights=wts), 1e-9)
+    win = s[s.season_end > vantage - window]
+    out = []
+    for pid, d in win.groupby("playerId"):
+        lag = vantage - d.season_end.to_numpy()
+        om = delta ** lag / d.v.to_numpy()
+        theta = float((om * d.r.to_numpy()).sum() / (om.sum() + 1.0 / tau2))
+        last = d[d.season_end == d.season_end.max()].iloc[0]
+        sog82 = last.sog / max(last.gp, 1) * 82
+        out.append({"playerId": pid, "theta_fin": theta, "sog82": float(sog82),
+                    "sog_win": float(d.sog.sum())})
+    res = pd.DataFrame(out)
+    res.attrs["tau2_pop"] = tau2
+    res.attrs["n0_implied"] = float(0.09 * 0.91 / tau2)
     return res
 
 

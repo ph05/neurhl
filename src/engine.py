@@ -306,8 +306,10 @@ def _series(higher: int, lower: int, strengths: np.ndarray, om: dict,
 
 def simulate_season(ratings_mean: dict, sigma, sched: pd.DataFrame, om: dict,
                     divisions: dict, n_sims: int, rng: np.random.Generator,
-                    playoffs: bool = True, chunk: int = 2000):
-    """sigma: scalar Elo strength noise, or dict team->sigma (heteroscedastic)."""
+                    playoffs: bool = True, chunk: int = 2000, extra_noise=None):
+    """sigma: scalar Elo strength noise, or dict team->sigma (heteroscedastic).
+    extra_noise: optional callable(m, rng) -> (m, n_teams) Elo noise aligned to sorted
+    team order (e.g. availability draws); added to the per-sim strength draw."""
     teams = sorted(ratings_mean)
     if isinstance(sigma, dict):
         sigma = np.array([sigma[t] for t in teams], dtype=float)
@@ -333,6 +335,8 @@ def simulate_season(ratings_mean: dict, sigma, sched: pd.DataFrame, om: dict,
     while done < n_sims:
         m = min(chunk, n_sims - done)
         S = mu[None, :] + sigma * rng.standard_normal((m, n))
+        if extra_noise is not None:
+            S = S + extra_noise(m, rng)
         strengths_store[done:done + m] = S
         d = S[:, hi] - S[:, ai]
         p_ot, p_reg, p_otw = game_probs(d, om)
