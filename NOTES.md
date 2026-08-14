@@ -134,3 +134,14 @@ v3 headline moves vs v2: DAL 4th (+2.9 finishing/PP), EDM 8th (+3.5), OTT 6th (-
 CAR behind COL (-1.3 finishing). TBL most fragile roster (avail SD 12 Elo), CGY least (4.1).
 DEFERRED to v3.1 (documented, not built): goalie-start rotation in game sim, prospect arrival
 curves (draft name-join), UFA/RFA heuristic flags, GBM bake-off vs ridge.
+
+## v3.1 — proposed signals screened (2026-08-14)
+Four narrative claims converted to features, screened vs train LOSO residuals:
+1. Within-season form (2H-1H): r=-0.05, t=-0.7 -> NULL (Elo already recency-weights).
+2. Roster-value overlay, partial regression controlling prior residual: rho=1.011 (se 0.26)
+   -> IDENTIFIED (raw estimate was biased DOWN by buyer-selection). Amendment path was named
+   in advance when placebo blocked v2 overlay; applied post-hoc with documentation:
+   rho*=0.506, cap +-25, zero-sum. TOR +13.2 Elo, WSH +13.0, PIT -10.9, DET -9.2.
+3. Young-team right-tail skew: skew +0.07, tails equal across age tertiles -> NULL.
+4. 3yr pedigree beyond current rating: r=+0.03 -> NULL.
+v3.1 headline: CAR 107.6 back on top (COL -6.5 overlay), WSH into top-9 (+13), TOR to 89.8.
