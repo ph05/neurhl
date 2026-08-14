@@ -103,5 +103,10 @@
       "41": 0.1075,
       "60": 0.0825
     }
+  },
+  "overlay_amendment": {
+    "history": "prereg placebo blocked raw estimate (rho 0.743, placebo -0.528); amendment path named in advance: partial regression controlling prior-season residual; result rho_partial=1.011 (se 0.260, n=150), reversion coef +0.006 -> identified",
+    "rho_star_applied": 0.506,
+    "post_hoc_amendment": true
   }
 }

@@ -97,7 +97,10 @@ def main():
     for h, (label, target_T, seed, lam) in {1: ("2026_27", 2027, 311, lam1),
                                             2: ("2027_28", 2028, 322, lam2)}.items():
         yhat, contribs = production_predictions(fb, feats, lam, h, target_T)
-        ratings = {t: 1505.0 + yhat[t] / c for t in yhat.index}
+        delo = pd.read_csv(OUT / "overlay_team_deltas.csv", index_col=0)["dElo"]
+        ov_scale = 1.0 if h == 1 else 0.88  # decays like other deviations (phi2/phi1)
+        ratings = {t: 1505.0 + yhat[t] / c + ov_scale * float(delo.get(t, 0.0))
+                   for t in yhat.index}
         rng = np.random.default_rng(seed)
         sched = real_schedule() if h == 1 else E.synthetic_schedule_84(E.DIVISIONS_CURRENT, rng)
         assert sorted(ratings) == sorted(noise_teams)
@@ -119,6 +122,7 @@ def main():
                    "Playoff%": playoff, "Division%": sim["won_div"][:, i].mean(),
                    "Conference%": sim["won_conf"][:, i].mean(), "Cup%": cup,
                    "Avail SD (Elo)": float(frag.avail_sd_elo.get(t, 0.0)),
+                   "Overlay dElo": round(ov_scale * float(delo.get(t, 0.0)), 1),
                    "FairOdds Cup (US)": cup_amer}
             for lbl in contribs:
                 row[lbl] = float(contribs[lbl].get(t, 0.0))
