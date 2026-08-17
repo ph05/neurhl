@@ -157,13 +157,14 @@ sea_first = preds[(preds.home == "SEA") | (preds.away == "SEA")].iloc[0]
 sea_r = sea_first.rh if sea_first.home == "SEA" else sea_first.ra
 check("SEA first-game pregame rating == 1470", abs(sea_r - 1470) < 1e-9, f"{sea_r}")
 
-# --- 2.5 float32 standings key precision: is the ROW tiebreaker preserved?
+# --- 2.5 the pre-v4 float32 key formulation drops ROW (documents why B1 was fixed;
+#         the fixed engine path is asserted in section 7.1)
 pts32 = np.float32(100.0)
 rw32 = np.float32(30.0)
 key_a = pts32 * 1e8 + rw32 * 1e4 + np.float32(45.0)   # ROW 45
 key_b = pts32 * 1e8 + rw32 * 1e4 + np.float32(44.0)   # ROW 44
-check("float32 standings key preserves ROW tiebreaker (engine.py:374)",
-      key_a > key_b,
+check("old float32 key formulation loses ROW (the bug v4's B1 fixed)",
+      key_a == key_b,
       f"key(ROW=45)-key(ROW=44) = {float(key_a - key_b):.1f} (float32 ULP at 1e10 ~ 1024)")
 
 # --- 2.6 analytic xpts == simulated mean (sigma=0)
@@ -377,6 +378,134 @@ try:
           f"max diff {np.abs(rep_v2 - pub_v2).max():.2e}")
 except Exception as ex:  # pragma: no cover
     check("v2 final-window h1 MAEs reproduce from frozen pipeline", False, f"ERROR {ex!r}")
+
+print()
+print("=" * 78)
+print("SECTION 7: v4 components (added 2026-08-17)")
+print("=" * 78)
+import json as _json
+
+import availability2 as A2v4
+import goalie_game as GGv4
+import prospects as PRv4
+import scoring as SCv4
+
+# 7.1 float64 standings key preserves every level (the bug this battery caught)
+kA = E.standings_key(100, 30, 45, 50, 0.0)
+kB = E.standings_key(100, 30, 44, 50, 0.999)
+kC = E.standings_key(100, 30, 44, 51, 0.0)
+check("v4 standings key: ROW and W levels preserved, ordered", kA > kC > kB)
+
+# 7.2 CRPS estimator vs closed-form Gaussian
+rng7 = np.random.default_rng(2)
+mu_, sd_, y_ = 95.0, 13.0, 101.5
+draws = rng7.normal(mu_, sd_, 400_000)
+z = (y_ - mu_) / sd_
+from math import erf, exp, pi, sqrt
+Phi = 0.5 * (1 + erf(z / sqrt(2)))
+phi = exp(-z * z / 2) / sqrt(2 * pi)
+crps_closed = sd_ * (z * (2 * Phi - 1) + 2 * phi - 1 / sqrt(pi))
+crps_emp = SCv4.crps_draws(draws, y_)
+check("CRPS estimator matches closed-form Gaussian (<0.5%)",
+      abs(crps_emp - crps_closed) / crps_closed < 0.005,
+      f"emp {crps_emp:.4f} vs closed {crps_closed:.4f}")
+
+# 7.3 availability2 mixture noise is zero-mean
+skp2, gop2, skt2, got2, bios2 = P.load_panels()
+par2 = A2v4.fit_availability2(skp2, bios2, 2017)
+gpar2 = A2v4.fit_goalie_availability(got2, ts, 2017)
+fn2 = A2v4.make_extra_noise2(["X"], {"X": [(1, 0.9, 20.0), (4, 0.8, 12.0)]}, par2,
+                             {"X": (0.75, 10.0)}, gpar2, k_elo=60.0)
+d7 = fn2(300_000, np.random.default_rng(3))
+check("availability2 mixture noise zero-mean (|mean| < 3*SE)",
+      abs(d7.mean()) < 3 * d7.std() / np.sqrt(300_000),
+      f"mean {d7.mean():+.4f}, sd {d7.std():.2f}")
+
+# 7.4 goalie game noise: zero-mean per game incl b2b nights; b2b raises backup usage
+p2j = _json.loads((PROJ / "output/params_v2.json").read_text())
+sched7 = pd.DataFrame({"home": ["AAA", "AAA"], "away": ["BBB", "BBB"],
+                       "hb2b": [0.0, 1.0], "ab2b": [0.0, 0.0]})
+tand7 = pd.DataFrame({"team": ["AAA", "BBB"], "g1": [1, 2], "g2": [3, 4],
+                      "theta1": [0.008, 0.002], "theta2": [-0.004, -0.002],
+                      "s1": [0.65, 0.6], "gap_gpg": [0.36, 0.12]}).set_index("team")
+gn7 = GGv4.make_game_noise(sched7, tand7, k_elo=p2j["k"])
+d8 = gn7(400_000, np.random.default_rng(4))
+check("goalie game noise zero-mean per game (rested and b2b)",
+      abs(d8.mean(0)).max() < 0.05, f"per-game |mean| max {abs(d8.mean(0)).max():.4f}")
+# start-mix variance matches the analytic Bernoulli-mix prediction (rested game):
+# var = sum over both teams of p1(1-p1) * (a1-a2)^2
+var_pred = 0.0
+for tm in ("AAA", "BBB"):
+    r_ = tand7.loc[tm]
+    a1 = p2j["k"] * GGv4.SHOTS_PG * (r_.theta1 - (r_.s1 * r_.theta1 + (1 - r_.s1) * r_.theta2))
+    a2 = p2j["k"] * GGv4.SHOTS_PG * (r_.theta2 - (r_.s1 * r_.theta1 + (1 - r_.s1) * r_.theta2))
+    var_pred += r_.s1 * (1 - r_.s1) * (a1 - a2) ** 2
+check("goalie noise sd matches analytic Bernoulli-mix (<3%)",
+      abs(d8[:, 0].std() - np.sqrt(var_pred)) / np.sqrt(var_pred) < 0.03,
+      f"sim {d8[:, 0].std():.2f} vs analytic {np.sqrt(var_pred):.2f} "
+      f"(b2b night sd {d8[:, 1].std():.2f}: near-equal by design — p(1-p) is flat "
+      f"around 0.5, and per-game centering keeps the league-mean b2b penalty in the "
+      f"flat 38 Elo constant)")
+
+# 7.5 prospect join + ramp
+join7 = PRv4.build_join(skp2)
+q7 = PRv4.join_quality(join7)
+check("draft join quality bar (>=85% picks 1-15, spot checks)", q7["pass"], str(q7))
+ramp7 = PRv4.fit_ramp(join7, skp2)
+top_y4 = ramp7[(ramp7.bucket == 0) & (ramp7.y == 4)].mean_pts.iloc[0]
+late_y4 = ramp7[(ramp7.bucket == 3) & (ramp7.y == 4)].mean_pts.iloc[0]
+check("ramp ordering: top-10 picks >> picks 61+ at year 4", top_y4 > 5 * late_y4,
+      f"{top_y4:.1f} vs {late_y4:.1f}")
+
+# 7.6 v4/ENS output consistency
+for tag in ("v4", "ens"):
+    dfp = pd.read_csv(PROJ / f"output/projections_2026_27_{tag}.csv")
+    check(f"2026-27 {tag}: prob sums (PO 16 / Div 4 / Conf 2 / Cup 1)",
+          abs(dfp["Playoff%"].sum() - 16) < 0.05 and abs(dfp["Division%"].sum() - 4) < 0.03
+          and abs(dfp["Conference%"].sum() - 2) < 0.03 and abs(dfp["Cup%"].sum() - 1) < 0.02)
+ens7 = pd.read_csv(PROJ / "output/projections_2026_27_ens.csv").set_index("Abbr")
+v47 = pd.read_csv(PROJ / "output/projections_2026_27_v4.csv").set_index("Abbr")
+v17 = pd.read_csv(PROJ / "output/v4_prior_ratings.csv", index_col=0)
+mid = 0.5 * (v17.rating_v1 + v17.rating_v4)
+check("ENS prior ratings are the exact 50/50 blend",
+      (v17.rating_ens - mid).abs().max() < 0.02,
+      f"max dev {(v17.rating_ens - mid).abs().max():.3f}")
+
+# 7.7 market sheet math
+mk7 = pd.read_csv(PROJ / "output/market_vs_model_2026_27.csv")
+check("market: stakes only where both devig edges and EV positive",
+      bool(((mk7.stake > 0) <= ((mk7.edge_prop > 0) & (mk7.edge_pow > 0)
+                                & (mk7.ev_per_dollar > 0))).all()))
+check("market: overround recorded ~1.255", abs(mk7.p_imp.sum() - 1.255) < 0.01,
+      f"{mk7.p_imp.sum():.3f}")
+check("market: total quarter-Kelly stake is small (< $6 of $100)",
+      mk7.stake.sum() < 6.0, f"${mk7.stake.sum():.2f}")
+
+# 7.8 committed reproductions + overlay v4 invariants
+import repro_b2b as RB
+res_b2b = RB.main()
+check("B2B measurement REPRODUCED from committed code", res_b2b["reproduced"],
+      str({kk: res_b2b[kk] for kk in ("dwin_hb2b", "dwin_ab2b", "elo_equiv_mean")}))
+ov7 = _json.loads((PROJ / "output/overlay_v4.json").read_text())
+check("overlay v3.1 estimate reproduced within band", ov7["reproduced_within_band"],
+      f"repro {ov7['repro_toi_share']['rho_partial']} vs 1.011")
+d_ov = pd.read_csv(PROJ / "output/overlay_team_deltas_v4.csv", index_col=0)
+check("overlay v4 deltas zero-sum and capped",
+      abs(d_ov.dElo.sum()) < 1e-6 and d_ov.dElo.abs().max() <= 25 + 1e-9)
+
+# 7.9 live path parity
+import live as LV
+check("live estimator parity vs replay engine (<0.5 Elo)", LV.selftest(2024, 20))
+
+# 7.10 gates recorded and internally consistent
+p4j = _json.loads((PROJ / "output/params_v4.json").read_text())
+check("gate G passed with true mean shift < 0.4",
+      p4j["gate_G"]["pass"] and p4j["gate_G"]["max_mean_shift"] < 0.4)
+check("persistence dropped (EB lost to nested baseline)",
+      not p4j["screens"]["persistence_kept"])
+check("gate F2 h2 gain recorded (dMAE <= -0.10)",
+      p4j["gate_F2"]["h2"]["pass"] and p4j["gate_F2"]["h2"]["dmae"] <= -0.10,
+      f"{p4j['gate_F2']['h2']['dmae']}")
 
 print()
 print("=" * 78)

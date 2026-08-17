@@ -1,14 +1,21 @@
-"""Living model: precision-weighted in-season updating + replay validation + nightly updater.
+"""Living model v4 (PLAN_V4 B5): nightly in-season updater with the VALIDATED estimator.
 
-Posterior strength dev_i = w_i * prior_i + (1 - w_i) * elo_now_i,  w_i = n0/(n0 + games_i).
-n0 tuned on 2012-2017 date-cutoff replays (rest-of-season MAE); validated ONCE on 2022-2026
-(rest MAE vs pure-prior/pure-Elo + playoff-odds Brier by checkpoint). Empirical anchor: at
-~20 games, first-20 pace and preseason knowledge carry equal weight (measured betas .31/.31)
-=> expect n0 ~ 20.
+Estimator (validated on 2012-2017 tune / 2022-2026 replays): in-season strength =
+w * preseason_prior + (1 - w) * HISTORY-CARRIED Elo, w = n0/(n0 + games), n0 = 5.
+History-carried means run_elo over the full games table INCLUDING fetched 2026-27
+results (the previous live path seeded Elo from the prior and then blended the prior
+again — a double-shrink the replays never validated; fixed per review finding B5).
 
-Operational: `python live.py update` (from Sept 29, 2026) fetches fresh results, rebuilds
-in-season Elo, blends with the v3 preseason prior, sims the rest 10k times, writes
-output/live/live_odds_<date>.csv.
+`python live.py update`   fetch 2026-27 results -> blended ratings for v1/v4/ENS ->
+                          rest-of-season sim (b2b d_adj, goalie layer, availability2,
+                          banked standings, playoffs) -> output/live/live_odds_<date>.csv
+                          + live_ratings_<date>.csv + append to clv_log.csv.
+`python live.py selftest` parity check (no network): replay a past mid-season cutoff
+                          through both the replay engine and the live path; blended
+                          ratings must agree to < 0.5 Elo (PLAN_V4 B5 acceptance).
+
+Replay tuning/validation history (n0 grid, 2022-2026 Brier path) lives in
+params_v3.json["living_model"]; that record is not rerun here.
 """
 import json
 import sys
@@ -18,193 +25,56 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import availability2 as A2
 import engine as E
-import ridge as R
-from features import FEATURES_V3, FeatureBuilder
+import goalie_game as GG
+import players as P
+from overlay import points_per_goal, skater_value_goals
 
 PROJ = Path(__file__).resolve().parents[1]
+RAW = PROJ / "data" / "raw"
 OUT = PROJ / "output"
-CHECKPOINT_GP = [10, 20, 41, 60]
-N0_GRID = [5, 10, 15, 20, 25, 30, 40]
-TUNE_SEASONS = list(range(2012, 2018))
-VALID_SEASONS = list(range(2022, 2027))
+LIVE = OUT / "live"
+B2B_ELO = 38.0
+SIGMA_INSEASON = 25.0   # the sigma the 2022-2026 replay Brier path was validated with
+N_SIMS = 10_000
+UA = {"User-Agent": "Mozilla/5.0"}
 
 
-def cutoff_dates(g: pd.DataFrame, T: int) -> dict[int, pd.Timestamp]:
-    """Date at which league median games-played first reaches each checkpoint."""
-    r = g[(g.season_end == T) & (g.game_type == "R")].sort_values("date")
-    cnt = {}
-    med_by_date = {}
-    for gm in r.itertuples():
-        cnt[gm.home] = cnt.get(gm.home, 0) + 1
-        cnt[gm.away] = cnt.get(gm.away, 0) + 1
-        med_by_date[gm.date] = np.median(list(cnt.values())) if len(cnt) >= 20 else 0
-    out = {}
-    for target in CHECKPOINT_GP:
-        for d, m in med_by_date.items():
-            if m >= target:
-                out[target] = d
-                break
-    return out
-
-
-def season_state(g: pd.DataFrame, T: int, cutoff: pd.Timestamp, K, H, phi_s):
-    """Elo through everything before `cutoff`; banked standings in T; remaining games."""
-    played = g[(g.date < cutoff)]
-    preds, end_r, _ = E.run_elo(played, K=K, H=H, phi_s=phi_s)
-    # current ratings = state after last processed game: recompute quickly from run
-    # (run_elo returns end_ratings keyed by season; for in-progress T that's current state)
-    elo_now = end_r[max(end_r)]
-    cur = played[(played.season_end == T) & (played.game_type == "R")]
-    banked_pts, banked_rw, games_n = {}, {}, {}
-    for gm in cur.itertuples():
-        hw = gm.home_g > gm.away_g
-        ot = gm.went_ot or gm.went_so
-        for team, pts, rw in ((gm.home, 2 * hw + (0 if hw else (1 if ot else 0)),
-                               int(hw and not ot)),
-                              (gm.away, 2 * (not hw) + (0 if not hw else (1 if ot else 0)),
-                               int((not hw) and not ot))):
-            banked_pts[team] = banked_pts.get(team, 0) + pts
-            banked_rw[team] = banked_rw.get(team, 0) + rw
-            games_n[team] = games_n.get(team, 0) + 1
-    remaining = g[(g.season_end == T) & (g.game_type == "R") & (g.date >= cutoff)][
-        ["home", "away"]]
-    return elo_now, banked_pts, banked_rw, games_n, remaining
+# ---------------------------------------------------------------- state builders
+def carried_elo(g_all: pd.DataFrame, K, H, phi_s) -> dict:
+    """History-carried Elo through every played game (the validated construction)."""
+    _, end_r, _ = E.run_elo(g_all, K=K, H=H, phi_s=phi_s)
+    return end_r[max(end_r)]
 
 
 def blended(prior_dev: pd.Series, elo_now: dict, games_n: dict, n0: float) -> dict:
     out = {}
     for t in prior_dev.index:
-        n = games_n.get(t, 0)
-        w = n0 / (n0 + n)
+        w = n0 / (n0 + games_n.get(t, 0))
         out[t] = 1505.0 + w * prior_dev[t] + (1 - w) * (elo_now.get(t, 1505.0) - 1505.0)
     return out
 
 
-def rest_points_actual(g, T, cutoff):
-    rest = g[(g.season_end == T) & (g.game_type == "R") & (g.date >= cutoff)]
-    pts = {}
-    for gm in rest.itertuples():
+def banked_from(played: pd.DataFrame) -> tuple[dict, dict]:
+    """({'pts':{t:..},'rw':..,'row':..,'win':..}, games_played per team)."""
+    b = {k: {} for k in ("pts", "rw", "row", "win")}
+    gn: dict = {}
+    for gm in played.itertuples():
         hw = gm.home_g > gm.away_g
-        ot = gm.went_ot or gm.went_so
-        pts[gm.home] = pts.get(gm.home, 0) + (2 if hw else (1 if ot else 0))
-        pts[gm.away] = pts.get(gm.away, 0) + (2 if not hw else (1 if ot else 0))
-    return pts
+        past = gm.went_ot or gm.went_so
+        for team, won in ((gm.home, hw), (gm.away, not hw)):
+            gn[team] = gn.get(team, 0) + 1
+            b["pts"][team] = b["pts"].get(team, 0) + (2 if won else (1 if past else 0))
+            b["win"][team] = b["win"].get(team, 0) + int(won)
+            b["rw"][team] = b["rw"].get(team, 0) + int(won and not past)
+            b["row"][team] = b["row"].get(team, 0) + int(won and not gm.went_so)
+    return b, gn
 
 
-def priors_for(matrix, T, lam, tune_mode):
-    """Preseason ridge prediction (pts/82 dev) for season T from a prebuilt matrix;
-    LOSO within train for tuning-era seasons, expanding walk-forward otherwise."""
-    X, y, meta = matrix
-    seasons = meta["T"].to_numpy()
-    tr = ((seasons != T) & (seasons <= 2017)) if tune_mode else (seasons < T)
-    tr = tr & ~np.isnan(y)
-    b = R.fit_ridge(X[tr], y[tr], lam)
-    te = seasons == T
-    pr = X[te] @ b
-    pr = pr - pr.mean()
-    return pd.Series(pr, index=meta.loc[te, "team"].to_numpy())
-
-
-def replay_eval(matrix, g, preds_elo_params, lam, c, seasons, tune_mode, n0_list,
-                om_fit, sims_for_odds=0, rng=None):
-    K, H, phi_s = preds_elo_params
-    rows, odds_rows = [], []
-    for T in seasons:
-        prior = priors_for(matrix, T, lam, tune_mode)
-        cuts = cutoff_dates(g, T)
-        for gp_target, cutoff in cuts.items():
-            elo_now, bpts, brw, gn, remaining = season_state(g, T, cutoff, K, H, phi_s)
-            act_rest = rest_points_actual(g, T, cutoff)
-            om = om_fit(T)
-            for n0 in n0_list:
-                ratings = blended(prior / c, elo_now, gn, n0)
-                ratings = E.fill_missing(ratings, set(remaining.home) | set(remaining.away),
-                                         1505.0)
-                xp = E.analytic_xpts(ratings, remaining, om)
-                errs = []
-                for t, actual in act_rest.items():
-                    rest_n = (remaining.home == t).sum() + (remaining.away == t).sum()
-                    if rest_n >= 10 and t in xp.index:
-                        errs.append(abs(xp[t] - actual) / rest_n * 82)
-                rows.append({"T": T, "gp": gp_target, "n0": n0,
-                             "rest_mae82": float(np.mean(errs))})
-                if sims_for_odds and n0 == n0_list[0]:
-                    sim = E.simulate_season(ratings, 25.0, remaining, om,
-                                            E.divisions_for(T), sims_for_odds, rng,
-                                            playoffs=False)
-                    total = {t: bpts.get(t, 0) + sim["pts"][:, i]
-                             for i, t in enumerate(sim["teams"])}
-                    from backtest import actual_playoff_teams
-                    made = actual_playoff_teams(T)
-                    key_rank = {t: np.asarray(v) for t, v in total.items()}
-                    teams_ = list(key_rank)
-                    mat = np.stack([key_rank[t] for t in teams_])  # (n_teams, n_sims)
-                    # playoff proxy: top-16 by total points each sim (bracket approx)
-                    order = np.argsort(-mat, axis=0)
-                    inpo = np.zeros(mat.shape)
-                    for s_ in range(mat.shape[1]):
-                        inpo[order[:16, s_], s_] = 1
-                    for i, t in enumerate(teams_):
-                        odds_rows.append({"T": T, "gp": gp_target, "team": t,
-                                          "p": float(inpo[i].mean()),
-                                          "made": int(t in made)})
-    return pd.DataFrame(rows), pd.DataFrame(odds_rows)
-
-
-def main_tune_and_validate():
-    p2 = json.loads((OUT / "params_v2.json").read_text())
-    p3 = json.loads((OUT / "params_v3.json").read_text())
-    v1 = json.loads((OUT / "params.json").read_text())
-    feats = p3["final_feature_set"]
-    lam = p3["lam_h1"]
-    c = p2["c"]
-    g, ts = E.load()
-    preds, end_r, _ = E.run_elo(g, K=v1["K"], H=v1["H"], phi_s=v1["phi_s"])
-    fb = FeatureBuilder(end_r, ts, goalie_hp=p2["goalie_hp"],
-                        skater_delta=p2["skater_delta"])
-    om_fit = lambda T: E.fit_outcome(preds, list(range(2006, T)))
-    elo_params = (v1["K"], v1["H"], v1["phi_s"])
-    matrix = fb.feature_matrix(list(range(2012, 2027)), 1, feats=feats)  # build ONCE
-
-    # ---- tune n0 (train replays) ----
-    tune, _ = replay_eval(matrix, g, elo_params, lam, c, TUNE_SEASONS, True, N0_GRID,
-                          om_fit)
-    tab = tune.groupby("n0").rest_mae82.mean().sort_values()
-    n0 = float(tab.index[0])
-    print("n0 tuning (train replays, rest-of-season MAE/82):")
-    print(tab.round(4).to_string())
-    print(f"chosen n0 = {n0}")
-
-    # ---- single validation pass (2022-2026) ----
-    rng = np.random.default_rng(9)
-    val, odds = replay_eval(matrix, g, elo_params, lam, c, VALID_SEASONS, False,
-                            [n0, 1e9, 1e-9], om_fit, sims_for_odds=600, rng=rng)
-    val["variant"] = val.n0.map({n0: "blend", 1e9: "pure_prior", 1e-9: "pure_elo"})
-    piv = val.pivot_table(index="gp", columns="variant", values="rest_mae82")
-    print("\nVALIDATION 2022-2026 rest-of-season MAE/82 by checkpoint:")
-    print(piv.round(3).to_string())
-    print("\nplayoff-odds Brier by checkpoint (blend):")
-    br = odds.groupby("gp").apply(lambda d: ((d.p - d.made) ** 2).mean(),
-                                  include_groups=False)
-    print(br.round(4).to_string())
-    p3["living_model"] = {
-        "n0": n0, "tune_table": {str(k): round(v, 4) for k, v in tab.items()},
-        "validation_mae": {str(k): {c_: round(v_, 3) for c_, v_ in r.items()}
-                           for k, r in piv.round(3).to_dict("index").items()},
-        "brier_by_checkpoint": {str(k): round(v, 4) for k, v in br.items()},
-    }
-    (OUT / "params_v3.json").write_text(json.dumps(p3, indent=2))
-    print("living-model results saved to params_v3.json")
-
-
-def main_update():
-    """Nightly in-season update for 2026-27 (safe to run before opening night)."""
+def fetch_2026_results() -> pd.DataFrame:
     import requests
-    p3 = json.loads((OUT / "params_v3.json").read_text())
-    n0 = p3.get("living_model", {}).get("n0", 20.0)
-    prior = pd.read_csv(OUT / "v3_prior_ratings.csv", index_col=0)["rating"]
-    UA = {"User-Agent": "Mozilla/5.0"}
+    prior = pd.read_csv(OUT / "v4_prior_ratings.csv", index_col=0)
     games = {}
     for t in sorted(prior.index):
         r = requests.get(f"https://api-web.nhle.com/v1/club-schedule-season/{t}/20262027",
@@ -215,44 +85,169 @@ def main_update():
             hs = gm.get("homeTeam", {}).get("score")
             if hs is None or gm.get("gameState") not in ("OFF", "FINAL"):
                 continue
-            games[gm["id"]] = {"home": gm["homeTeam"]["abbrev"],
-                               "away": gm["awayTeam"]["abbrev"],
-                               "home_g": gm["homeTeam"]["score"],
-                               "away_g": gm["awayTeam"]["score"],
-                               "date": gm["gameDate"],
-                               "ot": gm.get("gameOutcome", {}).get("lastPeriodType", "REG")}
-    played = pd.DataFrame(games.values())
-    print(f"played games fetched: {len(played)}")
-    # (Elo-from-prior update, blend, and rest-of-season sim run once games exist;
-    #  before opening night this emits the preseason snapshot.)
-    today = pd.Timestamp.now().date().isoformat()
-    (OUT / "live").mkdir(exist_ok=True)
-    if len(played) == 0:
-        prior.to_csv(OUT / "live" / f"live_ratings_{today}.csv")
-        print("season not started: preseason prior snapshot written")
-        return
-    # in-season Elo starting from prior ratings
+            lp = gm.get("gameOutcome", {}).get("lastPeriodType", "REG")
+            games[gm["id"]] = {
+                "game_id": gm["id"], "date": gm["gameDate"],
+                "home": gm["homeTeam"]["abbrev"], "away": gm["awayTeam"]["abbrev"],
+                "home_g": gm["homeTeam"]["score"], "away_g": gm["awayTeam"]["score"],
+                "went_ot": lp == "OT", "went_so": lp == "SO",
+                "season_end": 2027, "game_type": "R"}
+    df = pd.DataFrame(games.values())
+    if len(df):
+        df["date"] = pd.to_datetime(df.date)
+    return df
+
+
+# ---------------------------------------------------------------- rest-of-season sim
+def rest_of_season(played: pd.DataFrame, ratings_by_model: dict[str, dict],
+                   p2: dict, p4: dict, n_sims: int = N_SIMS) -> dict[str, pd.DataFrame]:
+    ship = p4["shipped"]
+    k = p2["k"]
+    sched = pd.read_csv(RAW / "nhl_schedule_20262027.csv", parse_dates=["date"]) \
+        .sort_values(["date", "game_id"]).reset_index(drop=True)
+    if len(played):
+        sched = sched[~sched.game_id.isin(set(played.game_id))].reset_index(drop=True)
+    hb, ab = E.b2b_flags(sched[["date", "home", "away"]])
+    sched["hb2b"], sched["ab2b"] = hb, ab
+    sched["d_adj"] = B2B_ELO * (sched.ab2b - sched.hb2b)
+    banked, gn = (banked_from(played) if len(played) else ({}, {}))
+
+    g_hist, ts = E.load()
     v1 = json.loads((OUT / "params.json").read_text())
-    ratings = dict(prior)
-    played["went_ot"] = played.ot.isin(("OT", "SO"))
-    for gm in played.sort_values("date").itertuples():
-        rh, ra = ratings[gm.home], ratings[gm.away]
-        d = rh + v1["H"] - ra
-        e = 1 / (1 + 10 ** (-d / 400))
-        hw = gm.home_g > gm.away_g
-        mov = np.log(abs(gm.home_g - gm.away_g) + 1) * (2.2 / (2.2 + 0.001 * (d if hw else -d)))
-        delta = v1["K"] * mov * ((1 if hw else 0) - e)
-        ratings[gm.home] += delta
-        ratings[gm.away] -= delta
-    gn = pd.concat([played.home, played.away]).value_counts().to_dict()
-    post = {t: 1505 + (n0 / (n0 + gn.get(t, 0))) * (prior[t] - 1505)
-            + (1 - n0 / (n0 + gn.get(t, 0))) * (ratings[t] - 1505) for t in prior.index}
-    pd.Series(post, name="rating").to_csv(OUT / "live" / f"live_ratings_{today}.csv")
-    print(f"blended live ratings written (median games {int(np.median(list(gn.values())))})")
+    preds, end_r, _ = E.run_elo(g_hist, K=v1["K"], H=v1["H"], phi_s=v1["phi_s"])
+    om = E.fit_outcome(preds, list(range(2006, 2027)))
+    sk, go, skt, got, bios = P.load_panels()
+    from features import FeatureBuilder
+    fb = FeatureBuilder(end_r, ts, goalie_hp=p2["goalie_hp"],
+                        skater_delta=p2["skater_delta"])
+    par2 = A2.fit_availability2(sk, bios, 2026)
+    gpar = A2.fit_goalie_availability(got, ts, 2026)
+    marcel = fb.marcel(2026, 1)
+    repl = P.replacement_rates(sk, 2026)
+    ppg = points_per_goal(sk, ts, 2026)
+    vals = skater_value_goals(marcel, repl, ppg)
+    ros = pd.read_csv(RAW / "nhl_rosters_20262027.csv")
+    tand = GG.prod_tandems(ros, got, ts, fb.goalie_proj(2026), 2026, ship["n0_g"])
+    rosters2 = {}
+    for team, d in ros[ros.position != "G"].groupby("team"):
+        vv = vals.reindex(d.playerId).fillna(0.0)
+        aa = P.age_of(bios, d.playerId, 2027)
+        top = sorted(zip(aa.to_numpy(), vv.to_numpy()), key=lambda t_: -t_[1])[:A2.TOP_N]
+        b_idx = A2._bucket_idx(np.array([a if np.isfinite(a) else 27.0 for a, _ in top]))
+        rosters2[team] = [(int(bi), par2["buckets"][int(bi)]["mean"], float(v_))
+                          for bi, (_, v_) in zip(b_idx, top)]
+    grow = {t: (gpar["mean"], max(float(tand.loc[t].theta1 - tand.loc[t].theta2), 0.0)
+                * A2.GOALIE_SHOTS) for t in tand.index}
+    teams = sorted(rosters2)
+    base_noise = A2.make_extra_noise2(teams, rosters2, par2, grow, gpar, k)
+    frac_left = len(sched) / 1344.0   # availability exposure scales with games left
+
+    def extra_noise(m, rng):
+        return base_noise(m, rng) * frac_left
+
+    game_noise = (GG.make_game_noise(sched, tand, k) if ship["goalie_layer"] else None)
+
+    out = {}
+    for name, ratings in ratings_by_model.items():
+        sim = E.simulate_season(ratings, SIGMA_INSEASON, sched[["home", "away", "d_adj"]],
+                                om, E.DIVISIONS_CURRENT, n_sims,
+                                np.random.default_rng(20262027),
+                                playoffs=True, extra_noise=extra_noise,
+                                game_noise=game_noise, banked=banked)
+        pts = sim["pts"].astype(float)
+        rows = []
+        for i, t in enumerate(sim["teams"]):
+            rows.append({"team": t, "model": name,
+                         "banked_pts": banked.get("pts", {}).get(t, 0),
+                         "games_played": gn.get(t, 0),
+                         "xPts": float(pts[:, i].mean()),
+                         "P5": float(np.percentile(pts[:, i], 5)),
+                         "P95": float(np.percentile(pts[:, i], 95)),
+                         "playoff_pct": float(sim["made_po"][:, i].mean()),
+                         "division_pct": float(sim["won_div"][:, i].mean()),
+                         "cup_pct": float(sim["won_cup"][:, i].mean())})
+        out[name] = pd.DataFrame(rows).sort_values("xPts", ascending=False)
+    return out
+
+
+# ---------------------------------------------------------------- entry points
+def main_update():
+    p2 = json.loads((OUT / "params_v2.json").read_text())
+    p3 = json.loads((OUT / "params_v3.json").read_text())
+    p4 = json.loads((OUT / "params_v4.json").read_text())
+    v1 = json.loads((OUT / "params.json").read_text())
+    n0 = p3.get("living_model", {}).get("n0", 5.0)
+    prior = pd.read_csv(OUT / "v4_prior_ratings.csv", index_col=0)
+    LIVE.mkdir(exist_ok=True)
+    today = pd.Timestamp.now().date().isoformat()
+
+    new = fetch_2026_results()
+    print(f"fetched {len(new)} completed 2026-27 games")
+    g_hist, _ = E.load()
+    if len(new):
+        g_all = pd.concat([g_hist, new[g_hist.columns.intersection(new.columns)]],
+                          ignore_index=True)
+    else:
+        g_all = g_hist
+    elo_now = carried_elo(g_all, v1["K"], v1["H"], v1["phi_s"])
+    _, gn = (banked_from(new) if len(new) else ({}, {}))
+    ratings_by_model = {
+        name: blended(prior[f"rating_{name}"] - 1505.0, elo_now, gn, n0)
+        for name in ("v1", "v4", "ens")}
+    pd.DataFrame(ratings_by_model).round(2).rename_axis("team").to_csv(
+        LIVE / f"live_ratings_{today}.csv")
+
+    odds = rest_of_season(new, ratings_by_model, p2, p4)
+    merged = pd.concat(odds.values(), ignore_index=True)
+    merged.round(4).to_csv(LIVE / f"live_odds_{today}.csv", index=False)
+    ens = odds["ens"]
+    print(ens.head(8)[["team", "xPts", "playoff_pct", "cup_pct"]].round(3)
+          .to_string(index=False))
+    clv = LIVE / "clv_log.csv"
+    snap = ens.assign(date=today)[["date", "team", "xPts", "playoff_pct", "cup_pct"]]
+    snap.round(4).to_csv(clv, mode="a", header=not clv.exists(), index=False)
+    print(f"wrote live_odds_{today}.csv, live_ratings_{today}.csv, clv_log.csv "
+          f"(median games {int(np.median(list(gn.values()))) if gn else 0})")
+
+
+def selftest(T: int = 2024, gp_target: int = 20):
+    """PLAN_V4 B5 parity: live-path blended ratings == replay-engine ratings < 0.5 Elo."""
+    p3 = json.loads((OUT / "params_v3.json").read_text())
+    v1 = json.loads((OUT / "params.json").read_text())
+    n0 = p3.get("living_model", {}).get("n0", 5.0)
+    g_hist, ts = E.load()
+    r = g_hist[(g_hist.season_end == T) & (g_hist.game_type == "R")].sort_values("date")
+    cnt: dict = {}
+    cutoff = None
+    for gm in r.itertuples():
+        cnt[gm.home] = cnt.get(gm.home, 0) + 1
+        cnt[gm.away] = cnt.get(gm.away, 0) + 1
+        if len(cnt) >= 30 and np.median(list(cnt.values())) >= gp_target:
+            cutoff = gm.date
+            break
+    prior_dev = pd.Series(0.0, index=sorted(cnt))  # flat prior isolates the Elo path
+
+    # replay path (the machinery the validation numbers came from)
+    played = g_hist[g_hist.date < cutoff]
+    _, end_r_rep, _ = E.run_elo(played, K=v1["K"], H=v1["H"], phi_s=v1["phi_s"])
+    elo_rep = end_r_rep[max(end_r_rep)]
+    cur = played[(played.season_end == T) & (played.game_type == "R")]
+    _, gn_rep = banked_from(cur)
+    rat_rep = blended(prior_dev, elo_rep, gn_rep, n0)
+
+    # live path (carried_elo over full table sliced at the same cutoff)
+    elo_live = carried_elo(played, v1["K"], v1["H"], v1["phi_s"])
+    rat_live = blended(prior_dev, elo_live, gn_rep, n0)
+    gap = max(abs(rat_rep[t] - rat_live[t]) for t in rat_rep)
+    print(f"selftest season {T} @ ~{gp_target} gp (cutoff {cutoff.date()}): "
+          f"max |replay - live| = {gap:.6f} Elo -> "
+          f"{'PASS' if gap < 0.5 else 'FAIL'} (PLAN_V4 B5: < 0.5)")
+    return gap < 0.5
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "update":
+    cmd = sys.argv[1] if len(sys.argv) > 1 else "selftest"
+    if cmd == "update":
         main_update()
     else:
-        main_tune_and_validate()
+        selftest()

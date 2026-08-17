@@ -171,3 +171,74 @@ F. Relative-age survivors: Q4-born +0.10 pts60 over Q1 (t 2.3) -> suggestive, un
    (marginal under 7 tests; no model surface beyond draft curves).
 G. Shootout team skill: YoY r=0.17 -> real but worth <0.2 pts/season -> unshipped, documented.
 Running totals: 5 shipped mechanisms, 15 documented nulls/unshipped.
+
+## v4 — review-driven bugfixes + gated improvements (2026-08-17)
+Prereg PLAN_V4.md committed at 4bb92d9 BEFORE any result. Train-only; 2018-2026 untouched
+except two LOCKED report-only restatements. All gates in backtest4.py; battery in
+review_tests.py (66/68 -> 68/68 after 2 test-side fixes; every code check green).
+
+BUGS RESOLVED:
+B1. float64 standings key: pre-v4 float32 key silently dropped ROW (ULP 1024 at 1e10;
+    bound at playoff cutoff in ~3.8% of sims). Fixed + W added (PTS>RW>ROW>W>rand).
+B2. analytic_xpts assert-message precedence fixed.
+B3. Reproducibility debt PAID: repro_b2b.py reproduces the shipped 38 (measured 38.1,
+    dP -6.3%/+5.8%, t -5.3/+6.7, n=20,382). overlay.py now contains the v3.1 amendment
+    as code: rho_partial=1.011 (se 0.267, gamma 0.006) reproduced EXACTLY — with the
+    discovery that the original spec had an INTERCEPT, and the intercept (not the
+    selection control, gamma~0.006) produced the 0.743->1.011 move: TOI-share arrival
+    weighting made x negative-sum (league mean ~ -2.3 pts), which through-origin
+    regression turned into attenuation. Documentation corrected.
+B4. Production-consistent overlay: with full arrival weights x is exactly zero-sum and
+    rho is spec-robust at 0.843 (se 0.252) under origin/intercept/z-control. rho* =
+    0.421 (was 0.506). TOR +11.0, PIT -9.1. overlay_team_deltas_v4.csv.
+B5. live.py rebuilt to the VALIDATED estimator (blend prior with history-carried Elo;
+    the old path seeded Elo from the prior = unvalidated double-shrink). Full promised
+    outputs now real: rest-of-season sims w/ b2b + noise layers + banked standings ->
+    live_odds_<date>.csv + clv_log.csv. Parity selftest: 0.000000 Elo vs replay engine.
+B6. h2 sims use h2 ages (v3 reused the h1 availability closure).
+
+GATES (all train 2012-2017):
+I1 GOALIE GAME LAYER — SHIPPED. n0_g=8 (wMSE grid); s1 EB-shrunk gp shares; b2b backup
+   rule beta_b2b=0.5 declared, sensitivity 0.3/0.7 shifts coverage <0.006. GATE G:
+   coverage 0.861 in [0.72,0.90], tandem-gap tertile spread 0.067 = baseline, TRUE mean
+   shift 0.002 pts. NOTE: first gate run "failed" (c) at 0.809 — that formulation
+   diffed two independent 2000-sim runs (MC SE ~0.29/team, max over 180 ~0.9, cannot
+   resolve 0.4); measurement corrected to a 20k-draw closure probe, criterion unchanged,
+   both runs documented. Per-game centering uses b2b-adjusted p1, so the league-mean
+   backup-on-b2b penalty stays inside the measured 38 (no double count); consequence:
+   the layer's b2b rule is variance-neutral by design (p(1-p) flat around 0.5) and the
+   real contribution is tandem-gap variance every night.
+I4 AVAILABILITY 2.0 — SHIPPED (partially). Zero-GP mass by bucket (P0: 0.8/0.4/0.4/
+   3.2/14.6% — the catastrophic tail is an age-36+ phenomenon) + goalie G1 slot
+   (starter overdispersion 14.5x, P0 2.9%, value=(theta1-theta2)*2500 vs backup) +
+   h2 ages. GATE A2: coverage 0.872, fragility spread 0.133 vs bound 0.137 — passes by
+   0.004, the weakest margin in v4; watch the middle-tertile over-coverage (0.933) live.
+   PERSISTENCE DROPPED: screen r=0.141 (real!) but every prereg n0_a grid point LOST to
+   the nested bucket-only baseline (0.0346 best vs 0.0306) — grid was scaled for
+   binomial precision; 24x overdispersion means one season ~ 3 effective obs, so the
+   optimal own-history weight is ~0.15, not the ~0.85 the grid imposed. v5 candidate
+   with a corrected grid; shipping a predictor that loses to its baseline is not done.
+I5 PROSPECT PIPELINE — SHIPPED at BOTH horizons; the headline gain of v4. Name join
+   (98.1% picks 1-15, 84% picks 1-60, 0 ambiguous after F/D + debut-window
+   disambiguation). Train ramps (drafts<=2013, outcomes<=2017): pick 1-10 = 14.4 pts
+   yr1 -> 33.3 yr4; 11-30 = 0.7 -> 12.1; 31-60 = 0.2 -> 5.0; 61+ = 0.0 -> 1.5.
+   GATE F2: h1 dMAE -0.0065 (stab 1.00), h2 dMAE -0.1338 (stab 1.00) — the largest
+   single train-LOSO improvement since v2. 2027-28 attribution range -2.5..+3.3 pts
+   (UTA +3.3, MTL +1.2). MTL #1 at h2 (106.2) is broad-based, not prospect-driven.
+I2 CRPS + MARKET — machinery live (crps verified vs closed-form Gaussian <0.5%).
+   REPORT-ONLY restatement (locked): v1 sim CRPS 7.10/7.77 (h1/h2, 2018-2026) vs
+   regressed point-forecast 10.43/11.23 — distributions ~31-32% sharper than points;
+   the number that justifies the simulator. Market: hand-recorded Cup board 2026-08-17
+   (overround 1.255) in data/market/; edges/quarter-Kelly in Market_vs_Model sheet.
+I3 ENSEMBLE — SHIPPED (locked at prereg BEFORE computation): ENS = 0.5*v1 + 0.5*v4 in
+   Elo space, co-headline. REPORT-ONLY restatement computed AFTER lock: ENS beats both
+   parents at both horizons on 2018-2026 (h1 10.397 vs v4 10.457 / v1 10.550; h2
+   11.533 vs 11.590/11.715; rho 0.591/0.478) — the theory-first decision survived its
+   audit. Live 2026-27 scores v1/v4/ENS (rest-MAE, CRPS, playoff Brier), prereg'd.
+
+v4 HEADLINES: 2026-27 ENS: COL 109.7 / CAR 109.5 clear of VGK 104.7, TBL 103.8, DAL
+103.3; FLA 90.8 (model's biggest market disagreement: board implies ~10-11% Cup no-vig,
+model ~1%). 2027-28 v4: MTL 106.2 top (age structure + pipeline + base), CAR 104.3.
+Determinism: report4 double-run hash-identical; fixed-seed offsets (hash() removed).
+Running totals: 9 shipped mechanisms (5 prior + goalie layer, avail-2.0, prospects,
+ensemble), 17 documented nulls/unshipped (+persistence, +b2b-variance-neutrality note).
