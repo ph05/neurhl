@@ -22,6 +22,7 @@ FEATURES = ["elo_dev", "xg_dev", "gsax_1yr", "gsax_marcel", "tandem_gsax",
             "share_32p", "prod_age_exp", "returning_toi", "star_share", "draft_cap",
             "player_points_proj"]
 FEATURES_V3 = FEATURES + ["finishing", "st_pp", "st_pk"]
+FEATURES_V4 = FEATURES_V3 + ["prospect_pipeline"]
 TANDEM_SHARES = np.array([0.58, 0.30, 0.12])
 
 
@@ -182,6 +183,16 @@ class FeatureBuilder:
                 .groupby(level=0).sum().rename("finishing")
         return self._fin_cache[V]
 
+    def team_prospects(self, V: int, h: int, teams) -> pd.Series:
+        """v4: expected points arriving in V+h from own not-yet-established draftees
+        (train-frozen ramp per PLAN_V4 I5; join cached in data/processed)."""
+        if not hasattr(self, "_prospect"):
+            import prospects as PR
+            join = PR.build_join(self.sk)
+            self._prospect = (PR, join, PR.fit_ramp(join, self.sk))
+        PR, join, ramp = self._prospect
+        return PR.pipeline_feature(join, self.sk, ramp, V, h, teams)
+
     def team_st(self, V: int) -> pd.DataFrame:
         """Special teams process rates at vantage: PP xGF/60 (5on4), PK -xGA/60 (4on5)."""
         if not hasattr(self, "_st_cache"):
@@ -215,6 +226,7 @@ class FeatureBuilder:
         df = df.join(self.team_player_points(V, h), how="left")
         df = df.join(self.team_finishing(V), how="left")
         df = df.join(self.team_st(V), how="left")
+        df["prospect_pipeline"] = self.team_prospects(V, h, teams)
         df["goalie_age"] = df.goalie_age.fillna(28.0)
         df["toi_age"] = df.toi_age.fillna(27.0)
         return df

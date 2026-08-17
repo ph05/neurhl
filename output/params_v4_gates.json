@@ -1,0 +1,8 @@
+{
+  "gate_G": "goalie layer: 80% coverage in [0.72,0.90] w/ sigma refit; tandem-gap tertile spread <= no-layer + 0.02; max |mean shift| < 0.4 pts",
+  "gate_A2": "availability2: coverage in [0.72,0.90]; fragility-tertile spread <= v3-availability spread + 0.02; failed screens drop components",
+  "screens": "S1 skater persistence r>=0.10 AND tuned EB beats bucket-only MSE; S2 goalie starter overdispersion >= 5x",
+  "gate_F2": "prospect_pipeline per horizon: add-one-in LOSO dMAE <= +0.02, sign stability >= 0.67; final set <= incumbent + 0.05",
+  "windows": "train <= 2017 only; 2018-2026 untouched; live 2026-27 = holdout",
+  "committed_before_results": "PLAN_V4.md @ git 4bb92d9"
+}

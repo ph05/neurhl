@@ -1,0 +1,128 @@
+{
+  "prereg_ref": "params_v4_gates.json",
+  "gate_G": {
+    "pass": true,
+    "sigma_with_layer": 40.0,
+    "coverage": 0.861,
+    "spread_with": 0.067,
+    "spread_without": 0.067,
+    "max_mean_shift": 0.002,
+    "n0_g": 8.0
+  },
+  "screens": {
+    "S1": {
+      "r_within_bucket": 0.141,
+      "n": 1660,
+      "pass": true
+    },
+    "S2": {
+      "overdispersion": 14.5,
+      "mean_share": 0.604,
+      "n": 171,
+      "pass": true
+    },
+    "n0_a_table": [
+      {
+        "n0_a": 32.0,
+        "mse": 0.03463
+      },
+      {
+        "n0_a": 16.0,
+        "mse": 0.03578
+      },
+      {
+        "n0_a": 8.0,
+        "mse": 0.03648
+      },
+      {
+        "n0_a": 4.0,
+        "mse": 0.03686
+      }
+    ],
+    "bucket_only_mse": 0.03057,
+    "persistence_kept": false
+  },
+  "gate_A2": {
+    "pass": true,
+    "sigma": 40.0,
+    "coverage": 0.872,
+    "spread": 0.133,
+    "spread_v3": 0.117,
+    "goalie_slot": true,
+    "persistence": false
+  },
+  "gate_F2": {
+    "h1": {
+      "pass": true,
+      "dmae": -0.0065,
+      "stability": 1.0,
+      "lam": 64.0,
+      "mae_incumbent": 9.84,
+      "mae_with": 9.833
+    },
+    "h2": {
+      "pass": true,
+      "dmae": -0.1338,
+      "stability": 1.0,
+      "lam": 64.0,
+      "mae_incumbent": 10.477,
+      "mae_with": 10.343
+    }
+  },
+  "shipped": {
+    "goalie_layer": true,
+    "availability": "v2.0",
+    "sigma_c4": 40.0,
+    "features_h1": [
+      "elo_dev",
+      "xg_dev",
+      "gsax_1yr",
+      "gsax_marcel",
+      "tandem_gsax",
+      "goalie_consistency",
+      "goalie_age",
+      "goalie_trend",
+      "toi_age",
+      "share_u23",
+      "share_32p",
+      "prod_age_exp",
+      "returning_toi",
+      "star_share",
+      "draft_cap",
+      "player_points_proj",
+      "finishing",
+      "st_pp",
+      "prospect_pipeline"
+    ],
+    "features_h2": [
+      "elo_dev",
+      "xg_dev",
+      "gsax_1yr",
+      "gsax_marcel",
+      "tandem_gsax",
+      "goalie_consistency",
+      "goalie_age",
+      "goalie_trend",
+      "toi_age",
+      "share_u23",
+      "share_32p",
+      "prod_age_exp",
+      "returning_toi",
+      "star_share",
+      "draft_cap",
+      "player_points_proj",
+      "finishing",
+      "st_pp",
+      "prospect_pipeline"
+    ],
+    "lam_h1": 64.0,
+    "lam_h2": 64.0,
+    "n0_g": 8.0,
+    "beta_b2b": 0.5,
+    "b2b_elo": 38.0,
+    "overlay": "overlay_team_deltas_v4.csv (rho*=0.421, production-consistent)",
+    "ensemble": "ENS = 0.5*v1 + 0.5*v4 in Elo space (locked in PLAN_V4 I3)"
+  },
+  "train_crps_context": 6.429,
+  "seconds": 35.0
+}
