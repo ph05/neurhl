@@ -230,6 +230,26 @@ def synthetic_schedule_84(divisions: dict, rng: np.random.Generator) -> pd.DataF
     return df
 
 
+def b2b_flags(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+    """Second-of-back-to-back flags (home, away) for a schedule frame with columns
+    date/home/away. Computed in date order, returned in the caller's row order
+    (keyed alignment — the lesson from the batch-3 sort bug)."""
+    orig_index = df.index
+    s = df.sort_values("date", kind="stable")
+    last: dict[str, pd.Timestamp] = {}
+    hb = np.zeros(len(s), dtype=float)
+    ab = np.zeros(len(s), dtype=float)
+    for i, gm in enumerate(s.itertuples(index=False)):
+        if gm.home in last and (gm.date - last[gm.home]).days <= 1:
+            hb[i] = 1.0
+        if gm.away in last and (gm.date - last[gm.away]).days <= 1:
+            ab[i] = 1.0
+        last[gm.home] = gm.date
+        last[gm.away] = gm.date
+    out = pd.DataFrame({"hb2b": hb, "ab2b": ab}, index=s.index).reindex(orig_index)
+    return out.hb2b.to_numpy(), out.ab2b.to_numpy()
+
+
 # ------------------------------------------------------------------ analytics
 def game_probs(d_elo: np.ndarray, om: dict):
     """d_elo: home-away rating diff EXCLUDING home ice (it lives in intercepts).
@@ -242,7 +262,7 @@ def game_probs(d_elo: np.ndarray, om: dict):
 
 
 def analytic_xpts(ratings: dict, sched: pd.DataFrame, om: dict) -> pd.Series:
-    missing = set(sched.home) | set(sched.away) - set(ratings)
+    missing = (set(sched.home) | set(sched.away)) - set(ratings)
     assert set(sched.home) <= set(ratings) and set(sched.away) <= set(ratings), \
         f"schedule teams missing from ratings: {missing} (use fill_missing)"
     teams = sorted(ratings)
@@ -260,6 +280,14 @@ def analytic_xpts(ratings: dict, sched: pd.DataFrame, om: dict) -> pd.Series:
 
 
 # ------------------------------------------------------------------ simulator
+def standings_key(pts, rw, row, win, u) -> np.ndarray:
+    """Exact float64 standings sort key: PTS > RW > ROW > W > random residual.
+    Max magnitude ~1.7e14 << 2^53, so every integer level is preserved exactly."""
+    return (np.asarray(pts, np.float64) * 1e12 + np.asarray(rw, np.float64) * 1e8
+            + np.asarray(row, np.float64) * 1e4 + np.asarray(win, np.float64) * 10
+            + np.asarray(u, np.float64) * 0.5)
+
+
 def _series_win_prob(p_games: np.ndarray) -> float:
     """P(higher seed wins best-of-7), p_games: win prob for higher seed, games 1..7
     (2-2-1-1-1 venues already applied)."""
@@ -306,10 +334,15 @@ def _series(higher: int, lower: int, strengths: np.ndarray, om: dict,
 
 def simulate_season(ratings_mean: dict, sigma, sched: pd.DataFrame, om: dict,
                     divisions: dict, n_sims: int, rng: np.random.Generator,
-                    playoffs: bool = True, chunk: int = 2000, extra_noise=None):
+                    playoffs: bool = True, chunk: int = 2000, extra_noise=None,
+                    game_noise=None, banked=None):
     """sigma: scalar Elo strength noise, or dict team->sigma (heteroscedastic).
     extra_noise: optional callable(m, rng) -> (m, n_teams) Elo noise aligned to sorted
-    team order (e.g. availability draws); added to the per-sim strength draw."""
+    team order (e.g. availability draws); added to the per-sim strength draw.
+    game_noise: optional callable(m, rng) -> (m, n_games) per-game Elo adjustment in
+    home-minus-away terms (e.g. goalie-start draws); added to d each chunk.
+    banked: optional dict with 'pts'/'rw'/'row'/'win' -> {team: value} of already-played
+    results (live mid-season use); added before standings/tiebreaks."""
     teams = sorted(ratings_mean)
     if isinstance(sigma, dict):
         sigma = np.array([sigma[t] for t in teams], dtype=float)
@@ -327,6 +360,7 @@ def simulate_season(ratings_mean: dict, sigma, sched: pd.DataFrame, om: dict,
     pts_all = np.zeros((n_sims, n), dtype=np.float32)
     rw_all = np.zeros((n_sims, n), dtype=np.float32)
     row_all = np.zeros((n_sims, n), dtype=np.float32)
+    win_all = np.zeros((n_sims, n), dtype=np.float32)
     made_po = np.zeros((n_sims, n), dtype=bool)
     won_div = np.zeros((n_sims, n), dtype=bool)
     won_conf = np.zeros((n_sims, n), dtype=bool)
@@ -341,6 +375,8 @@ def simulate_season(ratings_mean: dict, sigma, sched: pd.DataFrame, om: dict,
             S = S + extra_noise(m, rng)
         strengths_store[done:done + m] = S
         d = S[:, hi] - S[:, ai] + d_adj
+        if game_noise is not None:
+            d = d + game_noise(m, rng)
         p_ot, p_reg, p_otw = game_probs(d, om)
         u1, u2, u3 = rng.random((3, m, len(hi)))
         is_ot = u1 < p_ot
@@ -361,7 +397,15 @@ def simulate_season(ratings_mean: dict, sigma, sched: pd.DataFrame, om: dict,
         pts_all[done:done + m] = scatter(hp, ap)
         rw_all[done:done + m] = scatter(home_w & ~is_ot, ~home_w & ~is_ot)
         row_all[done:done + m] = scatter(home_w & ~is_so, ~home_w & ~is_so)
+        win_all[done:done + m] = scatter(home_w, ~home_w)
         done += m
+
+    if banked is not None:
+        for name, arr in (("pts", pts_all), ("rw", rw_all), ("row", row_all),
+                          ("win", win_all)):
+            add = np.array([banked.get(name, {}).get(t, 0.0) for t in teams],
+                           dtype=np.float32)
+            arr += add[None, :]
 
     # standings, playoffs (python loop over sims)
     conf_names = list(CONFS)
@@ -371,7 +415,10 @@ def simulate_season(ratings_mean: dict, sigma, sched: pd.DataFrame, om: dict,
     div_teams = {dv: [idx[t] for t in ts_ if t in idx] for dv, ts_ in divisions.items()}
     rng_tb = rng
     for k in range(n_sims if playoffs else 0):
-        key = pts_all[k] * 1e8 + rw_all[k] * 1e4 + row_all[k] + rng_tb.random(n) * 0.5
+        # NHL tiebreak order: PTS > RW > ROW > W > (H2H etc. approximated by random).
+        # float64 keeps every level exact; the old float32 key lost ROW (ULP ~1024 at 1e10).
+        key = standings_key(pts_all[k], rw_all[k], row_all[k], win_all[k],
+                            rng_tb.random(n))
         champs = {}
         for conf in conf_names:
             seeds = []  # (bracket) per division
@@ -409,6 +456,6 @@ def simulate_season(ratings_mean: dict, sigma, sched: pd.DataFrame, om: dict,
             won_cup[k, cup] = True
 
     return {
-        "teams": teams, "pts": pts_all, "rw": rw_all, "row": row_all,
+        "teams": teams, "pts": pts_all, "rw": rw_all, "row": row_all, "win": win_all,
         "made_po": made_po, "won_div": won_div, "won_conf": won_conf, "won_cup": won_cup,
     }

@@ -148,6 +148,123 @@ def mechanism_test(fb: FeatureBuilder, p2: dict, g, ts) -> dict:
             "n": len(xs), "chain": round(chain, 3), "ppg": round(ppg, 3)}
 
 
+def mechanism_partial(fb: FeatureBuilder, p2: dict, g, ts, arrival_weight: str) -> dict:
+    """v3.1 amendment as committed code (was ad hoc; review finding B3), plus the
+    production-consistent re-estimate (B4).
+
+    Partial regression on train (T=2013..2017, h=1): v1 residual ~ rho*x + gamma*z,
+    z = prior-season v1 residual (controls buyer-selection: teams that add value are
+    selected underperformers, which biased the raw through-origin estimate down and
+    the placebo negative). arrival_weight: 'toi_share' = original v3.1 spec
+    (min(share*18,1) realized-TOI weighting); 'full' = production-consistent
+    (August movers are valued at full weight when the overlay is applied).
+    """
+    import backtest2 as B
+    sk, goalies, skt, got, bios = P.load_panels()
+    ppg = points_per_goal(sk, ts, 2017)
+    chain = p2["k"] * p2["c"] / 82.0
+    preds, end_r, _ = E.run_elo(g, K=B.V1["K"], H=B.V1["H"], phi_s=B.V1["phi_s"])
+    v1p = B.v1_predictions(end_r, preds, 1, list(range(2012, 2018)))
+
+    xs, ys, zs = [], [], []
+    for T in range(2013, 2018):
+        V = T - 1
+        marcel = fb.marcel(V, 1)
+        repl = P.replacement_rates(sk, V)
+        sk_val = skater_value_goals(marcel, repl, ppg)
+        maj_prev = P.majority_team(skt[skt.season_end == V]).set_index("playerId").team
+        cur = skt[skt.season_end == T]
+        team_toi = cur.groupby("team").toi_min.sum()
+        x = {}
+        for r in cur.itertuples():
+            prev = maj_prev.get(r.playerId)
+            if prev is None or prev == r.team:
+                continue
+            val = float(sk_val.get(r.playerId, 0.0))
+            if arrival_weight == "toi_share":
+                w_arr = min(r.toi_min / team_toi[r.team] * 18.0, 1.0)
+            else:
+                w_arr = 1.0
+            x[r.team] = x.get(r.team, 0.0) + w_arr * val
+            x[prev] = x.get(prev, 0.0) - val
+        act = ts[ts.season_end == T].set_index("team")
+        ydev = (act.pts_pct - act.pts_pct.mean()) * 164
+        act_prev = ts[ts.season_end == V].set_index("team")
+        ydev_prev = (act_prev.pts_pct - act_prev.pts_pct.mean()) * 164
+        for team, xv in x.items():
+            if (team in v1p[T].index and team in ydev.index
+                    and team in ydev_prev.index and team in v1p[V].index):
+                xs.append(chain * xv)
+                ys.append(float(ydev[team] - v1p[T][team]))
+                zs.append(float(ydev_prev[team] - v1p[V][team]))
+    # Intercept matters for toi_share x (share-weighted arrivals minus full-weight
+    # departures make x negative-sum, mean ~ -2.3 pts/season; through-origin attenuates).
+    # For full-weight x the league sum is exactly zero and the intercept is moot.
+    M = np.column_stack([xs, zs, np.ones(len(xs))])
+    yv = np.array(ys)
+    beta = np.linalg.solve(M.T @ M, M.T @ yv)
+    resid = yv - M @ beta
+    cov = np.linalg.inv(M.T @ M) * (resid @ resid) / (len(yv) - M.shape[1])
+    se = np.sqrt(np.diag(cov))
+    return {"rho_partial": round(float(beta[0]), 3), "se": round(float(se[0]), 3),
+            "gamma_reversion": round(float(beta[1]), 3),
+            "intercept": round(float(beta[2]), 3), "n": len(yv),
+            "arrival_weight": arrival_weight}
+
+
+def amend_v4():
+    """B3/B4: reproduce the v3.1 amendment, re-estimate with production-consistent
+    weights, and regenerate the overlay deltas as overlay_team_deltas_v4.csv
+    (v3 artifacts untouched)."""
+    p2 = json.loads((OUT / "params_v2.json").read_text())
+    g, ts = E.load()
+    v1 = json.loads((OUT / "params.json").read_text())
+    preds, end_r, _ = E.run_elo(g, K=v1["K"], H=v1["H"], phi_s=v1["phi_s"])
+    fb = FeatureBuilder(end_r, ts, goalie_hp=p2["goalie_hp"], skater_delta=p2["skater_delta"])
+
+    orig = mechanism_partial(fb, p2, g, ts, "toi_share")
+    full = mechanism_partial(fb, p2, g, ts, "full")
+    print(f"repro (toi_share): rho_partial={orig['rho_partial']} (se {orig['se']}), "
+          f"gamma={orig['gamma_reversion']}, n={orig['n']}  [documented: 1.011, se 0.260, n 150]")
+    print(f"production-consistent (full): rho_partial={full['rho_partial']} "
+          f"(se {full['se']}), gamma={full['gamma_reversion']}, n={full['n']}")
+    reproduced = abs(orig["rho_partial"] - 1.011) <= 0.15
+    print(f"ACCEPTANCE (PLAN_V4 B3): {'REPRODUCED' if reproduced else 'NOT REPRODUCED'}")
+
+    rho_star = float(np.clip(0.5 * full["rho_partial"], 0.0, 0.75))
+    print(f"rho* (v4, from production-consistent estimate) = {rho_star:.3f} "
+          f"(v3.1 applied 0.506)")
+
+    # regenerate production deltas with the v4 rho* (mover table inputs unchanged)
+    sk, goalies, skt, got, bios = P.load_panels()
+    marcel = fb.marcel(V_PROD, 1)
+    repl = P.replacement_rates(sk, V_PROD)
+    ppg = points_per_goal(sk, ts, V_PROD)
+    sk_val = skater_value_goals(marcel, repl, ppg)
+    gproj = fb.goalie_proj(V_PROD)
+    movers = mover_table_2026(sk_val, gproj)
+    net = team_net_goals(movers)
+    delo = (p2["k"] * net / 82.0 * rho_star).clip(-25, 25)
+    delo = delo - delo.mean()
+    pd.DataFrame({"net_goals": net, "dElo": delo.reindex(net.index).fillna(0)}).to_csv(
+        OUT / "overlay_team_deltas_v4.csv")
+    block = {"repro_toi_share": orig, "production_consistent_full": full,
+             "reproduced_within_band": bool(reproduced),
+             "rho_star_v4": round(rho_star, 3), "rho_star_v31": 0.506,
+             "history": "raw rho 0.743 placebo-blocked (v2, prereg working); v3.1 "
+                        "'partial-regression identification' reproduced at 1.011 WITH "
+                        "INTERCEPT — decomposition shows the gain was the intercept "
+                        "absorbing the negative-sum artifact of TOI-share weighting "
+                        "(league mean x ~ -2.3), NOT the selection control (gamma ~ "
+                        "0.006). v4: production-consistent full weights make x exactly "
+                        "zero-sum; rho is spec-robust at ~0.84 (origin/intercept/"
+                        "z-control all agree). PLAN_V4 B3+B4."}
+    (OUT / "overlay_v4.json").write_text(json.dumps(block, indent=2))
+    print(f"wrote overlay_team_deltas_v4.csv + overlay_v4.json "
+          f"(biggest: {delo.abs().idxmax()} {delo[delo.abs().idxmax()]:+.1f} Elo)")
+    return block
+
+
 def main():
     p2 = json.loads((OUT / "params_v2.json").read_text())
     g, ts = E.load()
@@ -202,4 +319,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "amend_v4":
+        amend_v4()
+    else:
+        main()

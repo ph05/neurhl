@@ -1,0 +1,22 @@
+{
+  "repro_toi_share": {
+    "rho_partial": 1.011,
+    "se": 0.267,
+    "gamma_reversion": 0.006,
+    "intercept": 2.291,
+    "n": 150,
+    "arrival_weight": "toi_share"
+  },
+  "production_consistent_full": {
+    "rho_partial": 0.843,
+    "se": 0.252,
+    "gamma_reversion": 0.004,
+    "intercept": -0.0,
+    "n": 150,
+    "arrival_weight": "full"
+  },
+  "reproduced_within_band": true,
+  "rho_star_v4": 0.421,
+  "rho_star_v31": 0.506,
+  "history": "raw rho 0.743 placebo-blocked (v2, prereg working); v3.1 'partial-regression identification' reproduced at 1.011 WITH INTERCEPT \u2014 decomposition shows the gain was the intercept absorbing the negative-sum artifact of TOI-share weighting (league mean x ~ -2.3), NOT the selection control (gamma ~ 0.006). v4: production-consistent full weights make x exactly zero-sum; rho is spec-robust at ~0.84 (origin/intercept/z-control all agree). PLAN_V4 B3+B4."
+}
