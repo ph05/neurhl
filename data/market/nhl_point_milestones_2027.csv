@@ -1,13 +1,95 @@
 team,threshold,american,source,retrieved
-NYR,90,-120,hand-recorded sportsbook board,2026-08-17
-NYR,100,310,hand-recorded sportsbook board,2026-08-17
-NYR,110,1200,hand-recorded sportsbook board,2026-08-17
-BOS,90,125,hand-recorded sportsbook board,2026-08-17
-BOS,100,450,hand-recorded sportsbook board,2026-08-17
-BOS,110,1900,hand-recorded sportsbook board,2026-08-17
-SEA,80,-130,hand-recorded sportsbook board,2026-08-17
-SEA,90,280,hand-recorded sportsbook board,2026-08-17
-SEA,100,1100,hand-recorded sportsbook board,2026-08-17
-MTL,100,-110,hand-recorded sportsbook board,2026-08-17
-MTL,110,350,hand-recorded sportsbook board,2026-08-17
-MTL,120,1600,hand-recorded sportsbook board,2026-08-17
+NYR,90,-120,recorded board,2026-08-17
+NYR,100,310,recorded board,2026-08-17
+NYR,110,1200,recorded board,2026-08-17
+BOS,90,125,recorded board,2026-08-17
+BOS,100,450,recorded board,2026-08-17
+BOS,110,1900,recorded board,2026-08-17
+SEA,80,-130,recorded board,2026-08-17
+SEA,90,280,recorded board,2026-08-17
+SEA,100,1100,recorded board,2026-08-17
+MTL,100,-110,recorded board,2026-08-17
+MTL,110,350,recorded board,2026-08-17
+MTL,120,1600,recorded board,2026-08-17
+MIN,110,180,recorded board,2026-08-17
+MIN,120,750,recorded board,2026-08-17
+VGK,100,-195,recorded board,2026-08-17
+VGK,110,190,recorded board,2026-08-17
+VGK,120,800,recorded board,2026-08-17
+EDM,110,170,recorded board,2026-08-17
+EDM,120,700,recorded board,2026-08-17
+STL,90,135,recorded board,2026-08-17
+STL,100,500,recorded board,2026-08-17
+STL,110,2000,recorded board,2026-08-17
+SJS,90,-185,recorded board,2026-08-17
+SJS,100,190,recorded board,2026-08-17
+SJS,110,700,recorded board,2026-08-17
+SJS,120,3000,recorded board,2026-08-17
+CHI,80,-130,recorded board,2026-08-17
+CHI,90,280,recorded board,2026-08-17
+CHI,100,1000,recorded board,2026-08-17
+CHI,110,4500,recorded board,2026-08-17
+COL,110,-115,recorded board,2026-08-17
+COL,120,350,recorded board,2026-08-17
+LAK,100,135,recorded board,2026-08-17
+LAK,110,500,recorded board,2026-08-17
+LAK,120,2200,recorded board,2026-08-17
+CAR,110,-115,recorded board,2026-08-17
+CAR,120,340,recorded board,2026-08-17
+TOR,100,130,recorded board,2026-08-17
+TOR,110,490,recorded board,2026-08-17
+TOR,120,2200,recorded board,2026-08-17
+BUF,100,145,recorded board,2026-08-17
+BUF,110,550,recorded board,2026-08-17
+BUF,120,2500,recorded board,2026-08-17
+DAL,100,-155,recorded board,2026-08-17
+DAL,110,230,recorded board,2026-08-17
+DAL,120,1000,recorded board,2026-08-17
+DET,90,115,recorded board,2026-08-17
+DET,100,420,recorded board,2026-08-17
+DET,110,1800,recorded board,2026-08-17
+ANA,100,165,recorded board,2026-08-17
+ANA,110,600,recorded board,2026-08-17
+ANA,120,2700,recorded board,2026-08-17
+NJD,100,115,recorded board,2026-08-17
+NJD,110,430,recorded board,2026-08-17
+NJD,120,1800,recorded board,2026-08-17
+FLA,110,-110,recorded board,2026-08-17
+FLA,120,370,recorded board,2026-08-17
+VAN,80,160,recorded board,2026-08-17
+VAN,90,600,recorded board,2026-08-17
+VAN,100,2500,recorded board,2026-08-17
+NYI,90,115,recorded board,2026-08-17
+NYI,100,420,recorded board,2026-08-17
+NYI,110,1800,recorded board,2026-08-17
+CGY,80,110,recorded board,2026-08-17
+CGY,90,420,recorded board,2026-08-17
+CGY,100,1800,recorded board,2026-08-17
+WSH,100,-180,recorded board,2026-08-17
+WSH,110,200,recorded board,2026-08-17
+WSH,120,800,recorded board,2026-08-17
+PHI,90,-190,recorded board,2026-08-17
+PHI,100,185,recorded board,2026-08-17
+PHI,110,750,recorded board,2026-08-17
+PHI,120,3500,recorded board,2026-08-17
+NSH,90,130,recorded board,2026-08-17
+NSH,100,500,recorded board,2026-08-17
+NSH,110,2200,recorded board,2026-08-17
+WPG,90,145,recorded board,2026-08-17
+WPG,100,500,recorded board,2026-08-17
+WPG,110,2200,recorded board,2026-08-17
+UTA,100,125,recorded board,2026-08-17
+UTA,110,450,recorded board,2026-08-17
+UTA,120,2000,recorded board,2026-08-17
+CBJ,90,-170,recorded board,2026-08-17
+CBJ,100,210,recorded board,2026-08-17
+CBJ,110,800,recorded board,2026-08-17
+CBJ,120,4000,recorded board,2026-08-17
+OTT,100,140,recorded board,2026-08-17
+OTT,110,500,recorded board,2026-08-17
+OTT,120,2500,recorded board,2026-08-17
+TBL,110,155,recorded board,2026-08-17
+TBL,120,650,recorded board,2026-08-17
+PIT,90,-115,recorded board,2026-08-17
+PIT,100,310,recorded board,2026-08-17
+PIT,110,1200,recorded board,2026-08-17
