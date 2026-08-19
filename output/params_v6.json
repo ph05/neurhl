@@ -1,0 +1,173 @@
+{
+  "prereg": "PLAN_V6.md @ git b719257 (committed before fetch/gates)",
+  "gate_F4": {
+    "h1": {
+      "mae_incumbent": 9.4562,
+      "candidates": {
+        "line_cont": {
+          "dmae": 0.0162,
+          "stability": 1.0,
+          "pass": false
+        },
+        "toi_hhi_f": {
+          "dmae": -0.0076,
+          "stability": 0.83,
+          "pass": true
+        },
+        "coach_new": {
+          "dmae": 0.0347,
+          "stability": 0.5,
+          "pass": false
+        },
+        "coach_tenure": {
+          "dmae": -0.0092,
+          "stability": 0.83,
+          "pass": true
+        },
+        "prospect_prod": {
+          "dmae": 0.0533,
+          "stability": 0.83,
+          "pass": false
+        }
+      },
+      "prospect_family": null,
+      "joint": {
+        "new": [
+          "coach_tenure",
+          "toi_hhi_f"
+        ],
+        "removed": [],
+        "mae_final": 9.4387,
+        "dmae_vs_incumbent": -0.0175,
+        "lam": 64.0,
+        "ships": true
+      }
+    },
+    "h2": {
+      "mae_incumbent": 10.3047,
+      "candidates": {
+        "line_cont": {
+          "dmae": 0.0259,
+          "stability": 1.0,
+          "pass": false
+        },
+        "toi_hhi_f": {
+          "dmae": -0.0606,
+          "stability": 1.0,
+          "pass": true
+        },
+        "coach_new": {
+          "dmae": 0.0255,
+          "stability": 0.6,
+          "pass": false
+        },
+        "coach_tenure": {
+          "dmae": 0.0146,
+          "stability": 0.8,
+          "pass": false
+        },
+        "prospect_prod": {
+          "dmae": 0.0102,
+          "stability": 1.0,
+          "pass": false
+        }
+      },
+      "prospect_family": null,
+      "joint": {
+        "new": [
+          "toi_hhi_f"
+        ],
+        "removed": [],
+        "mae_final": 10.2441,
+        "dmae_vs_incumbent": -0.0606,
+        "lam": 64.0,
+        "ships": true
+      }
+    }
+  },
+  "gate_T1": {
+    "n": 7093,
+    "net_tz": {
+      "coef": 0.0111,
+      "t": 0.3,
+      "elo_equiv_per_unit": 1.5,
+      "mean_abs_unit": 0.351,
+      "mean_elo_effect": 0.5,
+      "sign_stable_halves": false,
+      "ships": false
+    },
+    "net_km3": {
+      "coef": -0.006,
+      "t": -0.4,
+      "elo_equiv_per_unit": -0.8,
+      "mean_abs_unit": 1.485,
+      "mean_elo_effect": 1.2,
+      "sign_stable_halves": true,
+      "ships": false
+    },
+    "ships": []
+  },
+  "screen_S3": {
+    "mse_bucket": 0.05817,
+    "mse_eb_best": 0.05153,
+    "n0_best": 80.0,
+    "eb_beats_bucket": true
+  },
+  "shipped": {
+    "features_h1": [
+      "elo_dev",
+      "xg_dev",
+      "gsax_1yr",
+      "gsax_marcel",
+      "tandem_gsax",
+      "goalie_consistency",
+      "goalie_age",
+      "goalie_trend",
+      "toi_age",
+      "share_u23",
+      "share_32p",
+      "prod_age_exp",
+      "returning_toi",
+      "star_share",
+      "draft_cap",
+      "player_points_proj",
+      "finishing",
+      "st_pp",
+      "prospect_pipeline",
+      "corsi_dev",
+      "fo_dev",
+      "pen_diff",
+      "coach_tenure",
+      "toi_hhi_f"
+    ],
+    "features_h2": [
+      "elo_dev",
+      "xg_dev",
+      "gsax_1yr",
+      "gsax_marcel",
+      "tandem_gsax",
+      "goalie_consistency",
+      "goalie_age",
+      "goalie_trend",
+      "toi_age",
+      "share_u23",
+      "share_32p",
+      "prod_age_exp",
+      "returning_toi",
+      "star_share",
+      "draft_cap",
+      "player_points_proj",
+      "finishing",
+      "st_pp",
+      "prospect_pipeline",
+      "hd_share",
+      "toi_hhi_f"
+    ],
+    "lam_h1": 64.0,
+    "lam_h2": 64.0,
+    "travel_terms": [],
+    "v6_is_null": false,
+    "inherits": "everything else from params_v4/params_v5 shipped"
+  },
+  "seconds": 7.3
+}

@@ -579,5 +579,100 @@ if pr5.exists():
 
 print()
 print("=" * 78)
+print("SECTION 9: v6 data expansion (added 2026-08-19; PLAN_V6 @ b719257)")
+print("=" * 78)
+
+# 9.1 shift-chart derived tables
+cc9 = _json.loads((PROJ / "output/v6_crosschecks.json").read_text())
+check("shift TOI identity: on-ice hours/game in [5.5, 6.3] for >=95% of teams",
+      cc9["shift_toi_identity"]["in_band_5p5_6p3"] >= 0.95,
+      f"{cc9['shift_toi_identity']['mean_skater_hours_per_game']} h/gm mean "
+      f"(5 skaters + goalie ~ 6h)")
+sh9 = pd.read_csv(PROJ / "data/processed/shift_team_seasons.csv")
+check("shift table spans 2011-2026, no dup (season, team)",
+      (sh9.season_end.min(), sh9.season_end.max()) == (2011, 2026)
+      and sh9.duplicated(["season_end", "team"]).sum() == 0, f"{len(sh9)} rows")
+check("line_cont in [0,1] where present",
+      sh9.line_cont.dropna().between(0, 1).all())
+
+# 9.2 coaches
+co9 = pd.read_csv(PROJ / "data/processed/coaches.csv")
+check("coach table covers every team-season 2006-2026",
+      cc9["coach_coverage"]["seasons_full"] == cc9["coach_coverage"]["seasons_total"],
+      f"{len(co9)} rows, change rate {cc9['coach_change_rate']}")
+
+# 9.3 travel
+tv9 = pd.read_csv(PROJ / "data/processed/travel_games.csv")
+check("travel table row count == regular-season games",
+      len(tv9) == (g.game_type == "R").sum(), f"{len(tv9)}")
+tv24 = tv9[tv9.season_end == 2024].copy()
+tv24["date"] = pd.to_datetime(tv24.date)
+g24 = g[(g.season_end == 2024) & (g.game_type == "R")] \
+    .sort_values("date", kind="stable").reset_index(drop=True)
+hb24, ab24 = E.b2b_flags(g24[["date", "home", "away"]])
+g24["hb24"], g24["ab24"] = np.asarray(hb24, bool), np.asarray(ab24, bool)
+m24 = tv24.merge(g24[["date", "home", "away", "hb24", "ab24"]],
+                 on=["date", "home", "away"])
+check("travel: b2b (rest==1) reproduces engine b2b flags (2024 season)",
+      len(m24) == len(tv24)
+      and ((m24.home_rest == 1) == m24.hb24).mean() > 0.995
+      and ((m24.away_rest == 1) == m24.ab24).mean() > 0.995)
+check("travel: no negative km, |dtz| <= 5",
+      (tv9[["home_km", "away_km"]].min().min() >= 0)
+      and (tv9[["home_dtz", "away_dtz"]].abs().max().max() <= 5))
+
+# 9.4 absences + prospect production
+ab9 = pd.read_csv(PROJ / "data/processed/player_absences.csv")
+check("absences: dressed <= window everywhere; seasons 2012-2026",
+      (ab9.dressed <= ab9.window_games).all()
+      and (ab9.season_end.min(), ab9.season_end.max()) == (2012, 2026))
+pp9 = pd.read_csv(PROJ / "data/processed/prospect_production.csv")
+check("prospect production: >50k rows, no dup (player, season, league)",
+      len(pp9) > 50_000
+      and pp9.duplicated(["playerId", "season_end", "league"]).sum() == 0)
+
+# 9.5 gate record consistency + playoff diagnostics
+p6j = _json.loads((PROJ / "output/params_v6.json").read_text())
+ok9 = True
+for h in ("h1", "h2"):
+    for cand, r_ in p6j["gate_F4"][h]["candidates"].items():
+        ok9 &= r_["pass"] == (r_["dmae"] < 0.0 and r_["stability"] >= 0.67)
+    if p6j["gate_F4"][h]["joint"]["ships"]:
+        ok9 &= p6j["gate_F4"][h]["joint"]["dmae_vs_incumbent"] < 0
+for term in ("net_tz", "net_km3"):
+    r_ = p6j["gate_T1"][term]
+    ok9 &= r_["ships"] == (abs(r_["t"]) >= 4.0 and r_["mean_elo_effect"] >= 10.0
+                           and r_["sign_stable_halves"])
+check("F4/T1 gate records consistent with prereg rules", ok9)
+pd9 = _json.loads((PROJ / "output/playoff_diagnostics.json").read_text())
+check("playoff diagnostics: full corpus (>=1300 playoff, >=17000 regular games)",
+      pd9["playoffs"]["n_games"] >= 1300 and pd9["regular"]["n_games"] >= 17000)
+
+# 9.6 v6 base-feature non-regression + output consistency (if shipped)
+from features_v6 import FeatureBuilderV6 as FBV6
+fb6 = FBV6(end_rf, ts, goalie_hp=p2["goalie_hp"], skater_delta=p2["skater_delta"])
+f6 = fb6.team_features(2016, 1)
+check("FeatureBuilderV6 leaves all v4/v5 features unchanged (V=2016)",
+      all((f5[c].fillna(-9) == f6[c].fillna(-9)).all() for c in f5.columns))
+for tag in ("v6", "howe6"):
+    for yr in ("2026_27", "2027_28"):
+        f9 = PROJ / f"output/projections_{yr}_{tag}.csv"
+        if not f9.exists():
+            continue
+        dfp = pd.read_csv(f9)
+        check(f"{yr} {tag}: prob sums (PO 16 / Div 4 / Conf 2 / Cup 1)",
+              abs(dfp["Playoff%"].sum() - 16) < 0.05
+              and abs(dfp["Division%"].sum() - 4) < 0.03
+              and abs(dfp["Conference%"].sum() - 2) < 0.03
+              and abs(dfp["Cup%"].sum() - 1) < 0.02)
+pr6 = PROJ / "output/v6_prior_ratings.csv"
+if pr6.exists():
+    v69 = pd.read_csv(pr6, index_col=0)
+    mid6 = 0.5 * (v69.rating_v1 + v69.rating_v6)
+    check("HOWE6 prior ratings are the exact 50/50 blend",
+          (v69.rating_howe6 - mid6).abs().max() < 0.02)
+
+print()
+print("=" * 78)
 print(f"RESULT: {PASS} passed, {FAIL} failed")
 print("=" * 78)

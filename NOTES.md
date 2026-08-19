@@ -323,3 +323,67 @@ scores v1/v4/HOWE per PLAN_V4 (PLAN_V5 H; no mid-holdout swap). New seeds 511/52
 Running totals: 12 shipped mechanisms (+corsi_dev, fo_dev, pen_diff @h1 +
 hd_share @h2 counted as one data-expansion round), 20 documented nulls/unshipped
 (+rush_xg_dev, +hd_share@h1, +flurry_xg_dev collinearity-excluded, EDGE deferred).
+
+# 2026-08-19 — v6 SECOND DATA EXPANSION ("all 8"; PLAN_V6 prereg @ b719257,
+# committed BEFORE fetch/gates — restores the commit-before-results guarantee)
+
+DATA ACQUIRED:
+D1 shift charts 2011-2026 (19.4k games; 2009-10 not served; 57 games of 2024-25
+   lack shift data). Pair-TOI via per-second on-ice matrices -> shift_pairs.csv
+   (49k forward pairs) + shift_team_seasons.csv. Identity check: on-ice
+   hours/game 5.95 vs 6.0 expected (5 skaters + goalie), 100% in [5.5, 6.3].
+D2 player-landing careers for ALL 4,298 draft-pick playerIds 2006-2025 (ids from
+   records.nhl.com — the api-web draft JSONs carry no ids; draft_join alone would
+   have biased ramps to NHL survivors) -> prospect_production.csv (70k league-
+   season rows, 863 leagues).
+D3 coaches from 644 HR team pages (parse: 0 failures, 22 multi-coach seasons in
+   first 188) -> coaches.csv, full 21/21 season coverage, change rate 0.335.
+D4 travel_games.csv from games + hand-authored arenas.csv (era-aware: ATL->WPG,
+   Glendale->Tempe->SLC): 25.3k games, away 987 km/gm, 36% cross-tz. b2b(rest==1)
+   reproduces engine b2b flags.
+D5 playoff PBP 2012-2026 (1,350 games). REPORT-ONLY diagnostics: playoffs score
+   LESS (5.58 vs 5.79 g/gm), more penalties (8.8 vs 7.7), and home ice is WEAKER
+   (53.0% vs 54.3%) — no playoff-param change warranted yet.
+D6 EDGE skater-detail x 3,553 player-seasons (2022-2026), archived (EDGE history
+   is not guaranteed served). Player-level bursts>=20mph lag-1 r = 0.847 — a real
+   athlete trait; still ineligible until history reaches the train window.
+D7 odds logger (log_odds.py -> data/market/odds_log/): seeded 2026-08-19 with 32
+   teams x 6 books off the vegasinsider table; FLA 650 / COL 750 / CAR 800 best.
+   Run daily-ish through 2026-27 for CLV + market-weight calibration.
+D8 absence spells from rosterSpots already in the PBP corpus (no fetch): 16.6k
+   player-season-team rows; 86% of missed games sit in >=3-game spells; player
+   injury-rate lag-1 persistence r = +0.34.
+
+GATES (prereg'd F4 = strict F3 protocol; T1 three-part bar):
+F4 h1: toi_hhi_f PASS (-0.008, stab 0.83) + coach_tenure PASS (-0.009, 0.83);
+   line_cont fail (+0.016), coach_new fail (stab 0.50), prospect_prod fail
+   (+0.053 — production weighting does NOT beat slot-only ramps; the NHLe
+   multiplier is noise at this granularity. Documented null.)
+   Joint: 9.4562 -> 9.4387. SHIPS (24 features h1).
+F4 h2: toi_hhi_f PASS (-0.061, stab 1.00), all else fail. 10.3047 -> 10.2441.
+   SHIPS (21 features h2).
+T1 travel: NULL. Controlling Elo + b2b, net |tz| t=+0.30 (0.5 Elo mean effect),
+   net km3d t=-0.40 (1.2 Elo) — nowhere near the prereg'd |t|>=4 / >=10 Elo bar.
+   b2b was already carrying the schedule-fatigue signal. Documented measurement.
+S3 spell propensity (recorded only): EB (n0=80 games) MSE 0.0515 beats
+   bucket-only 0.0582. The streak structure carries what v4's S1 GP-share
+   persistence test could not find. Availability rebuild = future plan.
+
+REPORT-ONLY RESTATEMENT 2018-2026 (post-lock; the honest read):
+h1 v6 10.399 ~ v5 10.398 (flat); HOWE6 10.365 vs HOWE5 10.359 — v6's h1 train
+   gain does NOT add out-of-window; HOWE5 remains the best h1 model on the board.
+h2 v6 11.802 > v5 11.741 > v4 11.715 — toi_hhi_f at h2 joins hd_share as a
+   train-gate survivor that fails to generalize. WATCH LIVE. A future prereg
+   should consider reverting the h2 set to the v4 features (11.715 is still the
+   best ridge at h2; HOWE at 11.533 is best overall there).
+Pattern worth naming after two rounds: h1 gates transfer, h2 gates don't — the
+   5-season h2 train window (2013-2017) is too thin for strict-but-small gates.
+   Next plan should raise the h2 bar (e.g. dMAE <= -0.05) or gate h2 jointly
+   with h1 sign-consistency.
+
+v6 HEADLINES (2027-28 co-headline; live 2026-27 still scores v1/v4/HOWE):
+HOWE6 CAR 106.6 top / v6 MTL 106.3. Report-only 2026-27: v6 CAR 110.0, HOWE6
+CAR 110.7. Seeds 611/622; report6 rerun hash-identical. Battery extended
+(SECTION 9). Running totals: 14 shipped mechanisms, 25 documented
+nulls/unshipped (+line_cont, +coach_new, +prospect_prod, +travel x2 terms,
++playoff params unchanged).

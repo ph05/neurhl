@@ -32,6 +32,19 @@ co-headline 2027-28. Raw corpora are gitignored (multi-GB); derived tables are
 committed (`data/processed/team_seasons_v5.csv`, `pbp_team_seasons.csv`,
 `hr_league.csv`, `edge_team.csv`).
 
+**v6 (2026-08-19, PLAN_V6 @ b719257 — committed before fetch/gates):** eight more
+data assets: NHL shift charts (pair TOI → line continuity, TOI concentration),
+full-population prospect careers (records.nhl.com ids + player-landing),
+hockey-reference coach records, a travel/timezone game table, playoff PBP,
+player-level EDGE tracking archive, a cross-book odds logger
+(`src/log_odds.py`, run daily-ish), and absence spells from rosterSpots. Gate
+survivors: `toi_hhi_f` (both horizons) + `coach_tenure` (h1). Documented nulls:
+line continuity, coach-change flag, production-weighted prospects, travel
+effects (t≈0.3 after b2b control), playoff-specific params. The post-lock
+restatement is candid: v6's gains do not add out-of-window (HOWE5 still best at
+h1; HOWE/v4 best at h2) — and the S3 screen found spell-based injury propensity
+beats the age-bucket availability baseline, queued for a future plan.
+
 ## Layout
 
 | Path | What |

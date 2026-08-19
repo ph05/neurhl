@@ -1,0 +1,887 @@
+{
+  "restatement": [
+    {
+      "horizon": 1,
+      "season": 2018,
+      "model": "v4",
+      "mae": 10.7124,
+      "spearman": 0.6278
+    },
+    {
+      "horizon": 1,
+      "season": 2018,
+      "model": "v5",
+      "mae": 10.2408,
+      "spearman": 0.6536
+    },
+    {
+      "horizon": 1,
+      "season": 2018,
+      "model": "v6",
+      "mae": 10.1283,
+      "spearman": 0.6185
+    },
+    {
+      "horizon": 1,
+      "season": 2018,
+      "model": "v1",
+      "mae": 11.7755,
+      "spearman": 0.441
+    },
+    {
+      "horizon": 1,
+      "season": 2018,
+      "model": "howe",
+      "mae": 11.2218,
+      "spearman": 0.5582
+    },
+    {
+      "horizon": 1,
+      "season": 2018,
+      "model": "howe5",
+      "mae": 11.0081,
+      "spearman": 0.5548
+    },
+    {
+      "horizon": 1,
+      "season": 2018,
+      "model": "howe6",
+      "mae": 10.9321,
+      "spearman": 0.56
+    },
+    {
+      "horizon": 1,
+      "season": 2019,
+      "model": "v4",
+      "mae": 7.8433,
+      "spearman": 0.6975
+    },
+    {
+      "horizon": 1,
+      "season": 2019,
+      "model": "v5",
+      "mae": 8.0385,
+      "spearman": 0.6705
+    },
+    {
+      "horizon": 1,
+      "season": 2019,
+      "model": "v6",
+      "mae": 7.988,
+      "spearman": 0.658
+    },
+    {
+      "horizon": 1,
+      "season": 2019,
+      "model": "v1",
+      "mae": 8.2641,
+      "spearman": 0.5978
+    },
+    {
+      "horizon": 1,
+      "season": 2019,
+      "model": "howe",
+      "mae": 7.8396,
+      "spearman": 0.6542
+    },
+    {
+      "horizon": 1,
+      "season": 2019,
+      "model": "howe5",
+      "mae": 7.883,
+      "spearman": 0.6392
+    },
+    {
+      "horizon": 1,
+      "season": 2019,
+      "model": "howe6",
+      "mae": 7.8727,
+      "spearman": 0.6542
+    },
+    {
+      "horizon": 1,
+      "season": 2020,
+      "model": "v4",
+      "mae": 7.5377,
+      "spearman": 0.6659
+    },
+    {
+      "horizon": 1,
+      "season": 2020,
+      "model": "v5",
+      "mae": 7.6648,
+      "spearman": 0.6515
+    },
+    {
+      "horizon": 1,
+      "season": 2020,
+      "model": "v6",
+      "mae": 7.4995,
+      "spearman": 0.6511
+    },
+    {
+      "horizon": 1,
+      "season": 2020,
+      "model": "v1",
+      "mae": 7.4628,
+      "spearman": 0.6673
+    },
+    {
+      "horizon": 1,
+      "season": 2020,
+      "model": "howe",
+      "mae": 7.2713,
+      "spearman": 0.6659
+    },
+    {
+      "horizon": 1,
+      "season": 2020,
+      "model": "howe5",
+      "mae": 7.3672,
+      "spearman": 0.6441
+    },
+    {
+      "horizon": 1,
+      "season": 2020,
+      "model": "howe6",
+      "mae": 7.311,
+      "spearman": 0.6513
+    },
+    {
+      "horizon": 1,
+      "season": 2021,
+      "model": "v4",
+      "mae": 12.5604,
+      "spearman": 0.6982
+    },
+    {
+      "horizon": 1,
+      "season": 2021,
+      "model": "v5",
+      "mae": 12.4282,
+      "spearman": 0.7232
+    },
+    {
+      "horizon": 1,
+      "season": 2021,
+      "model": "v6",
+      "mae": 12.5164,
+      "spearman": 0.7216
+    },
+    {
+      "horizon": 1,
+      "season": 2021,
+      "model": "v1",
+      "mae": 12.9039,
+      "spearman": 0.6977
+    },
+    {
+      "horizon": 1,
+      "season": 2021,
+      "model": "howe",
+      "mae": 12.717,
+      "spearman": 0.7286
+    },
+    {
+      "horizon": 1,
+      "season": 2021,
+      "model": "howe5",
+      "mae": 12.6515,
+      "spearman": 0.7074
+    },
+    {
+      "horizon": 1,
+      "season": 2021,
+      "model": "howe6",
+      "mae": 12.7102,
+      "spearman": 0.7117
+    },
+    {
+      "horizon": 1,
+      "season": 2022,
+      "model": "v4",
+      "mae": 12.149,
+      "spearman": 0.6909
+    },
+    {
+      "horizon": 1,
+      "season": 2022,
+      "model": "v5",
+      "mae": 12.145,
+      "spearman": 0.6756
+    },
+    {
+      "horizon": 1,
+      "season": 2022,
+      "model": "v6",
+      "mae": 12.2087,
+      "spearman": 0.6562
+    },
+    {
+      "horizon": 1,
+      "season": 2022,
+      "model": "v1",
+      "mae": 12.2908,
+      "spearman": 0.7064
+    },
+    {
+      "horizon": 1,
+      "season": 2022,
+      "model": "howe",
+      "mae": 12.165,
+      "spearman": 0.7264
+    },
+    {
+      "horizon": 1,
+      "season": 2022,
+      "model": "howe5",
+      "mae": 12.1172,
+      "spearman": 0.7096
+    },
+    {
+      "horizon": 1,
+      "season": 2022,
+      "model": "howe6",
+      "mae": 12.1496,
+      "spearman": 0.7094
+    },
+    {
+      "horizon": 1,
+      "season": 2023,
+      "model": "v4",
+      "mae": 11.4843,
+      "spearman": 0.5862
+    },
+    {
+      "horizon": 1,
+      "season": 2023,
+      "model": "v5",
+      "mae": 11.2756,
+      "spearman": 0.628
+    },
+    {
+      "horizon": 1,
+      "season": 2023,
+      "model": "v6",
+      "mae": 11.4157,
+      "spearman": 0.6197
+    },
+    {
+      "horizon": 1,
+      "season": 2023,
+      "model": "v1",
+      "mae": 11.0894,
+      "spearman": 0.6547
+    },
+    {
+      "horizon": 1,
+      "season": 2023,
+      "model": "howe",
+      "mae": 11.035,
+      "spearman": 0.6375
+    },
+    {
+      "horizon": 1,
+      "season": 2023,
+      "model": "howe5",
+      "mae": 10.8781,
+      "spearman": 0.6542
+    },
+    {
+      "horizon": 1,
+      "season": 2023,
+      "model": "howe6",
+      "mae": 10.9922,
+      "spearman": 0.6566
+    },
+    {
+      "horizon": 1,
+      "season": 2024,
+      "model": "v4",
+      "mae": 9.6301,
+      "spearman": 0.7378
+    },
+    {
+      "horizon": 1,
+      "season": 2024,
+      "model": "v5",
+      "mae": 9.6311,
+      "spearman": 0.7081
+    },
+    {
+      "horizon": 1,
+      "season": 2024,
+      "model": "v6",
+      "mae": 9.5712,
+      "spearman": 0.7092
+    },
+    {
+      "horizon": 1,
+      "season": 2024,
+      "model": "v1",
+      "mae": 8.8702,
+      "spearman": 0.7318
+    },
+    {
+      "horizon": 1,
+      "season": 2024,
+      "model": "howe",
+      "mae": 9.1941,
+      "spearman": 0.7316
+    },
+    {
+      "horizon": 1,
+      "season": 2024,
+      "model": "howe5",
+      "mae": 9.1946,
+      "spearman": 0.7197
+    },
+    {
+      "horizon": 1,
+      "season": 2024,
+      "model": "howe6",
+      "mae": 9.1646,
+      "spearman": 0.7276
+    },
+    {
+      "horizon": 1,
+      "season": 2025,
+      "model": "v4",
+      "mae": 10.3584,
+      "spearman": 0.463
+    },
+    {
+      "horizon": 1,
+      "season": 2025,
+      "model": "v5",
+      "mae": 10.3851,
+      "spearman": 0.4566
+    },
+    {
+      "horizon": 1,
+      "season": 2025,
+      "model": "v6",
+      "mae": 10.3455,
+      "spearman": 0.4562
+    },
+    {
+      "horizon": 1,
+      "season": 2025,
+      "model": "v1",
+      "mae": 10.4013,
+      "spearman": 0.4762
+    },
+    {
+      "horizon": 1,
+      "season": 2025,
+      "model": "howe",
+      "mae": 10.2835,
+      "spearman": 0.4511
+    },
+    {
+      "horizon": 1,
+      "season": 2025,
+      "model": "howe5",
+      "mae": 10.3022,
+      "spearman": 0.4636
+    },
+    {
+      "horizon": 1,
+      "season": 2025,
+      "model": "howe6",
+      "mae": 10.2645,
+      "spearman": 0.4566
+    },
+    {
+      "horizon": 1,
+      "season": 2026,
+      "model": "v4",
+      "mae": 11.8329,
+      "spearman": 0.1803
+    },
+    {
+      "horizon": 1,
+      "season": 2026,
+      "model": "v5",
+      "mae": 11.7746,
+      "spearman": 0.2164
+    },
+    {
+      "horizon": 1,
+      "season": 2026,
+      "model": "v6",
+      "mae": 11.9188,
+      "spearman": 0.1724
+    },
+    {
+      "horizon": 1,
+      "season": 2026,
+      "model": "v1",
+      "mae": 11.8957,
+      "spearman": 0.1353
+    },
+    {
+      "horizon": 1,
+      "season": 2026,
+      "model": "howe",
+      "mae": 11.8489,
+      "spearman": 0.1665
+    },
+    {
+      "horizon": 1,
+      "season": 2026,
+      "model": "howe5",
+      "mae": 11.8249,
+      "spearman": 0.1566
+    },
+    {
+      "horizon": 1,
+      "season": 2026,
+      "model": "howe6",
+      "mae": 11.8884,
+      "spearman": 0.1564
+    },
+    {
+      "horizon": 2,
+      "season": 2018,
+      "model": "v4",
+      "mae": 12.9246,
+      "spearman": 0.2033
+    },
+    {
+      "horizon": 2,
+      "season": 2018,
+      "model": "v5",
+      "mae": 12.9128,
+      "spearman": 0.2058
+    },
+    {
+      "horizon": 2,
+      "season": 2018,
+      "model": "v6",
+      "mae": 12.7709,
+      "spearman": 0.2324
+    },
+    {
+      "horizon": 2,
+      "season": 2018,
+      "model": "v1",
+      "mae": 11.5334,
+      "spearman": 0.3649
+    },
+    {
+      "horizon": 2,
+      "season": 2018,
+      "model": "howe",
+      "mae": 12.0894,
+      "spearman": 0.2949
+    },
+    {
+      "horizon": 2,
+      "season": 2018,
+      "model": "howe5",
+      "mae": 12.1154,
+      "spearman": 0.3
+    },
+    {
+      "horizon": 2,
+      "season": 2018,
+      "model": "howe6",
+      "mae": 12.0727,
+      "spearman": 0.3129
+    },
+    {
+      "horizon": 2,
+      "season": 2019,
+      "model": "v4",
+      "mae": 9.9358,
+      "spearman": 0.4856
+    },
+    {
+      "horizon": 2,
+      "season": 2019,
+      "model": "v5",
+      "mae": 9.979,
+      "spearman": 0.4812
+    },
+    {
+      "horizon": 2,
+      "season": 2019,
+      "model": "v6",
+      "mae": 10.1751,
+      "spearman": 0.4572
+    },
+    {
+      "horizon": 2,
+      "season": 2019,
+      "model": "v1",
+      "mae": 10.5189,
+      "spearman": 0.3169
+    },
+    {
+      "horizon": 2,
+      "season": 2019,
+      "model": "howe",
+      "mae": 9.9864,
+      "spearman": 0.4509
+    },
+    {
+      "horizon": 2,
+      "season": 2019,
+      "model": "howe5",
+      "mae": 9.9383,
+      "spearman": 0.4735
+    },
+    {
+      "horizon": 2,
+      "season": 2019,
+      "model": "howe6",
+      "mae": 9.972,
+      "spearman": 0.4626
+    },
+    {
+      "horizon": 2,
+      "season": 2020,
+      "model": "v4",
+      "mae": 8.7967,
+      "spearman": 0.429
+    },
+    {
+      "horizon": 2,
+      "season": 2020,
+      "model": "v5",
+      "mae": 8.7207,
+      "spearman": 0.4742
+    },
+    {
+      "horizon": 2,
+      "season": 2020,
+      "model": "v6",
+      "mae": 8.9522,
+      "spearman": 0.3824
+    },
+    {
+      "horizon": 2,
+      "season": 2020,
+      "model": "v1",
+      "mae": 9.2959,
+      "spearman": 0.4485
+    },
+    {
+      "horizon": 2,
+      "season": 2020,
+      "model": "howe",
+      "mae": 9.0143,
+      "spearman": 0.4707
+    },
+    {
+      "horizon": 2,
+      "season": 2020,
+      "model": "howe5",
+      "mae": 8.9647,
+      "spearman": 0.4913
+    },
+    {
+      "horizon": 2,
+      "season": 2020,
+      "model": "howe6",
+      "mae": 9.0741,
+      "spearman": 0.4469
+    },
+    {
+      "horizon": 2,
+      "season": 2021,
+      "model": "v4",
+      "mae": 14.1421,
+      "spearman": 0.552
+    },
+    {
+      "horizon": 2,
+      "season": 2021,
+      "model": "v5",
+      "mae": 14.1085,
+      "spearman": 0.5232
+    },
+    {
+      "horizon": 2,
+      "season": 2021,
+      "model": "v6",
+      "mae": 13.7857,
+      "spearman": 0.5248
+    },
+    {
+      "horizon": 2,
+      "season": 2021,
+      "model": "v1",
+      "mae": 13.298,
+      "spearman": 0.5964
+    },
+    {
+      "horizon": 2,
+      "season": 2021,
+      "model": "howe",
+      "mae": 13.6799,
+      "spearman": 0.5351
+    },
+    {
+      "horizon": 2,
+      "season": 2021,
+      "model": "howe5",
+      "mae": 13.682,
+      "spearman": 0.5379
+    },
+    {
+      "horizon": 2,
+      "season": 2021,
+      "model": "howe6",
+      "mae": 13.5418,
+      "spearman": 0.572
+    },
+    {
+      "horizon": 2,
+      "season": 2022,
+      "model": "v4",
+      "mae": 14.3381,
+      "spearman": 0.5274
+    },
+    {
+      "horizon": 2,
+      "season": 2022,
+      "model": "v5",
+      "mae": 14.3944,
+      "spearman": 0.5142
+    },
+    {
+      "horizon": 2,
+      "season": 2022,
+      "model": "v6",
+      "mae": 14.5853,
+      "spearman": 0.4856
+    },
+    {
+      "horizon": 2,
+      "season": 2022,
+      "model": "v1",
+      "mae": 14.4441,
+      "spearman": 0.5096
+    },
+    {
+      "horizon": 2,
+      "season": 2022,
+      "model": "howe",
+      "mae": 14.2502,
+      "spearman": 0.5587
+    },
+    {
+      "horizon": 2,
+      "season": 2022,
+      "model": "howe5",
+      "mae": 14.2847,
+      "spearman": 0.5812
+    },
+    {
+      "horizon": 2,
+      "season": 2022,
+      "model": "howe6",
+      "mae": 14.3737,
+      "spearman": 0.5448
+    },
+    {
+      "horizon": 2,
+      "season": 2023,
+      "model": "v4",
+      "mae": 11.8184,
+      "spearman": 0.6232
+    },
+    {
+      "horizon": 2,
+      "season": 2023,
+      "model": "v5",
+      "mae": 11.8823,
+      "spearman": 0.6349
+    },
+    {
+      "horizon": 2,
+      "season": 2023,
+      "model": "v6",
+      "mae": 11.7909,
+      "spearman": 0.6138
+    },
+    {
+      "horizon": 2,
+      "season": 2023,
+      "model": "v1",
+      "mae": 12.4287,
+      "spearman": 0.5773
+    },
+    {
+      "horizon": 2,
+      "season": 2023,
+      "model": "howe",
+      "mae": 12.0689,
+      "spearman": 0.6263
+    },
+    {
+      "horizon": 2,
+      "season": 2023,
+      "model": "howe5",
+      "mae": 12.0795,
+      "spearman": 0.6322
+    },
+    {
+      "horizon": 2,
+      "season": 2023,
+      "model": "howe6",
+      "mae": 12.0192,
+      "spearman": 0.6322
+    },
+    {
+      "horizon": 2,
+      "season": 2024,
+      "model": "v4",
+      "mae": 10.526,
+      "spearman": 0.6577
+    },
+    {
+      "horizon": 2,
+      "season": 2024,
+      "model": "v5",
+      "mae": 10.8612,
+      "spearman": 0.6379
+    },
+    {
+      "horizon": 2,
+      "season": 2024,
+      "model": "v6",
+      "mae": 11.2693,
+      "spearman": 0.6373
+    },
+    {
+      "horizon": 2,
+      "season": 2024,
+      "model": "v1",
+      "mae": 9.8549,
+      "spearman": 0.6832
+    },
+    {
+      "horizon": 2,
+      "season": 2024,
+      "model": "howe",
+      "mae": 10.1816,
+      "spearman": 0.689
+    },
+    {
+      "horizon": 2,
+      "season": 2024,
+      "model": "howe5",
+      "mae": 10.3108,
+      "spearman": 0.6746
+    },
+    {
+      "horizon": 2,
+      "season": 2024,
+      "model": "howe6",
+      "mae": 10.5119,
+      "spearman": 0.6694
+    },
+    {
+      "horizon": 2,
+      "season": 2025,
+      "model": "v4",
+      "mae": 10.7865,
+      "spearman": 0.4773
+    },
+    {
+      "horizon": 2,
+      "season": 2025,
+      "model": "v5",
+      "mae": 10.7146,
+      "spearman": 0.4487
+    },
+    {
+      "horizon": 2,
+      "season": 2025,
+      "model": "v6",
+      "mae": 10.879,
+      "spearman": 0.4816
+    },
+    {
+      "horizon": 2,
+      "season": 2025,
+      "model": "v1",
+      "mae": 10.6972,
+      "spearman": 0.4865
+    },
+    {
+      "horizon": 2,
+      "season": 2025,
+      "model": "howe",
+      "mae": 10.5266,
+      "spearman": 0.5164
+    },
+    {
+      "horizon": 2,
+      "season": 2025,
+      "model": "howe5",
+      "mae": 10.4976,
+      "spearman": 0.4999
+    },
+    {
+      "horizon": 2,
+      "season": 2025,
+      "model": "howe6",
+      "mae": 10.5115,
+      "spearman": 0.501
+    },
+    {
+      "horizon": 2,
+      "season": 2026,
+      "model": "v4",
+      "mae": 12.1636,
+      "spearman": 0.1801
+    },
+    {
+      "horizon": 2,
+      "season": 2026,
+      "model": "v5",
+      "mae": 12.0916,
+      "spearman": 0.1603
+    },
+    {
+      "horizon": 2,
+      "season": 2026,
+      "model": "v6",
+      "mae": 12.0053,
+      "spearman": 0.1794
+    },
+    {
+      "horizon": 2,
+      "season": 2026,
+      "model": "v1",
+      "mae": 12.2432,
+      "spearman": 0.087
+    },
+    {
+      "horizon": 2,
+      "season": 2026,
+      "model": "howe",
+      "mae": 11.9973,
+      "spearman": 0.1573
+    },
+    {
+      "horizon": 2,
+      "season": 2026,
+      "model": "howe5",
+      "mae": 11.9614,
+      "spearman": 0.156
+    },
+    {
+      "horizon": 2,
+      "season": 2026,
+      "model": "howe6",
+      "mae": 11.9089,
+      "spearman": 0.1739
+    }
+  ],
+  "locked_before_run": "PLAN_V6 @ b719257 + params_v6 gates preceded this"
+}

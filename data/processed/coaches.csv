@@ -1,0 +1,645 @@
+season_end,team,coaches,n_coaches,final_coach,coach_new,coach_tenure
+2006,ANA,Randy Carlyle,1,carlyra01c,0.0,1
+2007,ANA,Randy Carlyle,1,carlyra01c,0.0,2
+2008,ANA,Randy Carlyle,1,carlyra01c,0.0,3
+2009,ANA,Randy Carlyle,1,carlyra01c,0.0,4
+2010,ANA,Randy Carlyle,1,carlyra01c,0.0,5
+2011,ANA,Randy Carlyle,1,carlyra01c,0.0,6
+2012,ANA,Randy Carlyle; Bruce Boudreau,2,boudrbr01c,1.0,1
+2013,ANA,Bruce Boudreau,1,boudrbr01c,0.0,2
+2014,ANA,Bruce Boudreau,1,boudrbr01c,0.0,3
+2015,ANA,Bruce Boudreau,1,boudrbr01c,0.0,4
+2016,ANA,Bruce Boudreau,1,boudrbr01c,0.0,5
+2017,ANA,Randy Carlyle,1,carlyra01c,1.0,1
+2018,ANA,Randy Carlyle,1,carlyra01c,0.0,2
+2019,ANA,Randy Carlyle; Bob Murray,2,murrabo02c,1.0,1
+2020,ANA,Dallas Eakins,1,eakinda01c,1.0,1
+2021,ANA,Dallas Eakins,1,eakinda01c,0.0,2
+2022,ANA,Dallas Eakins,1,eakinda01c,0.0,3
+2023,ANA,Dallas Eakins,1,eakinda01c,0.0,4
+2024,ANA,Greg Cronin,1,cronigr01c,1.0,1
+2025,ANA,Greg Cronin,1,cronigr01c,0.0,2
+2026,ANA,Joel Quenneville,1,quennjo01c,1.0,1
+2006,BOS,Mike Sullivan,1,sullimi01c,0.0,1
+2007,BOS,Dave Lewis,1,lewisda02c,1.0,1
+2008,BOS,Claude Julien,1,juliecl01c,1.0,1
+2009,BOS,Claude Julien,1,juliecl01c,0.0,2
+2010,BOS,Claude Julien,1,juliecl01c,0.0,3
+2011,BOS,Claude Julien,1,juliecl01c,0.0,4
+2012,BOS,Claude Julien,1,juliecl01c,0.0,5
+2013,BOS,Claude Julien,1,juliecl01c,0.0,6
+2014,BOS,Claude Julien,1,juliecl01c,0.0,7
+2015,BOS,Claude Julien,1,juliecl01c,0.0,8
+2016,BOS,Claude Julien,1,juliecl01c,0.0,9
+2017,BOS,Claude Julien; Bruce Cassidy,2,cassibr01c,1.0,1
+2018,BOS,Bruce Cassidy,1,cassibr01c,0.0,2
+2019,BOS,Bruce Cassidy,1,cassibr01c,0.0,3
+2020,BOS,Bruce Cassidy,1,cassibr01c,0.0,4
+2021,BOS,Bruce Cassidy,1,cassibr01c,0.0,5
+2022,BOS,Bruce Cassidy,1,cassibr01c,0.0,6
+2023,BOS,Jim Montgomery,1,montgji01c,1.0,1
+2024,BOS,Jim Montgomery,1,montgji01c,0.0,2
+2025,BOS,Jim Montgomery; Joe Sacco,2,saccojo01c,1.0,1
+2026,BOS,Marco Sturm,1,sturmma01c,1.0,1
+2006,BUF,Lindy Ruff,1,ruffli01c,0.0,1
+2007,BUF,Lindy Ruff,1,ruffli01c,0.0,2
+2008,BUF,Lindy Ruff,1,ruffli01c,0.0,3
+2009,BUF,Lindy Ruff,1,ruffli01c,0.0,4
+2010,BUF,Lindy Ruff,1,ruffli01c,0.0,5
+2011,BUF,Lindy Ruff,1,ruffli01c,0.0,6
+2012,BUF,Lindy Ruff,1,ruffli01c,0.0,7
+2013,BUF,Ron Rolston; Lindy Ruff,2,ruffli01c,1.0,1
+2014,BUF,Ted Nolan; Ron Rolston,2,rolstro01c,1.0,1
+2015,BUF,Ted Nolan,1,nolante01c,1.0,1
+2016,BUF,Dan Bylsma,1,bylsmda01c,1.0,1
+2017,BUF,Dan Bylsma,1,bylsmda01c,0.0,2
+2018,BUF,Phil Housley,1,houslph01c,1.0,1
+2019,BUF,Phil Housley,1,houslph01c,0.0,2
+2020,BUF,Ralph Krueger,1,kruegra99c,1.0,1
+2021,BUF,Ralph Krueger; Don Granato,2,granado01c,1.0,1
+2022,BUF,Don Granato,1,granado01c,0.0,2
+2023,BUF,Don Granato,1,granado01c,0.0,3
+2024,BUF,Don Granato,1,granado01c,0.0,4
+2025,BUF,Lindy Ruff,1,ruffli01c,1.0,1
+2026,BUF,Lindy Ruff,1,ruffli01c,0.0,2
+2006,CAR,Peter Laviolette,1,laviope01c,0.0,1
+2007,CAR,Peter Laviolette,1,laviope01c,0.0,2
+2008,CAR,Peter Laviolette,1,laviope01c,0.0,3
+2009,CAR,Peter Laviolette; Paul Maurice,2,mauripa99c,1.0,1
+2010,CAR,Paul Maurice,1,mauripa99c,0.0,2
+2011,CAR,Paul Maurice,1,mauripa99c,0.0,3
+2012,CAR,Paul Maurice; Kirk Muller,2,mulleki01c,1.0,1
+2013,CAR,Kirk Muller,1,mulleki01c,0.0,2
+2014,CAR,Kirk Muller,1,mulleki01c,0.0,3
+2015,CAR,Bill Peters,1,peterbi99c,1.0,1
+2016,CAR,Bill Peters,1,peterbi99c,0.0,2
+2017,CAR,Bill Peters,1,peterbi99c,0.0,3
+2018,CAR,Bill Peters,1,peterbi99c,0.0,4
+2019,CAR,Rod Brind'Amour,1,brindro01c,1.0,1
+2020,CAR,Rod Brind'Amour,1,brindro01c,0.0,2
+2021,CAR,Rod Brind'Amour,1,brindro01c,0.0,3
+2022,CAR,Rod Brind'Amour,1,brindro01c,0.0,4
+2023,CAR,Rod Brind'Amour,1,brindro01c,0.0,5
+2024,CAR,Rod Brind'Amour,1,brindro01c,0.0,6
+2025,CAR,Rod Brind'Amour,1,brindro01c,0.0,7
+2026,CAR,Rod Brind'Amour,1,brindro01c,0.0,8
+2006,CBJ,Gerard Gallant,1,gallage01c,0.0,1
+2007,CBJ,Gerard Gallant; Gary Agnew; Ken Hitchcock,3,hitchke99c,1.0,1
+2008,CBJ,Ken Hitchcock,1,hitchke99c,0.0,2
+2009,CBJ,Ken Hitchcock,1,hitchke99c,0.0,3
+2010,CBJ,Ken Hitchcock; Claude Noel,2,noelcl01c,1.0,1
+2011,CBJ,Scott Arniel,1,arniesc01c,1.0,1
+2012,CBJ,Scott Arniel; Todd Richards,2,richato01c,1.0,1
+2013,CBJ,Todd Richards,1,richato01c,0.0,2
+2014,CBJ,Todd Richards,1,richato01c,0.0,3
+2015,CBJ,Todd Richards,1,richato01c,0.0,4
+2016,CBJ,Todd Richards; John Tortorella,2,tortojo99c,1.0,1
+2017,CBJ,John Tortorella,1,tortojo99c,0.0,2
+2018,CBJ,John Tortorella,1,tortojo99c,0.0,3
+2019,CBJ,John Tortorella,1,tortojo99c,0.0,4
+2020,CBJ,John Tortorella,1,tortojo99c,0.0,5
+2021,CBJ,John Tortorella,1,tortojo99c,0.0,6
+2022,CBJ,Brad Larsen,1,larsebr01c,1.0,1
+2023,CBJ,Brad Larsen,1,larsebr01c,0.0,2
+2024,CBJ,Pascal Vincent,1,vincepa99c,1.0,1
+2025,CBJ,Dean Evason,1,evasode01c,1.0,1
+2026,CBJ,Dean Evason; Rick Bowness,2,bowneri01c,1.0,1
+2006,CGY,Darryl Sutter,1,sutteda01c,0.0,1
+2007,CGY,Jim Playfair,1,playfji01c,1.0,1
+2008,CGY,Mike Keenan,1,keenami99c,1.0,1
+2009,CGY,Mike Keenan,1,keenami99c,0.0,2
+2010,CGY,Brent Sutter,1,suttebr02c,1.0,1
+2011,CGY,Brent Sutter,1,suttebr02c,0.0,2
+2012,CGY,Brent Sutter,1,suttebr02c,0.0,3
+2013,CGY,Bob Hartley,1,hartlbo99c,1.0,1
+2014,CGY,Bob Hartley,1,hartlbo99c,0.0,2
+2015,CGY,Bob Hartley,1,hartlbo99c,0.0,3
+2016,CGY,Bob Hartley,1,hartlbo99c,0.0,4
+2017,CGY,Glen Gulutzan,1,gulutgl99c,1.0,1
+2018,CGY,Glen Gulutzan,1,gulutgl99c,0.0,2
+2019,CGY,Bill Peters,1,peterbi99c,1.0,1
+2020,CGY,Bill Peters; Geoff Ward,2,wardge99c,1.0,1
+2021,CGY,Geoff Ward; Ryan Huska; Darryl Sutter,3,sutteda01c,1.0,1
+2022,CGY,Darryl Sutter,1,sutteda01c,0.0,2
+2023,CGY,Darryl Sutter,1,sutteda01c,0.0,3
+2024,CGY,Ryan Huska,1,huskary01c,1.0,1
+2025,CGY,Ryan Huska,1,huskary01c,0.0,2
+2026,CGY,Ryan Huska,1,huskary01c,0.0,3
+2006,CHI,Trent Yawney,1,yawnetr01c,0.0,1
+2007,CHI,Trent Yawney; Denis Savard,2,savarde01c,1.0,1
+2008,CHI,Denis Savard,1,savarde01c,0.0,2
+2009,CHI,Denis Savard; Joel Quenneville,2,quennjo01c,1.0,1
+2010,CHI,Joel Quenneville,1,quennjo01c,0.0,2
+2011,CHI,Joel Quenneville,1,quennjo01c,0.0,3
+2012,CHI,Joel Quenneville,1,quennjo01c,0.0,4
+2013,CHI,Joel Quenneville,1,quennjo01c,0.0,5
+2014,CHI,Joel Quenneville,1,quennjo01c,0.0,6
+2015,CHI,Joel Quenneville,1,quennjo01c,0.0,7
+2016,CHI,Joel Quenneville,1,quennjo01c,0.0,8
+2017,CHI,Joel Quenneville,1,quennjo01c,0.0,9
+2018,CHI,Joel Quenneville,1,quennjo01c,0.0,10
+2019,CHI,Joel Quenneville; Jeremy Colliton,2,collije01c,1.0,1
+2020,CHI,Jeremy Colliton,1,collije01c,0.0,2
+2021,CHI,Jeremy Colliton,1,collije01c,0.0,3
+2022,CHI,Jeremy Colliton; Derek King,2,kingde01c,1.0,1
+2023,CHI,Luke Richardson,1,richalu01c,1.0,1
+2024,CHI,Luke Richardson,1,richalu01c,0.0,2
+2025,CHI,Luke Richardson; Anders Sorensen,2,sorenan01c,1.0,1
+2026,CHI,Jeff Blashill,1,blashje99c,1.0,1
+2006,COL,Joel Quenneville,1,quennjo01c,0.0,1
+2007,COL,Joel Quenneville,1,quennjo01c,0.0,2
+2008,COL,Joel Quenneville,1,quennjo01c,0.0,3
+2009,COL,Tony Granato,1,granato01c,1.0,1
+2010,COL,Joe Sacco,1,saccojo01c,1.0,1
+2011,COL,Joe Sacco,1,saccojo01c,0.0,2
+2012,COL,Joe Sacco,1,saccojo01c,0.0,3
+2013,COL,Joe Sacco,1,saccojo01c,0.0,4
+2014,COL,Patrick Roy,1,roypa01c,1.0,1
+2015,COL,Patrick Roy,1,roypa01c,0.0,2
+2016,COL,Patrick Roy,1,roypa01c,0.0,3
+2017,COL,Jared Bednar,1,bednaja99c,1.0,1
+2018,COL,Jared Bednar,1,bednaja99c,0.0,2
+2019,COL,Jared Bednar,1,bednaja99c,0.0,3
+2020,COL,Jared Bednar,1,bednaja99c,0.0,4
+2021,COL,Jared Bednar,1,bednaja99c,0.0,5
+2022,COL,Jared Bednar,1,bednaja99c,0.0,6
+2023,COL,Jared Bednar,1,bednaja99c,0.0,7
+2024,COL,Jared Bednar,1,bednaja99c,0.0,8
+2025,COL,Jared Bednar,1,bednaja99c,0.0,9
+2026,COL,Jared Bednar,1,bednaja99c,0.0,10
+2006,DAL,Dave Tippett,1,tippeda01c,0.0,1
+2007,DAL,Dave Tippett,1,tippeda01c,0.0,2
+2008,DAL,Dave Tippett,1,tippeda01c,0.0,3
+2009,DAL,Dave Tippett,1,tippeda01c,0.0,4
+2010,DAL,Marc Crawford,1,crawfma01c,1.0,1
+2011,DAL,Marc Crawford,1,crawfma01c,0.0,2
+2012,DAL,Glen Gulutzan,1,gulutgl99c,1.0,1
+2013,DAL,Glen Gulutzan,1,gulutgl99c,0.0,2
+2014,DAL,Lindy Ruff,1,ruffli01c,1.0,1
+2015,DAL,Lindy Ruff,1,ruffli01c,0.0,2
+2016,DAL,Lindy Ruff,1,ruffli01c,0.0,3
+2017,DAL,Lindy Ruff,1,ruffli01c,0.0,4
+2018,DAL,Ken Hitchcock,1,hitchke99c,1.0,1
+2019,DAL,Jim Montgomery,1,montgji01c,1.0,1
+2020,DAL,Jim Montgomery; Rick Bowness,2,bowneri01c,1.0,1
+2021,DAL,Rick Bowness,1,bowneri01c,0.0,2
+2022,DAL,Rick Bowness,1,bowneri01c,0.0,3
+2023,DAL,Peter DeBoer,1,deboepe99c,1.0,1
+2024,DAL,Peter DeBoer,1,deboepe99c,0.0,2
+2025,DAL,Peter DeBoer,1,deboepe99c,0.0,3
+2026,DAL,Glen Gulutzan,1,gulutgl99c,1.0,1
+2006,DET,Mike Babcock,1,babcomi99c,0.0,1
+2007,DET,Mike Babcock,1,babcomi99c,0.0,2
+2008,DET,Mike Babcock,1,babcomi99c,0.0,3
+2009,DET,Mike Babcock,1,babcomi99c,0.0,4
+2010,DET,Mike Babcock,1,babcomi99c,0.0,5
+2011,DET,Mike Babcock,1,babcomi99c,0.0,6
+2012,DET,Mike Babcock,1,babcomi99c,0.0,7
+2013,DET,Mike Babcock,1,babcomi99c,0.0,8
+2014,DET,Mike Babcock,1,babcomi99c,0.0,9
+2015,DET,Mike Babcock,1,babcomi99c,0.0,10
+2016,DET,Jeff Blashill,1,blashje99c,1.0,1
+2017,DET,Jeff Blashill,1,blashje99c,0.0,2
+2018,DET,Jeff Blashill,1,blashje99c,0.0,3
+2019,DET,Jeff Blashill,1,blashje99c,0.0,4
+2020,DET,Jeff Blashill,1,blashje99c,0.0,5
+2021,DET,Jeff Blashill,1,blashje99c,0.0,6
+2022,DET,Jeff Blashill,1,blashje99c,0.0,7
+2023,DET,Derek Lalonde,1,lalonde99c,1.0,1
+2024,DET,Derek Lalonde,1,lalonde99c,0.0,2
+2025,DET,Derek Lalonde; Todd McLellan,2,mclelto01c,1.0,1
+2026,DET,Todd McLellan,1,mclelto01c,0.0,2
+2006,EDM,Craig MacTavish,1,mactacr01c,0.0,1
+2007,EDM,Craig MacTavish,1,mactacr01c,0.0,2
+2008,EDM,Craig MacTavish,1,mactacr01c,0.0,3
+2009,EDM,Craig MacTavish,1,mactacr01c,0.0,4
+2010,EDM,Pat Quinn,1,quinnpa01c,1.0,1
+2011,EDM,Tom Renney,1,renneto99c,1.0,1
+2012,EDM,Tom Renney,1,renneto99c,0.0,2
+2013,EDM,Ralph Krueger,1,kruegra99c,1.0,1
+2014,EDM,Dallas Eakins,1,eakinda01c,1.0,1
+2015,EDM,Dallas Eakins; Todd Nelson,2,nelsoto01c,1.0,1
+2016,EDM,Todd McLellan,1,mclelto01c,1.0,1
+2017,EDM,Todd McLellan,1,mclelto01c,0.0,2
+2018,EDM,Todd McLellan,1,mclelto01c,0.0,3
+2019,EDM,Todd McLellan; Ken Hitchcock,2,hitchke99c,1.0,1
+2020,EDM,Dave Tippett,1,tippeda01c,1.0,1
+2021,EDM,Dave Tippett,1,tippeda01c,0.0,2
+2022,EDM,Dave Tippett; Jay Woodcroft,2,woodcja99c,1.0,1
+2023,EDM,Jay Woodcroft,1,woodcja99c,0.0,2
+2024,EDM,Jay Woodcroft; Kris Knoblauch,2,knoblkr01c,1.0,1
+2025,EDM,Kris Knoblauch,1,knoblkr01c,0.0,2
+2026,EDM,Kris Knoblauch,1,knoblkr01c,0.0,3
+2006,FLA,Jacques Martin,1,martija99c,0.0,1
+2007,FLA,Jacques Martin,1,martija99c,0.0,2
+2008,FLA,Jacques Martin,1,martija99c,0.0,3
+2009,FLA,Peter DeBoer,1,deboepe99c,1.0,1
+2010,FLA,Peter DeBoer,1,deboepe99c,0.0,2
+2011,FLA,Peter DeBoer,1,deboepe99c,0.0,3
+2012,FLA,Kevin Dineen,1,dineeke01c,1.0,1
+2013,FLA,Kevin Dineen,1,dineeke01c,0.0,2
+2014,FLA,Kevin Dineen; Peter Horachek,2,horacpe01c,1.0,1
+2015,FLA,Gerard Gallant,1,gallage01c,1.0,1
+2016,FLA,Gerard Gallant,1,gallage01c,0.0,2
+2017,FLA,Gerard Gallant; Tom Rowe,2,roweto01c,1.0,1
+2018,FLA,Bob Boughner,1,boughbo01c,1.0,1
+2019,FLA,Bob Boughner,1,boughbo01c,0.0,2
+2020,FLA,Joel Quenneville,1,quennjo01c,1.0,1
+2021,FLA,Joel Quenneville,1,quennjo01c,0.0,2
+2022,FLA,Joel Quenneville; Andrew Brunette,2,brunean01c,1.0,1
+2023,FLA,Paul Maurice,1,mauripa99c,1.0,1
+2024,FLA,Paul Maurice,1,mauripa99c,0.0,2
+2025,FLA,Paul Maurice,1,mauripa99c,0.0,3
+2026,FLA,Paul Maurice,1,mauripa99c,0.0,4
+2006,LAK,Andy Murray; John Torchetti,2,torchjo99c,1.0,1
+2007,LAK,Marc Crawford,1,crawfma01c,1.0,1
+2008,LAK,Marc Crawford,1,crawfma01c,0.0,2
+2009,LAK,Terry Murray,1,murrate01c,1.0,1
+2010,LAK,Terry Murray,1,murrate01c,0.0,2
+2011,LAK,Terry Murray,1,murrate01c,0.0,3
+2012,LAK,Terry Murray; John Stevens; Darryl Sutter,3,sutteda01c,1.0,1
+2013,LAK,Darryl Sutter,1,sutteda01c,0.0,2
+2014,LAK,Darryl Sutter,1,sutteda01c,0.0,3
+2015,LAK,Darryl Sutter,1,sutteda01c,0.0,4
+2016,LAK,Darryl Sutter,1,sutteda01c,0.0,5
+2017,LAK,Darryl Sutter,1,sutteda01c,0.0,6
+2018,LAK,John Stevens,1,stevejo01c,1.0,1
+2019,LAK,John Stevens; Willie Desjardins,2,desjawi99c,1.0,1
+2020,LAK,Todd McLellan,1,mclelto01c,1.0,1
+2021,LAK,Todd McLellan,1,mclelto01c,0.0,2
+2022,LAK,Todd McLellan,1,mclelto01c,0.0,3
+2023,LAK,Todd McLellan,1,mclelto01c,0.0,4
+2024,LAK,Todd McLellan; Jim Hiller,2,hilleji01c,1.0,1
+2025,LAK,Jim Hiller,1,hilleji01c,0.0,2
+2026,LAK,Jim Hiller; D.J. Smith,2,smithdj01c,1.0,1
+2006,MIN,Jacques Lemaire,1,lemaija01c,0.0,1
+2007,MIN,Jacques Lemaire,1,lemaija01c,0.0,2
+2008,MIN,Jacques Lemaire,1,lemaija01c,0.0,3
+2009,MIN,Jacques Lemaire,1,lemaija01c,0.0,4
+2010,MIN,Todd Richards,1,richato01c,1.0,1
+2011,MIN,Todd Richards,1,richato01c,0.0,2
+2012,MIN,Mike Yeo,1,yeomi99c,1.0,1
+2013,MIN,Mike Yeo,1,yeomi99c,0.0,2
+2014,MIN,Mike Yeo,1,yeomi99c,0.0,3
+2015,MIN,Mike Yeo,1,yeomi99c,0.0,4
+2016,MIN,Mike Yeo; John Torchetti,2,torchjo99c,1.0,1
+2017,MIN,Bruce Boudreau,1,boudrbr01c,1.0,1
+2018,MIN,Bruce Boudreau,1,boudrbr01c,0.0,2
+2019,MIN,Bruce Boudreau,1,boudrbr01c,0.0,3
+2020,MIN,Bruce Boudreau; Dean Evason,2,evasode01c,1.0,1
+2021,MIN,Dean Evason,1,evasode01c,0.0,2
+2022,MIN,Dean Evason,1,evasode01c,0.0,3
+2023,MIN,Dean Evason,1,evasode01c,0.0,4
+2024,MIN,Dean Evason; John Hynes,2,hynesjo01c,1.0,1
+2025,MIN,John Hynes,1,hynesjo01c,0.0,2
+2026,MIN,John Hynes,1,hynesjo01c,0.0,3
+2006,MTL,Claude Julien; Bob Gainey,2,gainebo01c,1.0,1
+2007,MTL,Guy Carbonneau,1,carbogu01c,1.0,1
+2008,MTL,Guy Carbonneau,1,carbogu01c,0.0,2
+2009,MTL,Guy Carbonneau; Bob Gainey,2,gainebo01c,1.0,1
+2010,MTL,Jacques Martin,1,martija99c,1.0,1
+2011,MTL,Jacques Martin,1,martija99c,0.0,2
+2012,MTL,Jacques Martin; Randy Cunneyworth,2,cunnera01c,1.0,1
+2013,MTL,Michel Therrien,1,therrmi99c,1.0,1
+2014,MTL,Michel Therrien,1,therrmi99c,0.0,2
+2015,MTL,Michel Therrien,1,therrmi99c,0.0,3
+2016,MTL,Michel Therrien,1,therrmi99c,0.0,4
+2017,MTL,Michel Therrien; Claude Julien,2,juliecl01c,1.0,1
+2018,MTL,Claude Julien,1,juliecl01c,0.0,2
+2019,MTL,Claude Julien,1,juliecl01c,0.0,3
+2020,MTL,Claude Julien,1,juliecl01c,0.0,4
+2021,MTL,Claude Julien; Dominique Ducharme,2,duchado99c,1.0,1
+2022,MTL,Dominique Ducharme; Martin St. Louis,2,stlouma01c,1.0,1
+2023,MTL,Martin St. Louis,1,stlouma01c,0.0,2
+2024,MTL,Martin St. Louis,1,stlouma01c,0.0,3
+2025,MTL,Martin St. Louis,1,stlouma01c,0.0,4
+2026,MTL,Martin St. Louis,1,stlouma01c,0.0,5
+2006,NJD,Larry Robinson; Lou Lamoriello,2,lamorlo99c,1.0,1
+2007,NJD,Claude Julien; Lou Lamoriello,2,lamorlo99c,1.0,1
+2008,NJD,Brent Sutter,1,suttebr02c,1.0,1
+2009,NJD,Brent Sutter,1,suttebr02c,0.0,2
+2010,NJD,Jacques Lemaire,1,lemaija01c,1.0,1
+2011,NJD,John MacLean; Jacques Lemaire,2,lemaija01c,1.0,1
+2012,NJD,Peter DeBoer,1,deboepe99c,1.0,1
+2013,NJD,Peter DeBoer,1,deboepe99c,0.0,2
+2014,NJD,Peter DeBoer,1,deboepe99c,0.0,3
+2015,NJD,Peter DeBoer; NJD Bench,2,benchnj01c,1.0,1
+2016,NJD,John Hynes,1,hynesjo01c,1.0,1
+2017,NJD,John Hynes,1,hynesjo01c,0.0,2
+2018,NJD,John Hynes,1,hynesjo01c,0.0,3
+2019,NJD,John Hynes,1,hynesjo01c,0.0,4
+2020,NJD,John Hynes; Alain Nasreddine,2,nasreal01c,1.0,1
+2021,NJD,Lindy Ruff,1,ruffli01c,1.0,1
+2022,NJD,Lindy Ruff,1,ruffli01c,0.0,2
+2023,NJD,Lindy Ruff,1,ruffli01c,0.0,3
+2024,NJD,Lindy Ruff; Travis Green,2,greentr01c,1.0,1
+2025,NJD,Sheldon Keefe,1,keefesh01c,1.0,1
+2026,NJD,Sheldon Keefe,1,keefesh01c,0.0,2
+2006,NSH,Barry Trotz,1,trotzba99c,0.0,1
+2007,NSH,Barry Trotz,1,trotzba99c,0.0,2
+2008,NSH,Barry Trotz,1,trotzba99c,0.0,3
+2009,NSH,Barry Trotz,1,trotzba99c,0.0,4
+2010,NSH,Barry Trotz,1,trotzba99c,0.0,5
+2011,NSH,Barry Trotz,1,trotzba99c,0.0,6
+2012,NSH,Barry Trotz,1,trotzba99c,0.0,7
+2013,NSH,Barry Trotz,1,trotzba99c,0.0,8
+2014,NSH,Barry Trotz,1,trotzba99c,0.0,9
+2015,NSH,Peter Laviolette,1,laviope01c,1.0,1
+2016,NSH,Peter Laviolette,1,laviope01c,0.0,2
+2017,NSH,Peter Laviolette,1,laviope01c,0.0,3
+2018,NSH,Peter Laviolette,1,laviope01c,0.0,4
+2019,NSH,Peter Laviolette,1,laviope01c,0.0,5
+2020,NSH,Peter Laviolette; John Hynes,2,hynesjo01c,1.0,1
+2021,NSH,John Hynes,1,hynesjo01c,0.0,2
+2022,NSH,John Hynes,1,hynesjo01c,0.0,3
+2023,NSH,John Hynes,1,hynesjo01c,0.0,4
+2024,NSH,Andrew Brunette,1,brunean01c,1.0,1
+2025,NSH,Andrew Brunette,1,brunean01c,0.0,2
+2026,NSH,Andrew Brunette,1,brunean01c,0.0,3
+2006,NYI,Steve Stirling; Brad Shaw,2,shawbr01c,1.0,1
+2007,NYI,Ted Nolan,1,nolante01c,1.0,1
+2008,NYI,Ted Nolan; Al Arbour; Ted Nolan,3,nolante01c,1.0,1
+2009,NYI,Scott Gordon,1,gordosc01c,1.0,1
+2010,NYI,Scott Gordon,1,gordosc01c,0.0,2
+2011,NYI,Scott Gordon; Jack Capuano,2,capuaja01c,1.0,1
+2012,NYI,Jack Capuano,1,capuaja01c,0.0,2
+2013,NYI,Jack Capuano,1,capuaja01c,0.0,3
+2014,NYI,Jack Capuano,1,capuaja01c,0.0,4
+2015,NYI,Jack Capuano,1,capuaja01c,0.0,5
+2016,NYI,Jack Capuano,1,capuaja01c,0.0,6
+2017,NYI,Jack Capuano; Doug Weight,2,weighdo01c,1.0,1
+2018,NYI,Doug Weight,1,weighdo01c,0.0,2
+2019,NYI,Barry Trotz,1,trotzba99c,1.0,1
+2020,NYI,Barry Trotz,1,trotzba99c,0.0,2
+2021,NYI,Barry Trotz,1,trotzba99c,0.0,3
+2022,NYI,Barry Trotz,1,trotzba99c,0.0,4
+2023,NYI,Lane Lambert,1,lambela01c,1.0,1
+2024,NYI,Lane Lambert; Patrick Roy,2,roypa01c,1.0,1
+2025,NYI,Patrick Roy,1,roypa01c,0.0,2
+2026,NYI,Patrick Roy; Peter DeBoer,2,deboepe99c,1.0,1
+2006,NYR,Tom Renney,1,renneto99c,0.0,1
+2007,NYR,Tom Renney,1,renneto99c,0.0,2
+2008,NYR,Tom Renney,1,renneto99c,0.0,3
+2009,NYR,Tom Renney; John Tortorella,2,tortojo99c,1.0,1
+2010,NYR,John Tortorella,1,tortojo99c,0.0,2
+2011,NYR,John Tortorella,1,tortojo99c,0.0,3
+2012,NYR,John Tortorella,1,tortojo99c,0.0,4
+2013,NYR,John Tortorella,1,tortojo99c,0.0,5
+2014,NYR,Alain Vigneault,1,vigneal01c,1.0,1
+2015,NYR,Alain Vigneault,1,vigneal01c,0.0,2
+2016,NYR,Alain Vigneault,1,vigneal01c,0.0,3
+2017,NYR,Alain Vigneault,1,vigneal01c,0.0,4
+2018,NYR,Alain Vigneault,1,vigneal01c,0.0,5
+2019,NYR,David Quinn,1,quinnda01c,1.0,1
+2020,NYR,David Quinn,1,quinnda01c,0.0,2
+2021,NYR,David Quinn,1,quinnda01c,0.0,3
+2022,NYR,Gerard Gallant,1,gallage01c,1.0,1
+2023,NYR,Gerard Gallant,1,gallage01c,0.0,2
+2024,NYR,Peter Laviolette,1,laviope01c,1.0,1
+2025,NYR,Peter Laviolette,1,laviope01c,0.0,2
+2026,NYR,Mike Sullivan,1,sullimi01c,1.0,1
+2006,OTT,Bryan Murray,1,murrabr99c,0.0,1
+2007,OTT,Bryan Murray,1,murrabr99c,0.0,2
+2008,OTT,John Paddock; Bryan Murray,2,murrabr99c,1.0,1
+2009,OTT,Craig Hartsburg; Cory Clouston,2,clousco99c,1.0,1
+2010,OTT,Cory Clouston,1,clousco99c,0.0,2
+2011,OTT,Cory Clouston,1,clousco99c,0.0,3
+2012,OTT,Paul MacLean,1,maclepa01c,1.0,1
+2013,OTT,Paul MacLean,1,maclepa01c,0.0,2
+2014,OTT,Paul MacLean,1,maclepa01c,0.0,3
+2015,OTT,Paul MacLean; Dave Cameron,2,camerda01c,1.0,1
+2016,OTT,Dave Cameron,1,camerda01c,0.0,2
+2017,OTT,Guy Boucher,1,bouchgu99c,1.0,1
+2018,OTT,Guy Boucher,1,bouchgu99c,0.0,2
+2019,OTT,Guy Boucher; Marc Crawford,2,crawfma01c,1.0,1
+2020,OTT,D.J. Smith,1,smithdj01c,1.0,1
+2021,OTT,D.J. Smith,1,smithdj01c,0.0,2
+2022,OTT,D.J. Smith,1,smithdj01c,0.0,3
+2023,OTT,D.J. Smith,1,smithdj01c,0.0,4
+2024,OTT,D.J. Smith; Jacques Martin,2,martija99c,1.0,1
+2025,OTT,Travis Green,1,greentr01c,1.0,1
+2026,OTT,Travis Green,1,greentr01c,0.0,2
+2006,PHI,Ken Hitchcock,1,hitchke99c,0.0,1
+2007,PHI,Ken Hitchcock; John Stevens,2,stevejo01c,1.0,1
+2008,PHI,John Stevens,1,stevejo01c,0.0,2
+2009,PHI,John Stevens,1,stevejo01c,0.0,3
+2010,PHI,John Stevens; Peter Laviolette,2,laviope01c,1.0,1
+2011,PHI,Peter Laviolette,1,laviope01c,0.0,2
+2012,PHI,Peter Laviolette,1,laviope01c,0.0,3
+2013,PHI,Peter Laviolette,1,laviope01c,0.0,4
+2014,PHI,Craig Berube; Peter Laviolette,2,laviope01c,1.0,1
+2015,PHI,Craig Berube,1,berubcr01c,1.0,1
+2016,PHI,Dave Hakstol,1,hakstda99c,1.0,1
+2017,PHI,Dave Hakstol,1,hakstda99c,0.0,2
+2018,PHI,Dave Hakstol,1,hakstda99c,0.0,3
+2019,PHI,Dave Hakstol; Scott Gordon,2,gordosc01c,1.0,1
+2020,PHI,Alain Vigneault,1,vigneal01c,1.0,1
+2021,PHI,Alain Vigneault,1,vigneal01c,0.0,2
+2022,PHI,Alain Vigneault; Mike Yeo,2,yeomi99c,1.0,1
+2023,PHI,John Tortorella,1,tortojo99c,1.0,1
+2024,PHI,John Tortorella,1,tortojo99c,0.0,2
+2025,PHI,John Tortorella; Brad Shaw,2,shawbr01c,1.0,1
+2026,PHI,Rick Tocchet,1,tocchri01c,1.0,1
+2006,PIT,Eddie Olczyk; Michel Therrien,2,therrmi99c,1.0,1
+2007,PIT,Michel Therrien,1,therrmi99c,0.0,2
+2008,PIT,Michel Therrien,1,therrmi99c,0.0,3
+2009,PIT,Michel Therrien; Dan Bylsma,2,bylsmda01c,1.0,1
+2010,PIT,Dan Bylsma,1,bylsmda01c,0.0,2
+2011,PIT,Dan Bylsma,1,bylsmda01c,0.0,3
+2012,PIT,Dan Bylsma,1,bylsmda01c,0.0,4
+2013,PIT,Dan Bylsma,1,bylsmda01c,0.0,5
+2014,PIT,Dan Bylsma,1,bylsmda01c,0.0,6
+2015,PIT,Mike Johnston,1,johnsmi99c,1.0,1
+2016,PIT,Mike Johnston; Mike Sullivan,2,sullimi01c,1.0,1
+2017,PIT,Mike Sullivan,1,sullimi01c,0.0,2
+2018,PIT,Mike Sullivan,1,sullimi01c,0.0,3
+2019,PIT,Mike Sullivan,1,sullimi01c,0.0,4
+2020,PIT,Mike Sullivan,1,sullimi01c,0.0,5
+2021,PIT,Mike Sullivan,1,sullimi01c,0.0,6
+2022,PIT,Mike Sullivan,1,sullimi01c,0.0,7
+2023,PIT,Mike Sullivan,1,sullimi01c,0.0,8
+2024,PIT,Mike Sullivan,1,sullimi01c,0.0,9
+2025,PIT,Mike Sullivan,1,sullimi01c,0.0,10
+2026,PIT,Dan Muse,1,museda01c,1.0,1
+2022,SEA,Dave Hakstol,1,hakstda99c,0.0,1
+2023,SEA,Dave Hakstol,1,hakstda99c,0.0,2
+2024,SEA,Dave Hakstol,1,hakstda99c,0.0,3
+2025,SEA,Dan Bylsma,1,bylsmda01c,1.0,1
+2026,SEA,Lane Lambert,1,lambela01c,1.0,1
+2006,SJS,Ron Wilson,1,wilsoro02c,0.0,1
+2007,SJS,Ron Wilson,1,wilsoro02c,0.0,2
+2008,SJS,Ron Wilson,1,wilsoro02c,0.0,3
+2009,SJS,Todd McLellan,1,mclelto01c,1.0,1
+2010,SJS,Todd McLellan,1,mclelto01c,0.0,2
+2011,SJS,Todd McLellan,1,mclelto01c,0.0,3
+2012,SJS,Todd McLellan,1,mclelto01c,0.0,4
+2013,SJS,Todd McLellan,1,mclelto01c,0.0,5
+2014,SJS,Todd McLellan,1,mclelto01c,0.0,6
+2015,SJS,Todd McLellan,1,mclelto01c,0.0,7
+2016,SJS,Peter DeBoer,1,deboepe99c,1.0,1
+2017,SJS,Peter DeBoer,1,deboepe99c,0.0,2
+2018,SJS,Peter DeBoer,1,deboepe99c,0.0,3
+2019,SJS,Peter DeBoer,1,deboepe99c,0.0,4
+2020,SJS,Bob Boughner; Peter DeBoer,2,deboepe99c,1.0,1
+2021,SJS,Bob Boughner,1,boughbo01c,1.0,1
+2022,SJS,Bob Boughner,1,boughbo01c,0.0,2
+2023,SJS,David Quinn,1,quinnda01c,1.0,1
+2024,SJS,David Quinn,1,quinnda01c,0.0,2
+2025,SJS,Ryan Warsofsky,1,warsory01w,1.0,1
+2026,SJS,Ryan Warsofsky,1,warsory01w,0.0,2
+2006,STL,Mike Kitchen,1,kitchmi01c,0.0,1
+2007,STL,Mike Kitchen; Andy Murray,2,murraan99c,1.0,1
+2008,STL,Andy Murray,1,murraan99c,0.0,2
+2009,STL,Andy Murray,1,murraan99c,0.0,3
+2010,STL,Andy Murray; Davis Payne,2,payneda01c,1.0,1
+2011,STL,Davis Payne,1,payneda01c,0.0,2
+2012,STL,Davis Payne; Ken Hitchcock,2,hitchke99c,1.0,1
+2013,STL,Ken Hitchcock,1,hitchke99c,0.0,2
+2014,STL,Ken Hitchcock,1,hitchke99c,0.0,3
+2015,STL,Ken Hitchcock,1,hitchke99c,0.0,4
+2016,STL,Ken Hitchcock,1,hitchke99c,0.0,5
+2017,STL,Ken Hitchcock; Mike Yeo,2,yeomi99c,1.0,1
+2018,STL,Mike Yeo,1,yeomi99c,0.0,2
+2019,STL,Mike Yeo; Craig Berube,2,berubcr01c,1.0,1
+2020,STL,Craig Berube,1,berubcr01c,0.0,2
+2021,STL,Craig Berube,1,berubcr01c,0.0,3
+2022,STL,Craig Berube,1,berubcr01c,0.0,4
+2023,STL,Craig Berube,1,berubcr01c,0.0,5
+2024,STL,Craig Berube; Drew Bannister,2,bannidr01c,1.0,1
+2025,STL,Drew Bannister; Jim Montgomery,2,montgji01c,1.0,1
+2026,STL,Jim Montgomery,1,montgji01c,0.0,2
+2006,TBL,John Tortorella,1,tortojo99c,0.0,1
+2007,TBL,John Tortorella,1,tortojo99c,0.0,2
+2008,TBL,John Tortorella,1,tortojo99c,0.0,3
+2009,TBL,Barry Melrose; Rick Tocchet,2,tocchri01c,1.0,1
+2010,TBL,Rick Tocchet,1,tocchri01c,0.0,2
+2011,TBL,Guy Boucher,1,bouchgu99c,1.0,1
+2012,TBL,Guy Boucher,1,bouchgu99c,0.0,2
+2013,TBL,Guy Boucher; Jon Cooper,2,coopejo01c,1.0,1
+2014,TBL,Jon Cooper,1,coopejo01c,0.0,2
+2015,TBL,Jon Cooper,1,coopejo01c,0.0,3
+2016,TBL,Jon Cooper,1,coopejo01c,0.0,4
+2017,TBL,Jon Cooper,1,coopejo01c,0.0,5
+2018,TBL,Jon Cooper,1,coopejo01c,0.0,6
+2019,TBL,Jon Cooper,1,coopejo01c,0.0,7
+2020,TBL,Jon Cooper,1,coopejo01c,0.0,8
+2021,TBL,Jon Cooper,1,coopejo01c,0.0,9
+2022,TBL,Jon Cooper,1,coopejo01c,0.0,10
+2023,TBL,Jon Cooper,1,coopejo01c,0.0,11
+2024,TBL,Jon Cooper,1,coopejo01c,0.0,12
+2025,TBL,Jon Cooper,1,coopejo01c,0.0,13
+2026,TBL,Jon Cooper,1,coopejo01c,0.0,14
+2006,TOR,Pat Quinn,1,quinnpa01c,0.0,1
+2007,TOR,Paul Maurice,1,mauripa99c,1.0,1
+2008,TOR,Paul Maurice,1,mauripa99c,0.0,2
+2009,TOR,Ron Wilson,1,wilsoro02c,1.0,1
+2010,TOR,Ron Wilson,1,wilsoro02c,0.0,2
+2011,TOR,Ron Wilson,1,wilsoro02c,0.0,3
+2012,TOR,Ron Wilson; Randy Carlyle,2,carlyra01c,1.0,1
+2013,TOR,Randy Carlyle,1,carlyra01c,0.0,2
+2014,TOR,Randy Carlyle,1,carlyra01c,0.0,3
+2015,TOR,Randy Carlyle; Peter Horachek,2,horacpe01c,1.0,1
+2016,TOR,Mike Babcock,1,babcomi99c,1.0,1
+2017,TOR,Mike Babcock,1,babcomi99c,0.0,2
+2018,TOR,Mike Babcock,1,babcomi99c,0.0,3
+2019,TOR,Mike Babcock,1,babcomi99c,0.0,4
+2020,TOR,Mike Babcock; Sheldon Keefe,2,keefesh01c,1.0,1
+2021,TOR,Sheldon Keefe,1,keefesh01c,0.0,2
+2022,TOR,Sheldon Keefe,1,keefesh01c,0.0,3
+2023,TOR,Sheldon Keefe,1,keefesh01c,0.0,4
+2024,TOR,Sheldon Keefe,1,keefesh01c,0.0,5
+2025,TOR,Craig Berube,1,berubcr01c,1.0,1
+2026,TOR,Craig Berube,1,berubcr01c,0.0,2
+2006,UTA,Wayne Gretzky,1,gretzwa01c,0.0,1
+2007,UTA,Wayne Gretzky,1,gretzwa01c,0.0,2
+2008,UTA,Wayne Gretzky,1,gretzwa01c,0.0,3
+2009,UTA,Wayne Gretzky,1,gretzwa01c,0.0,4
+2010,UTA,Dave Tippett,1,tippeda01c,1.0,1
+2011,UTA,Dave Tippett,1,tippeda01c,0.0,2
+2012,UTA,Dave Tippett,1,tippeda01c,0.0,3
+2013,UTA,Dave Tippett,1,tippeda01c,0.0,4
+2014,UTA,Dave Tippett,1,tippeda01c,0.0,5
+2015,UTA,Dave Tippett,1,tippeda01c,0.0,6
+2016,UTA,Dave Tippett,1,tippeda01c,0.0,7
+2017,UTA,Dave Tippett,1,tippeda01c,0.0,8
+2018,UTA,Rick Tocchet,1,tocchri01c,1.0,1
+2019,UTA,Rick Tocchet,1,tocchri01c,0.0,2
+2020,UTA,Rick Tocchet,1,tocchri01c,0.0,3
+2021,UTA,Rick Tocchet,1,tocchri01c,0.0,4
+2022,UTA,AndrÃ© Tourigny,1,tourian99c,1.0,1
+2023,UTA,AndrÃ© Tourigny,1,tourian99c,0.0,2
+2024,UTA,AndrÃ© Tourigny,1,tourian99c,0.0,3
+2025,UTA,AndrÃ© Tourigny,1,tourian99c,0.0,4
+2026,UTA,AndrÃ© Tourigny,1,tourian99c,0.0,5
+2006,VAN,Marc Crawford,1,crawfma01c,0.0,1
+2007,VAN,Alain Vigneault,1,vigneal01c,1.0,1
+2008,VAN,Alain Vigneault,1,vigneal01c,0.0,2
+2009,VAN,Alain Vigneault,1,vigneal01c,0.0,3
+2010,VAN,Alain Vigneault,1,vigneal01c,0.0,4
+2011,VAN,Alain Vigneault,1,vigneal01c,0.0,5
+2012,VAN,Alain Vigneault,1,vigneal01c,0.0,6
+2013,VAN,Alain Vigneault,1,vigneal01c,0.0,7
+2014,VAN,John Tortorella,1,tortojo99c,1.0,1
+2015,VAN,Willie Desjardins,1,desjawi99c,1.0,1
+2016,VAN,Willie Desjardins,1,desjawi99c,0.0,2
+2017,VAN,Willie Desjardins,1,desjawi99c,0.0,3
+2018,VAN,Travis Green,1,greentr01c,1.0,1
+2019,VAN,Travis Green,1,greentr01c,0.0,2
+2020,VAN,Travis Green,1,greentr01c,0.0,3
+2021,VAN,Travis Green,1,greentr01c,0.0,4
+2022,VAN,Travis Green; Bruce Boudreau,2,boudrbr01c,1.0,1
+2023,VAN,Bruce Boudreau; Rick Tocchet,2,tocchri01c,1.0,1
+2024,VAN,Rick Tocchet,1,tocchri01c,0.0,2
+2025,VAN,Rick Tocchet,1,tocchri01c,0.0,3
+2026,VAN,Adam Foote,1,footead01c,1.0,1
+2018,VGK,Gerard Gallant,1,gallage01c,0.0,1
+2019,VGK,Gerard Gallant,1,gallage01c,0.0,2
+2020,VGK,Gerard Gallant; Peter DeBoer,2,deboepe99c,1.0,1
+2021,VGK,Peter DeBoer,1,deboepe99c,0.0,2
+2022,VGK,Peter DeBoer,1,deboepe99c,0.0,3
+2023,VGK,Bruce Cassidy,1,cassibr01c,1.0,1
+2024,VGK,Bruce Cassidy,1,cassibr01c,0.0,2
+2025,VGK,Bruce Cassidy,1,cassibr01c,0.0,3
+2026,VGK,Bruce Cassidy; John Tortorella,2,tortojo99c,1.0,1
+2006,WPG,Bob Hartley,1,hartlbo99c,0.0,1
+2007,WPG,Bob Hartley,1,hartlbo99c,0.0,2
+2008,WPG,Bob Hartley; Don Waddell,2,waddedo01c,1.0,1
+2009,WPG,John Anderson,1,anderjo01c,1.0,1
+2010,WPG,John Anderson,1,anderjo01c,0.0,2
+2011,WPG,Craig Ramsay,1,ramsacr01c,1.0,1
+2012,WPG,Claude Noel,1,noelcl01c,1.0,1
+2013,WPG,Claude Noel,1,noelcl01c,0.0,2
+2014,WPG,Claude Noel; Paul Maurice,2,mauripa99c,1.0,1
+2015,WPG,Paul Maurice,1,mauripa99c,0.0,2
+2016,WPG,Paul Maurice,1,mauripa99c,0.0,3
+2017,WPG,Paul Maurice,1,mauripa99c,0.0,4
+2018,WPG,Paul Maurice,1,mauripa99c,0.0,5
+2019,WPG,Paul Maurice,1,mauripa99c,0.0,6
+2020,WPG,Paul Maurice,1,mauripa99c,0.0,7
+2021,WPG,Paul Maurice,1,mauripa99c,0.0,8
+2022,WPG,Paul Maurice; Dave Lowry,2,lowryda01c,1.0,1
+2023,WPG,Rick Bowness,1,bowneri01c,1.0,1
+2024,WPG,Rick Bowness,1,bowneri01c,0.0,2
+2025,WPG,Scott Arniel,1,arniesc01c,1.0,1
+2026,WPG,Scott Arniel,1,arniesc01c,0.0,2
+2006,WSH,Glen Hanlon,1,hanlogl01c,0.0,1
+2007,WSH,Glen Hanlon,1,hanlogl01c,0.0,2
+2008,WSH,Glen Hanlon; Bruce Boudreau,2,boudrbr01c,1.0,1
+2009,WSH,Bruce Boudreau,1,boudrbr01c,0.0,2
+2010,WSH,Bruce Boudreau,1,boudrbr01c,0.0,3
+2011,WSH,Bruce Boudreau,1,boudrbr01c,0.0,4
+2012,WSH,Bruce Boudreau; Dale Hunter,2,hunteda02c,1.0,1
+2013,WSH,Adam Oates,1,oatesad01c,1.0,1
+2014,WSH,Adam Oates,1,oatesad01c,0.0,2
+2015,WSH,Barry Trotz,1,trotzba99c,1.0,1
+2016,WSH,Barry Trotz,1,trotzba99c,0.0,2
+2017,WSH,Barry Trotz,1,trotzba99c,0.0,3
+2018,WSH,Barry Trotz,1,trotzba99c,0.0,4
+2019,WSH,Todd Reirden,1,reirdto01c,1.0,1
+2020,WSH,Todd Reirden,1,reirdto01c,0.0,2
+2021,WSH,Peter Laviolette,1,laviope01c,1.0,1
+2022,WSH,Peter Laviolette,1,laviope01c,0.0,2
+2023,WSH,Peter Laviolette,1,laviope01c,0.0,3
+2024,WSH,Spencer Carbery,1,carbesp01c,1.0,1
+2025,WSH,Spencer Carbery,1,carbesp01c,0.0,2
+2026,WSH,Spencer Carbery,1,carbesp01c,0.0,3

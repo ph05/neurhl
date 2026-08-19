@@ -1,0 +1,17 @@
+{
+  "playoffs": {
+    "n_games": 1350,
+    "goals_pg": 5.579,
+    "pen_pg": 8.802,
+    "home_win_pct": 0.5304,
+    "ot_pct": 0.2393
+  },
+  "regular": {
+    "n_games": 17922,
+    "goals_pg": 5.788,
+    "pen_pg": 7.696,
+    "home_win_pct": 0.5425,
+    "ot_pct": 0.2293
+  },
+  "note": "report-only (PLAN_V6 D5); playoff sim params unchanged"
+}

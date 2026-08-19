@@ -1,0 +1,13 @@
+{
+  "shift_toi_identity": {
+    "n": 490,
+    "mean_skater_hours_per_game": 5.949,
+    "note": "5 skaters + 1 goalie x ~60min = ~6h/game expected (penalties shave slightly; OT adds slightly)",
+    "in_band_5p5_6p3": 1.0
+  },
+  "coach_coverage": {
+    "seasons_full": 21,
+    "seasons_total": 21
+  },
+  "coach_change_rate": 0.335
+}
