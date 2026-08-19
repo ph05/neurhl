@@ -6,7 +6,7 @@ History-carried means run_elo over the full games table INCLUDING fetched 2026-2
 results (the previous live path seeded Elo from the prior and then blended the prior
 again — a double-shrink the replays never validated; fixed per review finding B5).
 
-`python live.py update`   fetch 2026-27 results -> blended ratings for v1/v4/ENS ->
+`python live.py update`   fetch 2026-27 results -> blended ratings for v1/v4/HOWE ->
                           rest-of-season sim (b2b d_adj, goalie layer, availability2,
                           banked standings, playoffs) -> output/live/live_odds_<date>.csv
                           + live_ratings_<date>.csv + append to clv_log.csv.
@@ -193,18 +193,18 @@ def main_update():
     _, gn = (banked_from(new) if len(new) else ({}, {}))
     ratings_by_model = {
         name: blended(prior[f"rating_{name}"] - 1505.0, elo_now, gn, n0)
-        for name in ("v1", "v4", "ens")}
+        for name in ("v1", "v4", "howe")}
     pd.DataFrame(ratings_by_model).round(2).rename_axis("team").to_csv(
         LIVE / f"live_ratings_{today}.csv")
 
     odds = rest_of_season(new, ratings_by_model, p2, p4)
     merged = pd.concat(odds.values(), ignore_index=True)
     merged.round(4).to_csv(LIVE / f"live_odds_{today}.csv", index=False)
-    ens = odds["ens"]
-    print(ens.head(8)[["team", "xPts", "playoff_pct", "cup_pct"]].round(3)
+    howe = odds["howe"]
+    print(howe.head(8)[["team", "xPts", "playoff_pct", "cup_pct"]].round(3)
           .to_string(index=False))
     clv = LIVE / "clv_log.csv"
-    snap = ens.assign(date=today)[["date", "team", "xPts", "playoff_pct", "cup_pct"]]
+    snap = howe.assign(date=today)[["date", "team", "xPts", "playoff_pct", "cup_pct"]]
     snap.round(4).to_csv(clv, mode="a", header=not clv.exists(), index=False)
     print(f"wrote live_odds_{today}.csv, live_ratings_{today}.csv, clv_log.csv "
           f"(median games {int(np.median(list(gn.values()))) if gn else 0})")

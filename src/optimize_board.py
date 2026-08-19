@@ -1,7 +1,7 @@
 """Portfolio allocation over a full totals board (PLAN_V4 I2 tooling; report-only).
 
 Method, in the order it matters:
-1. Exact joint distribution: the ENS 2026-27 sim (10k draws x 32 teams) prices every
+1. Exact joint distribution: the HOWE 2026-27 sim (10k draws x 32 teams) prices every
    instrument AND their correlations (same-team ladders are nested; cross-team totals
    are weakly coupled through head-to-head games).
 2. Market ensemble shrink: betting probability = 0.5*model + 0.5*devigged market.
@@ -27,7 +27,7 @@ from scipy.optimize import minimize
 from scipy.stats import norm
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from price_milestones import rebuild_ens_sim
+from howe import rebuild_sim
 from scoring import american_to_decimal, american_to_prob
 
 PROJ = Path(__file__).resolve().parents[1]
@@ -42,7 +42,7 @@ MKT_WEIGHT = 0.5
 
 
 def main():
-    sim = rebuild_ens_sim()
+    sim = rebuild_sim()
     teams = sim["teams"]
     draws = sim["pts"].astype(float)          # (n_sims, 32), integer-valued
     tidx = {t: i for i, t in enumerate(teams)}

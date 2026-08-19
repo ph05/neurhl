@@ -1,11 +1,14 @@
-"""v4 production report: gated improvements + locked ENS co-headline (PLAN_V4).
+"""v4 production report: gated improvements + locked HOWE co-headline (PLAN_V4).
+
+HOWE = Hockey Outcomes via Weighted Ensemble (prereg name "ENS"; renamed 2026-08-19,
+math/seeds unchanged — see src/howe.py).
 
 Ships: 19-feature ridge (prospect_pipeline in at h1+h2), amended overlay (rho*=0.421),
 availability 2.0 (bucket + zero-GP mass + goalie slot; h2 uses h2 ages), goalie
 game layer (starter rotation, b2b backup rule), b2b d_adj on the real schedule,
-float64 tiebreakers, ENS = 0.5*v1 + 0.5*v4 (decision locked before computation).
+float64 tiebreakers, HOWE = 0.5*v1 + 0.5*v4 (decision locked before computation).
 Writes output/nhl_2026_27_projections_v4.xlsx + CSVs + v4_prior_ratings.csv
-(v1/v4/ENS columns, consumed by live.py). v1/v2/v3 outputs untouched.
+(v1/v4/HOWE columns, consumed by live.py). v1/v2/v3 outputs untouched.
 """
 import json
 import sys
@@ -155,8 +158,8 @@ def main():
                 for t in yhat.index}
         phi = v1p["phi1"] if h == 1 else v1p["phi2"]
         r_v1 = E.project_ratings(end_r, ts, beta_prod, V_PROD, w=v1p["w"], phi=phi)
-        r_ens = {t: 1505.0 + 0.5 * (r_v1[t] - 1505.0) + 0.5 * (r_v4[t] - 1505.0)
-                 for t in r_v4}
+        r_howe = {t: 1505.0 + 0.5 * (r_v1[t] - 1505.0) + 0.5 * (r_v4[t] - 1505.0)
+                  for t in r_v4}
 
         noise_fn, nteams, par2, gpar, tand, frag = prod_noise(
             fb, sk, got, bios, ts, k, h, ship["n0_g"])
@@ -170,7 +173,7 @@ def main():
             sched["d_adj"] = 0.0
         gn = (GG.make_game_noise(sched, tand, k) if ship["goalie_layer"] else None)
         sim_cols = ["home", "away", "d_adj"]
-        for name, ratings, seed_off in (("v4", r_v4, 0), ("ENS", r_ens, 1)):
+        for name, ratings, seed_off in (("v4", r_v4, 0), ("HOWE", r_howe, 1)):
             assert sorted(ratings) == sorted(nteams)
             sim = E.simulate_season(ratings, sigma, sched[sim_cols], om,
                                     E.DIVISIONS_CURRENT, N_SIMS,
@@ -190,7 +193,7 @@ def main():
         if h == 1:
             prior_rows = {t: {"rating_v1": round(r_v1[t], 2),
                               "rating_v4": round(r_v4[t], 2),
-                              "rating_ens": round(r_ens[t], 2)} for t in sorted(r_v4)}
+                              "rating_howe": round(r_howe[t], 2)} for t in sorted(r_v4)}
             frag_h1, tand_h1, par2_h1, gpar_h1 = frag, tand, par2, gpar
 
     pd.DataFrame(prior_rows).T.rename_axis("team").to_csv(OUT / "v4_prior_ratings.csv")
@@ -200,12 +203,12 @@ def main():
     market = None
     if board is not None:
         cup_v4 = results[("2026_27", "v4")].set_index("Abbr")["Cup%"]
-        cup_ens = results[("2026_27", "ENS")].set_index("Abbr")["Cup%"]
-        market = SC.cup_market_sheet(cup_ens, board)
+        cup_howe = results[("2026_27", "HOWE")].set_index("Abbr")["Cup%"]
+        market = SC.cup_market_sheet(cup_howe, board)
         market["model_v4"] = market.team.map(cup_v4)
-        market = market.rename(columns={"model_p": "model_ens"})
+        market = market.rename(columns={"model_p": "model_howe"})
         print(f"market board: overround {market.attrs['overround']:.3f}; "
-              f"+EV (ENS, both devigs): {list(market[market.stake > 0].team)}")
+              f"+EV (HOWE, both devigs): {list(market[market.stake > 0].team)}")
 
     # ---- sheets
     prospect_sheet = pd.DataFrame({
@@ -236,8 +239,10 @@ def main():
     readme = [
         "NHL 2026-27 / 2027-28 — MODEL v4 (built 2026-08-17; PLAN_V4 prereg @ git 4bb92d9)",
         "",
-        "CO-HEADLINES: Projections_2026_27_ENS (locked 50/50 v1+v4 ensemble) and _v4.",
-        "The live 2026-27 season scores v1, v4 and ENS — pre-registered holdout.",
+        "CO-HEADLINES: Projections_2026_27_HOWE (locked 50/50 v1+v4 ensemble) and _v4.",
+        "HOWE = Hockey Outcomes via Weighted Ensemble (prereg name ENS; renamed "
+        "2026-08-19, math/seeds unchanged).",
+        "The live 2026-27 season scores v1, v4 and HOWE — pre-registered holdout.",
         "",
         "Gated in this round (train-only, 2018-2026 untouched):",
         f"1. GOALIE GAME LAYER: starter rotation per game, b2b backup rule "
@@ -266,9 +271,9 @@ def main():
     xlsx = OUT / "nhl_2026_27_projections_v4.xlsx"
     with pd.ExcelWriter(xlsx, engine="openpyxl") as xw:
         pd.DataFrame({"NHL Model v4": readme}).to_excel(xw, sheet_name="README", index=False)
-        results[("2026_27", "ENS")].to_excel(xw, sheet_name="Projections_2026_27_ENS", index=False)
+        results[("2026_27", "HOWE")].to_excel(xw, sheet_name="Projections_2026_27_HOWE", index=False)
         results[("2026_27", "v4")].to_excel(xw, sheet_name="Projections_2026_27_v4", index=False)
-        results[("2027_28", "ENS")].to_excel(xw, sheet_name="Projections_2027_28_ENS", index=False)
+        results[("2027_28", "HOWE")].to_excel(xw, sheet_name="Projections_2027_28_HOWE", index=False)
         results[("2027_28", "v4")].to_excel(xw, sheet_name="Projections_2027_28_v4", index=False)
         if market is not None:
             market.round(4).to_excel(xw, sheet_name="Market_vs_Model", index=False)
@@ -282,9 +287,9 @@ def main():
             for cell in ws[1]:
                 cell.fill = PatternFill("solid", fgColor="14532D")
                 cell.font = Font(bold=True, color="FFFFFF")
-    results[("2026_27", "ENS")].to_csv(OUT / "projections_2026_27_ens.csv", index=False)
+    results[("2026_27", "HOWE")].to_csv(OUT / "projections_2026_27_howe.csv", index=False)
     results[("2026_27", "v4")].to_csv(OUT / "projections_2026_27_v4.csv", index=False)
-    results[("2027_28", "ENS")].to_csv(OUT / "projections_2027_28_ens.csv", index=False)
+    results[("2027_28", "HOWE")].to_csv(OUT / "projections_2027_28_howe.csv", index=False)
     results[("2027_28", "v4")].to_csv(OUT / "projections_2027_28_v4.csv", index=False)
     if market is not None:
         market.round(4).to_csv(OUT / "market_vs_model_2026_27.csv", index=False)

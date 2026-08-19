@@ -2,13 +2,14 @@
 4bb92d9 BEFORE this ran; nothing here may change what ships, and nothing here tunes).
 
 1. Historical ensemble restatement, 2018-2026, h1+h2: deviation-space MAE/Spearman of
-   v1, the v4 feature pipeline (walk-forward, shipped feats/lams), and ENS = 0.5/0.5.
-   The ENS ships regardless (locked); these numbers are context for the live test.
+   v1, the v4 feature pipeline (walk-forward, shipped feats/lams), and HOWE = 0.5/0.5
+   (prereg name "ENS"; renamed 2026-08-19, math unchanged).
+   The HOWE ships regardless (locked); these numbers are context for the live test.
 2. CRPS restatement, 2018-2026: v1 frozen-pipeline simulated distributions vs actual
    points; baseline = regressed-prior point forecast (its CRPS equals its abs error).
    Quantifies the value of the distribution itself, which MAE cannot see.
 
-Writes output/report_only_v4.json + output/report_only_ens.csv. Single scripted run.
+Writes output/report_only_v4.json + output/report_only_howe.csv. Single scripted run.
 """
 import json
 import sys
@@ -41,7 +42,7 @@ def main():
     fb = FeatureBuilder(end_r, ts, goalie_hp=p2["goalie_hp"],
                         skater_delta=p2["skater_delta"])
 
-    # ---- 1. historical ENS (deviation space; overlay never in backtests)
+    # ---- 1. historical HOWE (deviation space; overlay never in backtests)
     rows = []
     for h in (1, 2):
         feats = ship[f"features_h{h}"]
@@ -62,18 +63,18 @@ def main():
             act = ACT.loc[T]
             gp2 = 2 * act.gp.reindex(xp.index)
             v1_dev = (xp / gp2 - (xp / gp2).mean()) * 164
-            ens_dev = 0.5 * v1_dev.reindex(v4_dev.index).fillna(0) + 0.5 * v4_dev
+            howe_dev = 0.5 * v1_dev.reindex(v4_dev.index).fillna(0) + 0.5 * v4_dev
             ydev = ((act.pts_pct - act.pts_pct.mean()) * 164).reindex(v4_dev.index)
             for name, pr in (("v1", v1_dev.reindex(v4_dev.index).fillna(0)),
-                             ("v4", v4_dev), ("ens", ens_dev)):
+                             ("v4", v4_dev), ("howe", howe_dev)):
                 rows.append({"horizon": h, "season": T, "model": name,
                              "mae": float((pr - ydev).abs().mean()),
                              "spearman": float(pr.rank().corr(ydev.rank()))})
-    ens = pd.DataFrame(rows)
-    ens.to_csv(OUT / "report_only_ens.csv", index=False)
-    print("=== REPORT-ONLY: historical ENS restatement (2018-2026) ===")
+    howe = pd.DataFrame(rows)
+    howe.to_csv(OUT / "report_only_howe.csv", index=False)
+    print("=== REPORT-ONLY: historical HOWE restatement (2018-2026) ===")
     for h in (1, 2):
-        sub = ens[ens.horizon == h]
+        sub = howe[howe.horizon == h]
         piv = sub.pivot_table(index="model", values=["mae", "spearman"], aggfunc="mean")
         core = sub[~sub.season.isin([2020, 2021])]
         piv2 = core.pivot_table(index="model", values="mae", aggfunc="mean")
@@ -110,11 +111,12 @@ def main():
               f"forecast CRPS(=MAE) {sub.mae_regressed_point.mean():.3f} "
               f"({100 * (1 - sub.crps_model.mean() / sub.mae_regressed_point.mean()):.0f}% "
               f"sharper)")
-    blob = {"ens_restatement": ens.round(4).to_dict("records"),
+    blob = {"howe_restatement": howe.round(4).to_dict("records"),
             "crps_restatement": cr.round(4).to_dict("records"),
-            "locked_before_run": "PLAN_V4 @ 4bb92d9; ENS ships regardless"}
+            "locked_before_run": "PLAN_V4 @ 4bb92d9; HOWE (prereg name ENS) "
+                                 "ships regardless"}
     (OUT / "report_only_v4.json").write_text(json.dumps(blob, indent=2))
-    print("\nwrote report_only_v4.json + report_only_ens.csv")
+    print("\nwrote report_only_v4.json + report_only_howe.csv")
 
 
 if __name__ == "__main__":

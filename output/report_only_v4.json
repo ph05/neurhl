@@ -1,5 +1,5 @@
 {
-  "ens_restatement": [
+  "howe_restatement": [
     {
       "horizon": 1,
       "season": 2018,
@@ -17,7 +17,7 @@
     {
       "horizon": 1,
       "season": 2018,
-      "model": "ens",
+      "model": "howe",
       "mae": 11.2218,
       "spearman": 0.5582
     },
@@ -38,7 +38,7 @@
     {
       "horizon": 1,
       "season": 2019,
-      "model": "ens",
+      "model": "howe",
       "mae": 7.8396,
       "spearman": 0.6542
     },
@@ -59,7 +59,7 @@
     {
       "horizon": 1,
       "season": 2020,
-      "model": "ens",
+      "model": "howe",
       "mae": 7.2713,
       "spearman": 0.6659
     },
@@ -80,7 +80,7 @@
     {
       "horizon": 1,
       "season": 2021,
-      "model": "ens",
+      "model": "howe",
       "mae": 12.717,
       "spearman": 0.7286
     },
@@ -101,7 +101,7 @@
     {
       "horizon": 1,
       "season": 2022,
-      "model": "ens",
+      "model": "howe",
       "mae": 12.165,
       "spearman": 0.7264
     },
@@ -122,7 +122,7 @@
     {
       "horizon": 1,
       "season": 2023,
-      "model": "ens",
+      "model": "howe",
       "mae": 11.035,
       "spearman": 0.6375
     },
@@ -143,7 +143,7 @@
     {
       "horizon": 1,
       "season": 2024,
-      "model": "ens",
+      "model": "howe",
       "mae": 9.1941,
       "spearman": 0.7316
     },
@@ -164,7 +164,7 @@
     {
       "horizon": 1,
       "season": 2025,
-      "model": "ens",
+      "model": "howe",
       "mae": 10.2835,
       "spearman": 0.4511
     },
@@ -185,7 +185,7 @@
     {
       "horizon": 1,
       "season": 2026,
-      "model": "ens",
+      "model": "howe",
       "mae": 11.8489,
       "spearman": 0.1665
     },
@@ -206,7 +206,7 @@
     {
       "horizon": 2,
       "season": 2018,
-      "model": "ens",
+      "model": "howe",
       "mae": 12.0894,
       "spearman": 0.2949
     },
@@ -227,7 +227,7 @@
     {
       "horizon": 2,
       "season": 2019,
-      "model": "ens",
+      "model": "howe",
       "mae": 9.9864,
       "spearman": 0.4509
     },
@@ -248,7 +248,7 @@
     {
       "horizon": 2,
       "season": 2020,
-      "model": "ens",
+      "model": "howe",
       "mae": 9.0143,
       "spearman": 0.4707
     },
@@ -269,7 +269,7 @@
     {
       "horizon": 2,
       "season": 2021,
-      "model": "ens",
+      "model": "howe",
       "mae": 13.6799,
       "spearman": 0.5351
     },
@@ -290,7 +290,7 @@
     {
       "horizon": 2,
       "season": 2022,
-      "model": "ens",
+      "model": "howe",
       "mae": 14.2502,
       "spearman": 0.5587
     },
@@ -311,7 +311,7 @@
     {
       "horizon": 2,
       "season": 2023,
-      "model": "ens",
+      "model": "howe",
       "mae": 12.0689,
       "spearman": 0.6263
     },
@@ -332,7 +332,7 @@
     {
       "horizon": 2,
       "season": 2024,
-      "model": "ens",
+      "model": "howe",
       "mae": 10.1816,
       "spearman": 0.689
     },
@@ -353,7 +353,7 @@
     {
       "horizon": 2,
       "season": 2025,
-      "model": "ens",
+      "model": "howe",
       "mae": 10.5266,
       "spearman": 0.5164
     },
@@ -374,7 +374,7 @@
     {
       "horizon": 2,
       "season": 2026,
-      "model": "ens",
+      "model": "howe",
       "mae": 11.9973,
       "spearman": 0.1573
     }
@@ -489,5 +489,5 @@
       "mae_regressed_point": 10.7889
     }
   ],
-  "locked_before_run": "PLAN_V4 @ 4bb92d9; ENS ships regardless"
+  "locked_before_run": "PLAN_V4 @ 4bb92d9; HOWE (prereg name ENS) ships regardless"
 }

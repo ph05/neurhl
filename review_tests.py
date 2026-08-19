@@ -457,19 +457,19 @@ late_y4 = ramp7[(ramp7.bucket == 3) & (ramp7.y == 4)].mean_pts.iloc[0]
 check("ramp ordering: top-10 picks >> picks 61+ at year 4", top_y4 > 5 * late_y4,
       f"{top_y4:.1f} vs {late_y4:.1f}")
 
-# 7.6 v4/ENS output consistency
-for tag in ("v4", "ens"):
+# 7.6 v4/HOWE output consistency
+for tag in ("v4", "howe"):
     dfp = pd.read_csv(PROJ / f"output/projections_2026_27_{tag}.csv")
     check(f"2026-27 {tag}: prob sums (PO 16 / Div 4 / Conf 2 / Cup 1)",
           abs(dfp["Playoff%"].sum() - 16) < 0.05 and abs(dfp["Division%"].sum() - 4) < 0.03
           and abs(dfp["Conference%"].sum() - 2) < 0.03 and abs(dfp["Cup%"].sum() - 1) < 0.02)
-ens7 = pd.read_csv(PROJ / "output/projections_2026_27_ens.csv").set_index("Abbr")
+howe7 = pd.read_csv(PROJ / "output/projections_2026_27_howe.csv").set_index("Abbr")
 v47 = pd.read_csv(PROJ / "output/projections_2026_27_v4.csv").set_index("Abbr")
 v17 = pd.read_csv(PROJ / "output/v4_prior_ratings.csv", index_col=0)
 mid = 0.5 * (v17.rating_v1 + v17.rating_v4)
-check("ENS prior ratings are the exact 50/50 blend",
-      (v17.rating_ens - mid).abs().max() < 0.02,
-      f"max dev {(v17.rating_ens - mid).abs().max():.3f}")
+check("HOWE prior ratings are the exact 50/50 blend",
+      (v17.rating_howe - mid).abs().max() < 0.02,
+      f"max dev {(v17.rating_howe - mid).abs().max():.3f}")
 
 # 7.7 market sheet math
 mk7 = pd.read_csv(PROJ / "output/market_vs_model_2026_27.csv")

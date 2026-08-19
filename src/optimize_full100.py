@@ -6,7 +6,7 @@ scenarios subject to sum(f) = 1 (not <= a Kelly fraction of a larger bankroll). 
 floor (2% of budget) encodes that a wipeout of the test budget is survivable; log
 still forces genuine diversification and starves negative-tail allocations.
 
-Instruments (all priced on ONE joint 10k-scenario ENS sim with playoffs, so Cup bets
+Instruments (all priced on ONE joint 10k-scenario HOWE sim with playoffs, so Cup bets
 and totals bets are coherent):
   - O/U totals sides (recorded board, two-sided devig exact)
   - point milestones (recorded board; OTT 110+/120+ excluded per the Tkachuk rho-stress)
@@ -15,7 +15,6 @@ Probabilities: 50% model / 50% devigged market (the market earned its vote: tota
 sum to the feasible league total). Model correlations kept via odds rescaling.
 Caps: 15% per line; min ticket $1; rounding to $0.50 preserving the $100 total.
 """
-import json
 import sys
 from pathlib import Path
 
@@ -25,12 +24,7 @@ from scipy.optimize import minimize
 from scipy.stats import norm
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import availability2 as A2
-import engine as E
-import goalie_game as GG
-import players as P
-from features import FeatureBuilder
-from report4 import prod_noise, real_schedule_flags
+from howe import rebuild_sim
 from scoring import american_to_decimal, american_to_prob
 
 PROJ = Path(__file__).resolve().parents[1]
@@ -44,29 +38,8 @@ MKT_W = 0.5
 EXCLUDE = {("OTT", 110), ("OTT", 120)}   # Tkachuk rho-stress casualties
 
 
-def rebuild_sim_with_playoffs(n_sims=10_000):
-    p2 = json.loads((OUT / "params_v2.json").read_text())
-    p4 = json.loads((OUT / "params_v4.json").read_text())
-    v1 = json.loads((OUT / "params.json").read_text())
-    ship = p4["shipped"]
-    g, ts = E.load()
-    preds, end_r, _ = E.run_elo(g, K=v1["K"], H=v1["H"], phi_s=v1["phi_s"])
-    fb = FeatureBuilder(end_r, ts, goalie_hp=p2["goalie_hp"],
-                        skater_delta=p2["skater_delta"])
-    om = E.fit_outcome(preds, list(range(2006, 2027)))
-    sk, go, skt, got, bios = P.load_panels()
-    ratings = dict(pd.read_csv(OUT / "v4_prior_ratings.csv", index_col=0)["rating_ens"])
-    noise_fn, *_ , tand, frag = prod_noise(fb, sk, got, bios, ts, p2["k"], 1, ship["n0_g"])
-    sched = real_schedule_flags()
-    gn = GG.make_game_noise(sched, tand, p2["k"]) if ship["goalie_layer"] else None
-    return E.simulate_season(ratings, ship["sigma_c4"], sched[["home", "away", "d_adj"]],
-                             om, E.DIVISIONS_CURRENT, n_sims,
-                             np.random.default_rng(412), playoffs=True,
-                             extra_noise=noise_fn, game_noise=gn)
-
-
 def main():
-    sim = rebuild_sim_with_playoffs()
+    sim = rebuild_sim(playoffs=True)
     teams = sim["teams"]
     tidx = {t: i for i, t in enumerate(teams)}
     draws = sim["pts"].astype(float)

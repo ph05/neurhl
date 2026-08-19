@@ -242,3 +242,21 @@ model ~1%). 2027-28 v4: MTL 106.2 top (age structure + pipeline + base), CAR 104
 Determinism: report4 double-run hash-identical; fixed-seed offsets (hash() removed).
 Running totals: 9 shipped mechanisms (5 prior + goalie layer, avail-2.0, prospects,
 ensemble), 17 documented nulls/unshipped (+persistence, +b2b-variance-neutrality note).
+
+# 2026-08-19 — RENAME: ENS -> HOWE (branding only; math/seeds byte-identical)
+
+The flagship ensemble is now HOWE — "Hockey Outcomes via Weighted Ensemble", after
+Gordie Howe (Mr. Hockey) — Nate Silver naming convention (PECOTA/CARMELO/RAPTOR).
+Pure rebrand of the model locked at prereg as "ENS" (PLAN_V4 I3 @ 4bb92d9): the
+definition r_howe = 1505 + 0.5*(r_v1-1505) + 0.5*(r_v4-1505), all params, seeds
+(411/412/422), and closures are unchanged. report4 rerun after the rename reproduced
+the projections CSVs byte-identically. Locked prereg text above and PLAN_*.md keep
+the original "ENS" wording as the historical record.
+
+Refactor with the rename: new src/howe.py is the single canonical rebuild of the
+deterministic HOWE 2026-27 sim (ratings + rebuild_sim), replacing duplicated copies
+in price_milestones.py and optimize_full100.py; optimize_board.py now imports from
+it. Renamed artifacts: projections_*_ens.csv -> *_howe.csv, point_threshold_probs,
+report_only_howe.csv, rating_ens -> rating_howe (v4_prior_ratings.csv), model_ens ->
+model_howe (market sheet), ens_restatement -> howe_restatement (report_only_v4.json),
+xlsx sheets Projections_*_ENS -> _HOWE, live.py model key "ens" -> "howe".
