@@ -509,5 +509,75 @@ check("gate F2 h2 gain recorded (dMAE <= -0.10)",
 
 print()
 print("=" * 78)
+print("SECTION 8: v5 data expansion (added 2026-08-19; PLAN_V5)")
+print("=" * 78)
+
+# 8.1 derived-table integrity + cross-source agreement (PLAN_V5 integrity bar)
+v5t = pd.read_csv(PROJ / "data/processed/team_seasons_v5.csv")
+check("team_seasons_v5 spans 2006-2026, unique (season, team)",
+      (v5t.season_end.min(), v5t.season_end.max()) == (2006, 2026)
+      and v5t.duplicated(["season_end", "team"]).sum() == 0, f"{len(v5t)} rows")
+pbp8 = pd.read_csv(PROJ / "data/processed/pbp_team_seasons.csv")
+gexp = g[(g.game_type == "R") & (g.season_end >= 2012)].groupby("season_end").size()
+gact = pbp8.groupby("season_end").gp.sum() / 2
+check("PBP corpus complete: team-games match games.csv every season 2012-2026",
+      (gexp.reindex(gact.index) == gact).all(),
+      f"{int(gact.sum())} team-games")
+cc8 = _json.loads((PROJ / "output/v5_crosschecks.json").read_text())
+check("faceoffs: PBP vs official mean abs diff < 0.2%",
+      cc8["fo_nhl_vs_pbp"]["mean_abs_diff"] < 0.002,
+      f"{cc8['fo_nhl_vs_pbp']['mean_abs_diff']:.2e}")
+check("faceoffs: MoneyPuck vs official mean abs diff < 2%",
+      cc8["fo_nhl_vs_mp"]["mean_abs_diff"] < 0.02)
+check("penalties: PBP vs official corr > 0.95",
+      cc8["pen_nhl_vs_pbp_corr"]["corr"] > 0.95,
+      f"{cc8['pen_nhl_vs_pbp_corr']['corr']:.3f}")
+check("SAT attribution resolved (corr > 0.99 vs official satPct)",
+      max(cc8["sat_attribution"]["corr_blk_owner_shoots"],
+          cc8["sat_attribution"]["corr_blk_owner_blocks"]) > 0.99,
+      cc8["sat_attribution"]["chosen"])
+
+# 8.2 v5 base-feature non-regression: the 19 v4 columns are bit-identical
+from features_v5 import CAND_MAP, FeatureBuilderV5 as FBV5
+fb5 = FBV5(end_rf, ts, goalie_hp=p2["goalie_hp"], skater_delta=p2["skater_delta"])
+f4 = fb2.team_features(2016, 1)
+f5 = fb5.team_features(2016, 1)
+check("FeatureBuilderV5 leaves all v4 features unchanged (V=2016)",
+      all((f4[c].fillna(-9) == f5[c].fillna(-9)).all() for c in f4.columns))
+check("v5 candidate columns populated at V=2016",
+      all(f5[c].notna().all() for c in CAND_MAP))
+
+# 8.3 gate record internally consistent
+p5j = _json.loads((PROJ / "output/params_v5.json").read_text())
+ok8 = True
+for h in ("h1", "h2"):
+    rec = p5j["gate_F3"][h]
+    for cand, r_ in rec["candidates"].items():
+        ok8 &= r_["pass"] == (r_["dmae"] < 0.0 and r_["stability"] >= 0.67)
+    if rec["joint"]["ships"]:
+        ok8 &= rec["joint"]["dmae_vs_incumbent"] < 0
+check("F3 gate record consistent with prereg rule (strict dMAE<0, stab>=0.67)", ok8)
+
+# 8.4 v5 output consistency (mirrors 7.6) + HOWE5 blend identity
+for tag in ("v5", "howe5"):
+    for yr in ("2026_27", "2027_28"):
+        f8 = PROJ / f"output/projections_{yr}_{tag}.csv"
+        if not f8.exists():
+            continue
+        dfp = pd.read_csv(f8)
+        check(f"{yr} {tag}: prob sums (PO 16 / Div 4 / Conf 2 / Cup 1)",
+              abs(dfp["Playoff%"].sum() - 16) < 0.05
+              and abs(dfp["Division%"].sum() - 4) < 0.03
+              and abs(dfp["Conference%"].sum() - 2) < 0.03
+              and abs(dfp["Cup%"].sum() - 1) < 0.02)
+pr5 = PROJ / "output/v5_prior_ratings.csv"
+if pr5.exists():
+    v58 = pd.read_csv(pr5, index_col=0)
+    mid5 = 0.5 * (v58.rating_v1 + v58.rating_v5)
+    check("HOWE5 prior ratings are the exact 50/50 blend",
+          (v58.rating_howe5 - mid5).abs().max() < 0.02)
+
+print()
+print("=" * 78)
 print(f"RESULT: {PASS} passed, {FAIL} failed")
 print("=" * 78)

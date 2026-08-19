@@ -1,0 +1,165 @@
+{
+  "prereg": {
+    "gate_F3": "per candidate/horizon: add-one-in train LOSO dMAE < 0.00 AND sign stability >= 0.67 (stricter than v4 F2: empirically mined pool)",
+    "collinearity": "among flurry_xg_dev/corsi_dev vs xg_dev: at most one ships; replacement variant evaluated, better form kept",
+    "joint": "greedy forward addition in dMAE order, accept only on joint LOSO improvement; final set must beat incumbent or v5 is null",
+    "windows": "train 2012-2017 (h1) / 2013-2017 (h2); 2018-2026 untouched; live 2026-27 holdout unaffected (PLAN_V5 H)",
+    "committed_before_results": "PLAN_V5.md written 2026-08-19 before this ran"
+  },
+  "gate_F3": {
+    "h1": {
+      "mae_incumbent": 9.8334,
+      "lam_incumbent": 64.0,
+      "candidates": {
+        "fo_dev": {
+          "dmae": -0.1534,
+          "stability": 1.0,
+          "pass": true
+        },
+        "pen_diff": {
+          "dmae": -0.1451,
+          "stability": 1.0,
+          "pass": true
+        },
+        "hd_share": {
+          "dmae": 0.0261,
+          "stability": 1.0,
+          "pass": false
+        },
+        "flurry_xg_dev": {
+          "dmae": -0.1357,
+          "stability": 1.0,
+          "pass": true
+        },
+        "corsi_dev": {
+          "dmae": -0.1691,
+          "stability": 1.0,
+          "pass": true
+        },
+        "rush_xg_dev": {
+          "dmae": 0.0212,
+          "stability": 1.0,
+          "pass": false
+        }
+      },
+      "xg_family": {
+        "candidate": "corsi_dev",
+        "mae_replace_xg_dev": 9.683,
+        "mae_add": 9.6643,
+        "chosen": "add"
+      },
+      "joint": {
+        "final_set_new": [
+          "corsi_dev",
+          "fo_dev",
+          "pen_diff"
+        ],
+        "removed": [],
+        "mae_final": 9.4562,
+        "dmae_vs_incumbent": -0.3772,
+        "lam": 64.0,
+        "ships": true
+      }
+    },
+    "h2": {
+      "mae_incumbent": 10.3428,
+      "lam_incumbent": 64.0,
+      "candidates": {
+        "fo_dev": {
+          "dmae": 0.0099,
+          "stability": 1.0,
+          "pass": false
+        },
+        "pen_diff": {
+          "dmae": 0.0473,
+          "stability": 0.8,
+          "pass": false
+        },
+        "hd_share": {
+          "dmae": -0.0381,
+          "stability": 1.0,
+          "pass": true
+        },
+        "flurry_xg_dev": {
+          "dmae": 0.0486,
+          "stability": 1.0,
+          "pass": false
+        },
+        "corsi_dev": {
+          "dmae": 0.0457,
+          "stability": 1.0,
+          "pass": false
+        },
+        "rush_xg_dev": {
+          "dmae": -0.0082,
+          "stability": 1.0,
+          "pass": true
+        }
+      },
+      "xg_family": null,
+      "joint": {
+        "final_set_new": [
+          "hd_share"
+        ],
+        "removed": [],
+        "mae_final": 10.3047,
+        "dmae_vs_incumbent": -0.0381,
+        "lam": 64.0,
+        "ships": true
+      }
+    }
+  },
+  "shipped": {
+    "features_h1": [
+      "elo_dev",
+      "xg_dev",
+      "gsax_1yr",
+      "gsax_marcel",
+      "tandem_gsax",
+      "goalie_consistency",
+      "goalie_age",
+      "goalie_trend",
+      "toi_age",
+      "share_u23",
+      "share_32p",
+      "prod_age_exp",
+      "returning_toi",
+      "star_share",
+      "draft_cap",
+      "player_points_proj",
+      "finishing",
+      "st_pp",
+      "prospect_pipeline",
+      "corsi_dev",
+      "fo_dev",
+      "pen_diff"
+    ],
+    "features_h2": [
+      "elo_dev",
+      "xg_dev",
+      "gsax_1yr",
+      "gsax_marcel",
+      "tandem_gsax",
+      "goalie_consistency",
+      "goalie_age",
+      "goalie_trend",
+      "toi_age",
+      "share_u23",
+      "share_32p",
+      "prod_age_exp",
+      "returning_toi",
+      "star_share",
+      "draft_cap",
+      "player_points_proj",
+      "finishing",
+      "st_pp",
+      "prospect_pipeline",
+      "hd_share"
+    ],
+    "lam_h1": 64.0,
+    "lam_h2": 64.0,
+    "v5_is_null": false,
+    "inherits": "everything else (overlay, availability2, goalie layer, sigma, n0_g) from params_v4 shipped"
+  },
+  "seconds": 5.9
+}

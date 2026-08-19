@@ -1,3 +1,9 @@
 .DS_Store
 __pycache__/
 *.pyc
+data/raw/pbp/
+data/raw/mp_shots/
+data/raw/hr_html/
+data/raw/nhl_reports/
+data/raw/edge/
+data/raw/fastrhockey/

@@ -260,3 +260,66 @@ it. Renamed artifacts: projections_*_ens.csv -> *_howe.csv, point_threshold_prob
 report_only_howe.csv, rating_ens -> rating_howe (v4_prior_ratings.csv), model_ens ->
 model_howe (market sheet), ens_restatement -> howe_restatement (report_only_v4.json),
 xlsx sheets Projections_*_ENS -> _HOWE, live.py model key "ens" -> "howe".
+
+# 2026-08-19 — v5 DATA EXPANSION (PLAN_V5; prereg'd before gates ran)
+
+DATA ACQUIRED (raw gitignored where heavy; derived tables committed):
+D1 MoneyPuck shot-level 2007-2025 zips (325MB, 2.3M shots) -> 5v5 rush/danger aggs.
+D2 NHL play-by-play corpus, api-web gamecenter JSON, 2012-2026 regular season:
+   17,647 games (gzipped, 140MB). Aggregated to pbp_team_seasons.csv; team-games
+   match games.csv EXACTLY every season incl. 2013 lockout + COVID years.
+D3 NHL stats-rest team reports x7, 2006-2026 (faceoffs, penalties, realtime, ST).
+D4 NHL EDGE team tracking 2022-2026 (report-only by prereg: 4-5 seasons cannot
+   reach the 2012-2017 train window).
+D5 hockey-reference league pages 2006-2026 -> SRS/SOS (hr_league.csv).
+D6 sportsdataverse fastRhockey-data bulk parquet (added): team/player box,
+   schedules, processed PBP 2010-2024 (688MB) as processed cross-check.
+
+CROSS-SOURCE INTEGRITY (output/v5_crosschecks.json): PBP faceoffs vs official
+r=0.9999998 (mad 1.7e-6); PBP penalties vs official r=0.990; MP faceoffs vs
+official mad 0.011%; blocked-shot attribution resolved (eventOwner = shooting team,
+r=0.9990 vs official satPct); MP "penaltiesFor" semantics resolved = penalties
+DRAWN (r=+0.972 vs official net, and note MP spells it "penalities" in some files);
+fastRhockey per-game FO% vs official r=0.954 (their per-game average vs official
+weighted). mp_teams xG identical to team_seasons (same source).
+
+EDA HEADLINES (full table in output/eda_v5.md):
+- Repeatability (lag-1): pen_drawn60/taken60 0.87 (style is sticky), hits 0.72,
+  corsi_sa 0.69, sat5_close 0.67, fo_pct 0.55, hd_share 0.59. rush_xg_pct 0.06 —
+  rush xG% is NOISE at the team-season level; correctly failed its gate.
+- Incremental signal vs v4 walk-forward residuals (train window only): flurry_xg
+  +0.26, fo_pct +0.20/+0.24, sat5_close +0.22, hd_xg_pct +0.20, corsi_sa +0.18.
+  Penalties: repeatable but ~zero incremental univariate correlation.
+- Score-state: 5v5 close-score SAT% beats all-score for t+1 points (0.487 vs
+  0.452) but they correlate 0.954 — modest edge.
+- EDGE (2022+, report-only): OZ-time% and SAT-diff mostly duplicate xG% (r 0.78 /
+  0.91) — tracking confirms rather than adds. But bursts>=20mph is HIGHLY
+  repeatable (lag-1 0.81-0.83) with r~0.26-0.28 to same-season points: a genuine
+  candidate for a future plan once history accumulates. speed_max/shot_speed are
+  near-noise year to year.
+
+GATES F3 (train-only 2012-2017, STRICT dMAE<0 + stability>=0.67; prereg'd):
+h1: fo_dev PASS (-0.153), pen_diff PASS (-0.145), corsi_dev PASS (-0.169),
+    flurry_xg_dev PASS (-0.136) but collinearity rule keeps only corsi_dev (best of
+    the xG family; replacement-for-xg_dev tested and rejected, add-form better);
+    hd_share fail (+0.026), rush_xg_dev fail (+0.021).
+    Joint greedy: +corsi_dev +fo_dev +pen_diff -> train LOSO 9.833 -> 9.456. SHIPS.
+h2: only hd_share PASS (-0.038); rush_xg_dev passed alone (-0.008) but rejected by
+    joint. Joint 10.343 -> 10.305. SHIPS (thin margin — see restatement caveat).
+Note pen_diff: near-zero univariate residual corr but strong LOSO gain — the ridge
+uses it as a conditioner (penalties drawn/taken are 0.87-repeatable), a reminder
+that add-one-in beats univariate screening.
+
+REPORT-ONLY RESTATEMENT 2018-2026 (computed AFTER lock, v4-I3 precedent):
+h1 MAE: v5 10.398 < v4 10.457; HOWE5 10.359 < HOWE 10.397 (best model on the
+   board); rho v5 0.598 best. The -0.38 train gain shrinks to -0.06 out-of-window
+   but is real and survives excl-20/21 (10.499 vs 10.573).
+h2 MAE: v5 11.741 > v4 11.715 — hd_share does NOT generalize; HOWE5 11.537 ~ HOWE
+   11.533. WATCH LIVE; a future plan may drop it (would need its own prereg).
+
+v5 HEADLINES: 2027-28 HOWE5: CAR 107.1 top; v5: MTL 106.5 top. Report-only
+2026-27: v5 CAR 110.4 / HOWE5 CAR 110.8. Live 2026-27 holdout UNCHANGED: still
+scores v1/v4/HOWE per PLAN_V4 (PLAN_V5 H; no mid-holdout swap). New seeds 511/522.
+Running totals: 12 shipped mechanisms (+corsi_dev, fo_dev, pen_diff @h1 +
+hd_share @h2 counted as one data-expansion round), 20 documented nulls/unshipped
+(+rush_xg_dev, +hd_share@h1, +flurry_xg_dev collinearity-excluded, EDGE deferred).

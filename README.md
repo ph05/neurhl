@@ -20,6 +20,18 @@ Every production run is deterministic (fixed seeds; reruns are hash-identical).
 The 2026-27 season is a pre-registered live holdout scoring v1, v4, and HOWE on
 rest-of-season MAE, CRPS, and playoff Brier.
 
+**v5 (2026-08-19, PLAN_V5):** the ridge gained gated features from an expanded data
+layer — MoneyPuck shot-level data, a 17,647-game NHL play-by-play corpus
+(2012-2026, cross-checked to r>0.99 against official aggregates), NHL stats-rest
+reports, hockey-reference SRS/SOS, NHL EDGE tracking (report-only), and
+sportsdataverse fastRhockey bulk data. Gate survivors: `corsi_dev`, `fo_dev`,
+`pen_diff` (h1) and `hd_share` (h2). Post-lock restatement 2018-2026: **HOWE5**
+(0.5·v1 + 0.5·v5) is the best h1 model on the board (MAE 10.359 vs HOWE 10.397).
+Per PLAN_V5 H the live 2026-27 holdout still scores v1/v4/HOWE unchanged; v5/HOWE5
+co-headline 2027-28. Raw corpora are gitignored (multi-GB); derived tables are
+committed (`data/processed/team_seasons_v5.csv`, `pbp_team_seasons.csv`,
+`hr_league.csv`, `edge_team.csv`).
+
 ## Layout
 
 | Path | What |

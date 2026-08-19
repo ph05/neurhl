@@ -1,0 +1,36 @@
+{
+  "fo_nhl_vs_mp": {
+    "n": 584,
+    "corr": 0.9998977536043061,
+    "mean_abs_diff": 0.00011296236333095971
+  },
+  "pen_semantics": {
+    "corr_drawnFor": 0.972421223957071,
+    "corr_takenFor": -0.972421223957071,
+    "resolution": "penaltiesFor = drawn by team"
+  },
+  "mp_teams_vs_team_seasons_xg": {
+    "n": 584,
+    "max_rel_diff": 0.0
+  },
+  "fo_nhl_vs_pbp": {
+    "n": 461,
+    "corr": 0.9999998195808515,
+    "mean_abs_diff": 1.6616052060734879e-06
+  },
+  "pen_nhl_vs_pbp_corr": {
+    "n": 461,
+    "corr": 0.9895271647042899
+  },
+  "fo_nhl_vs_fastrhockey": {
+    "n": 426,
+    "corr": 0.9535370517447833,
+    "mean_abs_diff": 0.003254918110035278
+  },
+  "sat_attribution": {
+    "n": 461,
+    "corr_blk_owner_shoots": 0.9989850313207532,
+    "corr_blk_owner_blocks": 0.7892564491536594,
+    "chosen": "sat5_pct_own"
+  }
+}
