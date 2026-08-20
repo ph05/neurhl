@@ -1,0 +1,5 @@
+run_id,date,phase,config_delta,tune_metric,tune_value,notes
+t0-001,2026-08-19,tier0,"fixed xgb depth4/300",pooled_logloss_2014_2017,0.69812,"mis-specified: worse than constant-home; superseded"
+t0-002,2026-08-19,tier0,"logistic + xgb early-stop pair",pooled_logloss_2014_2017,,"tier0 redefined pre-prereg as max-strength pair; see baselines_tune.json"
+nn-smoke-1,2026-08-20,pretrain,"--smoke 60-game CPU mechanical test",n/a,,"pipeline check only; discarded checkpoint"
+nn-smoke-2,2026-08-20,game_model,"--smoke T=2013 RANDOM embeddings 400 games",n/a,,"mechanical check only; not a config evaluation; artifacts deleted"

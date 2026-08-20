@@ -11,3 +11,9 @@ data/raw/shifts/
 data/raw/pbp_po/
 data/raw/player_landing/
 data/raw/edge_players/
+data/raw/htm_reports/
+data/raw/nst/
+data/raw/nhl_player_reports/
+data/raw/lineup_snapshots/
+neurhl/data/tensors/
+neurhl/checkpoints/
