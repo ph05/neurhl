@@ -387,3 +387,78 @@ CAR 110.7. Seeds 611/622; report6 rerun hash-identical. Battery extended
 (SECTION 9). Running totals: 14 shipped mechanisms, 25 documented
 nulls/unshipped (+line_cont, +coach_new, +prospect_prod, +travel x2 terms,
 +playoff params unchanged).
+
+## NeurHL-2 (generative simulation engine) — data foundation and RAPM anchor
+
+Prereg: `PLAN_NeurHL2.md`, committed before any NeurHL-2 number existed.
+Windows: DEV 2009-2011 (decisions) / TUNE 2012-2017 (spent by v1) / CONFIRM
+2018-2026 (untouched). `NO_SCORE = {2013, 2021}`. Projection target is
+**season_end 2027 = the 2026-27 season**; nothing projects 2027-28.
+
+### Ships
+
+**Exact on-ice data now covers every season 2008-2026.** Native shift JSON only
+goes back to season_end 2011 (verified against the API: gameId 2009020001
+returns 0 records). The HTM TH/TV reports cover 2008-2012 and were on disk,
+parsed only for the jersey map. Using both adds 3,690 games no other source
+supplies. 18.9M shifts over 23,883 games.
+
+**parse_toi phantom-shift bug.** Each player block ends with a per-period SUMMARY
+table sharing the shape of a shift row, so every player with <= 4 shifts in a
+period — every goalie, every fourth-liner — got a phantom shift. Found by
+cross-validating HTM against JSON on their 2011-2012 overlap. Fix: shift rows are
+the only ones whose time cells are "elapsed / remaining" pairs.
+corr(TOI) 0.98141 -> 0.99969; MAE 51.14s -> 0.32s; within 10s 78.3% -> 99.91%.
+
+**Stint table, 7.1M stints, validated 19/19 seasons.** Stints tile the game clock
+to exactly 3600s; player-TOI reconciles to 21,184-21,523s per team-game against a
+nominal 21,600; 5v5 goal share matches the official situationCode split within
+~0.01 in every season and across both data eras.
+
+**Event-attribution convention.** Events were attributed to the stint STARTING at
+their timestamp — correct only for faceoffs. A PP goal coincides with the
+penalised player stepping back on, so it was credited to the post-goal 5v5 unit.
+situationCode agreement 0.972 -> 0.999; share of goals labelled 5v5 0.90 -> 0.663
+against an official 0.652; PP G/60 6.70 against a real 6-7. Totals were unchanged
+throughout, which is why only an independent cross-check caught it.
+
+**MoneyPuck shot corpus parsed (2,079,359 shots, P3 allowlist).** Closes the
+pre-2012 coordinate hole: `events_2011.has_coord` is 0.000, MoneyPuck is 1.000
+back to 2008. The two feeds disagree on rink-end convention for 15.8% of GAMES
+(whole-game flips, uniform across period/team/direction), so raw x/y would have
+put ~16% of pre-2012 shots at the wrong end silently. Distance from |x| is
+flip-invariant and reconciles at corr 0.99972, 98.6% within 1 ft.
+
+### Nulls and negative results
+
+**Gate R1 (split-half repeatability) FAILED and was retired (A5).** RAPM
+0.656/0.505 vs raw on-ice 0.789/0.714. The gate was mis-specified: raw on-ice
+rate is more repeatable BECAUSE it is confounded — linemates, zone starts and
+competition all repeat across random halves. Reliability is not validity, and
+ranking rating systems this way rewards confounding.
+
+**lambda selection on stint-level MSE is degenerate.** The path is monotone to
+the grid edge and the whole grid spans 0.12%: the median stint is 3-9s carrying
+0-1 attempts, so irreducible variance swamps player signal.
+
+**Gate R1' (transfer across a team change) is INCONCLUSIVE, not passed.** Pooled
+over three DEV folds, target = realised on-ice net demeaned by the new team,
+Steiger test for dependent correlations:
+
+  movers (n=485)    RAPM 0.3866   raw 0.3226   raw-demeaned 0.3709
+                    p vs raw 0.086, p vs raw-demeaned 0.597
+  stayers (n=1346)  RAPM 0.4909   raw 0.3645   raw-demeaned 0.4933
+
+Team-season fixed effects (A6) fixed a real identification defect — within a
+season a player's column is nearly collinear with his team's roster — and lifted
+movers 0.3626 -> 0.3866 and stayers 0.4586 -> 0.4909. RAPM beats PLAIN raw
+significantly (p=0.042 on the undemeaned target). It does NOT beat a one-line
+team-demeaning at any conventional level: the two are statistically
+indistinguishable at this sample size.
+
+**Decision, on the record:** RAPM is retained as the anchor for STRUCTURAL
+reasons, not because it won the gate. It maps an arbitrary on-ice set to a rate,
+separates offence from defence, adjusts for opponents, and yields posterior SEs —
+all of which the hazard model and S5 need and a per-player scalar cannot provide.
+The caveat is carried forward and must be re-tested where it actually matters:
+does a hazard model anchored on RAPM beat one anchored on team-demeaned raw?

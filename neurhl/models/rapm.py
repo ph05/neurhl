@@ -57,9 +57,18 @@ TARGETS = {"cf": ("cf_h", "cf_a"), "sog": ("sog_h", "sog_a"),
            "g": ("g_h", "g_a")}
 POS_F, POS_D, POS_G = 0, 1, 2
 N_FIXED = 2                       # intercept, home
+TEAM_PEN = 10.0                   # identifies the collinear team-FE block only
 
 
-def load_stints(seasons, game_type=2, only_5v5=True) -> pd.DataFrame:
+def load_stints(seasons, game_type=2, only_5v5=True,
+                with_teams=True) -> pd.DataFrame:
+    """Stints for the given seasons.
+
+    `with_teams` attaches TEAM-SEASON ids (team identity crossed with season)
+    for the A6 fixed effects: a franchise is a different object in 2009 than in
+    2011, so a single team id would pool three different rosters and defeat the
+    purpose of absorbing team level.
+    """
     parts = []
     for s in seasons:
         p = TENSORS / f"stints_{s}.parquet"
@@ -69,6 +78,18 @@ def load_stints(seasons, game_type=2, only_5v5=True) -> pd.DataFrame:
         d = d[d.game_type == game_type]
         if only_5v5:
             d = d[d.is_5v5]
+        if with_teams:
+            gc = TENSORS / f"games_ctx_{s}.parquet"
+            if gc.exists():
+                g = pd.read_parquet(gc, columns=["game_id", "home_idx",
+                                                 "away_idx"]).set_index("game_id")
+                d = d.copy()
+                # home_idx is uint8; cast before crossing with season or the
+                # team-season id silently overflows
+                d["team_off"] = (d.game_id.map(g.home_idx).astype("float64")
+                                 + 100 * s)
+                d["team_def"] = (d.game_id.map(g.away_idx).astype("float64")
+                                 + 100 * s)
         parts.append(d)
     if not parts:
         raise FileNotFoundError(f"no stint shards for seasons {list(seasons)}")
@@ -96,8 +117,9 @@ class RAPMDesign:
     """Sparse design over stints; column layout is fixed and introspectable."""
 
     def __init__(self, st: pd.DataFrame, min_toi_s: int = 12000,
-                 positions: dict | None = None):
+                 positions: dict | None = None, team_fe: bool = True):
         self.min_toi_s = min_toi_s
+        self.team_fe = team_fe
         h = st[H_COLS].to_numpy(np.int64)
         a = st[A_COLS].to_numpy(np.int64)
         dur = st.dur_s.to_numpy(np.float64)
@@ -120,16 +142,34 @@ class RAPMDesign:
         self.repl_slot = {POS_F: n, POS_D: n + 1}
         self.n_eff = n + 2
         self.positions = positions
-        self.n_cols = N_FIXED + 2 * self.n_eff
-        self.off0 = N_FIXED
-        self.def0 = N_FIXED + self.n_eff
+        # Team-season fixed effects (A6). Within a season a player's column is
+        # nearly collinear with his team's roster -- he plays essentially every
+        # shift for one club -- so plain ridge cannot separate "this player is
+        # good" from "his team is good" and the coefficients retain team level.
+        # With team-season effects absorbed (unpenalised, like intercept/home),
+        # player coefficients estimate performance RELATIVE TO their own team,
+        # which is the identified quantity and the one that transfers when a
+        # player moves.
+        if self.team_fe and "team_off" in st.columns:
+            ts = pd.unique(pd.concat([st.team_off, st.team_def]).dropna())
+            self.team_slot = {int(t): i for i, t in enumerate(sorted(ts))}
+        else:
+            self.team_slot = {}
+            self.team_fe = False
+        self.n_team = len(self.team_slot)
+        self.tm_off0 = N_FIXED
+        self.tm_def0 = N_FIXED + self.n_team
+        self.off0 = N_FIXED + 2 * self.n_team
+        self.def0 = self.off0 + self.n_eff
+        self.n_cols = self.def0 + self.n_eff
+        self.n_unpen = N_FIXED + 2 * self.n_team
 
         allp = np.unique(np.concatenate([h.ravel(), a.ravel()]))
         allp = allp[allp > 0]
         self.lut = np.full(int(allp.max()) + 2, -1, np.int64)
         for pid in allp:
             self.lut[int(pid)] = self._slot(int(pid))
-        self.X, self.w, self.rows_meta = self._build(h, a, dur)
+        self.X, self.w, self.rows_meta = self._build(h, a, dur, st)
 
     def _slot(self, pid: int) -> int:
         s = self.pid_to_slot.get(pid)
@@ -160,13 +200,16 @@ class RAPMDesign:
         for pid in np.unique(np.concatenate([h.ravel(), a.ravel()])):
             if pid > 0 and self.lut[int(pid)] < 0:
                 self.lut[int(pid)] = self._slot(int(pid))
-        X, w, _ = self._build(h, a, dur)
+        X, w, _ = self._build(h, a, dur, st)
         return X, w
 
-    def _build(self, h, a, dur):
+    def _build(self, h, a, dur, st):
         n_st = len(dur)
         lut = self.lut
         rows, cols = [], []
+        if self.team_fe:
+            t_h = st.team_off.map(self.team_slot).to_numpy(dtype="float64")
+            t_a = st.team_def.map(self.team_slot).to_numpy(dtype="float64")
         for attack_home in (True, False):
             base = np.arange(n_st) + (0 if attack_home else n_st)
             off_side, def_side = (h, a) if attack_home else (a, h)
@@ -181,6 +224,12 @@ class RAPMDesign:
             if attack_home:
                 rows.append(base)                   # home indicator
                 cols.append(np.ones(n_st, np.int64))
+            if self.team_fe:
+                ta, td = (t_h, t_a) if attack_home else (t_a, t_h)
+                for tv, col0 in ((ta, self.tm_off0), (td, self.tm_def0)):
+                    m = np.isfinite(tv)
+                    rows.append(base[m])
+                    cols.append(col0 + tv[m].astype(np.int64))
         r = np.concatenate(rows)
         c = np.concatenate(cols)
         X = sparse.csr_matrix(
@@ -218,7 +267,16 @@ def solve(design: RAPMDesign, ys: dict, lam: float, want_se=True,
     X, w = design.X, design.w
     XtWX, XtWy = normal if normal is not None else normal_equations(design, ys)
     pen = np.full(design.n_cols, lam)
-    pen[:N_FIXED] = 0.0
+    n_unpen = getattr(design, "n_unpen", N_FIXED)
+    pen[:n_unpen] = 0.0
+    # The team-season dummies sum to 1 on every row, so together with the
+    # intercept they are EXACTLY collinear and the normal matrix is singular.
+    # A token ridge on that block alone breaks the tie. Team diagonals are the
+    # summed TOI of a whole roster (order 1e6-1e7 seconds), so TEAM_PEN is
+    # ~1e-6 relative -- it identifies the system without shrinking team effects
+    # in any meaningful sense, and player columns keep the full lambda.
+    if n_unpen > N_FIXED:
+        pen[N_FIXED:n_unpen] = TEAM_PEN
     cf = cho_factor(XtWX + np.diag(pen), lower=True, check_finite=False)
 
     out = {"lam": lam, "n_cols": design.n_cols, **design.rows_meta}

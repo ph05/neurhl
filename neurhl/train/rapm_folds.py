@@ -33,6 +33,7 @@ from train.fit_rapm import (LAM_GRID, MIN_TOI, TARGET, net_raw,  # noqa: E402
                             player_team)
 
 FOLDS = [([2008], 2009), ([2008, 2009], 2010), ([2008, 2009, 2010], 2011)]
+TEAM_FE = True                 # A6: absorb team-season level
 
 
 def steiger(r_xy, r_zy, r_xz, n):
@@ -59,7 +60,7 @@ def fold(train, test, lam):
     tr = R.load_stints(train)
     te = R.load_stints([test])
     des = R.RAPMDesign(tr, min_toi_s=MIN_TOI * len(train) // 3 or MIN_TOI,
-                       positions=R.player_positions(train))
+                       positions=R.player_positions(train), team_fe=TEAM_FE)
     ys = des.targets(tr, [TARGET])
     res = R.solve(des, ys, lam, want_se=False)
     coef = res["coef"][TARGET]
@@ -83,6 +84,7 @@ def fold(train, test, lam):
     thr = MIN_TOI * len(train) // 3 or MIN_TOI
     df = df[(df.toi_tr >= thr) & (df.toi_te >= thr // len(train) // 2 + 1)]
     df["post_dev"] = df.post_raw - df.groupby("team_to").post_raw.transform("mean")
+    df["post_abs"] = df.post_raw     # A6: undemeaned target reported alongside
     df["prior_raw_dev"] = (df.prior_raw
                            - df.groupby("team_from").prior_raw.transform("mean"))
 
@@ -104,7 +106,7 @@ def fold(train, test, lam):
                     "vs_raw": {"t": round(t1, 3), "p": round(p1, 5)},
                     "vs_raw_dev": {"t": round(t2, 3), "p": round(p2, 5)},
                     "_rows": sub[["prior_rapm", "prior_raw", "prior_raw_dev",
-                                  "post_dev"]].to_numpy().tolist()}
+                                  "post_dev", "post_abs"]].to_numpy().tolist()}
     return out
 
 
@@ -137,18 +139,22 @@ def main():
         A = np.array(pooled[grp])
         if len(A) < 20:
             continue
-        rr = float(np.corrcoef(A[:, 0], A[:, 3])[0, 1])
-        rw = float(np.corrcoef(A[:, 1], A[:, 3])[0, 1])
-        rd = float(np.corrcoef(A[:, 2], A[:, 3])[0, 1])
-        t1, p1 = steiger(rr, rw, float(np.corrcoef(A[:, 0], A[:, 1])[0, 1]), len(A))
-        t2, p2 = steiger(rr, rd, float(np.corrcoef(A[:, 0], A[:, 2])[0, 1]), len(A))
-        summary[grp] = {"n": len(A), "r_rapm": round(rr, 4),
-                        "r_raw": round(rw, 4), "r_raw_dev": round(rd, 4),
-                        "p_vs_raw": round(p1, 6), "p_vs_raw_dev": round(p2, 6)}
-        print(f"POOLED {grp:>8}: n={len(A):>4}  RAPM {rr:+.4f}  raw {rw:+.4f}  "
-              f"raw_dev {rd:+.4f}  |  p(vs raw)={p1:.5f}  p(vs raw_dev)={p2:.5f}")
+        summary[grp] = {"n": len(A)}
+        for tname, tcol in (("demeaned", 3), ("undemeaned", 4)):
+            rr = float(np.corrcoef(A[:, 0], A[:, tcol])[0, 1])
+            rw = float(np.corrcoef(A[:, 1], A[:, tcol])[0, 1])
+            rd = float(np.corrcoef(A[:, 2], A[:, tcol])[0, 1])
+            t1, p1 = steiger(rr, rw, float(np.corrcoef(A[:, 0], A[:, 1])[0, 1]), len(A))
+            t2, p2 = steiger(rr, rd, float(np.corrcoef(A[:, 0], A[:, 2])[0, 1]), len(A))
+            summary[grp][tname] = {"r_rapm": round(rr, 4), "r_raw": round(rw, 4),
+                                   "r_raw_dev": round(rd, 4),
+                                   "p_vs_raw": round(p1, 6),
+                                   "p_vs_raw_dev": round(p2, 6)}
+            print(f"POOLED {grp:>8} [{tname:>10}]: n={len(A):>4}  "
+                  f"RAPM {rr:+.4f}  raw {rw:+.4f}  raw_dev {rd:+.4f}  |  "
+                  f"p(vs raw)={p1:.5f}  p(vs raw_dev)={p2:.5f}")
 
-    mv = summary.get("movers", {})
+    mv = summary.get("movers", {}).get("demeaned", {})
     ok = (mv.get("r_rapm", -9) > max(mv.get("r_raw", 9), mv.get("r_raw_dev", 9))
           and mv.get("p_vs_raw_dev", 1) < 0.05)
     print(f"\nR1' {'PASS' if ok else 'INCONCLUSIVE'}: RAPM beats both raw "
