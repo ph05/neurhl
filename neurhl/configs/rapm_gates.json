@@ -9,53 +9,289 @@
  "target": "cf",
  "min_toi_s": 12000,
  "lam_grid": [
-  25.0,
-  50.0,
-  100.0,
   200.0,
-  400.0,
   800.0,
-  1600.0,
   3200.0,
-  6400.0
+  6400.0,
+  12800.0,
+  25600.0,
+  51200.0,
+  102400.0,
+  204800.0,
+  409600.0
  ],
- "lam_chosen": 6400.0,
+ "lam_chosen": 51200.0,
+ "selection_criterion": "R1_transfer",
  "path": [
   {
-   "lam": 25.0,
-   "wmse": 18237.826441197634
-  },
-  {
-   "lam": 50.0,
-   "wmse": 18237.479400113156
-  },
-  {
-   "lam": 100.0,
-   "wmse": 18236.8104203591
-  },
-  {
    "lam": 200.0,
-   "wmse": 18235.56526053758
-  },
-  {
-   "lam": 400.0,
-   "wmse": 18233.393879800482
+   "wmse": 18235.56526053758,
+   "transfer": {
+    "movers": {
+     "n": 152,
+     "rapm": 0.1388,
+     "raw": 0.3002,
+     "raw_dev": 0.3532,
+     "rapm_dev": 0.1195
+    },
+    "stayers": {
+     "n": 439,
+     "rapm": 0.3187,
+     "raw": 0.4196,
+     "raw_dev": 0.5282,
+     "rapm_dev": 0.3088
+    },
+    "all": {
+     "n": 591,
+     "rapm": 0.2706,
+     "raw": 0.3898,
+     "raw_dev": 0.4775,
+     "rapm_dev": 0.2573
+    }
+   }
   },
   {
    "lam": 800.0,
-   "wmse": 18230.012773090486
-  },
-  {
-   "lam": 1600.0,
-   "wmse": 18225.587937369863
+   "wmse": 18230.012773090486,
+   "transfer": {
+    "movers": {
+     "n": 152,
+     "rapm": 0.1692,
+     "raw": 0.3002,
+     "raw_dev": 0.3532,
+     "rapm_dev": 0.1493
+    },
+    "stayers": {
+     "n": 439,
+     "rapm": 0.349,
+     "raw": 0.4196,
+     "raw_dev": 0.5282,
+     "rapm_dev": 0.34
+    },
+    "all": {
+     "n": 591,
+     "rapm": 0.301,
+     "raw": 0.3898,
+     "raw_dev": 0.4775,
+     "rapm_dev": 0.288
+    }
+   }
   },
   {
    "lam": 3200.0,
-   "wmse": 18220.908868806335
+   "wmse": 18220.908868806335,
+   "transfer": {
+    "movers": {
+     "n": 152,
+     "rapm": 0.2541,
+     "raw": 0.3002,
+     "raw_dev": 0.3532,
+     "rapm_dev": 0.2341
+    },
+    "stayers": {
+     "n": 439,
+     "rapm": 0.4258,
+     "raw": 0.4196,
+     "raw_dev": 0.5282,
+     "rapm_dev": 0.421
+    },
+    "all": {
+     "n": 591,
+     "rapm": 0.38,
+     "raw": 0.3898,
+     "raw_dev": 0.4775,
+     "rapm_dev": 0.3696
+    }
+   }
   },
   {
    "lam": 6400.0,
-   "wmse": 18216.773509233146
+   "wmse": 18216.773509233146,
+   "transfer": {
+    "movers": {
+     "n": 152,
+     "rapm": 0.3133,
+     "raw": 0.3002,
+     "raw_dev": 0.3532,
+     "rapm_dev": 0.2952
+    },
+    "stayers": {
+     "n": 439,
+     "rapm": 0.4728,
+     "raw": 0.4196,
+     "raw_dev": 0.5282,
+     "rapm_dev": 0.4723
+    },
+    "all": {
+     "n": 591,
+     "rapm": 0.4301,
+     "raw": 0.3898,
+     "raw_dev": 0.4775,
+     "rapm_dev": 0.4231
+    }
+   }
+  },
+  {
+   "lam": 12800.0,
+   "wmse": 18213.56655255046,
+   "transfer": {
+    "movers": {
+     "n": 152,
+     "rapm": 0.3619,
+     "raw": 0.3002,
+     "raw_dev": 0.3532,
+     "rapm_dev": 0.3476
+    },
+    "stayers": {
+     "n": 439,
+     "rapm": 0.5082,
+     "raw": 0.4196,
+     "raw_dev": 0.5282,
+     "rapm_dev": 0.5126
+    },
+    "all": {
+     "n": 591,
+     "rapm": 0.4686,
+     "raw": 0.3898,
+     "raw_dev": 0.4775,
+     "rapm_dev": 0.4661
+    }
+   }
+  },
+  {
+   "lam": 25600.0,
+   "wmse": 18211.887996507056,
+   "transfer": {
+    "movers": {
+     "n": 152,
+     "rapm": 0.3876,
+     "raw": 0.3002,
+     "raw_dev": 0.3532,
+     "rapm_dev": 0.3784
+    },
+    "stayers": {
+     "n": 439,
+     "rapm": 0.5275,
+     "raw": 0.4196,
+     "raw_dev": 0.5282,
+     "rapm_dev": 0.5365
+    },
+    "all": {
+     "n": 591,
+     "rapm": 0.4893,
+     "raw": 0.3898,
+     "raw_dev": 0.4775,
+     "rapm_dev": 0.4914
+    }
+   }
+  },
+  {
+   "lam": 51200.0,
+   "wmse": 18212.821221591985,
+   "transfer": {
+    "movers": {
+     "n": 152,
+     "rapm": 0.3924,
+     "raw": 0.3002,
+     "raw_dev": 0.3532,
+     "rapm_dev": 0.3888
+    },
+    "stayers": {
+     "n": 439,
+     "rapm": 0.5325,
+     "raw": 0.4196,
+     "raw_dev": 0.5282,
+     "rapm_dev": 0.5464
+    },
+    "all": {
+     "n": 591,
+     "rapm": 0.4941,
+     "raw": 0.3898,
+     "raw_dev": 0.4775,
+     "rapm_dev": 0.5012
+    }
+   }
+  },
+  {
+   "lam": 102400.0,
+   "wmse": 18217.143011640022,
+   "transfer": {
+    "movers": {
+     "n": 152,
+     "rapm": 0.3815,
+     "raw": 0.3002,
+     "raw_dev": 0.3532,
+     "rapm_dev": 0.3846
+    },
+    "stayers": {
+     "n": 439,
+     "rapm": 0.5244,
+     "raw": 0.4196,
+     "raw_dev": 0.5282,
+     "rapm_dev": 0.5446
+    },
+    "all": {
+     "n": 591,
+     "rapm": 0.4855,
+     "raw": 0.3898,
+     "raw_dev": 0.4775,
+     "rapm_dev": 0.499
+    }
+   }
+  },
+  {
+   "lam": 204800.0,
+   "wmse": 18224.21928426657,
+   "transfer": {
+    "movers": {
+     "n": 152,
+     "rapm": 0.3591,
+     "raw": 0.3002,
+     "raw_dev": 0.3532,
+     "rapm_dev": 0.3702
+    },
+    "stayers": {
+     "n": 439,
+     "rapm": 0.5032,
+     "raw": 0.4196,
+     "raw_dev": 0.5282,
+     "rapm_dev": 0.5325
+    },
+    "all": {
+     "n": 591,
+     "rapm": 0.4647,
+     "raw": 0.3898,
+     "raw_dev": 0.4775,
+     "rapm_dev": 0.4869
+    }
+   }
+  },
+  {
+   "lam": 409600.0,
+   "wmse": 18231.914932500044,
+   "transfer": {
+    "movers": {
+     "n": 152,
+     "rapm": 0.3293,
+     "raw": 0.3002,
+     "raw_dev": 0.3532,
+     "rapm_dev": 0.3499
+    },
+    "stayers": {
+     "n": 439,
+     "rapm": 0.4715,
+     "raw": 0.4196,
+     "raw_dev": 0.5282,
+     "rapm_dev": 0.5123
+    },
+    "all": {
+     "n": 591,
+     "rapm": 0.4345,
+     "raw": 0.3898,
+     "raw_dev": 0.4775,
+     "rapm_dev": 0.4676
+    }
+   }
   }
  ],
  "baselines": {
@@ -63,41 +299,66 @@
   "raw_onice": 18231.87367021241,
   "team_fe": 18245.49087056406
  },
- "R1": {
+ "R1_retired_A5": {
   "per_seed": [
    {
-    "rapm_off_r": 0.6455,
-    "rapm_def_r": 0.5516,
+    "rapm_off_r": 0.737,
+    "rapm_def_r": 0.6298,
     "raw_off_r": 0.7867,
     "raw_def_r": 0.7487,
     "n_common": 862
    },
    {
-    "rapm_off_r": 0.6676,
-    "rapm_def_r": 0.4746,
+    "rapm_off_r": 0.7465,
+    "rapm_def_r": 0.5868,
     "raw_off_r": 0.7899,
     "raw_def_r": 0.6888,
     "n_common": 859
    },
    {
-    "rapm_off_r": 0.6534,
-    "rapm_def_r": 0.4883,
+    "rapm_off_r": 0.7411,
+    "rapm_def_r": 0.5821,
     "raw_off_r": 0.7904,
     "raw_def_r": 0.7056,
     "n_common": 858
    }
   ],
   "mean": {
-   "rapm_off_r": 0.6555,
-   "rapm_def_r": 0.5048,
+   "rapm_off_r": 0.7415,
+   "rapm_def_r": 0.5996,
    "raw_off_r": 0.789,
    "raw_def_r": 0.7144
   },
-  "pass": false
+  "note": "raw is more repeatable by being confounded; reliability != validity"
+ },
+ "R1_transfer": {
+  "movers": {
+   "n": 152,
+   "rapm": 0.3924,
+   "raw": 0.3002,
+   "raw_dev": 0.3532,
+   "rapm_dev": 0.3888
+  },
+  "stayers": {
+   "n": 439,
+   "rapm": 0.5325,
+   "raw": 0.4196,
+   "raw_dev": 0.5282,
+   "rapm_dev": 0.5464
+  },
+  "all": {
+   "n": 591,
+   "rapm": 0.4941,
+   "raw": 0.3898,
+   "raw_dev": 0.4775,
+   "rapm_dev": 0.5012
+  },
+  "pass": true
  },
  "R2": {
   "pass": true,
-  "wmse": 18216.773509233146
+  "wmse": 18212.821221591985,
+  "margin_vs_raw": -0.00104500771369187
  },
  "n_players": 882,
  "n_stints_train": 742015,

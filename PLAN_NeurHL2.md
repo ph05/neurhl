@@ -122,6 +122,51 @@ stratified by availability regime.
 **Ablations required before any causal claim:** remove EDGE (G5), graph edges,
 goalie module, score effects, scratches.
 
+### A6 — R1′ INCONCLUSIVE on DEV; team-season fixed effects added to the RAPM design
+
+*Declared after the A5 replacement gate returned a negative result, before the
+corrected estimator is run. The negative result stands recorded.*
+
+**Measured on all three DEV folds at fixed λ=51,200** (2008→2009, 2008-09→2010,
+2008-10→2011), target = realised on-ice net rate in the test season demeaned by
+the player's new team:
+
+| pooled | n | RAPM | raw | raw (team-demeaned) | p vs raw | p vs raw-dev |
+|---|---|---|---|---|---|---|
+| movers | 485 | 0.3626 | 0.3226 | **0.3709** | 0.151 | 0.793 |
+| stayers | 1346 | 0.4586 | 0.3645 | **0.4933** | <0.001 | 0.018 |
+
+RAPM beats *plain* raw decisively, so it is removing real confounding. But a
+one-line within-team demeaning matches or beats it, significantly so for stayers
+— **in the wrong direction**. R1′ is therefore **INCONCLUSIVE**, not passed. The
+single-fold 0.3924 reported earlier was λ selected on that same fold and is
+optimistically biased; it is withdrawn.
+
+**Diagnosis — a real identification defect, not a target artefact.** Within a
+season a player's design column is nearly collinear with his team's roster,
+because he plays essentially every shift for one team. Ridge cannot cleanly
+separate "this player is good" from "this player's team is good", so the fitted
+coefficients retain team level. The transfer target is a *within-team* deviation,
+which is exactly the component the estimator fails to isolate — and which
+demeaning gets for free.
+
+**Correction:** add **team-season fixed effects** to the design (unpenalised,
+alongside intercept and home). Player coefficients then estimate performance
+*relative to their own team*, which is the identified and transferable quantity.
+This is a standard RAPM variant, and it is a fix to the estimator, not a change
+to the test.
+
+**Anti-forking-path condition, binding:** the corrected estimator is evaluated on
+**the same three pre-specified folds**, and reported against **both** targets —
+team-demeaned *and* undemeaned realised on-ice rate — because the demeaned target
+structurally favours within-team predictors and the undemeaned one favours
+team-level predictors. Reporting only the flattering one is the failure mode this
+condition exists to prevent. If the corrected estimator still fails to beat
+team-demeaned raw, **RAPM is dropped as the anchor and the team-demeaned raw rate
+becomes the prior the hazard model is anchored on** — the anchor is chosen on
+evidence, and the plan's residual `effect = anchor + s·tanh(δ)` form is unchanged
+either way.
+
 ### A5 — R1 retired and replaced; λ no longer selected on stint MSE
 
 *Declared after seeing the DEV result, before running the replacement. The
