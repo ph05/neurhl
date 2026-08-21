@@ -110,7 +110,12 @@ def fit_vantage(v: int, cache: dict) -> dict:
         "goal": yte, "xg": p,
         "sk_h": te.homeSkatersOnIce.to_numpy(),
         "sk_a": te.awaySkatersOnIce.to_numpy(),
-        "en": (te.homeEmptyNet | te.awayEmptyNet).to_numpy()})
+        "en": (te.homeEmptyNet | te.awayEmptyNet).to_numpy(),
+        # time/period/shooter are what let these predictions be joined back to
+        # the stint table -- without them the artifact is a dead end
+        "time": te.time.to_numpy(), "period": te.period.to_numpy(),
+        "shooter": te.shooterPlayerId.to_numpy(),
+        "team_code": te.teamCode.to_numpy()})
 
     return {"vantage": v, "n_train": int(len(ytr)), "n_test": int(len(yte)),
             "base_rate_train": round(base_rate, 5),
