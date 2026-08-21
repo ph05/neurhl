@@ -119,12 +119,24 @@ def _game(args):
         act = (t0[None, :] <= mid[:, None]) & (mid[:, None] < t1[None, :])
         K = len(a)
 
-        # --- events -> stint index, vectorised
+        # --- events -> stint index, vectorised, with the TWO boundary
+        # conventions validated in build_onice (98.9% vs situationCode).
+        # A faceoff belongs to the stint STARTING at its timestamp: the new
+        # players are already on for it. Every other event belongs to the stint
+        # ENDING there -- those are the conditions that produced it.
+        #
+        # This is not a detail. A power-play goal at time t coincides with the
+        # penalised player stepping back on at t, so crediting the interval
+        # starting at t hands the goal to the post-goal 5v5 unit. Measured on
+        # 2016 with the single-convention version: 90% of goals were labelled
+        # 5v5 against a true share near 73%, i.e. PP goals were contaminating
+        # the 5v5 RAPM design.
         emask = (e_t >= lo) & (e_t < max(end, lo + 1))
-        idx = np.searchsorted(np.concatenate([a, [b[-1]]]), e_t[emask],
-                              side="right") - 1
-        idx = np.clip(idx, 0, K - 1)
         et, eh = e_type[emask], e_home[emask]
+        i_start = np.clip(np.searchsorted(pts, e_t[emask], "right") - 1, 0, K - 1)
+        i_end = np.clip(np.searchsorted(pts, e_t[emask], "left") - 1, 0, K - 1)
+        is_fo = np.isin(et, _EIDS["faceoff"])
+        idx = np.where(is_fo, i_start, i_end)
         acc = {}
         for nm, ids in (("cf", _EIDS["attempt"]), ("sog", _EIDS["sog"]),
                         ("g", _EIDS["goal"]), ("fo", _EIDS["faceoff"]),
@@ -143,12 +155,12 @@ def _game(args):
             first[si[firsts]] = np.flatnonzero(emask)[order][firsts]
 
         # --- zone / on-the-fly from a faceoff at the stint boundary
-        fo_m = np.isin(et, _EIDS["faceoff"])
         fo_stint = np.full(K, -1, np.int64)
-        if fo_m.any():
-            fi = np.flatnonzero(emask)[fo_m]
-            at_start = np.abs(e_t[fi] - a[idx[fo_m]]) <= 2
-            fo_stint[idx[fo_m][at_start]] = fi[at_start]
+        if is_fo.any():
+            fi = np.flatnonzero(emask)[is_fo]
+            ks = idx[is_fo]
+            at_start = np.abs(e_t[fi] - a[ks]) <= 2
+            fo_stint[ks[at_start]] = fi[at_start]
 
         for k in range(K):
             on = act[k]
