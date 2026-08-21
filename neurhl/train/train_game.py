@@ -23,7 +23,7 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from common import CKPT, NOUT, TENSORS  # noqa: E402
+from common import CKPT, NOUT, PROJ, TENSORS  # noqa: E402
 from models.game_model import GameModel, game_loss  # noqa: E402
 
 EWMA_ALPHA = 0.1
@@ -79,6 +79,36 @@ def form_vector(rec) -> list:
             rec["a_gf"] / 3.0, rec["a_ga"] / 3.0, rec["a_pts"] / 2.0]
 
 
+def elo_features(gc: pd.DataFrame) -> pd.DataFrame:
+    """Pre-game v1 Elo expectation per game (PLAN_NeurHL amendment A2).
+
+    engine.run_elo is chronological and returns PRE-game ratings, so this is
+    P1-clean by construction. Gives the network the incumbent's own summary of
+    team strength so it can learn the RESIDUAL — the things Elo structurally
+    cannot see (this goalie, this rest pattern, this lineup) — rather than
+    having to rediscover team strength from roster composition alone.
+    """
+    import backtest as B
+    import engine as E
+    v1 = json.loads((PROJ / "output" / "params.json").read_text())
+    preds, _, _ = E.run_elo(B.g, K=v1["K"], H=v1["H"], phi_s=v1["phi_s"])
+    preds = preds.copy()
+    preds["date"] = pd.to_datetime(B.g.date).dt.strftime("%Y-%m-%d").values
+    gs = pd.read_parquet(TENSORS / "_edacache" / "game_summary.parquet")
+    gs = gs[gs.game_type == 2].copy()
+    remap = {"PHX": "UTA", "ARI": "UTA", "ATL": "WPG"}
+    gs["home_m"] = gs.home.replace(remap)
+    gs["away_m"] = gs.away.replace(remap)
+    j = gs[["game_id", "date", "home_m", "away_m"]].merge(
+        preds[["date", "home", "away", "e_home", "rh", "ra"]].rename(
+            columns={"home": "home_m", "away": "away_m"}),
+        on=["date", "home_m", "away_m"], how="inner")
+    j["elo_diff"] = (j.rh - j.ra) / 100.0
+    j["elo_logit"] = np.log(np.clip(j.e_home, 1e-6, 1 - 1e-6)
+                            / np.clip(1 - j.e_home, 1e-6, 1 - 1e-6))
+    return j.set_index("game_id")[["elo_diff", "elo_logit"]]
+
+
 def era_table_row(T: int) -> np.ndarray:
     """Scaled walk-forward era vector for season T (shared with sim/)."""
     from data.tensorize_games import era_table
@@ -113,7 +143,7 @@ def add_form(pg: pd.DataFrame) -> pd.DataFrame:
     return pg
 
 
-def build_tensors(gc, pg, emb_npz, smoke=False, form=None):
+def build_tensors(gc, pg, emb_npz, smoke=False, form=None, elo=None):
     ids = emb_npz["ids"]
     emb = emb_npz["emb"]
     row = {int(p): i for i, p in enumerate(ids)}
@@ -200,6 +230,9 @@ def build_tensors(gc, pg, emb_npz, smoke=False, form=None):
                              g.away_dtz / 3, g.days_in / 200]
         if form is not None and g.game_id in form.index:
             out["ctx"][i, 9:15] = form_vector(form.loc[g.game_id])
+        if elo is not None and g.game_id in elo.index:
+            e = elo.loc[g.game_id]
+            out["ctx"][i, 15] = e.elo_logit
         out["era"][i] = np.array([getattr(g, c) for c in ERA_COLS],
                                  np.float32) * ERA_SCALE
         out["outcome4"][i] = g.outcome4
@@ -254,6 +287,7 @@ def main():
     # in-season rolling form over the whole ordered history (amendment A1);
     # each row uses only games before it, matching how house Elo updates
     form = team_form(gc) if cfg.get("use_team_form") else None
+    elo = elo_features(gc) if cfg.get("use_elo") else None
     if cfg.get("val_mode") == "iid_holdout":
         # Selecting epochs on the single adjacent season made every seed fit
         # that season's idiosyncrasies: at T=2012 the val season implied
@@ -263,7 +297,7 @@ def main():
         # which also recovers ~1,230 games of scarce training data.
         all_gc = gc[gc.season_end < T]
         tens_all, _, cold_tr = build_tensors(all_gc, pg, emb_npz, args.smoke,
-                                             form)
+                                             form, elo)
         n_all = len(tens_all["outcome4"])
         rng = np.random.default_rng(9000 + T)
         perm = rng.permutation(n_all)
@@ -276,14 +310,14 @@ def main():
         tr_gc = gc[gc.season_end < T - 1]
         va_gc = gc[gc.season_end == T - 1]
         tens_tr, _, cold_tr = build_tensors(tr_gc, pg, emb_npz, args.smoke,
-                                            form)
-        tens_va, _, _ = build_tensors(va_gc, pg, emb_npz, args.smoke, form)
+                                            form, elo)
+        tens_va, _, _ = build_tensors(va_gc, pg, emb_npz, args.smoke, form, elo)
     if args.no_test:
         tens_te, te_ids, cold_te = tens_va, np.zeros(0, np.int64), 0
     else:
         te_gc = gc[gc.season_end == T]
         tens_te, te_ids, cold_te = build_tensors(te_gc, pg, emb_npz,
-                                                 args.smoke, form)
+                                                 args.smoke, form, elo)
     print(f"T={T}: train {len(tens_tr['outcome4'])}, val "
           f"{len(tens_va['outcome4'])}, test {len(tens_te['outcome4'])} "
           f"(cold-start slots: train {cold_tr}, test {cold_te})")

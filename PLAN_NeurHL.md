@@ -321,6 +321,54 @@ recent rate, and adds nothing on usage or shot volume.
 NeurHL therefore nulls at all three levels it was built to serve: game, season
 and player. Reported as such.
 
+## A2. AMENDMENT 2 (2026-08-21) — Elo-residual hybrid + an actual significance test
+
+Committed BEFORE its run, as with A1.
+
+### A2.1 Why the gates were the wrong bar
+
+Measured on the 6,870 tune-window games: one standard error on a PAIRED
+log-loss difference against v1 is 0.00268. Consequences:
+
+- Gate G1's margin (v1 - 0.002) is **0.75 SE**. It is not a significance test.
+  A model with exactly zero skill clears it by chance ~23% of the time, so
+  repeatedly trying configurations until one passes is guaranteed to produce a
+  false positive — the failure mode the whole prereg exists to prevent.
+- To be significantly better than v1 at p<0.05, NeurHL must reach log loss
+  <= **0.67059**. For scale, the best linear model on every feature available
+  reaches ~0.6765, i.e. 0.24 SE better than v1 — nowhere near.
+- Config #1 sits at +7.6 SE on the WRONG side (p = 2e-14 that it is worse).
+
+### A2.2 New gate S1 (added, nothing relaxed)
+
+**S1: NeurHL's paired per-game log loss beats v1 with p < 0.05 (two-sided),
+and beats it in the same direction on a season-clustered test.** S1 is STRICTER
+than G1 and is now the headline criterion. G1-G6 remain exactly as locked; no
+threshold is loosened anywhere in this amendment.
+
+### A2.3 Change (config #4)
+
+C1 the network receives the incumbent's own strength summary — the pre-game v1
+   Elo logit — as a context feature, so it learns the RESIDUAL rather than
+   rediscovering team strength from roster composition (which R.2 proved it
+   cannot). This puts a floor at Elo and isolates the real question: does the
+   event-derived information add anything Elo structurally cannot see, namely
+   this starting goalie, this rest/travel pattern, this lineup?
+C2 keeps A1's team form, the reduced capacity, and the 2008+ corpus.
+C3 restores the PREREGISTERED temporal (adjacent-season) validation, which R.2
+   item 3 showed was correct and which config #3 wrongly replaced.
+
+### A2.4 Declared in advance, so the result cannot be spun
+
+Expected outcome: a gain over config #1, plausibly clearing the weak G1 bar,
+and most likely still short of S1. If S1 fails, the conclusion stands as
+written in R.4 and NO further configurations will be run to chase it: the
+honest finding would be that beating a 20-year-integrated rating system at NHL
+game level needs information this corpus does not contain (closing betting
+lines, real injury/scratch feeds, or line-level deployment). This amendment is
+the LAST modelling attempt; what follows a failure is data acquisition, not
+another config.
+
 ## H. Boundaries
 
 NeurHL touches only neurhl/ + this file + .gitignore additions. Nothing in
