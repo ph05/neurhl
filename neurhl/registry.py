@@ -22,8 +22,13 @@ from dataclasses import dataclass, field
 GROUPS = {
     "G0": dict(name="core events", first=2008, last=2026,
                desc="event types, actors, on-ice sets, strength, score state"),
-    "G1": dict(name="coordinates", first=2012, last=2026,
-               desc="x/y; 2008-2011 recoverable from mp_shots raw"),
+    "G1": dict(name="coordinates", first=2008, last=2026,
+               desc="x/y. NHL JSON carries none before 2012 (events_2011."
+                    "has_coord == 0.000); mp_shots supplies 100% coverage back "
+                    "to 2008, so the hole is CLOSED. Use |x|-derived distance/"
+                    "angle, never raw x/y: the two feeds disagree on rink-end "
+                    "convention for 15.8% of GAMES (whole-game flips), which "
+                    "distance is invariant to (corr 0.99972, 98.6% within 1ft)"),
     "G2": dict(name="shot distance", first=2008, last=2026,
                desc="dist_ft from HTM PL + derived from JSON coords"),
     "G3": dict(name="shifts / exact on-ice", first=2008, last=2026,
