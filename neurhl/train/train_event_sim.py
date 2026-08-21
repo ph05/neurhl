@@ -93,7 +93,8 @@ def make_batch(seasons, picks, eras, dev):
     T = min(MAX_LEN, max(int(s.off[g + 1] - s.off[g]) - 1 for s, g in picks))
     T = max(T, 2)
     ints = {}
-    I = ["etype", "team", "zone", "stype", "strength", "score", "period"]
+    I = ["etype", "team", "zone", "stype", "strength", "score", "period",
+         "score_abs", "n_home", "n_away", "g_home", "g_away"]
     F = ["dt", "t_rem", "xa", "ya", "xg"]
     Bm = ["has_xy", "has_xg"]
     for k in I + Bm + ["n_for", "n_against"]:

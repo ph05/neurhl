@@ -1,0 +1,32 @@
+[
+ {
+  "season": 2011,
+  "ok": true,
+  "games_json": 1230,
+  "games_htm": 1230,
+  "rows_json": 46919,
+  "rows_htm": 46850,
+  "matched": 46850,
+  "match_rate": 0.9985,
+  "corr_toi": 0.98141,
+  "mae_toi_s": 51.14,
+  "median_abs_s": 0.0,
+  "within_10s": 0.7825,
+  "within_60s": 0.796
+ },
+ {
+  "season": 2012,
+  "ok": true,
+  "games_json": 1316,
+  "games_htm": 1230,
+  "rows_json": 50199,
+  "rows_htm": 46866,
+  "matched": 46866,
+  "match_rate": 0.9336,
+  "corr_toi": 0.98155,
+  "mae_toi_s": 50.98,
+  "median_abs_s": 0.0,
+  "within_10s": 0.781,
+  "within_60s": 0.7937
+ }
+]

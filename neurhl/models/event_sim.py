@@ -108,10 +108,11 @@ class EventSim(nn.Module):
         self.e_stype = nn.Embedding(c.n_stype, 12)
         self.e_str = nn.Embedding(c.n_strength, 24)
         self.e_score = nn.Embedding(c.n_score, 16)
+        self.e_score_abs = nn.Embedding(c.n_score, 16)
         self.e_per = nn.Embedding(c.n_period, 12)
         self.absent_xy = nn.Parameter(torch.zeros(2))
-        n_scalar = 9
-        self.in_proj = nn.Linear(48 + 12 + 12 + 12 + 24 + 16 + 12 + n_scalar, d)
+        n_scalar = 14
+        self.in_proj = nn.Linear(48 + 12 + 12 + 12 + 24 + 16 + 16 + 12 + n_scalar, d)
         self.onice = OnIceEncoder(c)
         self.ctx_proj = nn.Linear(d, d)
         self.era_proj = nn.Linear(c.n_era, 2 * d)          # FiLM
@@ -142,12 +143,22 @@ class EventSim(nn.Module):
             xy, b["has_xy"].unsqueeze(-1).float(),
             b["xg"].unsqueeze(-1), b["has_xg"].unsqueeze(-1).float(),
             (b["n_for"].float() / 6.0).unsqueeze(-1),
-            (b["n_against"].float() / 6.0).unsqueeze(-1)], -1)
+            (b["n_against"].float() / 6.0).unsqueeze(-1),
+            # absolute home-relative state, and the score x time-remaining
+            # interaction: score effects intensify as time runs out, and a model
+            # given only the main effects has to rediscover that from scratch
+            (b["n_home"].float() / 6.0).unsqueeze(-1),
+            (b["n_away"].float() / 6.0).unsqueeze(-1),
+            b["g_home"].float().unsqueeze(-1),
+            b["g_away"].float().unsqueeze(-1),
+            (((b["score_abs"].float() - 4.0) / 4.0)
+             * (b["t_rem"] / 3600.0)).unsqueeze(-1)], -1)
         tok = torch.cat([
             self.e_type(b["etype"]), self.e_team(b["team"]),
             self.e_zone(b["zone"]), self.e_stype(b["stype"]),
             self.e_str(b["strength"]), self.e_score(b["score"]),
-            self.e_per(b["period"]), scal], -1)
+            self.e_per(b["period"]), self.e_score_abs(b["score_abs"]),
+            scal], -1)
         h = self.in_proj(tok)
 
         on_ctx, pemb = self.onice(b["on_next"], rapm_tab, b["home_next"])

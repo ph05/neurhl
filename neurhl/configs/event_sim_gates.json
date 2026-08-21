@@ -1,71 +1,71 @@
 {
- "checkpoint": "s1_seed20260821.pt",
- "step": 1000,
+ "checkpoint": "s1b_seed20260821.pt",
+ "step": 12000,
  "season": 2017,
  "val_loss": {
-  "dt": 0.7281961152950923,
-  "tt": 2.1962105592091876,
-  "loc": 0.9259135534365972,
-  "zone": 1.1525566061337789,
-  "actor": 2.093907574812571,
-  "loss": 4.060864373048147
+  "dt": -0.10217065406031907,
+  "tt": 1.8666839480400086,
+  "loc": 0.3021024025976658,
+  "zone": 1.0512442469596863,
+  "actor": 2.0054130494594573,
+  "loss": 2.667016784350077
  },
  "E1": {
   "per_game": [
    {
     "event": "blocked-shot",
-    "expected": 26.686,
-    "observed": 28.467,
-    "rel_err": -0.0626,
+    "expected": 29.081,
+    "observed": 28.848,
+    "rel_err": 0.0081,
     "pass": true
    },
    {
     "event": "faceoff",
-    "expected": 60.844,
-    "observed": 61.567,
-    "rel_err": -0.0117,
+    "expected": 61.297,
+    "observed": 60.885,
+    "rel_err": 0.0068,
     "pass": true
    },
    {
     "event": "goal",
-    "expected": 4.731,
-    "observed": 6.083,
-    "rel_err": -0.2223,
-    "pass": false
+    "expected": 5.584,
+    "observed": 5.32,
+    "rel_err": 0.0496,
+    "pass": true
    },
    {
     "event": "hit",
-    "expected": 48.247,
-    "observed": 42.5,
-    "rel_err": 0.1352,
-    "pass": false
+    "expected": 43.801,
+    "observed": 44.23,
+    "rel_err": -0.0097,
+    "pass": true
    },
    {
     "event": "missed-shot",
-    "expected": 22.15,
-    "observed": 22.517,
-    "rel_err": -0.0163,
+    "expected": 23.285,
+    "observed": 23.372,
+    "rel_err": -0.0038,
     "pass": true
    },
    {
     "event": "penalty",
-    "expected": 8.372,
-    "observed": 9.333,
-    "rel_err": -0.1031,
-    "pass": false
+    "expected": 7.291,
+    "observed": 8.098,
+    "rel_err": -0.0996,
+    "pass": true
    },
    {
     "event": "shot-on-goal",
-    "expected": 52.525,
-    "observed": 53.133,
-    "rel_err": -0.0114,
+    "expected": 55.215,
+    "observed": 54.932,
+    "rel_err": 0.0051,
     "pass": true
    },
    {
     "event": "stoppage",
-    "expected": 46.796,
-    "observed": 47.333,
-    "rel_err": -0.0114,
+    "expected": 48.31,
+    "observed": 47.87,
+    "rel_err": 0.0092,
     "pass": true
    }
   ],
@@ -73,112 +73,188 @@
    {
     "period": 1,
     "event": "goal",
-    "expected": 1.471,
-    "observed": 1.9,
-    "rel_err": -0.2258
+    "expected": 1.585,
+    "observed": 1.502,
+    "rel_err": 0.0548
    },
    {
     "period": 1,
     "event": "shot-on-goal",
-    "expected": 17.289,
-    "observed": 17.783,
-    "rel_err": -0.0278
+    "expected": 17.987,
+    "observed": 17.97,
+    "rel_err": 0.001
    },
    {
     "period": 2,
     "event": "goal",
-    "expected": 1.609,
-    "observed": 1.8,
-    "rel_err": -0.1058
+    "expected": 1.838,
+    "observed": 1.847,
+    "rel_err": -0.005
    },
    {
     "period": 2,
     "event": "shot-on-goal",
-    "expected": 17.813,
-    "observed": 17.883,
-    "rel_err": -0.0039
+    "expected": 18.915,
+    "observed": 18.733,
+    "rel_err": 0.0097
    },
    {
     "period": 3,
     "event": "goal",
-    "expected": 1.591,
-    "observed": 2.2,
-    "rel_err": -0.2769
+    "expected": 2.046,
+    "observed": 1.81,
+    "rel_err": 0.1305
    },
    {
     "period": 3,
     "event": "shot-on-goal",
-    "expected": 16.892,
-    "observed": 16.8,
-    "rel_err": 0.0055
+    "expected": 17.491,
+    "observed": 17.332,
+    "rel_err": 0.0091
    }
   ],
   "pass": false,
-  "pass_overall": false,
+  "pass_overall": true,
   "pass_per_period": false
  },
  "E2": {
   "rows": [
    {
-    "score_diff": -3,
-    "n": 555,
-    "pred_share": 0.24417,
-    "obs_share": 0.25225
+    "own_lead": -3,
+    "n": 5845,
+    "pred_share": 0.14212,
+    "obs_share": 0.13482
    },
    {
-    "score_diff": -2,
-    "n": 1575,
-    "pred_share": 0.26196,
-    "obs_share": 0.26921
+    "own_lead": -2,
+    "n": 15295,
+    "pred_share": 0.14407,
+    "obs_share": 0.14384
    },
    {
-    "score_diff": -1,
-    "n": 4017,
-    "pred_share": 0.25371,
-    "obs_share": 0.2599
+    "own_lead": -1,
+    "n": 38352,
+    "pred_share": 0.13594,
+    "obs_share": 0.13415
    },
    {
-    "score_diff": 0,
-    "n": 6557,
-    "pred_share": 0.2587,
-    "obs_share": 0.26979
+    "own_lead": 0,
+    "n": 73786,
+    "pred_share": 0.12742,
+    "obs_share": 0.12687
    },
    {
-    "score_diff": 1,
-    "n": 3555,
-    "pred_share": 0.26184,
-    "obs_share": 0.26582
+    "own_lead": 1,
+    "n": 38352,
+    "pred_share": 0.11705,
+    "obs_share": 0.11757
    },
    {
-    "score_diff": 2,
-    "n": 1444,
-    "pred_share": 0.25524,
-    "obs_share": 0.26177
+    "own_lead": 2,
+    "n": 15295,
+    "pred_share": 0.11082,
+    "obs_share": 0.10899
+   },
+   {
+    "own_lead": 3,
+    "n": 5845,
+    "pred_share": 0.11138,
+    "obs_share": 0.1148
    }
   ],
-  "grad_pred": 0.001714,
-  "grad_obs": 0.001352,
-  "ratio": 1.268,
+  "grad_pred": -0.006343,
+  "grad_obs": -0.005226,
+  "ratio": 1.214,
   "same_direction": true,
-  "corr": 0.9372,
+  "corr": 0.9774,
+  "pass": true
+ },
+ "E2_all_strength": {
+  "rows": [
+   {
+    "own_lead": -3,
+    "n": 7478,
+    "pred_share": 0.15276,
+    "obs_share": 0.1471
+   },
+   {
+    "own_lead": -2,
+    "n": 19389,
+    "pred_share": 0.15554,
+    "obs_share": 0.15287
+   },
+   {
+    "own_lead": -1,
+    "n": 47399,
+    "pred_share": 0.1472,
+    "obs_share": 0.14599
+   },
+   {
+    "own_lead": 0,
+    "n": 91006,
+    "pred_share": 0.13519,
+    "obs_share": 0.13502
+   },
+   {
+    "own_lead": 1,
+    "n": 47399,
+    "pred_share": 0.121,
+    "obs_share": 0.12173
+   },
+   {
+    "own_lead": 2,
+    "n": 19389,
+    "pred_share": 0.11805,
+    "obs_share": 0.1161
+   },
+   {
+    "own_lead": 3,
+    "n": 7478,
+    "pred_share": 0.11736,
+    "obs_share": 0.12049
+   }
+  ],
+  "grad_pred": -0.007406,
+  "grad_obs": -0.006344,
+  "ratio": 1.167,
+  "same_direction": true,
+  "corr": 0.9916,
   "pass": true
  },
  "dt_pit": {
-  "n": 18474,
+  "n": 124423,
   "decile_fracs": [
-   0.0926,
-   0.1064,
-   0.0795,
-   0.0767,
-   0.1117,
-   0.2141,
-   0.0658,
-   0.0741,
-   0.0783,
-   0.1008
+   0.0656,
+   0.0868,
+   0.0824,
+   0.0813,
+   0.0895,
+   0.1143,
+   0.1166,
+   0.1189,
+   0.1239,
+   0.1208
   ],
-  "max_decile_dev": 0.1141,
-  "ks": 0.0892,
-  "mean": 0.4927
+  "max_decile_dev": 0.0344,
+  "ks": 0.0971,
+  "mean": 0.5542
+ },
+ "dt_pit_naive": {
+  "n": 124423,
+  "decile_fracs": [
+   0.0822,
+   0.0734,
+   0.083,
+   0.081,
+   0.2729,
+   0.073,
+   0.0715,
+   0.0755,
+   0.082,
+   0.1056
+  ],
+  "max_decile_dev": 0.1729,
+  "ks": 0.0925,
+  "mean": 0.5043
  }
 }

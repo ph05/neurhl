@@ -92,8 +92,26 @@ def tensorise(se: int, vocab: dict) -> dict:
         m = (on[:, c] == p1) & (p1 > 0) & (actor < 0)
         actor[m] = c
 
+    # ABSOLUTE (home-relative) game state, alongside the owner-relative
+    # description of the event itself. The prediction target (type, team) is in
+    # absolute home/away terms, so conditioning only on owner-relative state
+    # makes "home leads 2-0" appear as +2 or -2 depending on which team happened
+    # to touch the puck last -- the model cannot learn a score effect from a
+    # label that flips arbitrarily. Verified: n_for = n_h when home_event==1 and
+    # n_a otherwise, so n_home = n_for where home else n_against, for every value
+    # of home_event including -1.
+    is_h = (d.home_event.to_numpy() == 1)
+    n_home = np.where(is_h, d.n_for, d.n_against).astype(np.int8)
+    n_away = np.where(is_h, d.n_against, d.n_for).astype(np.int8)
+    g_home = np.where(is_h, d.g_for, d.g_against).astype(np.int8)
+    g_away = np.where(is_h, d.g_against, d.g_for).astype(np.int8)
+    score_abs = np.clip(d.score_h.to_numpy(np.int16) - d.score_a.to_numpy(np.int16),
+                        -4, 4).astype(np.int8) + 4
+
     return {
         "offsets": offsets,
+        "score_abs": score_abs, "n_home": n_home, "n_away": n_away,
+        "g_home": g_home, "g_away": g_away,
         "game_id": d.game_id.to_numpy(np.int64)[starts],
         "game_type": d.game_type.to_numpy(np.int8)[starts],
         "tt": tt,
