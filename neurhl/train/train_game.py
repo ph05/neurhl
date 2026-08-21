@@ -151,6 +151,9 @@ def build_tensors(gc, pg, emb_npz, smoke=False, form=None):
     for f in ("toi", "shots", "goals_p", "assists_p"):
         out[f"{f}_h"] = np.zeros((N, 20), np.float32)
         out[f"{f}_a"] = np.zeros((N, 20), np.float32)
+    # player id per roster slot: not a model input, but lets evaluation join
+    # each slot back to that player's own pre-game baseline
+    out["pids"] = np.zeros((N, 2, 20), np.int64)
     n_coldstart = 0
     game_ids = np.zeros(N, np.int64)
     for i, g in enumerate(gc.itertuples(index=False)):
@@ -181,6 +184,7 @@ def build_tensors(gc, pg, emb_npz, smoke=False, form=None):
                                         np.log1p(r.gp_todate) / 5.0,
                                         r.goalie_start]
                 out["pad"][i, t, j] = False
+                out["pids"][i, t, j] = r.player_id
                 if r.pos_group < 2 and j >= 2:
                     k = j
                     out[f"skater_mask_{suf}"][i, k] = True
@@ -250,10 +254,30 @@ def main():
     # in-season rolling form over the whole ordered history (amendment A1);
     # each row uses only games before it, matching how house Elo updates
     form = team_form(gc) if cfg.get("use_team_form") else None
-    tr_gc = gc[gc.season_end < T - 1]
-    va_gc = gc[gc.season_end == T - 1]
-    tens_tr, _, cold_tr = build_tensors(tr_gc, pg, emb_npz, args.smoke, form)
-    tens_va, _, _ = build_tensors(va_gc, pg, emb_npz, args.smoke, form)
+    if cfg.get("val_mode") == "iid_holdout":
+        # Selecting epochs on the single adjacent season made every seed fit
+        # that season's idiosyncrasies: at T=2012 the val season implied
+        # temperature 1.06 while the test season needed 4.90. Instead hold out
+        # a seeded random slice of ALL past seasons (i.i.d. with training, and
+        # strictly < T so still P1-clean) and train on season T-1 as well,
+        # which also recovers ~1,230 games of scarce training data.
+        all_gc = gc[gc.season_end < T]
+        tens_all, _, cold_tr = build_tensors(all_gc, pg, emb_npz, args.smoke,
+                                             form)
+        n_all = len(tens_all["outcome4"])
+        rng = np.random.default_rng(9000 + T)
+        perm = rng.permutation(n_all)
+        n_val = int(round(cfg.get("val_frac", 0.15) * n_all))
+        vi = torch.as_tensor(perm[:n_val].copy())
+        ti = torch.as_tensor(perm[n_val:].copy())
+        tens_tr = {k: v[ti] for k, v in tens_all.items()}
+        tens_va = {k: v[vi] for k, v in tens_all.items()}
+    else:
+        tr_gc = gc[gc.season_end < T - 1]
+        va_gc = gc[gc.season_end == T - 1]
+        tens_tr, _, cold_tr = build_tensors(tr_gc, pg, emb_npz, args.smoke,
+                                            form)
+        tens_va, _, _ = build_tensors(va_gc, pg, emb_npz, args.smoke, form)
     if args.no_test:
         tens_te, te_ids, cold_te = tens_va, np.zeros(0, np.int64), 0
     else:

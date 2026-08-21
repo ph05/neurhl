@@ -213,6 +213,114 @@ Elo diff, team form, travel, goalie and roster-aggregate features. If NeurHL
 does not beat Tier-0 by 0.003, the big-data hypothesis nulls at game level and
 will be reported as such. G1 (vs v1) remains the ship gate.
 
+## R. RESULTS — game-level DOCUMENTED NULL (2026-08-21)
+
+Three configurations were run against the gates locked in section G. All fail.
+Per the search-budget rule (P7) every one is in configs/search_ledger.csv;
+per P8 the consequence is spelled out in R.4.
+
+### R.1 What was run
+
+| config | change | pooled home-win ll 2012-2017 | season MAE / rho / CRPS |
+|---|---|---|---|
+| #1 | architecture as prereg'd (1.2M params, temporal val) | **0.6966** | 10.73 / 0.441 / 7.68 |
+| #2 | A1: +team form, 11x smaller, train from 2008 | 0.7041 | 11.48 / 0.442 / 8.42 |
+| #3 | i.i.d. holdout selection + label smoothing 0.08 | aborted (2012 0.784, 2013 0.714) | — |
+
+Reference on the same seasons: v1 (Elo) **0.67585** pooled, season MAE 9.58 /
+rho 0.535 / CRPS 6.77; constant-home 0.6898; Tier-0 0.67692. Gate bars were
+G1 0.67385, G2 MAE 9.42 & rho 0.545, G4 0.67392, G5 CRPS 6.674.
+
+Config #1 — the architecture exactly as preregistered — is the best of the
+three and is still level with predicting the home-ice base rate.
+
+### R.2 Why (each established by measurement, not inference)
+
+1. **The representation, not the optimizer.** A regularized logistic regression
+   on mean-pooled roster embeddings scores 0.6888, i.e. constant-home, while
+   six team-form features score 0.6787 — beating the entire 1.2M-parameter
+   network — and embeddings ADDED on top of form make it worse
+   (eda_09_signal_location.md). A logistic regression cannot be accused of
+   failing to optimize, so the signal is absent from the representation rather
+   than merely hard to extract.
+2. **What the embeddings did learn.** Position is linearly decodable at 0.952
+   and a linear probe recovers R^2 0.54 / 0.59 of points-per-60 and TOI-per-game
+   (eda_08) — from a model whose only objective was next-event prediction. The
+   event-LM encodes what KIND of player someone is; it does not encode how GOOD
+   their team is, and every NHL roster carries a similar mix of roles, so
+   pooling over one barely separates teams.
+3. **Selection protocol.** Config #3 replaced the adjacent-season holdout with
+   an i.i.d. one and got worse. An i.i.d. holdout draws validation games from
+   the same seasons as training, so it rewards memorising each team-season's
+   strength — real information in-distribution, stale in a new season. The
+   preregistered temporal holdout was correct.
+4. **Era conditioning was suspected and exonerated.** Zeroing the era vector at
+   inference moved 2012 only from 0.784 to 0.766, and the test-season era vector
+   is nearly identical to the training mean. FiLM is not the failure mode.
+5. **Ceiling.** Even an optimally-regularized linear model on all available
+   features lands ~0.677-0.681, against v1's 0.676 and a bar of 0.674. Beating
+   a 20-year-integrated rating system at game level, from roster composition and
+   ~7k training games, is not reachable with the information NeurHL has.
+
+### R.3 Other documented nulls
+
+- **Career encoder** (ce-null-1): validation MSE 0.99-1.00x the predict-the-mean
+  baseline at every vantage. NeurHL has NO working rookie-projection mechanism;
+  cold-start players receive approximately the centroid embedding. No result may
+  be attributed to rookie modelling.
+- **Tier-0** could not beat plain Elo either (0.67692 vs 0.67548), which is
+  context, not excuse: the whole skill window between knowing nothing (0.6898)
+  and market-level (~0.66) is roughly 0.03 nats wide.
+
+### R.4 Consequence under the prereg (no discretion exercised)
+
+G1-G3 + G6 were required to ship to restatement. G1 fails, so:
+- **eval/restate_2018_2026.py is NOT run.** The 2018-2026 window stays unspent.
+- **NeurHL does not ship as a report track**, standalone or blended. P8 branch
+  (iii): documented null.
+- **2026-27 production scoring remains v1/v4/HOWE**, exactly as before NeurHL
+  existed. Nothing in the house pipeline changed.
+- The 2026-27 NeurHL projection is still produced because it is the requested
+  deliverable, and is labelled UNVALIDATED — it failed its own gates and must
+  not be read as competitive with HOWE.
+
+### R.5 What NeurHL does contribute
+
+The infrastructure and the corpus stand on their own: the HTM backfill extends
+the event corpus to 2008 at 100% agreement with the JSON era on the overlap,
+playoff shifts and 57 missing 2024-25 games were recovered, career coverage went
+from 66% to 100% of dressed players, and the tensor/vocab/embedding layer is
+reusable. Player-rate heads are evaluated separately in R.6 — that is capability
+the house models do not have, rather than a contest against a tuned Elo.
+
+### R.6 Player-rate heads (H4) — also a NULL
+
+Scored on 44,129 skater-games of season 2017 (neurhl/output/player_eval_2017.json).
+The only defensible baseline is each player's OWN pre-game EWMA, which the
+network also receives as an input; beating "everyone is identical" is trivial
+and is reported only for context.
+
+| target | model | player's own EWMA | naive |
+|---|---|---|---|
+| TOI share (MAE) | 0.00934 | **0.00619** | 0.01239 equal split |
+| TOI share (r) | 0.652 | **0.848** | — |
+| shots (MAE) | 1.148 | **1.080** | — |
+| shots (r) | 0.248 | **0.412** | — |
+| P(goal) log loss | 0.39060 | 0.43552 raw / **0.38770** oracle-shrunk | 0.40582 base rate |
+| P(assist) log loss | 0.52212 | 0.55678 raw | 0.52459 base rate |
+
+The network is clearly WORSE than the player's own recent form on both
+continuous targets. On the binary targets it beats the RAW EWMA, but raw EWMA of
+a rare binary event is badly calibrated (it scores worse than the base rate), so
+that comparison is a strawman; against a one-parameter shrinkage of the same
+EWMA toward the base rate — with the shrinkage chosen on the test set, i.e.
+handicapped in the BASELINE's favour — the model loses (0.39060 vs 0.38770).
+The honest reading is that H4 is at best level with shrinking a player's own
+recent rate, and adds nothing on usage or shot volume.
+
+NeurHL therefore nulls at all three levels it was built to serve: game, season
+and player. Reported as such.
+
 ## H. Boundaries
 
 NeurHL touches only neurhl/ + this file + .gitignore additions. Nothing in

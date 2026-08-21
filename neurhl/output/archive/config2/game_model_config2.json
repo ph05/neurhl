@@ -1,0 +1,66 @@
+{
+  "_comment": "NeurHL Tier-2 config #2 (ledger gm-c2). Motivated by config #1's observed overfitting: every seed peaked at ~epoch 5 then degraded (val 1.21 -> 1.53 by epoch 15) with 1.2M params against 2.4k-9.7k training games. Change = ~11x capacity reduction + stronger regularization + use the full 2008+ corpus. Architecture family, objectives, heads, protocol and gates are unchanged. Amendment A1: adds 6 rolling team-form ctx features (use_team_form).",
+  "arch": {
+    "d": 48,
+    "trunk_dim": 128,
+    "enc_layers": 1,
+    "n_heads": 4,
+    "dropout": 0.3
+  },
+  "weight_decay": 0.1,
+  "train_from": 2008,
+  "roster_encoder": {
+    "type": "set_transformer",
+    "layers": 1,
+    "d_model": 48,
+    "position_group_queries": [
+      "F",
+      "D",
+      "G"
+    ]
+  },
+  "context_dim": 24,
+  "era_vec_dim": 8,
+  "trunk": {
+    "hidden": [
+      128
+    ],
+    "conditioning": "film_on_era"
+  },
+  "heads": {
+    "outcome4": "categorical(home_reg, away_reg, home_otso, away_otso)",
+    "score": "bivariate_poisson(lambda_h, lambda_a, lambda_12)",
+    "sat5": "poisson_aux",
+    "player_rates": [
+      "toi_share_softmax",
+      "shots_poisson",
+      "p_goal",
+      "p_assist"
+    ]
+  },
+  "loss_weights": {
+    "outcome4": 1.0,
+    "score": 0.5,
+    "sat5": 0.2,
+    "player_rates": 0.2
+  },
+  "label_smoothing_outcome4": 0.02,
+  "batch_size": 256,
+  "optimizer": "adamw",
+  "lr": 0.001,
+  "lr_schedule": "cosine",
+  "epochs_max": 150,
+  "early_stop": "rolling-origin val within tune window, patience 10",
+  "ensemble_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "calibration": "temperature_on_outcome4, fit in train window only",
+  "rookie_blend_n0": 40,
+  "device_train": "mps",
+  "device_inference": "cpu",
+  "use_team_form": true
+}

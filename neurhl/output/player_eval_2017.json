@@ -1,0 +1,39 @@
+{
+ "season": 2017,
+ "n_player_games": 44129,
+ "n_models": 5,
+ "ewma_join_coverage": 0.9966574067800438,
+ "toi_share": {
+  "mae_model": 0.00933839287608862,
+  "mae_ewma_baseline": 0.006191630847752094,
+  "mae_equal_split": 0.012388572096824646,
+  "r_model": 0.6516522831434984,
+  "r_ewma": 0.8478527094625048
+ },
+ "shots": {
+  "mae_model": 1.14799964427948,
+  "mae_ewma_baseline": 1.0795979183610747,
+  "r_model": 0.24779223755044946,
+  "r_ewma": 0.4118455725446505,
+  "mean_pred": 1.6507625579833984,
+  "mean_true": 1.6943506002426147
+ },
+ "p_goal": {
+  "logloss_model": 0.3905956782533145,
+  "logloss_ewma_baseline": 0.43551762319873727,
+  "logloss_baserate": 0.4058239384330496,
+  "base_rate": 0.14047451789072946
+ },
+ "p_assist": {
+  "logloss_model": 0.522121479341263,
+  "logloss_ewma_baseline": 0.5567759197841351,
+  "logloss_baserate": 0.5245928916135855,
+  "base_rate": 0.21817852206032315
+ },
+ "verdict": {
+  "toi_share": "NULL: no better than the player's own recent form",
+  "shots": "NULL: no better than the player's own recent form",
+  "p_goal": "model beats own-EWMA baseline",
+  "p_assist": "model beats own-EWMA baseline"
+ }
+}
