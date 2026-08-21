@@ -110,10 +110,10 @@ def significance_vs_v1(per_game: pd.DataFrame) -> dict:
     n = len(d)
     se = float(d.std(ddof=1) / np.sqrt(n))
     t = float(d.mean() / se)
-    per_season = m.groupby("season").apply(
-        lambda g: float((nll(g.p_nn.to_numpy())
-                         - nll(g.e_home.to_numpy())).mean()),
-        include_groups=False)
+    # per-season means must be computed from the aligned difference vector,
+    # not by re-running nll inside groupby (y there is the full-length array)
+    m = m.assign(_d=d)
+    per_season = m.groupby("season")._d.mean()
     cl_se = float(per_season.std(ddof=1) / np.sqrt(len(per_season)))
     return {"n_games": int(n), "mean_diff_nn_minus_v1": float(d.mean()),
             "se": se, "t": t, "p_two_sided": float(stats.norm.sf(abs(t)) * 2),
@@ -121,9 +121,9 @@ def significance_vs_v1(per_game: pd.DataFrame) -> dict:
             "significant_at_05": bool(d.mean() < 0 and abs(t) > 1.96),
             "clustered_t_by_season": float(per_season.mean() / cl_se)
             if cl_se > 0 else float("nan"),
-            "per_season_diff": {str(k): round(v, 5)
+            "per_season_diff": {str(k): round(float(v), 5)
                                 for k, v in per_season.items()},
-            "threshold_needed_for_p05": float(m.e_home.pipe(nll).mean()
+            "threshold_needed_for_p05": float(nll(m.e_home.to_numpy()).mean()
                                               - 1.96 * se)}
 
 

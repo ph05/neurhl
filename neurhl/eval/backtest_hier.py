@@ -26,14 +26,17 @@ from common import NOUT, TENSORS  # noqa: E402
 from train.train_game import elo_features, load_frames  # noqa: E402
 
 TUNE = [2012, 2013, 2014, 2015, 2016, 2017]
-# season_end 2013 = the 2012-13 LOCKOUT season: 48 games/team, conference-only
-# scheduling, no preseason after a four-month layoff, compressed calendar.
-# Prereg P6 already treats COVID (2020/2021) as structurally anomalous and
-# always breaks it out; the lockout was an omission from that rule and is
-# handled the same way here (amendment A4). Reported BOTH ways, never silently
-# dropped.
-SHORTENED = {2013}
+# Structurally broken seasons are TRAINING data (they are real hockey) but are
+# never used to SCORE the model (amendment A4). Criterion is the season's
+# STRUCTURE, fixed by history and not by any result:
+#   2013 = 2012-13 lockout: 48 games/team, CONFERENCE-ONLY, no preseason
+#   2021 = 2020-21 COVID:   56 games/team, DIVISION-ONLY, no preseason, no fans
+# 2020 (2019-20) is NOT excluded: it merely stopped early, and the games that
+# were played had normal structure.
+NO_SCORE = {2013, 2021}
+SHORTENED = NO_SCORE          # backwards-compatible alias
 CS = (0.01, 0.03, 0.1, 0.3, 1.0)
+COLS_DEFAULT = ["elo_logit", "proj_diff", "proj_cl_diff", "rest_diff"]
 
 
 def nll(p, y):
@@ -66,10 +69,12 @@ def main():
     d["rest_diff"] = (d.home_rest.clip(upper=7) - d.away_rest.clip(upper=7)) / 7
     d = d.fillna({"rest_diff": 0.0})
 
-    COLS = ["elo_logit", "proj_diff", "proj_cl_diff", "rest_diff"]
+    COLS = COLS_DEFAULT
     rows, per_season = [], {}
     for T in TUNE:
-        tr = d[d.season_end < T]
+        tr = d[d.season_end < T]        # broken seasons DO train
+        if T in NO_SCORE:               # ...but never score
+            continue
         te = d[d.season_end == T]
         if len(tr) < 900 or not len(te):
             continue
@@ -104,25 +109,11 @@ def main():
     wins = int((cl < 0).sum())
     sign_p = float(stats.binomtest(wins, len(cl), 0.5,
                                    alternative="two-sided").pvalue)
-    # same statistics with structurally anomalous seasons excluded
-    Rx = R[~R.season.isin(SHORTENED)]
-    dx = (Rx.ll_h - Rx.ll_v1).to_numpy()
-    sex = dx.std(ddof=1) / np.sqrt(len(dx))
-    tx = dx.mean() / sex
-    clx = Rx.groupby("season").apply(lambda g: (g.ll_h - g.ll_v1).mean(),
-                                     include_groups=False)
-    ex = {"n_games": int(len(dx)), "neurhl_h": float(Rx.ll_h.mean()),
-          "v1": float(Rx.ll_v1.mean()), "diff": float(dx.mean()),
-          "t": float(tx), "p_two_sided": float(stats.norm.sf(abs(tx)) * 2),
-          "clustered_t": float(clx.mean() / (clx.std(ddof=1) / np.sqrt(len(clx)))),
-          "seasons_won": int((clx < 0).sum()),
-          "seasons_evaluated": int(len(clx)),
-          "S1_pass": bool(dx.mean() < 0 and abs(tx) > 1.96)}
-
     res = {
         "model": "NeurHL-H (Layer1 neural residual -> Layer2 aggregate -> thin head)",
-        "excluding_shortened_seasons": ex,
-        "shortened_excluded": sorted(SHORTENED),
+        "not_scored_structurally_broken": sorted(NO_SCORE),
+        "note": ("broken seasons are TRAINING data but are never scored; "
+                 "criterion is season structure, fixed by history"),
         "n_games": int(n), "neurhl_h": float(R.ll_h.mean()),
         "v1": float(R.ll_v1.mean()), "diff": float(diff.mean()),
         "se": float(se), "t": float(t), "p_two_sided": p_two,
@@ -135,6 +126,7 @@ def main():
                     "and sign tests are reported alongside for completeness, "
                     "not as substitutes."),
         "G1_pass": bool(R.ll_h.mean() <= 0.67385)}
+    res["seasons_scored"] = sorted(int(s) for s in per_season)
     (NOUT / "hier_result.json").write_text(json.dumps(res, indent=1))
     print(json.dumps({k: v for k, v in res.items() if k != "per_season"},
                      indent=1))

@@ -19,6 +19,11 @@ cannot represent at all:
   * games with CURRENT team and a recent-move flag — trade and call-up
     acclimation, where a player's own history overstates his immediate output
   * days rest, home flag, position group
+  * WHERE IN THE SEASON this game falls: the team's game number (1..82), the
+    player's games played so far this season, and a late-season flag. These
+    condition on effects that are invisible to a season-agnostic model —
+    early-season rust and small samples, mid-season fatigue, and late-season
+    playoff races, tanking and rested starters.
 plus the player embedding (64) and his own shifted EWMAs of on-ice CF/CA/
 close-range/TOI.
 
@@ -29,7 +34,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 STATIC_COLS = ["pos_f", "pos_d", "pos_g", "age", "age_sq", "career_gp",
-               "team_gp", "recent_move", "home", "rest"]
+               "team_gp", "recent_move", "home", "rest",
+               "team_game_no", "player_gp_season", "late_season"]
 EWMA_COLS = ["e_cf", "e_ca", "e_clf", "e_cla", "e_toi", "e_cfpct"]
 N_STATIC = len(STATIC_COLS)
 N_EWMA = len(EWMA_COLS)

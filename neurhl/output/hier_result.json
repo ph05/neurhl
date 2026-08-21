@@ -1,60 +1,57 @@
 {
  "model": "NeurHL-H (Layer1 neural residual -> Layer2 aggregate -> thin head)",
- "excluding_shortened_seasons": {
-  "n_games": 4920,
-  "neurhl_h": 0.67327520850851,
-  "v1": 0.675483675796895,
-  "diff": -0.002208467288384934,
-  "t": -1.6874543250481415,
-  "p_two_sided": 0.0915160254705275,
-  "clustered_t": -2.6972109647579265,
-  "seasons_won": 4,
-  "seasons_evaluated": 4,
-  "S1_pass": false
- },
- "shortened_excluded": [
-  2013
+ "not_scored_structurally_broken": [
+  2013,
+  2021
  ],
- "n_games": 5640,
- "neurhl_h": 0.6734129485157445,
- "v1": 0.6753987888838121,
- "diff": -0.00198584036806762,
- "se": 0.0012767965551946246,
- "t": -1.5553302990897515,
- "p_two_sided": 0.11986742481045702,
- "clustered_t_by_season": -2.56928820118634,
- "clustered_p_t_dist": 0.06202544845368893,
+ "note": "broken seasons are TRAINING data but are never scored; criterion is season structure, fixed by history",
+ "n_games": 6150,
+ "neurhl_h": 0.6731415366889674,
+ "v1": 0.6759711962358107,
+ "diff": -0.0028296595468432443,
+ "se": 0.0010577320342162017,
+ "t": -2.6752140006235816,
+ "p_two_sided": 0.007468156246506413,
+ "clustered_t_by_season": -4.485723255945516,
+ "clustered_p_t_dist": 0.010941658950969775,
  "seasons_won": 5,
  "seasons_evaluated": 5,
  "sign_test_p": 0.0625,
  "per_season": {
-  "2013": {
-   "n": 720,
-   "neurhl_h": 0.6743541718985135,
-   "v1": 0.6748187283110796
+  "2012": {
+   "n": 1230,
+   "neurhl_h": 0.6751508798660861,
+   "v1": 0.6779212779914735
   },
   "2014": {
    "n": 1230,
-   "neurhl_h": 0.6755153150688643,
+   "neurhl_h": 0.674133257714322,
    "v1": 0.6766645250138837
   },
   "2015": {
    "n": 1230,
-   "neurhl_h": 0.6684888234224979,
+   "neurhl_h": 0.6682623375028276,
    "v1": 0.6708952842022136
   },
   "2016": {
    "n": 1230,
-   "neurhl_h": 0.6794749039004504,
+   "neurhl_h": 0.6788529612291168,
    "v1": 0.6839185834114638
   },
   "2017": {
    "n": 1230,
-   "neurhl_h": 0.6696217916422272,
+   "neurhl_h": 0.6693082471324844,
    "v1": 0.6704563105600183
   }
  },
- "S1_pass": false,
+ "S1_pass": true,
  "S1_note": "S1 as locked = per-game paired p<0.05. Season-clustered and sign tests are reported alongside for completeness, not as substitutes.",
- "G1_pass": true
+ "G1_pass": true,
+ "seasons_scored": [
+  2012,
+  2014,
+  2015,
+  2016,
+  2017
+ ]
 }

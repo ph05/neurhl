@@ -39,9 +39,15 @@ def build_player_frame(seasons) -> pd.DataFrame:
          for se in seasons], ignore_index=True)
     pg = pd.concat(
         [pd.read_parquet(TENSORS / f"player_games_{se}.parquet",
-                         columns=["game_id", "player_id", "is_home",
-                                  "pos_group", "toi_sec"]).assign(season_end=se)
+                         columns=["game_id", "game_type", "player_id",
+                                  "is_home", "pos_group",
+                                  "toi_sec"]).assign(season_end=se)
          for se in seasons], ignore_index=True)
+    # REGULAR SEASON ONLY. player_games carries playoffs too, but onice_rates
+    # is built for game_type 2 only, so playoff rows would left-join to NaN and
+    # be filled with ZERO shot attempts — teaching the model that some games
+    # have no shots and contaminating every EWMA baseline (bugfix l1-fix-2).
+    pg = pg[pg.game_type == 2].drop(columns=["game_type"])
     gc, _ = load_frames(seasons)
     meta = gc.set_index("game_id")[["date", "home_idx", "away_idx"]]
     d = pg.merge(rates.drop(columns=["season_end"]),
@@ -64,6 +70,19 @@ def build_player_frame(seasons) -> pd.DataFrame:
     grp_id = (~same).cumsum()
     d["team_gp"] = d.groupby(grp_id).cumcount()
     d["recent_move"] = (d.team_gp < 10).astype(np.float32)
+    # where in the season this game falls (known pre-game). Count DISTINCT
+    # GAMES, not player-rows: each team-game carries ~20 player rows, so a
+    # naive cumcount reaches ~1640 instead of 82.
+    def _seq(keys, label):
+        u = d[keys + ["game_id", "date"]].drop_duplicates()
+        u = u.sort_values(keys + ["date", "game_id"])
+        u[label] = u.groupby(keys).cumcount()
+        m = u.set_index(keys + ["game_id"])[label]
+        return pd.MultiIndex.from_arrays(
+            [d[k] for k in keys] + [d.game_id]).map(m)
+
+    d["team_game_no"] = _seq(["team_idx", "season_end"], "team_game_no")
+    d["player_gp_season"] = _seq(["player_id", "season_end"], "player_gp_season")
     # rest days
     dt = pd.to_datetime(d.date)
     d["rest"] = (dt - g["date"].shift(1).pipe(pd.to_datetime)).dt.days.fillna(9)
@@ -96,6 +115,9 @@ def featurize(d: pd.DataFrame, emb_npz) -> tuple:
     f["recent_move"] = d.recent_move
     f["home"] = d.home
     f["rest"] = d.rest / 9.0
+    f["team_game_no"] = d.team_game_no / 82.0
+    f["player_gp_season"] = d.player_gp_season / 82.0
+    f["late_season"] = (d.team_game_no >= 62).astype(np.float32)
     f["e_cf"] = d.e_cf / 20.0
     f["e_ca"] = d.e_ca / 20.0
     f["e_clf"] = d.e_clf / 6.0
