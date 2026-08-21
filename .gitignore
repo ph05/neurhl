@@ -17,3 +17,4 @@ data/raw/nhl_player_reports/
 data/raw/lineup_snapshots/
 neurhl/data/tensors/
 neurhl/checkpoints/
+data/raw/mp_extra/
