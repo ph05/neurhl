@@ -1,5 +1,5 @@
 {
-  "_comment": "NeurHL Tier-2 config #5 (ledger gm-c5, AMENDMENT A3). Adds 18 rolling shot-share features (attempts/SOG/close-range over 10/25/60 games) on top of A2's Elo logit and A1's team form. Motivated by a measured result that refuted my own A2 ceiling claim: shot info is complementary to Elo (all six variants improved on it) while goal form is not. Feature set PRE-SPECIFIED here; evaluated once on the full tune window against gate S1. Nothing relaxed.",
+  "_comment": "NeurHL Tier-2 config #4 (ledger gm-c4, AMENDMENT A2). Adds the pre-game v1 Elo logit as a context feature so the network learns the RESIDUAL rather than rediscovering team strength from roster composition (R.2 proved it cannot). Keeps A1 team form + reduced capacity + 2008 corpus; RESTORES the preregistered temporal adjacent-season validation (config #3's i.i.d. holdout was shown to reward team-season memorisation). Headline criterion is the new gate S1: paired significance vs v1 at p<0.05. No threshold anywhere is relaxed.",
   "arch": {
     "d": 48,
     "trunk_dim": 128,
@@ -63,6 +63,5 @@
   "device_train": "mps",
   "device_inference": "cpu",
   "use_team_form": true,
-  "use_elo": true,
-  "use_shot_form": true
+  "use_elo": true
 }

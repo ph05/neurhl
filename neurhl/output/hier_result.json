@@ -1,0 +1,60 @@
+{
+ "model": "NeurHL-H (Layer1 neural residual -> Layer2 aggregate -> thin head)",
+ "excluding_shortened_seasons": {
+  "n_games": 4920,
+  "neurhl_h": 0.67327520850851,
+  "v1": 0.675483675796895,
+  "diff": -0.002208467288384934,
+  "t": -1.6874543250481415,
+  "p_two_sided": 0.0915160254705275,
+  "clustered_t": -2.6972109647579265,
+  "seasons_won": 4,
+  "seasons_evaluated": 4,
+  "S1_pass": false
+ },
+ "shortened_excluded": [
+  2013
+ ],
+ "n_games": 5640,
+ "neurhl_h": 0.6734129485157445,
+ "v1": 0.6753987888838121,
+ "diff": -0.00198584036806762,
+ "se": 0.0012767965551946246,
+ "t": -1.5553302990897515,
+ "p_two_sided": 0.11986742481045702,
+ "clustered_t_by_season": -2.56928820118634,
+ "clustered_p_t_dist": 0.06202544845368893,
+ "seasons_won": 5,
+ "seasons_evaluated": 5,
+ "sign_test_p": 0.0625,
+ "per_season": {
+  "2013": {
+   "n": 720,
+   "neurhl_h": 0.6743541718985135,
+   "v1": 0.6748187283110796
+  },
+  "2014": {
+   "n": 1230,
+   "neurhl_h": 0.6755153150688643,
+   "v1": 0.6766645250138837
+  },
+  "2015": {
+   "n": 1230,
+   "neurhl_h": 0.6684888234224979,
+   "v1": 0.6708952842022136
+  },
+  "2016": {
+   "n": 1230,
+   "neurhl_h": 0.6794749039004504,
+   "v1": 0.6839185834114638
+  },
+  "2017": {
+   "n": 1230,
+   "neurhl_h": 0.6696217916422272,
+   "v1": 0.6704563105600183
+  }
+ },
+ "S1_pass": false,
+ "S1_note": "S1 as locked = per-game paired p<0.05. Season-clustered and sign tests are reported alongside for completeness, not as substitutes.",
+ "G1_pass": true
+}

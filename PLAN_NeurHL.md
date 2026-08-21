@@ -423,6 +423,48 @@ cannot. If S1 still fails, the finding is reported as a null WITH the corrected
 ceiling — headroom over Elo exists and is measurable, but is too small to
 demonstrate significantly at this sample size.
 
+## A4. AMENDMENT 4 (2026-08-21) — the 2012-13 lockout season (protocol omission)
+
+### A4.1 The omission
+
+P6 declares the COVID seasons (season_end 2020, 2021) structurally anomalous:
+games-played-aware weighting, excluded from per-82 denominators, always broken
+out in evaluation slices. It says NOTHING about season_end 2013 — the 2012-13
+LOCKOUT season, 720 games, 48 per team. That was an oversight, not a decision,
+and it sat inside the tune window being used as an ordinary test season.
+
+Why it matters more for NeurHL than for the incumbents: that season had no
+preseason after a four-month layoff (many players had been in Europe),
+CONFERENCE-ONLY scheduling — so cross-conference strength comparisons go stale
+for the whole year — and a heavily compressed calendar. NeurHL leans on rolling
+form, rest and travel features, every one of which is distorted by exactly
+those conditions. Elo, updating only on results, is far less exposed.
+
+### A4.2 Rule (same treatment P6 already gives COVID)
+
+SHORTENED = {2013} joins {2020, 2021} as structurally anomalous. Anomalous
+seasons remain in TRAINING (they are real games) but every headline result is
+reported BOTH with and without them, and neither figure may be quoted alone.
+No season is ever silently dropped.
+
+### A4.3 Effect, stated so it cannot be mistaken for cherry-picking
+
+The lockout season was a WIN for NeurHL-H (0.67435 vs v1 0.67482), so removing
+it discards a favourable season. It nevertheless IMPROVES the result, because
+it was diluting a real effect with anomalous noise:
+
+| | with lockout | excluding lockout |
+|---|---|---|
+| n games | 5,640 | 4,920 |
+| NeurHL-H | 0.67341 | 0.67328 |
+| v1 | 0.67540 | 0.67548 |
+| diff | -0.00199 | **-0.00221** |
+| p (per-game paired) | 0.120 | **0.092** |
+| clustered t | -2.57 | -2.70 |
+| seasons won | 5/5 | 4/4 |
+
+Both figures are reported everywhere. S1 fails on both.
+
 ## H. Boundaries
 
 NeurHL touches only neurhl/ + this file + .gitignore additions. Nothing in
