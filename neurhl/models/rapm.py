@@ -124,7 +124,12 @@ class RAPMDesign:
         self.off0 = N_FIXED
         self.def0 = N_FIXED + self.n_eff
 
-        self.X, self.w, self.rows_meta = self._build(h, a, dur, st)
+        allp = np.unique(np.concatenate([h.ravel(), a.ravel()]))
+        allp = allp[allp > 0]
+        self.lut = np.full(int(allp.max()) + 2, -1, np.int64)
+        for pid in allp:
+            self.lut[int(pid)] = self._slot(int(pid))
+        self.X, self.w, self.rows_meta = self._build(h, a, dur)
 
     def _slot(self, pid: int) -> int:
         s = self.pid_to_slot.get(pid)
@@ -133,16 +138,34 @@ class RAPMDesign:
         return self.repl_slot.get(self.positions.get(pid, POS_F),
                                   self.repl_slot[POS_F])
 
-    def _build(self, h, a, dur, st):
-        n_st = len(dur)
-        # lookup table playerId -> column slot; below-threshold players resolve
-        # to their position's pooled replacement column
-        allp = np.unique(np.concatenate([h.ravel(), a.ravel()]))
-        allp = allp[allp > 0]
-        lut = np.full(int(allp.max()) + 2, -1, np.int64)
-        for pid in allp:
-            lut[int(pid)] = self._slot(int(pid))
+    def transform(self, st: pd.DataFrame):
+        """Design for UNSEEN stints under this fit's column mapping.
 
+        Players absent from the training window resolve to their position's
+        pooled replacement column, which is what makes out-of-sample scoring
+        (gate R2) and the 2026-27 projection well-defined for newcomers instead
+        of silently dropping them.
+        """
+        h = st[H_COLS].to_numpy(np.int64)
+        a = st[A_COLS].to_numpy(np.int64)
+        dur = st.dur_s.to_numpy(np.float64)
+        need = int(max(h.max(initial=0), a.max(initial=0))) + 2
+        if need > len(self.lut):
+            grow = np.full(need, -1, np.int64)
+            grow[:len(self.lut)] = self.lut
+            self.lut = grow
+        unseen = np.flatnonzero(self.lut == -1)
+        if len(unseen):
+            self.lut[unseen] = self.repl_slot[POS_F]
+        for pid in np.unique(np.concatenate([h.ravel(), a.ravel()])):
+            if pid > 0 and self.lut[int(pid)] < 0:
+                self.lut[int(pid)] = self._slot(int(pid))
+        X, w, _ = self._build(h, a, dur)
+        return X, w
+
+    def _build(self, h, a, dur):
+        n_st = len(dur)
+        lut = self.lut
         rows, cols = [], []
         for attack_home in (True, False):
             base = np.arange(n_st) + (0 if attack_home else n_st)
@@ -179,20 +202,29 @@ class RAPMDesign:
         return out
 
 
-def solve(design: RAPMDesign, ys: dict, lam: float, want_se=True) -> dict:
-    """Weighted ridge with unpenalised intercept/home, by Cholesky."""
+def normal_equations(design: RAPMDesign, ys: dict) -> tuple:
+    """X'WX and X'Wy, formed ONCE. The whole ridge path is then nearly free,
+    which is what makes an honest lambda search cheap enough to actually run."""
     X, w = design.X, design.w
     Xw = X.multiply(w[:, None]).tocsr()
     XtWX = np.asarray((X.T @ Xw).todense())
+    XtWy = {nm: np.asarray(Xw.T @ y).ravel() for nm, y in ys.items()}
+    return XtWX, XtWy
+
+
+def solve(design: RAPMDesign, ys: dict, lam: float, want_se=True,
+          normal=None) -> dict:
+    """Weighted ridge with unpenalised intercept/home, by Cholesky."""
+    X, w = design.X, design.w
+    XtWX, XtWy = normal if normal is not None else normal_equations(design, ys)
     pen = np.full(design.n_cols, lam)
     pen[:N_FIXED] = 0.0
-    A = XtWX + np.diag(pen)
-    cf = cho_factor(A, lower=True, check_finite=False)
+    cf = cho_factor(XtWX + np.diag(pen), lower=True, check_finite=False)
 
     out = {"lam": lam, "n_cols": design.n_cols, **design.rows_meta}
     coefs = {}
     for nm, y in ys.items():
-        b = cho_solve(cf, Xw.T @ y, check_finite=False)
+        b = cho_solve(cf, XtWy[nm], check_finite=False)
         coefs[nm] = b
         resid = y - X @ b
         dof = max(X.shape[0] - design.n_cols, 1)
@@ -204,6 +236,11 @@ def solve(design: RAPMDesign, ys: dict, lam: float, want_se=True) -> dict:
         sand = np.einsum("ij,jk,ki->i", Ainv, XtWX, Ainv)
         out["se_unit"] = np.sqrt(np.maximum(sand, 0.0))
     return out
+
+
+def wmse(y, pred, w) -> float:
+    """Duration-weighted MSE, the quantity gate R2 is scored on."""
+    return float((w * (y - pred) ** 2).sum() / w.sum())
 
 
 def to_frame(design: RAPMDesign, res: dict, target: str) -> pd.DataFrame:

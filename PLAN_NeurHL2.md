@@ -110,7 +110,8 @@ stratified by availability regime.
 | **X1** xG skill | 1.65M shots | beat distance+angle logistic by ≥0.002 nats in ≥15/19 vantages |
 | **X2** xG earns its place | team-games | team-aggregated xG differential beats Corsi differential out of sample — **if X2 fails, delete L0 and use Corsi** |
 | **X3** xG calibration | 20 bins | \|observed − predicted\| ≤ 0.005 per decile |
-| **R1** RAPM repeatability | 900k player-games | split-half correlation exceeds that of raw on-ice CF% |
+| ~~**R1** RAPM repeatability~~ | ~~900k player-games~~ | ~~split-half correlation exceeds that of raw on-ice CF%~~ **RETIRED — see A5** |
+| **R1′** RAPM transfer | players changing team | prior rating predicts realised on-ice results in a NEW team/linemate context better than raw on-ice rate does |
 | **R2** RAPM value | 600k held-out stints | beats raw rate and team-fixed-effects |
 | **P-screen** | 600k stints | pair-interaction terms improve out-of-season MSE → GNN go/no-go |
 | **E1** event realism | held-out games | simulated goals/shots/PP%/penalties per game inside the observed historical band, **checked per period** |
@@ -120,6 +121,43 @@ stratified by availability regime.
 
 **Ablations required before any causal claim:** remove EDGE (G5), graph edges,
 goalie module, score effects, scratches.
+
+### A5 — R1 retired and replaced; λ no longer selected on stint MSE
+
+*Declared after seeing the DEV result, before running the replacement. The
+original R1 result stands recorded as a failure of the gate as written.*
+
+**Measured on DEV (train 2008-2010, test 2011, 742,015 stints, 882 players):**
+
+| split-half r | offence | defence |
+|---|---|---|
+| RAPM | 0.656 | 0.505 |
+| raw on-ice CF% | 0.789 | 0.714 |
+
+R1 as written therefore **FAILS**. But the gate was mis-specified, and the result
+is what a correct RAPM *should* produce: **raw on-ice rate is more repeatable
+precisely because it is contaminated.** A player skates with the same linemates,
+takes the same zone starts and draws the same quality of competition in both
+random halves, so those confounders repeat and carry the correlation with them.
+RAPM removes exactly those terms, so it necessarily repeats less. Reliability is
+not validity — a thermometer stuck at 72°F is perfectly repeatable and useless.
+Ranking rating systems by split-half correlation actively rewards confounding,
+so the original R1 would have selected the *worse* estimator.
+
+**R1′ (replacement): predictive transfer across a change of context.** For
+players whose team changes between the fit window and the held-out season,
+correlate the prior rating with realised on-ice results in the new team. A rating
+that measures the PLAYER transfers to new linemates; a rating that is really
+measuring his old linemates does not. PASS requires RAPM to beat raw on-ice rate
+on transfer.
+
+**λ selection moves to the same criterion.** On DEV the stint-level wMSE path is
+monotone to the grid edge (λ=6400, i.e. shrink players to nearly zero) and the
+entire grid spans 0.12%. That is a noise-dominated objective, not a preference
+for heavy shrinkage: the median stint is 3-9 seconds carrying 0 or 1 attempts, so
+irreducible variance swamps player signal at that resolution. λ is instead chosen
+to maximise held-out transfer correlation. R2 is retained unchanged as a
+sanity floor, with its margin reported honestly (−0.083%) rather than as support.
 
 ## H. Boundaries and engineering guarantees
 
