@@ -129,7 +129,7 @@ def main():
     tens = {"emb": np.zeros((N, 2, 20, d), np.float32),
             "pctx": np.zeros((N, 2, 20, 6), np.float32),
             "pad": np.ones((N, 2, 20), bool),
-            "ctx": np.zeros((N, 16), np.float32),
+            "ctx": np.zeros((N, 40), np.float32),
             "era": np.tile(era_vec, (N, 1)).astype(np.float32)}
     for i, g in enumerate(sched.itertuples(index=False)):
         for t, team in ((0, g.home), (1, g.away)):

@@ -124,7 +124,7 @@ def build_preseason(T: int, train_from: int = 2009):
     out = {"emb": np.zeros((N, 2, 20, d), np.float32),
            "pctx": np.zeros((N, 2, 20, 6), np.float32),
            "pad": np.ones((N, 2, 20), bool),
-           "ctx": np.zeros((N, 16), np.float32),
+           "ctx": np.zeros((N, 40), np.float32),
            "era": np.tile(era_vec, (N, 1)).astype(np.float32)}
     cfg = json.loads((TENSORS.parents[1] / "configs" / "game_model.json")
                      .read_text())

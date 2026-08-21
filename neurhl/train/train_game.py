@@ -79,6 +79,51 @@ def form_vector(rec) -> list:
             rec["a_gf"] / 3.0, rec["a_ga"] / 3.0, rec["a_pts"] / 2.0]
 
 
+SHOT_WINDOWS = (10, 25, 60)
+
+
+def shot_form(gc: pd.DataFrame) -> pd.DataFrame:
+    """Rolling team shot-share form (PLAN_NeurHL amendment A3).
+
+    Elo learns from goals (~5.5/game, very noisy); shot attempts are ~100/game
+    and far more repeatable, which is why possession metrics carry information
+    goal-based ratings miss. Per team, the share of attempts / shots-on-goal /
+    close-range (<25 ft) attempts it took in each of its previous N games, for
+    N in SHOT_WINDOWS. Strictly pre-game, so P1-clean.
+    """
+    sh = pd.read_parquet(TENSORS / "team_shot_game.parquet")
+    sh = sh.set_index("game_id").drop(columns=["season_end"], errors="ignore")
+    g = gc.sort_values("date").reset_index(drop=True).join(sh, on="game_id")
+    for c in ("att_h", "att_a", "sog_h", "sog_a", "close_h", "close_a"):
+        g[c] = g[c].fillna(0.0)
+    hist: dict = {}
+    rows = []
+    for r in g.itertuples(index=False):
+        rec = {}
+        for side, tid in (("h", r.home_idx), ("a", r.away_idx)):
+            past = hist.get(tid, [])
+            for N in SHOT_WINDOWS:
+                L = past[-N:]
+                for key, i in (("att", 0), ("sog", 1), ("cl", 2)):
+                    rec[f"{side}_{key}{N}"] = (float(np.mean([x[i] for x in L]))
+                                               if L else 0.5)
+        rows.append(rec)
+        ta = max(r.att_h + r.att_a, 1)
+        ts = max(r.sog_h + r.sog_a, 1)
+        tc = max(r.close_h + r.close_a, 1)
+        hist.setdefault(r.home_idx, []).append(
+            (r.att_h / ta, r.sog_h / ts, r.close_h / tc))
+        hist.setdefault(r.away_idx, []).append(
+            (r.att_a / ta, r.sog_a / ts, r.close_a / tc))
+    out = pd.DataFrame(rows)
+    out["game_id"] = g.game_id.values
+    return out.set_index("game_id")
+
+
+SHOT_COLS = [f"{s}_{k}{N}" for s in ("h", "a")
+             for N in SHOT_WINDOWS for k in ("att", "sog", "cl")]
+
+
 def elo_features(gc: pd.DataFrame) -> pd.DataFrame:
     """Pre-game v1 Elo expectation per game (PLAN_NeurHL amendment A2).
 
@@ -94,12 +139,17 @@ def elo_features(gc: pd.DataFrame) -> pd.DataFrame:
     preds, _, _ = E.run_elo(B.g, K=v1["K"], H=v1["H"], phi_s=v1["phi_s"])
     preds = preds.copy()
     preds["date"] = pd.to_datetime(B.g.date).dt.strftime("%Y-%m-%d").values
-    gs = pd.read_parquet(TENSORS / "_edacache" / "game_summary.parquet")
-    gs = gs[gs.game_type == 2].copy()
+    # Join on gc itself, not the JSON-era game index: that index covers only
+    # 2012+, so the HTM seasons silently received zeros (bugfix a2-fix-1).
+    maps = json.loads((TENSORS / "maps.json").read_text())["team"]
+    inv = {v: k for k, v in maps.items()}
     remap = {"PHX": "UTA", "ARI": "UTA", "ATL": "WPG"}
-    gs["home_m"] = gs.home.replace(remap)
-    gs["away_m"] = gs.away.replace(remap)
-    j = gs[["game_id", "date", "home_m", "away_m"]].merge(
+    g = gc[["game_id", "date", "home_idx", "away_idx"]].copy()
+    g["date"] = g.date.astype(str)
+    for side in ("home", "away"):
+        ab = g[f"{side}_idx"].map(inv)
+        g[f"{side}_m"] = ab.replace(remap)
+    j = g.merge(
         preds[["date", "home", "away", "e_home", "rh", "ra"]].rename(
             columns={"home": "home_m", "away": "away_m"}),
         on=["date", "home_m", "away_m"], how="inner")
@@ -143,7 +193,8 @@ def add_form(pg: pd.DataFrame) -> pd.DataFrame:
     return pg
 
 
-def build_tensors(gc, pg, emb_npz, smoke=False, form=None, elo=None):
+def build_tensors(gc, pg, emb_npz, smoke=False, form=None, elo=None,
+                  shots=None):
     ids = emb_npz["ids"]
     emb = emb_npz["emb"]
     row = {int(p): i for i, p in enumerate(ids)}
@@ -170,7 +221,7 @@ def build_tensors(gc, pg, emb_npz, smoke=False, form=None, elo=None):
         "emb": np.zeros((N, 2, 20, d), np.float32),
         "pctx": np.zeros((N, 2, 20, 6), np.float32),
         "pad": np.ones((N, 2, 20), bool),
-        "ctx": np.zeros((N, 16), np.float32),
+        "ctx": np.zeros((N, 40), np.float32),
         "era": np.zeros((N, 8), np.float32),
         "outcome4": np.zeros(N, np.int64),
         "goals_h": np.zeros(N, np.int64), "goals_a": np.zeros(N, np.int64),
@@ -231,8 +282,10 @@ def build_tensors(gc, pg, emb_npz, smoke=False, form=None, elo=None):
         if form is not None and g.game_id in form.index:
             out["ctx"][i, 9:15] = form_vector(form.loc[g.game_id])
         if elo is not None and g.game_id in elo.index:
-            e = elo.loc[g.game_id]
-            out["ctx"][i, 15] = e.elo_logit
+            out["ctx"][i, 15] = elo.loc[g.game_id].elo_logit
+        if shots is not None and g.game_id in shots.index:
+            out["ctx"][i, 16:16 + len(SHOT_COLS)] = \
+                shots.loc[g.game_id, SHOT_COLS].to_numpy(np.float32)
         out["era"][i] = np.array([getattr(g, c) for c in ERA_COLS],
                                  np.float32) * ERA_SCALE
         out["outcome4"][i] = g.outcome4
@@ -288,6 +341,7 @@ def main():
     # each row uses only games before it, matching how house Elo updates
     form = team_form(gc) if cfg.get("use_team_form") else None
     elo = elo_features(gc) if cfg.get("use_elo") else None
+    shots = shot_form(gc) if cfg.get("use_shot_form") else None
     if cfg.get("val_mode") == "iid_holdout":
         # Selecting epochs on the single adjacent season made every seed fit
         # that season's idiosyncrasies: at T=2012 the val season implied
@@ -297,7 +351,7 @@ def main():
         # which also recovers ~1,230 games of scarce training data.
         all_gc = gc[gc.season_end < T]
         tens_all, _, cold_tr = build_tensors(all_gc, pg, emb_npz, args.smoke,
-                                             form, elo)
+                                             form, elo, shots)
         n_all = len(tens_all["outcome4"])
         rng = np.random.default_rng(9000 + T)
         perm = rng.permutation(n_all)
@@ -310,14 +364,14 @@ def main():
         tr_gc = gc[gc.season_end < T - 1]
         va_gc = gc[gc.season_end == T - 1]
         tens_tr, _, cold_tr = build_tensors(tr_gc, pg, emb_npz, args.smoke,
-                                            form, elo)
-        tens_va, _, _ = build_tensors(va_gc, pg, emb_npz, args.smoke, form, elo)
+                                            form, elo, shots)
+        tens_va, _, _ = build_tensors(va_gc, pg, emb_npz, args.smoke, form, elo, shots)
     if args.no_test:
         tens_te, te_ids, cold_te = tens_va, np.zeros(0, np.int64), 0
     else:
         te_gc = gc[gc.season_end == T]
         tens_te, te_ids, cold_te = build_tensors(te_gc, pg, emb_npz,
-                                                 args.smoke, form, elo)
+                                                 args.smoke, form, elo, shots)
     print(f"T={T}: train {len(tens_tr['outcome4'])}, val "
           f"{len(tens_va['outcome4'])}, test {len(tens_te['outcome4'])} "
           f"(cold-start slots: train {cold_tr}, test {cold_te})")

@@ -369,6 +369,60 @@ lines, real injury/scratch feeds, or line-level deployment). This amendment is
 the LAST modelling attempt; what follows a failure is data acquisition, not
 another config.
 
+## A3. AMENDMENT 3 (2026-08-21) — shot-based form; my A2 ceiling claim was WRONG
+
+Committed BEFORE its run. This amendment exists because I made an error and the
+data caught it.
+
+### A3.1 The error
+
+A2.1 asserted a ceiling of ~0.6765 and declared A2 the last modelling attempt.
+That ceiling was computed from GOAL-based features only. It is wrong. Measured
+on tune seasons 2015-2017 (n=3,690), with v1 Elo alone at 0.67509:
+
+| features | log loss | vs Elo | t | p |
+|---|---|---|---|---|
+| Elo alone | 0.67509 | — | — | — |
+| goal-diff form only | 0.68059 | +0.0055 | +3.26 | 0.001 |
+| shot-share form only | 0.68119 | +0.0061 | +2.45 | 0.014 |
+| Elo + goal form | 0.67537 | +0.0003 | +1.13 | 0.257 |
+| Elo + attempt share (25) | 0.67374 | -0.0014 | -1.05 | 0.294 |
+| Elo + SOG share (25) | 0.67315 | -0.0019 | -1.63 | 0.103 |
+| Elo + close-shot share (25) | 0.67388 | -0.0012 | -2.05 | 0.041 |
+| Elo + attempts (10/25/60) | 0.67290 | -0.0022 | -1.57 | 0.117 |
+
+Shot information is COMPLEMENTARY to Elo even though it is worse than Elo on
+its own, and goal-based form is not. This is the possession-analytics result:
+~100 attempts/game carry far more signal per game than ~5.5 goals.
+
+Multiple-testing discipline: six shot variants were tried, so the single
+p=0.041 is NOT significant after correction (Bonferroni would need p<0.0083).
+What is meaningful is that all six point the same way (-0.0009 to -0.0022),
+which is unlikely by chance. Effect real, small, at the edge of detectability.
+
+### A3.2 Change (config #5) and the pre-specified confirmatory test
+
+C1 ctx gains 18 rolling shot-share features: attempts / shots-on-goal /
+   close-range (<25 ft) share over each team's previous 10, 25 and 60 games.
+   Strictly pre-game, P1-clean, computed for BOTH eras from our own event
+   shards. Keeps A2's Elo logit and A1's team form.
+C2 nothing else changes; no gate is relaxed. S1 remains the headline criterion.
+
+Pre-specified so this is confirmation and not another search: the feature set
+above is FIXED here, evaluated ONCE on the full tune window (2012-2017,
+n~6,870), and judged by S1. The 2015-2017 numbers in A3.1 were exploration and
+do not count as the test.
+
+### A3.3 Honest expectation
+
+The linear evidence suggests roughly -0.002 against Elo. Over the full tune
+window that is likely to clear G1 (bar 0.67385) and to sit near but probably
+short of S1's p<0.05. The network's opportunity is that it may combine shot
+form, Elo, goalie identity and lineup nonlinearly in a way the linear probe
+cannot. If S1 still fails, the finding is reported as a null WITH the corrected
+ceiling — headroom over Elo exists and is measurable, but is too small to
+demonstrate significantly at this sample size.
+
 ## H. Boundaries
 
 NeurHL touches only neurhl/ + this file + .gitignore additions. Nothing in

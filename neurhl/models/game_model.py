@@ -20,7 +20,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 D_PLAYER_CTX = 6      # pos onehot(3), ewma_toi_min, log1p(gp_todate), starter
-D_CTX = 16
+D_CTX = 40
 D_ERA = 8
 
 

@@ -1,0 +1,27 @@
+{
+  "_comment": "NeurHL Tier-2 game-model config. Locked at prereg commit; every tune-window variant is one search_ledger.csv row (budget <= 40).",
+  "roster_encoder": {"type": "set_transformer", "layers": 2, "d_model": 128,
+                     "position_group_queries": ["F", "D", "G"]},
+  "context_dim": 24,
+  "era_vec_dim": 8,
+  "trunk": {"hidden": [512, 512], "conditioning": "film_on_era"},
+  "heads": {
+    "outcome4": "categorical(home_reg, away_reg, home_otso, away_otso)",
+    "score": "bivariate_poisson(lambda_h, lambda_a, lambda_12)",
+    "sat5": "poisson_aux",
+    "player_rates": ["toi_share_softmax", "shots_poisson", "p_goal", "p_assist"]
+  },
+  "loss_weights": {"outcome4": 1.0, "score": 0.5, "sat5": 0.2, "player_rates": 0.2},
+  "label_smoothing_outcome4": 0.02,
+  "batch_size": 256,
+  "optimizer": "adamw",
+  "lr": 1e-3,
+  "lr_schedule": "cosine",
+  "epochs_max": 150,
+  "early_stop": "rolling-origin val within tune window, patience 10",
+  "ensemble_seeds": [0, 1, 2, 3, 4],
+  "calibration": "temperature_on_outcome4, fit in train window only",
+  "rookie_blend_n0": 40,
+  "device_train": "mps",
+  "device_inference": "cpu"
+}
