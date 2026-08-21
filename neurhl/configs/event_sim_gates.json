@@ -1,0 +1,184 @@
+{
+ "checkpoint": "s1_seed20260821.pt",
+ "step": 1000,
+ "season": 2017,
+ "val_loss": {
+  "dt": 0.7281961152950923,
+  "tt": 2.1962105592091876,
+  "loc": 0.9259135534365972,
+  "zone": 1.1525566061337789,
+  "actor": 2.093907574812571,
+  "loss": 4.060864373048147
+ },
+ "E1": {
+  "per_game": [
+   {
+    "event": "blocked-shot",
+    "expected": 26.686,
+    "observed": 28.467,
+    "rel_err": -0.0626,
+    "pass": true
+   },
+   {
+    "event": "faceoff",
+    "expected": 60.844,
+    "observed": 61.567,
+    "rel_err": -0.0117,
+    "pass": true
+   },
+   {
+    "event": "goal",
+    "expected": 4.731,
+    "observed": 6.083,
+    "rel_err": -0.2223,
+    "pass": false
+   },
+   {
+    "event": "hit",
+    "expected": 48.247,
+    "observed": 42.5,
+    "rel_err": 0.1352,
+    "pass": false
+   },
+   {
+    "event": "missed-shot",
+    "expected": 22.15,
+    "observed": 22.517,
+    "rel_err": -0.0163,
+    "pass": true
+   },
+   {
+    "event": "penalty",
+    "expected": 8.372,
+    "observed": 9.333,
+    "rel_err": -0.1031,
+    "pass": false
+   },
+   {
+    "event": "shot-on-goal",
+    "expected": 52.525,
+    "observed": 53.133,
+    "rel_err": -0.0114,
+    "pass": true
+   },
+   {
+    "event": "stoppage",
+    "expected": 46.796,
+    "observed": 47.333,
+    "rel_err": -0.0114,
+    "pass": true
+   }
+  ],
+  "per_period": [
+   {
+    "period": 1,
+    "event": "goal",
+    "expected": 1.471,
+    "observed": 1.9,
+    "rel_err": -0.2258
+   },
+   {
+    "period": 1,
+    "event": "shot-on-goal",
+    "expected": 17.289,
+    "observed": 17.783,
+    "rel_err": -0.0278
+   },
+   {
+    "period": 2,
+    "event": "goal",
+    "expected": 1.609,
+    "observed": 1.8,
+    "rel_err": -0.1058
+   },
+   {
+    "period": 2,
+    "event": "shot-on-goal",
+    "expected": 17.813,
+    "observed": 17.883,
+    "rel_err": -0.0039
+   },
+   {
+    "period": 3,
+    "event": "goal",
+    "expected": 1.591,
+    "observed": 2.2,
+    "rel_err": -0.2769
+   },
+   {
+    "period": 3,
+    "event": "shot-on-goal",
+    "expected": 16.892,
+    "observed": 16.8,
+    "rel_err": 0.0055
+   }
+  ],
+  "pass": false,
+  "pass_overall": false,
+  "pass_per_period": false
+ },
+ "E2": {
+  "rows": [
+   {
+    "score_diff": -3,
+    "n": 555,
+    "pred_share": 0.24417,
+    "obs_share": 0.25225
+   },
+   {
+    "score_diff": -2,
+    "n": 1575,
+    "pred_share": 0.26196,
+    "obs_share": 0.26921
+   },
+   {
+    "score_diff": -1,
+    "n": 4017,
+    "pred_share": 0.25371,
+    "obs_share": 0.2599
+   },
+   {
+    "score_diff": 0,
+    "n": 6557,
+    "pred_share": 0.2587,
+    "obs_share": 0.26979
+   },
+   {
+    "score_diff": 1,
+    "n": 3555,
+    "pred_share": 0.26184,
+    "obs_share": 0.26582
+   },
+   {
+    "score_diff": 2,
+    "n": 1444,
+    "pred_share": 0.25524,
+    "obs_share": 0.26177
+   }
+  ],
+  "grad_pred": 0.001714,
+  "grad_obs": 0.001352,
+  "ratio": 1.268,
+  "same_direction": true,
+  "corr": 0.9372,
+  "pass": true
+ },
+ "dt_pit": {
+  "n": 18474,
+  "decile_fracs": [
+   0.0926,
+   0.1064,
+   0.0795,
+   0.0767,
+   0.1117,
+   0.2141,
+   0.0658,
+   0.0741,
+   0.0783,
+   0.1008
+  ],
+  "max_decile_dev": 0.1141,
+  "ks": 0.0892,
+  "mean": 0.4927
+ }
+}
