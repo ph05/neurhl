@@ -151,6 +151,68 @@ G6 repro:       committed prediction artifacts reproduce on CPU
 Ship-to-restatement requires G1-G3 + G6; then P8 governs. Per-season and
 per-era breakdowns are mandatory in every gate report.
 
+## A1. AMENDMENT 1 (2026-08-21) — team-form context, committed BEFORE its run
+
+House precedent: PLAN_V3/V4/V5/V6 are successive amendments, each committed
+before its gates ran. This amendment follows that pattern. Gate THRESHOLDS
+G1-G6 are UNCHANGED; only the model's inputs and capacity change.
+
+### A1.1 What config #1 (the architecture as first prereg'd) produced
+
+Recorded in neurhl/output/archive/config1/params_neurhl.json. Game-level
+home-win log loss by predict season, NeurHL vs v1:
+
+  2012 0.7432 / 0.6779   2013 0.6806 / 0.6748   2014 0.6867 / 0.6767
+  2015 0.6851 / 0.6709   2016 0.6909 / 0.6839   2017 0.6851 / 0.6705
+  pooled 2012-2017 0.6966 (G1 bar 0.67385) -> G1 FAIL
+  pooled 2014-2017 0.6873 (G4 bar 0.67392) -> G4 FAIL
+
+Constant-home on the same games is 0.6898, so config #1 is at best level with
+knowing nothing. Temperature calibration is a no-op (tau 0.91-1.08): the
+ensemble is correctly SCALED but not DISCRIMINATING.
+
+### A1.2 The diagnostic that motivated this amendment
+
+Committed as neurhl/eda/eda_09_signal_location.md. Regularized logistic
+regression, trained <=2013, tested on 2015 (1,230 games):
+
+  roster embeddings (mean-pooled) + context   0.6888   ~= constant-home 0.6898
+  team rolling form alone (2 features)        0.6780
+  team rolling form + context                 0.6760
+  form + context + embeddings                 0.6838   (embeddings HURT)
+
+Two team-history features beat the entire 1.2M-parameter network. Mean-pooled
+player embeddings carry essentially no game-outcome signal. Read together with
+eda_08 (position decodable at 0.952, pts/60 R^2 0.54), the finding is that the
+event-LM encodes what KIND of player someone is far better than how GOOD their
+team is — and every NHL roster has a similar mix of roles, so pooled rosters
+barely separate teams. The binding constraint is INFORMATION, not capacity.
+
+### A1.3 Changes (config #2 of the <=40 budget)
+
+C1 ctx gains 6 rolling team-form features (goals for/against and points per
+   game over each team's previous 25 games): in-season updating for game-level
+   evaluation (mirrors how house Elo updates within a season), and frozen at
+   the end of season T-1 for preseason/h1 projection. Strictly pre-game, P1-clean.
+C2 capacity reduced ~11x (d 128->48, encoder layers 2->1, trunk 512x2->128,
+   dropout 0.1->0.3, weight decay 0.01->0.1), addressing the overfitting also
+   observed in config #1 (every seed peaked ~epoch 5, then degraded).
+C3 training corpus starts at 2008 rather than 2009 (uses all available data).
+
+A capacity-only config is deliberately NOT run: the A1.2 probe shows even an
+optimally-regularized linear model on embeddings reaches only 0.6888, so
+shrinking alone cannot clear the bar. Predicting that and skipping it is
+recorded here rather than spent from the budget.
+
+### A1.4 What this does to the scientific claim (stated plainly)
+
+NeurHL is no longer "event data alone beats Elo" — it becomes "event-derived
+player representations PLUS team form". The honest test of whether the event
+data contributes anything is therefore G4 vs Tier-0, which already contains
+Elo diff, team form, travel, goalie and roster-aggregate features. If NeurHL
+does not beat Tier-0 by 0.003, the big-data hypothesis nulls at game level and
+will be reported as such. G1 (vs v1) remains the ship gate.
+
 ## H. Boundaries
 
 NeurHL touches only neurhl/ + this file + .gitignore additions. Nothing in

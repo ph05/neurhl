@@ -32,6 +32,61 @@ ERA_COLS = ["prior_gpg", "prior_ot_share", "prior_so_share", "prior_margin_abs",
 ERA_SCALE = np.array([1 / 6, 1, 1, 1 / 2.3, 10, 1, 1, 1], dtype=np.float32)
 
 
+FORM_N = 25          # rolling window, games
+FORM_COLS = ["h_gf", "h_ga", "h_pts", "a_gf", "a_ga", "a_pts"]
+FORM_PRIOR = {"gf": 2.7, "ga": 2.7, "pts": 1.1}    # league-average cold start
+
+
+def team_form(gc: pd.DataFrame) -> pd.DataFrame:
+    """Rolling pre-game team form (PLAN_NeurHL amendment A1).
+
+    For every game, each team's goals-for/against per game and points per game
+    over its previous FORM_N games. Strictly pre-game (the current result is
+    appended only after the row is emitted), so this is P1-clean and mirrors
+    how the house Elo updates within a season. Returns a frame indexed by
+    game_id with FORM_COLS.
+    """
+    g = gc.sort_values("date").reset_index(drop=True)
+    hist: dict = {}
+    rows = []
+    for r in g.itertuples(index=False):
+        rec = {}
+        for side, tid in (("h", r.home_idx), ("a", r.away_idx)):
+            last = hist.get(tid, [])[-FORM_N:]
+            if last:
+                rec[f"{side}_gf"] = float(np.mean([x[0] for x in last]))
+                rec[f"{side}_ga"] = float(np.mean([x[1] for x in last]))
+                rec[f"{side}_pts"] = float(np.mean([x[2] for x in last]))
+            else:
+                rec[f"{side}_gf"] = FORM_PRIOR["gf"]
+                rec[f"{side}_ga"] = FORM_PRIOR["ga"]
+                rec[f"{side}_pts"] = FORM_PRIOR["pts"]
+        rows.append(rec)
+        home_win = r.home_g > r.away_g
+        extra = r.outcome4 >= 2
+        hist.setdefault(r.home_idx, []).append(
+            (r.home_g, r.away_g, 2 if home_win else (1 if extra else 0)))
+        hist.setdefault(r.away_idx, []).append(
+            (r.away_g, r.home_g, 2 if not home_win else (1 if extra else 0)))
+    out = pd.DataFrame(rows)
+    out["game_id"] = g.game_id.values
+    return out.set_index("game_id")
+
+
+def form_vector(rec) -> list:
+    """Scaled form features for the ctx slots (order = FORM_COLS)."""
+    return [rec["h_gf"] / 3.0, rec["h_ga"] / 3.0, rec["h_pts"] / 2.0,
+            rec["a_gf"] / 3.0, rec["a_ga"] / 3.0, rec["a_pts"] / 2.0]
+
+
+def era_table_row(T: int) -> np.ndarray:
+    """Scaled walk-forward era vector for season T (shared with sim/)."""
+    from data.tensorize_games import era_table
+    era = era_table()
+    v = np.array([era.loc[T, c] for c in ERA_COLS], np.float32) * ERA_SCALE
+    return np.nan_to_num(v)
+
+
 def load_frames(seasons):
     gc, pg = [], []
     for se in seasons:
@@ -58,7 +113,7 @@ def add_form(pg: pd.DataFrame) -> pd.DataFrame:
     return pg
 
 
-def build_tensors(gc, pg, emb_npz, smoke=False):
+def build_tensors(gc, pg, emb_npz, smoke=False, form=None):
     ids = emb_npz["ids"]
     emb = emb_npz["emb"]
     row = {int(p): i for i, p in enumerate(ids)}
@@ -73,6 +128,12 @@ def build_tensors(gc, pg, emb_npz, smoke=False):
     if smoke:
         gc = gc.head(400)
     pg = pg[pg.game_id.isin(set(gc.game_id))]
+    # games with no player rows have no usable inputs (2 unparseable 2009 HTM
+    # reports); drop rather than feed empty rosters (bugfix gm-fix-1)
+    n_before = len(gc)
+    gc = gc[gc.game_id.isin(set(pg.game_id))]
+    if len(gc) < n_before:
+        print(f"  dropped {n_before - len(gc)} games with no roster data")
     by_game = {k: v for k, v in pg.groupby("game_id")}
     N = len(gc)
     out = {
@@ -133,6 +194,8 @@ def build_tensors(gc, pg, emb_npz, smoke=False):
                              b2b_h, b2b_a, g.home_km3d / 1000,
                              g.away_km3d / 1000, g.home_dtz / 3,
                              g.away_dtz / 3, g.days_in / 200]
+        if form is not None and g.game_id in form.index:
+            out["ctx"][i, 9:15] = form_vector(form.loc[g.game_id])
         out["era"][i] = np.array([getattr(g, c) for c in ERA_COLS],
                                  np.float32) * ERA_SCALE
         out["outcome4"][i] = g.outcome4
@@ -172,20 +235,31 @@ def main():
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2, 3, 4])
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--train-from", type=int, default=2009)
+    ap.add_argument("--no-test", action="store_true",
+                    help="predict season not yet played (T=2027): train+val "
+                         "only, still writes game_val_<T>.csv for calibration")
     args = ap.parse_args()
     T = args.predict_season
     cfg = json.loads((TENSORS.parents[1] / "configs" / "game_model.json")
                      .read_text())
-    seasons = list(range(args.train_from, T + 1))
+    seasons = list(range(args.train_from, (T if args.no_test else T) +
+                         (0 if args.no_test else 1)))
     gc, pg = load_frames(seasons)
     pg = add_form(pg)
     emb_npz = np.load(TENSORS / f"embeddings_v{T}.npz")
+    # in-season rolling form over the whole ordered history (amendment A1);
+    # each row uses only games before it, matching how house Elo updates
+    form = team_form(gc) if cfg.get("use_team_form") else None
     tr_gc = gc[gc.season_end < T - 1]
     va_gc = gc[gc.season_end == T - 1]
-    te_gc = gc[gc.season_end == T]
-    tens_tr, _, cold_tr = build_tensors(tr_gc, pg, emb_npz, args.smoke)
-    tens_va, _, _ = build_tensors(va_gc, pg, emb_npz, args.smoke)
-    tens_te, te_ids, cold_te = build_tensors(te_gc, pg, emb_npz, args.smoke)
+    tens_tr, _, cold_tr = build_tensors(tr_gc, pg, emb_npz, args.smoke, form)
+    tens_va, _, _ = build_tensors(va_gc, pg, emb_npz, args.smoke, form)
+    if args.no_test:
+        tens_te, te_ids, cold_te = tens_va, np.zeros(0, np.int64), 0
+    else:
+        te_gc = gc[gc.season_end == T]
+        tens_te, te_ids, cold_te = build_tensors(te_gc, pg, emb_npz,
+                                                 args.smoke, form)
     print(f"T={T}: train {len(tens_tr['outcome4'])}, val "
           f"{len(tens_va['outcome4'])}, test {len(tens_te['outcome4'])} "
           f"(cold-start slots: train {cold_tr}, test {cold_te})")
@@ -196,8 +270,14 @@ def main():
     for seed in (args.seeds[:1] if args.smoke else args.seeds):
         torch.manual_seed(1000 * T + seed)
         np.random.seed(1000 * T + seed)
-        model = GameModel().to(device)
-        opt = torch.optim.AdamW(model.parameters(), lr=cfg["lr"])
+        arch = cfg.get("arch", {})
+        model = GameModel(d=arch.get("d", 128),
+                          trunk_dim=arch.get("trunk_dim", 512),
+                          dropout=arch.get("dropout", 0.1),
+                          enc_layers=arch.get("enc_layers", 2),
+                          n_heads=arch.get("n_heads", 4)).to(device)
+        opt = torch.optim.AdamW(model.parameters(), lr=cfg["lr"],
+                                weight_decay=cfg.get("weight_decay", 0.01))
         n = len(tens_tr["outcome4"])
         best, best_ep, patience = float("inf"), -1, 10
         ck = CKPT / f"game_T{T}_s{seed}.pt"
@@ -232,25 +312,29 @@ def main():
             hashlib.sha256(ck.read_bytes()).hexdigest())
         print(f"  seed {seed}: best val {best:.4f}; test out4 ll "
               f"{logloss4(pt, tens_te['outcome4']):.4f}")
-    P = torch.stack(ens).mean(0)
-    y = tens_te["outcome4"]
-    p_home = (P[:, 0] + P[:, 2]).clamp(1e-9, 1 - 1e-9)
-    y_home = ((y == 0) | (y == 2)).float()
-    ll_home = float(-(y_home * torch.log(p_home)
-                      + (1 - y_home) * torch.log(1 - p_home)).mean())
-    df = pd.DataFrame({"game_id": te_ids, "p_home_reg": P[:, 0],
-                       "p_away_reg": P[:, 1], "p_home_extra": P[:, 2],
-                       "p_away_extra": P[:, 3], "outcome4": y})
     (NOUT / "preds").mkdir(parents=True, exist_ok=True)
-    df.to_csv(NOUT / "preds" / f"game_preds_{T}.csv", index=False)
+    if not args.no_test:
+        P = torch.stack(ens).mean(0)
+        y = tens_te["outcome4"]
+        p_home = (P[:, 0] + P[:, 2]).clamp(1e-9, 1 - 1e-9)
+        y_home = ((y == 0) | (y == 2)).float()
+        ll_home = float(-(y_home * torch.log(p_home)
+                          + (1 - y_home) * torch.log(1 - p_home)).mean())
+        df = pd.DataFrame({"game_id": te_ids, "p_home_reg": P[:, 0],
+                           "p_away_reg": P[:, 1], "p_home_extra": P[:, 2],
+                           "p_away_extra": P[:, 3], "outcome4": y})
+        df.to_csv(NOUT / "preds" / f"game_preds_{T}.csv", index=False)
     # val-season ensemble preds: the ONLY data calibrate.py may fit on (P1/P7)
     Pv = torch.stack(ens_val).mean(0)
     pd.DataFrame({"p_home_reg": Pv[:, 0], "p_away_reg": Pv[:, 1],
                   "p_home_extra": Pv[:, 2], "p_away_extra": Pv[:, 3],
                   "outcome4": tens_va["outcome4"]}).to_csv(
         NOUT / "preds" / f"game_val_{T}.csv", index=False)
-    print(f"T={T} ENSEMBLE: out4 ll {logloss4(P, y):.5f}, "
-          f"home-win ll {ll_home:.5f} -> preds/game_preds_{T}.csv")
+    if args.no_test:
+        print(f"T={T}: no-test mode — checkpoints + game_val_{T}.csv written")
+    else:
+        print(f"T={T} ENSEMBLE: out4 ll {logloss4(P, y):.5f}, "
+              f"home-win ll {ll_home:.5f} -> preds/game_preds_{T}.csv")
 
 
 if __name__ == "__main__":

@@ -70,7 +70,6 @@ class EventLM(nn.Module):
         self.e_type = nn.Embedding(n_event_types + 1, d_model, padding_idx=0)
         self.e_zone = nn.Embedding(4, d_model, padding_idx=0)
         self.e_shot = nn.Embedding(n_shot_types + 1, d_model, padding_idx=0)
-        self.e_coord = nn.Embedding(N_COORD, d_model, padding_idx=0)
         self.e_dt = nn.Embedding(8, d_model)
         self.e_str = nn.Embedding(N_STRENGTH, d_model)
         self.e_score = nn.Embedding(N_SCORE, d_model)
@@ -99,8 +98,12 @@ class EventLM(nn.Module):
         oe = pe(onice)
         cnt = (onice > 0).sum(-1, keepdim=True).clamp(min=1)
         pooled = self.p_onice(oe.sum(-2) / cnt)
+        # coord is TARGET-ONLY (ledger pt-fix-3): the HTM era has no recorded
+        # coordinates, so a coord input factor splits the corpus into two
+        # incompatible input domains; zone (present in both eras) carries the
+        # location input instead, and h_coord still learns location as output.
         x = (self.e_type(b["event_type"]) + self.e_zone(b["zone"])
-             + self.e_shot(b["shot_type"]) + self.e_coord(b["coord"])
+             + self.e_shot(b["shot_type"])
              + self.e_dt(b["dtb"]) + self.e_str(b["strength_cls"])
              + self.e_score(b["score_cls"]) + self.e_period(b["period"])
              + self.e_home(b["home_event"] + 1) + self.e_venue(b["venue"])
@@ -130,12 +133,18 @@ def lm_loss(out: dict, b: dict, actor_masked: torch.Tensor) -> dict:
     pad = b["event_type"] == 0
     valid_next = (~pad)[:, 1:]
 
-    def nce(logits, target):
-        lo = logits[:, :-1][valid_next]
-        return F.cross_entropy(lo, target[:, 1:][valid_next])
+    def nce(logits, target, extra_mask=None):
+        m = valid_next if extra_mask is None else (valid_next & extra_mask)
+        if not m.any():
+            return torch.zeros((), device=logits.device)
+        return F.cross_entropy(logits[:, :-1][m], target[:, 1:][m])
 
+    # coord scored ONLY where the target event has a recorded coordinate —
+    # HTM-era events (2008-2011) carry none, and training the head to predict
+    # "missing" poisons cross-domain validation (ledger pt-fix-2)
     losses = {"type": nce(out["type"], b["event_type"]),
-              "coord": nce(out["coord"], b["coord"]),
+              "coord": nce(out["coord"], b["coord"],
+                           extra_mask=(b["coord"][:, 1:] > 0)),
               "dt": nce(out["dt"], b["dtb"])}
     # actor: only where next event has a real actor among dressed
     tgt = b["p1_slot"]                                # index into dressed, -1 none

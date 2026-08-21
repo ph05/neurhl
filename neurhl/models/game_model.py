@@ -26,15 +26,15 @@ D_ERA = 8
 
 class GameModel(nn.Module):
     def __init__(self, d_player: int = 64, d: int = 128, trunk_dim: int = 512,
-                 dropout: float = 0.1):
+                 dropout: float = 0.1, enc_layers: int = 2, n_heads: int = 4):
         super().__init__()
         self.p_proj = nn.Linear(d_player + D_PLAYER_CTX, d)
-        layer = nn.TransformerEncoderLayer(d, 4, 4 * d, dropout=dropout,
+        layer = nn.TransformerEncoderLayer(d, n_heads, 4 * d, dropout=dropout,
                                            batch_first=True, norm_first=True,
                                            activation="gelu")
-        self.team_enc = nn.TransformerEncoder(layer, 2)
+        self.team_enc = nn.TransformerEncoder(layer, enc_layers)
         self.queries = nn.Parameter(torch.randn(3, d) * 0.02)
-        self.pool = nn.MultiheadAttention(d, 4, batch_first=True,
+        self.pool = nn.MultiheadAttention(d, n_heads, batch_first=True,
                                           dropout=dropout)
         self.ctx_proj = nn.Sequential(nn.Linear(D_CTX, 64), nn.GELU())
         self.fc1 = nn.Linear(6 * d + 64, trunk_dim)
@@ -49,6 +49,11 @@ class GameModel(nn.Module):
 
     def encode_team(self, emb, pctx, pad):
         tok = self.p_proj(torch.cat([emb, pctx], dim=-1))       # B,20,d
+        # A fully-masked row makes attention softmax over nothing -> NaN, which
+        # then poisons the whole batch through the loss mean. Leave slot 0
+        # visible for such rows (bugfix gm-fix-1; also covers expansion teams
+        # with no prior roster at projection time).
+        pad = pad & ~pad.all(-1, keepdim=True)
         h = self.team_enc(tok, src_key_padding_mask=pad)
         q = self.queries.unsqueeze(0).expand(h.shape[0], -1, -1)
         pooled, _ = self.pool(q, h, h, key_padding_mask=pad)    # B,3,d
@@ -103,6 +108,26 @@ def bivpois_nll(lam: torch.Tensor, x: torch.Tensor, y: torch.Tensor,
     return -(base + torch.logsumexp(logterm, dim=1))
 
 
+def from_config(cfg: dict | None = None) -> "GameModel":
+    """Single construction path so training and every inference consumer agree
+    on architecture (a mismatch silently breaks checkpoint loading)."""
+    if cfg is None:
+        import json
+        from pathlib import Path
+        cfg = json.loads((Path(__file__).resolve().parents[1] / "configs"
+                          / "game_model.json").read_text())
+    a = cfg.get("arch", {})
+    return GameModel(d=a.get("d", 128), trunk_dim=a.get("trunk_dim", 512),
+                     dropout=a.get("dropout", 0.1),
+                     enc_layers=a.get("enc_layers", 2),
+                     n_heads=a.get("n_heads", 4))
+
+
+def _masked_mean(x: torch.Tensor, m: torch.Tensor) -> torch.Tensor:
+    """mean over a boolean mask; 0 (not NaN) when the mask selects nothing."""
+    return x[m].mean() if bool(m.any()) else x.sum() * 0.0
+
+
 def game_loss(out: dict, b: dict, weights: dict,
               label_smoothing: float = 0.02) -> dict:
     losses = {"out4": F.cross_entropy(out["out4"], b["outcome4"],
@@ -120,11 +145,11 @@ def game_loss(out: dict, b: dict, weights: dict,
         p4l.append(-(share * F.log_softmax(logit, -1)).sum(-1).mean())
         rate = F.softplus(o[..., 1]) + 1e-4
         shots = b[f"shots_{gh}"].float()
-        p4l.append(((rate - shots * torch.log(rate))[sk]).mean())
-        p4l.append(F.binary_cross_entropy_with_logits(
-            o[..., 2][sk], (b[f"goals_p_{gh}"][sk] > 0).float()))
-        p4l.append(F.binary_cross_entropy_with_logits(
-            o[..., 3][sk], (b[f"assists_p_{gh}"][sk] > 0).float()))
+        p4l.append(_masked_mean(rate - shots * torch.log(rate), sk))
+        for ch, key in ((2, "goals_p"), (3, "assists_p")):
+            p4l.append(_masked_mean(F.binary_cross_entropy_with_logits(
+                o[..., ch], (b[f"{key}_{gh}"] > 0).float(),
+                reduction="none"), sk))
     losses["player"] = sum(p4l) / len(p4l)
     losses["total"] = (weights["outcome4"] * losses["out4"]
                        + weights["score"] * losses["score"]
