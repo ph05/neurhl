@@ -154,6 +154,16 @@ def parse_toi(html: str) -> list[dict]:
             cells = [strip(c) for c in re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)]
             if len(cells) < 5 or not cells[0].isdigit():
                 continue
+            # Each player block ENDS with a per-period summary table whose rows
+            # are [period, shifts, avg, TOI, EV, PP, SH] -- same leading-digit
+            # shape as a shift row. Reading those as shifts silently invents a
+            # phantom shift for every player with <= 4 shifts in a period (so:
+            # every goalie, who has exactly one per period, and every
+            # fourth-liner), inflating team TOI ~5% and corrupting on-ice sets.
+            # Shift rows are the only ones whose time cells are "elapsed /
+            # remaining" pairs, so the slash is the discriminator.
+            if "/" not in cells[2] or "/" not in cells[3]:
+                continue
             per = 4 if cells[1] == "OT" else (int(cells[1]) if cells[1].isdigit() else 0)
             if not per or per >= 5:
                 continue
