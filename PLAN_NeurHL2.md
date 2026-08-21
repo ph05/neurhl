@@ -122,6 +122,43 @@ stratified by availability regime.
 **Ablations required before any causal claim:** remove EDGE (G5), graph edges,
 goalie module, score effects, scratches.
 
+### A7 — X3 failed; calibration method corrected (chosen on DEV/TUNE, never on CONFIRM)
+
+*Declared before the corrected walk-forward is run. The original X3 failure
+stands recorded: 0/18 vantages within tolerance, pooled max decile deviation
+0.02224.*
+
+**Two distinct causes, both diagnosed from the training side.**
+
+**(1) The calibrator was correcting the wrong model.** `CalibratedClassifierCV(…,
+ensemble=False)` fits the isotonic map on out-of-fold predictions produced by
+models trained on 2/3 of the data, then applies it to a final model trained on
+all of it. The deployed model is better calibrated than the folds, so the
+correction is misapplied. Measured on DEV V=2011, max decile deviation:
+cv-isotonic **0.0088**, uncalibrated **0.0061** — calibration was making it
+*worse*.
+
+**(2) A recording-regime shift from 2023, not a hockey shift.** Share of shots
+recorded within 10 ft was stable at 7.3-8.7% (2010-2021) and then runs 11.9% /
+12.8% / 12.5% / **14.5%** (2023-2026), while the goal rate on those same close
+shots *falls* from 0.166-0.179 to 0.149 / 0.143 / 0.140 / **0.132**. Rebound
+share rises 5.1-5.6% → 8.1%; the rush flag collapses 0.19% → 0.06%. A model
+fitted on the old regime reads "8 ft" and predicts the old ~17% conversion, so it
+over-predicts exactly where the top decile lives. This is precisely the "meta
+shift" hazard the project was told to guard against, in its most insidious form —
+the *measurement* changed, not the sport.
+
+**Corrected method.** Fit the GBM on seasons **< V-1**; fit isotonic on that same
+model's predictions for season **V-1**; apply to V. The base model is consistent
+with the one being corrected, the calibrator sits on the most recent available
+season so it tracks drift automatically, and nothing from V is touched. Cost is
+one season of training data.
+
+**Window discipline.** The method was selected on DEV V=2011 (0.0088 → **0.0037**,
+a pass) and confirmed on TUNE V=2016 as development signal (0.0104 → **0.0060**).
+CONFIRM vantages were NOT consulted in choosing it; the drift evidence above is
+entirely a property of training-side seasons and needs no test data to see.
+
 ### A6 — R1′ INCONCLUSIVE on DEV; team-season fixed effects added to the RAPM design
 
 *Declared after the A5 replacement gate returned a negative result, before the

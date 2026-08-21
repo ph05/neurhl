@@ -462,3 +462,67 @@ separates offence from defence, adjusts for opponents, and yields posterior SEs 
 all of which the hazard model and S5 need and a per-player scalar cannot provide.
 The caveat is carried forward and must be re-tested where it actually matters:
 does a hazard model anchored on RAPM beat one anchored on team-demeaned raw?
+
+### P3 — L0 walk-forward xG (gates X1 PASS, X2 PASS, X3 FAIL)
+
+18 walk-forward vantages 2009-2026; season V fit only on seasons < V. Features
+are geometry, shot type and state of play, all oriented to the SHOOTER. No
+shooter or team identity: finishing skill belongs in the player layer, and
+folding it in here would leak player identity into a feature the player model
+then consumes.
+
+**X1 PASS** — beats a distance+|angle| logistic by >= 0.002 nats in **17/18**
+vantages (bar was 15). Mean gain +0.01495. The single failure is 2009, which has
+exactly one prior season to train on.
+
+**X2 PASS** — team 5v5 xG differential predicts second-half goal share better
+than Corsi (n=554 team-seasons):
+
+  half-season target     xG 0.4181   Fenwick 0.4017   Corsi 0.3951
+  next-season target     xG 0.4907   Fenwick 0.4637   Corsi 0.4426   goals 0.4889
+  incremental            xG|Corsi +0.1842    Corsi|xG +0.1100
+  R2                     Corsi 0.1561   xG 0.1748   both 0.1848
+  split-half stability   Corsi 0.7610   Fenwick 0.7307   xG 0.6776   goals 0.4099
+
+The Fenwick row matters: Fenwick uses the same unblocked event set as xG, and it
+also beats Corsi, so xG's edge is not an artefact of Corsi counting ~2x the
+events. On the next-season horizon xG beats past GOAL share itself. And Corsi is
+the MOST stable but the LEAST predictive — the same reliability-is-not-validity
+pattern that killed gate R1.
+
+The 2-vantage smoke test had Corsi ahead (0.408 vs 0.239, n=60). That was
+small-sample noise and would have deleted L0 under the prereg rule. Running the
+full 18 vantages before acting is the only reason it survived.
+
+**X3 FAIL** — pooled max decile deviation 0.01239 against a 0.005 tolerance;
+3/18 vantages within tolerance. Two causes, both fixed as far as the evidence
+allows (A7):
+
+  1. `CalibratedClassifierCV(ensemble=False)` fits the isotonic map on
+     out-of-fold predictions from models trained on 2/3 of the data, then applies
+     it to a model trained on all of it -- correcting a weaker model than the one
+     deployed. On DEV V=2011 that made calibration WORSE than none (0.0088 vs
+     0.0061 uncalibrated). Replaced by: fit GBM on seasons < V-1, fit isotonic on
+     that same model's predictions for V-1, apply to V.
+  2. A RECORDING-regime shift from 2023, not a hockey shift. Shots logged within
+     10 ft: 7.3-8.7% (2010-2021) -> 11.9 / 12.8 / 12.5 / 14.5% (2023-2026), while
+     their goal rate FALLS 0.166-0.179 -> 0.149 / 0.143 / 0.140 / 0.132. Rebound
+     share 5.1-5.6% -> 8.1%; rush flag collapses 0.19% -> 0.06%. A model fitted
+     on the old regime reads "8 ft" and predicts the old ~17%.
+
+A7 took pooled deviation 0.02224 -> 0.01239 and per-vantage passes 0 -> 3/18.
+Deciles 1-9 are now within +/-0.0021; the entire residual is the top decile
+(-0.0124), concentrated in 2022-2026 (0.014-0.039) where the drift is still
+accelerating, so calibrating on V-1 lags a moving target.
+
+**Recency weighting was tested and REJECTED on window discipline.** DEV V=2011 —
+the only DEV vantage with enough data for a clean test — prefers uniform weights
+(0.0037 vs 0.0065-0.0096 for half-lives 2-5y). TUNE V=2016 mildly prefers a 3y
+half-life (0.0039 vs 0.0060), but TUNE is development signal only and DEV
+decides. Adopting it on the TUNE result would have been exactly the
+garden-of-forking-paths this project is structured to prevent.
+
+X3 has no preregistered consequence (unlike X2's "delete L0"). Carried forward as
+a known limitation: top-decile xG is over-predicted by ~1.2pp pooled and up to
+~4pp in the drift era. The mitigation already exists in the plan as S4's
+mandatory rollout rate-adjustment, fitted on train seasons only.

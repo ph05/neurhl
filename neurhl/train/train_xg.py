@@ -34,8 +34,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
@@ -64,20 +64,37 @@ def fit_vantage(v: int, cache: dict) -> dict:
     yte = te[XG.TARGET].to_numpy()
 
     cat_mask = [c in XG.CATS for c in XG.FEATURES]
-    raw = HistGradientBoostingClassifier(categorical_features=cat_mask, **GBM)
-    # Isotonic calibration on CROSS-VALIDATED training predictions. Boosted
-    # trees are over-confident in the tail -- the uncalibrated model missed X3
-    # only in the top decile (pred 0.2538 vs obs 0.2449) -- and the simulator
-    # consumes probabilities, not ranks, so a ranking win that is miscalibrated
-    # is worthless downstream. ensemble=False fits the calibrator out-of-fold
-    # and keeps a single base model fit on all training seasons; nothing from
-    # season V is used.
-    m = CalibratedClassifierCV(raw, method="isotonic", cv=3, ensemble=False)
-    m.fit(Xtr, ytr)
-    p = m.predict_proba(Xte)[:, 1]
-    raw_only = HistGradientBoostingClassifier(categorical_features=cat_mask,
-                                              **GBM).fit(Xtr, ytr)
-    p_raw = raw_only.predict_proba(Xte)[:, 1]
+    # A7 calibration. Fit the GBM on seasons < V-1, then fit isotonic on THAT
+    # SAME model's predictions for season V-1, and apply to V.
+    #
+    # Two failures this fixes. (1) CalibratedClassifierCV(ensemble=False) fits
+    # the isotonic map on out-of-fold predictions from models trained on 2/3 of
+    # the data, then applies it to a final model trained on all of it -- it
+    # corrects a weaker model than the one deployed, and on DEV V=2011 that made
+    # calibration WORSE than none (0.0088 vs 0.0061). Here the base model and
+    # the calibrated model are the same object. (2) A recording-regime shift
+    # from 2023 -- shots logged within 10 ft went 7.3-8.7% to 14.5% while their
+    # goal rate fell 0.17 to 0.13 -- so a calibrator fit across all history
+    # encodes a mapping that no longer holds. Fitting it on the most recent
+    # AVAILABLE season tracks the drift automatically, and season V is never
+    # touched.
+    hold = v - 1
+    m_fit = tr.season_end.to_numpy() != hold
+    cal_idx = ~m_fit
+    if m_fit.sum() == 0 or cal_idx.sum() == 0:
+        # V=2009 has exactly one prior season, so holding it out leaves nothing
+        # to fit on. Fall back to fitting and calibrating on the same rows: the
+        # calibrator is then in-sample and near-identity, which is honest for a
+        # vantage that cannot support a holdout at all. It is also the one
+        # vantage X1 does not clear, for the same reason -- too little history.
+        m_fit = np.ones(len(ytr), bool)
+        cal_idx = m_fit
+    base = HistGradientBoostingClassifier(categorical_features=cat_mask, **GBM)
+    base.fit(Xtr[m_fit], ytr[m_fit])
+    p_cal = base.predict_proba(Xtr[cal_idx])[:, 1]
+    iso = IsotonicRegression(out_of_bounds="clip").fit(p_cal, ytr[cal_idx])
+    p_raw = base.predict_proba(Xte)[:, 1]
+    p = iso.predict(p_raw)
 
     # baseline: the classic two-variable xG
     sc = StandardScaler().fit(Xtr[XG.BASELINE])

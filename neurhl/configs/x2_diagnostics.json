@@ -1,0 +1,29 @@
+{
+ "n_team_seasons": 554,
+ "half_season": {
+  "xg": 0.4181,
+  "cf": 0.3951,
+  "ff": 0.4017
+ },
+ "incremental": {
+  "xg_given_corsi": 0.1842,
+  "corsi_given_xg": 0.11,
+  "r2_corsi": 0.1561,
+  "r2_xg": 0.1748,
+  "r2_both": 0.1848
+ },
+ "next_season": {
+  "n": 519,
+  "xg": 0.4907,
+  "cf": 0.4426,
+  "ff": 0.4637,
+  "gf": 0.4889,
+  "xg_given_corsi": 0.2425
+ },
+ "stability": {
+  "xg": 0.6776,
+  "cf": 0.761,
+  "ff": 0.7307,
+  "gf": 0.4099
+ }
+}
