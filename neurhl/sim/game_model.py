@@ -205,12 +205,48 @@ def integrate(lam_h, lam_a, curve, step=10.0, max_goals=MAX_GOALS,
     return P
 
 
-def outcome(P, ot_home_edge=0.53):
+def observed_tie_rate(seasons) -> float:
+    """Share of regulation ties (games that reached OT/SO) in `seasons`."""
+    n = t = 0
+    for x in seasons:
+        p = TENSORS / f"games_ctx_{x}.parquet"
+        if not p.exists():
+            continue
+        g = pd.read_parquet(p, columns=["game_type", "outcome4"])
+        g = g[g.game_type == 2]
+        n += len(g)
+        t += int(g.outcome4.isin([2, 3]).sum())
+    return t / max(n, 1)
+
+
+def fit_tie_calibration(model_tie_rates, seasons) -> float:
+    """One multiplicative correction on P(regulation tie), fitted on TRAIN.
+
+    Independent-Poisson goals under-produce exact ties: real hockey games are
+    pulled together by score effects and by teams playing for the loser point,
+    so the observed OT share (~21-25%) exceeds what independent scoring gives
+    (measured 18.9% before this correction). PLAN_NeurHL2 S4 permits exactly one
+    such post-hoc rate adjustment, "fitted on train seasons only". This is it,
+    and it is a single scalar.
+    """
+    obs = observed_tie_rate(seasons)
+    mod = float(np.mean(model_tie_rates)) if len(model_tie_rates) else obs
+    return float(np.clip(obs / max(mod, 1e-6), 0.5, 2.0))
+
+
+def outcome(P, ot_home_edge=0.53, tie_calib=1.0):
     n = P.shape[0]
     gh = np.arange(n)[:, None]
     ga = np.arange(n)[None, :]
     reg_h = float(P[gh > ga].sum())
     tie = float(P[gh == ga].sum())
+    reg_a = 1.0 - reg_h - tie
+    if tie_calib != 1.0:
+        # inflate the tie mass and take the difference proportionally from the
+        # two regulation outcomes, preserving their relative odds
+        tie_c = min(tie * tie_calib, 0.95)
+        scale = (1.0 - tie_c) / max(reg_h + reg_a, 1e-9)
+        reg_h, reg_a, tie = reg_h * scale, reg_a * scale, tie_c
     return {"p_home_win": reg_h + tie * ot_home_edge,
-            "p_reg_home": reg_h, "p_tie": tie,
+            "p_reg_home": reg_h, "p_reg_away": reg_a, "p_tie": tie,
             "exp_gh": float((P * gh).sum()), "exp_ga": float((P * ga).sum())}

@@ -1,0 +1,137 @@
+[
+ {
+  "check": "src/ never imports neurhl/",
+  "pass": true,
+  "detail": "no references"
+ },
+ {
+  "check": "deliverable exists and is report-only",
+  "pass": true,
+  "detail": "neurhl/output/projection_2027.csv"
+ },
+ {
+  "check": "broken seasons 2013/2021 refuse to be scored",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "cross-window scoring refused",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "PROJECT season is 2027 (= the 2026-27 season)",
+  "pass": true,
+  "detail": "PROJECT=2027; nothing targets 2027-28"
+ },
+ {
+  "check": "causality: no input moves when the future is corrupted",
+  "pass": true,
+  "detail": "3 games, 22 inputs checked"
+ },
+ {
+  "check": "no input equals a target",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "no input recovers the target's team",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "on-ice carries no lift on the next event type",
+  "pass": true,
+  "detail": "max lift 1.000"
+ },
+ {
+  "check": "X1 re-derived: gain >= 0.002 nats in >= 15 vantages",
+  "pass": true,
+  "detail": "17/18, mean +0.01495"
+ },
+ {
+  "check": "X2 re-derived: team xG beats Corsi at future goal share",
+  "pass": true,
+  "detail": "xG 0.4181 vs Corsi 0.3951, n=554"
+ },
+ {
+  "check": "X3 recorded as FAILED (not silently passed)",
+  "pass": true,
+  "detail": "max decile deviation 0.01239 > 0.005 \u2014 recorded as a known limitation, no preregistered consequence"
+ },
+ {
+  "check": "R1' recorded as INCONCLUSIVE (A6), not passed",
+  "pass": true,
+  "detail": "movers n=485, RAPM 0.3866 vs raw-demeaned 0.3709, p=0.597"
+ },
+ {
+  "check": "E1 re-derived: every per-game count within 10%",
+  "pass": true,
+  "detail": "worst +4.16%"
+ },
+ {
+  "check": "E1 re-derived: per-period goals/shots within 10%",
+  "pass": true,
+  "detail": "worst +7.88%"
+ },
+ {
+  "check": "E2 re-derived: score-effect gradient ratio in [0.5, 1.5]",
+  "pass": true,
+  "detail": "ratio 0.979, corr 0.9792"
+ },
+ {
+  "check": "dt calibration (randomised PIT) within 0.05",
+  "pass": true,
+  "detail": "0.0305"
+ },
+ {
+  "check": "blend nests Elo (never materially worse)",
+  "pass": true,
+  "detail": "blend 0.67763 vs Elo 0.67668 (+0.00095)"
+ },
+ {
+  "check": "G-STOP correctly FIRED -> CONFIRM not spent",
+  "pass": true,
+  "detail": "blend 0.67763 vs v1 hierarchical 0.67314 = +0.00449, weaker than -0.0015"
+ },
+ {
+  "check": "CONFIRM window remains unspent",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "32 teams projected",
+  "pass": true,
+  "detail": "32 rows"
+ },
+ {
+  "check": "points identity implies a realistic OT share",
+  "pass": true,
+  "detail": "implied 22.1% (observed 2024-26 22.1%)"
+ },
+ {
+  "check": "playoff odds sum to 8 in the E conference",
+  "pass": true,
+  "detail": "8.000"
+ },
+ {
+  "check": "playoff odds sum to 8 in the W conference",
+  "pass": true,
+  "detail": "8.000"
+ },
+ {
+  "check": "no team projected outside a plausible points band",
+  "pass": true,
+  "detail": "74.0-110.4"
+ },
+ {
+  "check": "registry refuses an OUTCOME feature as an input",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "EDGE (G5) is usable for the 2027 projection under PRIOR vantage",
+  "pass": true,
+  "detail": ""
+ }
+]

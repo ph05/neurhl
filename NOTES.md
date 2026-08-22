@@ -680,3 +680,60 @@ substitution.
 
 S1 itself is validated and is not implicated: the gates pass, the audit is clean,
 and the model produces correct home advantage on unmodified data.
+
+### P9 — the 2026-27 deliverable, and the two rules that fired
+
+**S4 (game outcomes) — the preregistered FALLBACK is in force.** The direct S1
+hazard query was abandoned after three distinct query bugs were found and fixed
+and the home/away split still would not come right. Diagnosis, in order:
+
+  1. fabricated state: overwriting period/score onto arbitrary contexts gave
+     "period 3" on a clock reading early first period. With mirrored identical
+     units: lambda_away 3.09 vs lambda_home 2.48, E[dt] collapsing 12.2s -> 7.8s.
+  2. sampling noise: 6 contexts per state cell gave sd 1.41 g/60 on the away
+     rate. Converges by ~1536 (home 2.21 +/- 0.03, away 2.29 +/- 0.05).
+  3. positional mismatch: mid-game windows were laid at positional slots
+     0..T-1, telling the model it was watching an opening faceoff.
+
+The model was never the problem. On natural data the same ensemble gives
+expected home 2.929 / away 2.599 goals per game against observed 2.885 / 2.435 --
+home advantage +0.329 predicted vs +0.450 observed, and +0.195 vs +0.268 at 5v5.
+Conditioning on a single (period, score, 5v5) cell is a selection the natural
+sequence never makes, and the hazard does not survive it.
+
+S4-v2 was rebuilt from validated components: EB-shrunk team rates, walk-forward
+RAPM roster strength, S1's measured score-effect curve, Kolmogorov integration,
+Elo nested at the PROBABILITY level. A stacking error was found and fixed en
+route -- fitting the Elo blend on the same seasons the Poisson coefficients came
+from made the blend WORSE than the incumbent it was meant to nest (0.68218 vs Elo
+0.67668); refitted on walk-forward out-of-sample predictions.
+
+  TUNE, n=4,920      constant 0.68942   Elo 0.67668   sim 0.68416   BLEND 0.67763
+
+The engine's rates add NOTHING over Elo at the game level (+0.00095). Expected
+goals are well calibrated, so this is not a broken rate model: per-game outcome
+variance simply swamps the refinement the engine supplies.
+
+  **G-STOP FIRED.** v1 hierarchical scored 0.67314 on this window; the blend is
+  0.67763, i.e. +0.0045 WORSE, weaker than the -0.0015 threshold. CONFIRM
+  (2018-2026) was NOT touched and remains unspent for any future attempt.
+
+  **FALLBACK invoked** (validation item 7, written before any of this ran): the
+  hierarchical head remains the game-outcome estimator; the simulator ships only
+  for what it uniquely provides.
+
+**The projection (neurhl/output/projection_2027.csv).** Real 2026-27 schedule
+(1,344 games, 84 per team) and real announced rosters for all 32 teams. Elo
+carried from 2026 and regressed, team rates from 2024-2026, roster RAPM from
+rapm_prior_2027 applied to the ANNOUNCED rosters so trades and free agency are
+carried. 45 cold-start skaters across 32 rosters receive the position
+REPLACEMENT coefficient rather than a league-average one.
+
+One post-hoc rate adjustment was fitted, which PLAN_NeurHL2 S4 explicitly permits
+("fitted on train seasons only"): independent-Poisson goals under-produce exact
+ties, giving an 18.9% OT share against an observed 22.1%. A single scalar (1.171)
+on the tie mass fixes it -- the projection's implied OT share is now 22.1%,
+matching 2024-2026 exactly. League mean 93.3 points.
+
+**Acceptance: 27/27 checks pass** (neurhl/tests/review_tests_neurhl2.py), each
+re-deriving its verdict from the recorded numbers rather than trusting a report.
