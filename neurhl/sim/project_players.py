@@ -297,11 +297,21 @@ def backtest(seasons) -> None:
         mm = m[m.act_gp >= 40]
         if len(mm) < 50:
             continue
+        # Bias must be measured UNCONDITIONALLY. Filtering on games played
+        # selects players who beat their availability expectation, and their
+        # point totals follow: the bias runs +0.50 at no filter, -0.21 at >=10
+        # GP, -1.88 at >=40 and -3.62 at >=60. That gradient is selection on the
+        # outcome, not deflation, so the >=40 figure is reported for accuracy
+        # comparability only and never as a bias estimate.
+        uncond_bias = float((m.proj_p - m.act_p).mean())
         mae = float(np.abs(mm.proj_p - mm.act_p).mean())
         naive = float(np.abs(mm.act_p.mean() - mm.act_p).mean())
         rows.append({"season": V, "n": int(len(mm)), "mae_pts": mae,
                      "naive_mae": naive,
                      "bias": float((mm.proj_p - mm.act_p).mean()),
+                     "bias_unconditional": uncond_bias,
+                     "n_all": int(len(m)),
+                     "league_ratio": float(m.proj_p.sum() / max(m.act_p.sum(), 1)),
                      "corr": float(np.corrcoef(mm.proj_p, mm.act_p)[0, 1]),
                      "calib": list(cal),
                      "top10_proj": [round(float(x), 1) for x in
@@ -317,7 +327,10 @@ def backtest(seasons) -> None:
         print(f"\nPOOLED n={n:,}  MAE "
               f"{sum(r['mae_pts']*r['n'] for r in rows)/n:.2f} vs a league-mean "
               f"baseline of {sum(r['naive_mae']*r['n'] for r in rows)/n:.2f}  "
-              f"bias {sum(r['bias']*r['n'] for r in rows)/n:+.2f}  "
+              f"bias(>=40GP, selected) "
+              f"{sum(r['bias']*r['n'] for r in rows)/n:+.2f}  "
+              f"bias(all) "
+              f"{sum(r['bias_unconditional']*r['n_all'] for r in rows)/sum(r['n_all'] for r in rows):+.2f}  "
               f"corr {np.mean([r['corr'] for r in rows]):.3f}")
         p = Path(__file__).resolve().parents[1] / "configs" / "player_backtest.json"
         p.write_text(json.dumps(rows, indent=1))

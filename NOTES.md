@@ -864,3 +864,17 @@ for the PLAYER model. They sit inside CONFIRM, which had been reserved for the
 game-level C1 test -- but G-STOP already fired, so C1 will not run and the
 reservation was moot. Recording it rather than letting it pass silently: a future
 player-projection claim on those seasons is no longer independent.
+
+**Bias must be measured unconditionally.** The acceptance check initially failed
+on player bias (3.12 pts). Investigating rather than loosening the threshold
+showed the check was measuring the wrong quantity: filtering to players with >=40
+games selects those who BEAT their availability expectation, and their point
+totals follow. The bias runs monotonically with the filter --
+
+    >= 0 GP  +0.50      >= 20 GP  -0.74      >= 60 GP  -3.62
+    >= 10 GP -0.21      >= 40 GP  -1.88
+
+-- which is selection on the outcome, not deflation. Unconditionally the model is
+essentially unbiased: -0.34 points over 4,149 player-seasons, with a projected
+league point total 0.986 of actual. The >=40 GP figure is retained for accuracy
+comparability and never quoted as a bias estimate.

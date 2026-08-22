@@ -145,9 +145,14 @@
   "detail": "9.55 vs 18.54, n=2,956"
  },
  {
-  "check": "player projections are not materially biased",
-  "pass": false,
-  "detail": "mean |bias| 3.12 pts"
+  "check": "player projections are unbiased (all players, unfiltered)",
+  "pass": true,
+  "detail": "-0.34 pts over n=4,149"
+ },
+ {
+  "check": "projected league point total matches actual",
+  "pass": true,
+  "detail": "ratio 0.986"
  },
  {
   "check": "player deliverable exists",

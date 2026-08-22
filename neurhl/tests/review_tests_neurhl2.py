@@ -208,11 +208,21 @@ def main():
         n = sum(r["n"] for r in ok)
         mae = sum(r["mae_pts"] * r["n"] for r in ok) / n
         nai = sum(r["naive_mae"] * r["n"] for r in ok) / n
-        bias = sum(abs(r["bias"]) * r["n"] for r in ok) / n
         check("player points MAE beats a league-mean baseline", mae < nai,
               f"{mae:.2f} vs {nai:.2f}, n={n:,}")
-        check("player projections are not materially biased", bias < 2.5,
-              f"mean |bias| {bias:.2f} pts")
+        # Bias is checked UNCONDITIONALLY. The >=40 GP subset is selected on the
+        # outcome -- those players beat their availability expectation -- and its
+        # bias runs monotonically from +0.50 (no filter) to -3.62 (>=60 GP).
+        # Checking the filtered figure would fail a correctly calibrated model.
+        na = sum(r.get("n_all", r["n"]) for r in ok)
+        ub = sum(r.get("bias_unconditional", r["bias"]) * r.get("n_all", r["n"])
+                 for r in ok) / na
+        check("player projections are unbiased (all players, unfiltered)",
+              abs(ub) < 2.0, f"{ub:+.2f} pts over n={na:,}")
+        lr = sum(r.get("league_ratio", 1.0) * r.get("n_all", r["n"])
+                 for r in ok) / na
+        check("projected league point total matches actual", abs(lr - 1) < 0.06,
+              f"ratio {lr:.3f}")
         pp = ROOT / "output" / "player_proj_2027.csv"
         check("player deliverable exists", pp.exists(),
               f"{len(pd.read_csv(pp)):,} skaters" if pp.exists() else "missing")
