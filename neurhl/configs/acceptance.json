@@ -125,6 +125,36 @@
   "detail": "69.0-112.0"
  },
  {
+  "check": "standings MAE beats HOWE (10.36)",
+  "pass": true,
+  "detail": "9.61"
+ },
+ {
+  "check": "CRPS beats the house benchmarks (7.10 / 7.77)",
+  "pass": true,
+  "detail": "6.93"
+ },
+ {
+  "check": "80% interval coverage is calibrated",
+  "pass": true,
+  "detail": "0.794"
+ },
+ {
+  "check": "player points MAE beats a league-mean baseline",
+  "pass": true,
+  "detail": "6.66 vs 16.27, n=2,940"
+ },
+ {
+  "check": "player projections are not materially biased",
+  "pass": true,
+  "detail": "mean |bias| 1.65 pts"
+ },
+ {
+  "check": "player deliverable exists",
+  "pass": true,
+  "detail": "732 skaters"
+ },
+ {
   "check": "registry refuses an OUTCOME feature as an input",
   "pass": true,
   "detail": ""

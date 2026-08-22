@@ -188,6 +188,35 @@ def main():
               r.proj_points.between(55, 130).all(),
               f"{r.proj_points.min():.1f}-{r.proj_points.max():.1f}")
 
+    # ------------------------------------------------- season & player layers
+    print("\nSEASON AND PLAYER LAYERS")
+    sb = load("season_backtest.json")
+    if sb is None:
+        check("season backtest present", False)
+    else:
+        check("standings MAE beats HOWE (10.36)", sb["mae"] < 10.36,
+              f"{sb['mae']:.2f}")
+        check("CRPS beats the house benchmarks (7.10 / 7.77)",
+              sb["crps"] < 7.10, f"{sb['crps']:.2f}")
+        check("80% interval coverage is calibrated",
+              abs(sb["cover80"] - 0.80) < 0.06, f"{sb['cover80']:.3f}")
+    pb = load("player_backtest.json")
+    if pb is None:
+        check("player backtest present", False)
+    else:
+        ok = [r for r in pb if r["season"] >= 2014]        # assist-complete
+        n = sum(r["n"] for r in ok)
+        mae = sum(r["mae_pts"] * r["n"] for r in ok) / n
+        nai = sum(r["naive_mae"] * r["n"] for r in ok) / n
+        bias = sum(abs(r["bias"]) * r["n"] for r in ok) / n
+        check("player points MAE beats a league-mean baseline", mae < nai,
+              f"{mae:.2f} vs {nai:.2f}, n={n:,}")
+        check("player projections are not materially biased", bias < 2.5,
+              f"mean |bias| {bias:.2f} pts")
+        pp = ROOT / "output" / "player_proj_2027.csv"
+        check("player deliverable exists", pp.exists(),
+              f"{len(pd.read_csv(pp)):,} skaters" if pp.exists() else "missing")
+
     # ------------------------------------------------------------- registry
     print("\nFEATURE REGISTRY")
     try:

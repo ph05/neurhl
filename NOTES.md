@@ -779,3 +779,35 @@ So the honest summary of the whole build: the engine does NOT improve game-by-ga
 prediction (G-STOP fired, Elo unbeaten), but it DOES improve season-level
 projection over the incumbent, which is precisely the split the preregistered
 fallback anticipated.
+
+### Player projections — and a fourth data gap found
+
+`neurhl/output/player_proj_2027.csv`, 732 skaters on announced 2026-27 rosters.
+Walk-forward backtest on assist-complete vantages (2014-2017, n=2,940):
+
+    points MAE  6.66   against a league-mean baseline of 16.27
+    correlation 0.899  mean |bias| 1.65 points
+
+Deliberately NOT built on S1's actor head. That head chooses among players
+CURRENTLY on the ice, so turning it into a season projection needs the deployment
+process (S3), which was not built. Claiming a neural provenance it does not have
+would be worse than using the estimator that works.
+
+**Data gap: assists are ZERO for season_end 2008-2011.** Cause identified rather
+than worked around: `build_htm.parse_pl`'s actor regex requires a dotted
+team-code prefix, but HTM goal descriptions list assists as
+"Assists: #26 NAME; #91 NAME" with no team code, so `tensorize_htm`'s p2/p3
+assignment -- which is otherwise correct -- never sees them. Measured: assists
+per game 0.00 for 2008-2011 against 9.16-10.62 from 2012 on; p2>0 is 0.000 on
+those goals against 0.891-0.908 later.
+
+Including those seasons in the rate history biased projections DOWN by 18.3
+points at vantage 2012 (which trains entirely on zero-assist seasons) and 4.9-8.7
+points at 2014-2017. Assist rates are now estimated only from assist-complete
+seasons; goal rates still use the full history, since goals are intact
+throughout. Pooled MAE 9.05 -> 7.86.
+
+NOT FIXED AT SOURCE, and flagged as the top follow-up: recovering HTM assists
+needs a regex fix plus re-running tensorize_htm for 2008-2012 and rebuilding the
+downstream chain, which was not safe to start late in the session. Goals, shots,
+on-ice sets and TOI are unaffected, so nothing else in the build depends on it.
