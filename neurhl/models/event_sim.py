@@ -69,9 +69,18 @@ class OnIceEncoder(nn.Module):
         nn.init.zeros_(self.res_proj.bias)
         self.scale = nn.Parameter(torch.zeros(1))
 
-    def forward(self, on, rapm_tab, home_first):
-        """on: [B,T,14] player indices. home_first: [B,T] bool, True when the
-        event owner is the home side, so 'for'/'against' follow the owner."""
+    def forward(self, on, rapm_tab):
+        """on: [B,T,14] player indices, ALWAYS home slots 0-6 then away 7-13.
+
+        Orientation is fixed to home/away and is deliberately NOT keyed to the
+        next event's owner. An earlier version oriented 'for'/'against' by a
+        `home_next` flag equal to the owning team of the NEXT event -- verified
+        at 100% agreement with the target's team component -- which handed the
+        model half its own (type, team) label. That information does not exist
+        at simulation time: the deployment process decides who is ON THE ICE,
+        never who will touch the puck next. With the leak removed the model must
+        infer possession from history, which is what S4 actually needs.
+        """
         B, T, _ = on.shape
         r = rapm_tab[on]                                   # [B,T,14,5]
         e = self.emb(on)                                   # [B,T,14,dp]
@@ -86,14 +95,8 @@ class OnIceEncoder(nn.Module):
         hge, hse = pool(e, 0, 1), pool(e, 1, 7)
         age, ase = pool(e, 7, 8), pool(e, 8, 14)
 
-        hf = home_first.unsqueeze(-1).float()
-        f_sk, a_sk = hf * hs + (1 - hf) * as_, hf * as_ + (1 - hf) * hs
-        f_g, a_g = hf * hg + (1 - hf) * ag, hf * ag + (1 - hf) * hg
-        f_se, a_se = hf * hse + (1 - hf) * ase, hf * ase + (1 - hf) * hse
-        f_ge, a_ge = hf * hge + (1 - hf) * age, hf * age + (1 - hf) * hge
-
-        base = self.rapm_proj(torch.cat([f_sk, f_g, a_sk, a_g], -1))
-        res = self.res_proj(torch.cat([f_se, f_ge, a_se, a_ge], -1))
+        base = self.rapm_proj(torch.cat([hs, hg, as_, ag], -1))
+        res = self.res_proj(torch.cat([hse, hge, ase, age], -1))
         return torch.cat([base, self.scale * torch.tanh(res)], -1), e
 
 
@@ -161,7 +164,7 @@ class EventSim(nn.Module):
             scal], -1)
         h = self.in_proj(tok)
 
-        on_ctx, pemb = self.onice(b["on_next"], rapm_tab, b["home_next"])
+        on_ctx, pemb = self.onice(b["on_next"], rapm_tab)
         h = h + self.ctx_proj(on_ctx)
 
         gamma, beta = self.era_proj(b["era"]).chunk(2, -1)

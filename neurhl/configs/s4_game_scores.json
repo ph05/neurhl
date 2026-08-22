@@ -1,0 +1,20 @@
+{
+ "season": 2017,
+ "n": 60,
+ "ll_model": 2.1111506297834333,
+ "ll_constant": 0.5960740318257864,
+ "base_rate": 0.7166666666666667,
+ "mean_p_home": 0.061031605057910054,
+ "sd_p_home": 0.031299380776751914,
+ "exp_goals_home": 0.38937332384104545,
+ "exp_goals_away": 3.333682170985763,
+ "actual_goals_home": 3.3833333333333333,
+ "actual_goals_away": 2.7666666666666666,
+ "ensemble": [
+  "s1b_seed20260821.pt",
+  "s1b_seed20260822.pt",
+  "s1b_seed20260823.pt",
+  "s1b_seed20260824.pt",
+  "s1b_seed20260825.pt"
+ ]
+}

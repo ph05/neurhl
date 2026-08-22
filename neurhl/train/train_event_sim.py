@@ -102,7 +102,6 @@ def make_batch(seasons, picks, eras, dev):
     for k in F:
         ints[k] = np.zeros((B, T), np.float32)
     on_next = np.zeros((B, T, 14), np.int64)
-    home_next = np.zeros((B, T), np.float32)
     valid = np.zeros((B, T), bool)
     tgt = {k: np.zeros((B, T), np.int64) for k in
            ["tgt_tt", "tgt_zone", "tgt_actor"]}
@@ -127,7 +126,6 @@ def make_batch(seasons, picks, eras, dev):
         for k in Bm + ["n_for", "n_against"]:
             ints[k][i, :n] = d[k][sl]
         on_next[i, :n] = d["on"][nx]
-        home_next[i, :n] = (d["team"][nx] == 2).astype(np.float32)
         valid[i, :n] = True
         tgt_valid[i, :n] = True
         tgt["tgt_tt"][i, :n] = d["tt"][nx]
@@ -142,7 +140,6 @@ def make_batch(seasons, picks, eras, dev):
     out = {k: torch.from_numpy(v).to(dev) for k, v in ints.items()}
     out.update({k: torch.from_numpy(v).to(dev) for k, v in tgt.items()})
     out["on_next"] = torch.from_numpy(on_next).to(dev)
-    out["home_next"] = torch.from_numpy(home_next).to(dev)
     out["valid"] = torch.from_numpy(valid).to(dev)
     out["tgt_valid"] = torch.from_numpy(tgt_valid).to(dev)
     out["era"] = torch.from_numpy(era).to(dev)
