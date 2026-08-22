@@ -624,3 +624,59 @@ is the Grinsztajn et al. regime: 3.37M events are massively correlated within
 games, so effective sample size is far below nominal. Memory was never the
 constraint (26M peaked at 2.2 GB of 32 GB); MPS throughput peaks at batch 32 and
 collapses at 48+. The hardware went into longer training and the ensemble instead.
+
+
+### P5-v2 final results (leak-free, audited) and the S4 open issue
+
+All five seeds retrained on audited inputs (26,000 steps, bs 16, ~34 epochs each).
+Held-out loss 2.7981 / 2.8054 / 2.8130 / 2.8370 / 2.8892 -- a tight cluster once
+evaluation was widened from 60 to 140 batches, which had been masking real spread
+as eval noise.
+
+  LEAKAGE AUDIT   causality 22 inputs x 3 games CLEAN; no input equals a target
+                  or recovers its team; on-ice lift on next-event type exactly
+                  1.000 for penalty / goal / faceoff / stoppage.
+  E1 per game     goal +3.91%  SOG -0.83%  penalty -1.91%  faceoff +0.32%
+                  miss -1.23%  block -0.94%  stoppage -0.89%  hit +4.16%   PASS
+  E1 per period   P1 goal +3.89%   P2 +2.14%   P3 +7.88%   (tolerance 10%) PASS
+  E2 5v5          gradient -0.005118 vs -0.005226, ratio 0.979, corr 0.9792 PASS
+  E2 all-strength ratio 0.939, corr 0.9916
+  dt              randomised PIT max decile deviation 0.0305
+
+These supersede the void P5 numbers. Note E2 is BETTER without the leaks
+(ratio 0.979 vs 1.04), which is what one would expect: the leaks helped the model
+guess possession, not reproduce score effects.
+
+**S4 is NOT working yet, and the game-level number is worse than a constant
+baseline. Stated plainly rather than buried.**
+
+  log loss  S4 0.72021   constant home rate 0.67499   delta +0.04522
+  expected goals/game  home 2.50  away 2.65   (actual 2.90 / 2.47)
+
+Two S4 bugs were found and fixed along the way, and both are worth recording:
+
+  1. FABRICATED STATE. The first version took arbitrary contexts and overwrote
+     period/score/strength, producing self-contradictory inputs -- `period = 3`
+     on a context whose clock still read early first period. Measured with
+     mirrored identical units: lambda_away 3.09 vs lambda_home 2.48 and E[dt]
+     collapsing 12.2s -> 7.8s. Replaced by SELECTING real contexts that already
+     sit at the wanted (period, score, 5v5) state and substituting only
+     personnel. lambda went from 0.82/1.82 to 2.11/2.34 g/60 and log loss from
+     0.894 to 0.720.
+  2. UNREPRESENTATIVE UNITS. "Top 6 skaters by TOI" yields 3.2 DEFENCEMEN of 6
+     across all 30 teams, because D play more minutes. Fixed to a real 3F + 2D
+     unit. Effect was small (0.72089 -> 0.72021), so this was not the main issue.
+
+**The remaining defect is precisely characterised: home advantage is absent from
+the substituted-personnel query.** On natural real data the same ensemble gives
+lambda_home 2.55 vs lambda_away 2.29 -- correct direction and magnitude. Only
+after personnel substitution does it inverts to 2.50 / 2.65. The leading
+hypothesis is that substituting on-ice players across a whole context window
+breaks the correspondence between the context's ACTORS and its on-ice sets, and
+the model reads home/away partly from that consistency. Testable directly by
+substituting personnel only at the final position, or by re-deriving home
+advantage as an explicit additive term rather than expecting it to survive
+substitution.
+
+S1 itself is validated and is not implicated: the gates pass, the audit is clean,
+and the model produces correct home advantage on unmodified data.

@@ -60,71 +60,132 @@ def projected_units(season: int, pmap: dict) -> dict:
            .toi_sec.sum())
     out = {}
     for team, d in agg.groupby("team"):
-        sk = d[d.pos_group != 2].nlargest(N_SK, "toi_sec")
+        # A real 5v5 unit is 3 forwards + 2 defencemen. Ranking all skaters by
+        # TOI does NOT give that: defencemen play far more minutes, so the top 6
+        # comes out at 3.2 D on average (measured across all 30 teams), which is
+        # a defensively skewed unit that no team ever ices and which depresses
+        # the offensive hazard.
+        fw = d[d.pos_group == 0].nlargest(3, "toi_sec")
+        df = d[d.pos_group == 1].nlargest(2, "toi_sec")
         gk = d[d.pos_group == 2].nlargest(1, "toi_sec")
-        idx = [pmap.get(int(x), 0) for x in sk.player_id]
+        idx = [pmap.get(int(x), 0) for x in list(fw.player_id) + list(df.player_id)]
         idx = (idx + [0] * N_SK)[:N_SK]
         gi = pmap.get(int(gk.player_id.iloc[0]), 0) if len(gk) else 0
         out[int(team)] = [gi] + idx
     return out
 
 
-def context_bank(season_obj, eras, dev, n=N_CTX, seed=11):
-    """Short real histories from arbitrary games, used to marginalise history."""
+def state_matched_contexts(season, eras, dev, n_per_cell=6, n_games=260,
+                           seed=11):
+    """Real histories INDEXED BY THE STATE THEY ALREADY HAVE.
+
+    The first version of this fabricated state: it took arbitrary contexts and
+    overwrote period/score/strength. That produces self-contradictory inputs --
+    `period = 3` on a context whose clock still says early first period -- and
+    the model, correctly, returns nonsense for them (measured: lambda_away 3.09
+    against lambda_home 2.48 with mirrored identical units, and E[dt] collapsing
+    from 12.2s to 7.8s).
+
+    So nothing is overwritten except PERSONNEL. Contexts are selected because
+    they already sit at the wanted (period, score, 5v5) state, which keeps every
+    field mutually consistent and in-distribution. This is what "marginalise the
+    history" should have meant all along: average over real histories that
+    reached this state, not over invented ones.
+    """
     rng = np.random.default_rng(seed)
-    picks = [(season_obj, int(g)) for g in
-             rng.integers(0, season_obj.n_games, size=n)]
-    b = make_batch([season_obj], picks, eras, dev)
+    cells = {}
+    n_games = min(n_games, season.n_games)
+    d = season.d
+    for g in range(n_games):
+        a0, b0 = int(season.off[g]), int(season.off[g + 1])
+        per = d["period"][a0:b0]
+        sc = d["score_abs"][a0:b0].astype(int) - 4
+        st = d["strength"][a0:b0]
+        for pos in range(CTX_LEN, b0 - a0 - 1):
+            if st[pos] != 0:
+                continue
+            key = (int(per[pos]), int(np.clip(sc[pos], -4, 4)))
+            if key[0] < 1 or key[0] > 3:
+                continue
+            cells.setdefault(key, [])
+            if len(cells[key]) < n_per_cell * 4:
+                cells[key].append((g, pos))
     out = {}
-    for k, v in b.items():
-        out[k] = v[:, :CTX_LEN].contiguous() if (torch.is_tensor(v) and v.dim() >= 2
-                                                 and v.shape[1] > CTX_LEN) else v
+    for key, lst in cells.items():
+        if len(lst) < 2:
+            continue
+        pick = [lst[i] for i in rng.choice(len(lst),
+                                           size=min(n_per_cell, len(lst)),
+                                           replace=False)]
+        out[key] = build_window(season, pick, eras, dev)
     return out
 
 
+def build_window(season, picks, eras, dev):
+    """A batch of CTX_LEN-token windows ENDING at each chosen position."""
+    B = len(picks)
+    T = CTX_LEN
+    d = season.d
+    I = ["etype", "team", "zone", "stype", "strength", "score", "period",
+         "score_abs", "n_home", "n_away", "g_home", "g_away"]
+    F = ["dt", "t_rem", "xa", "ya", "xg"]
+    Bm = ["has_xy", "has_xg", "n_for", "n_against"]
+    out = {k: np.zeros((B, T), np.int64) for k in I + Bm}
+    out.update({k: np.zeros((B, T), np.float32) for k in F})
+    on = np.zeros((B, T, 14), np.int64)
+    for i, (g, pos) in enumerate(picks):
+        a0 = int(season.off[g])
+        sl = slice(a0 + pos - T + 1, a0 + pos + 1)
+        for k in I + Bm:
+            out[k][i] = d[k][sl]
+        for k in F:
+            out[k][i] = d[k][sl]
+        on[i] = d["on"][sl]
+    r = {k: torch.from_numpy(v).to(dev) for k, v in out.items()}
+    r["on_ctx"] = torch.from_numpy(on).to(dev)
+    r["valid"] = torch.ones(B, T, dtype=torch.bool, device=dev)
+    r["era"] = eras[season.se].to(dev).view(1, -1).expand(B, -1).contiguous()
+    return r
+
+
 @torch.no_grad()
-def hazards_for_games(models, ctx, units, era, rapm, dev, inv_tt, n_games):
-    """(n_games, period, score) -> (lambda_home, lambda_away) per second."""
+def hazards_for_games(models, cells, units, rapm, dev, inv_tt, n_games):
+    """(game, period, score) -> (lambda_home, lambda_away) goals per second.
+
+    ONLY personnel are substituted into each state-matched context.
+    """
     gh = [j for j, k in inv_tt.items() if k == "7|1"]
     ga = [j for j, k in inv_tt.items() if k == "7|0"]
-    n_ctx = ctx["etype"].shape[0]
-    T = ctx["etype"].shape[1]
     res = np.zeros((n_games, 3, len(SCORES), 2), np.float64)
+    on_all = torch.tensor(units, dtype=torch.long, device=dev)
 
-    on_all = torch.tensor(units, dtype=torch.long, device=dev)   # [G,14]
-    CH = max(1, 256 // max(n_ctx, 1))
     for per in (1, 2, 3):
         for si, sc in enumerate(SCORES):
+            ctx = cells.get((per, sc)) or cells.get((per, 0))
+            if ctx is None:
+                continue
+            n_ctx, T = ctx["etype"].shape
+            CH = max(1, 192 // max(n_ctx, 1))
             for lo in range(0, n_games, CH):
                 hi = min(lo + CH, n_games)
                 G = hi - lo
                 b = {}
                 for k, v in ctx.items():
-                    if torch.is_tensor(v) and v.dim() == 2:
-                        b[k] = v.repeat(G, 1)
-                    elif torch.is_tensor(v) and v.dim() == 3:
+                    if torch.is_tensor(v) and v.dim() == 3:
                         b[k] = v.repeat(G, 1, 1)
-                    elif torch.is_tensor(v):
-                        b[k] = v.repeat(G, 1) if v.dim() == 2 else v
+                    elif torch.is_tensor(v) and v.dim() == 2:
+                        b[k] = v.repeat(G, 1)
+                    else:
+                        b[k] = v
                 B = b["etype"].shape[0]
-                on = on_all[lo:hi].repeat_interleave(n_ctx, 0)
-                b["on_ctx"] = on.view(B, 1, 14).expand(B, T, 14).contiguous()
-                b["score_abs"] = torch.full((B, T), sc + 4, dtype=torch.long, device=dev)
-                b["n_home"] = torch.full((B, T), 5, dtype=torch.long, device=dev)
-                b["n_away"] = torch.full((B, T), 5, dtype=torch.long, device=dev)
-                b["g_home"] = torch.ones(B, T, dtype=torch.long, device=dev)
-                b["g_away"] = torch.ones(B, T, dtype=torch.long, device=dev)
-                b["period"] = torch.full((B, T), per, dtype=torch.long, device=dev)
-                b["era"] = era.view(1, -1).expand(B, -1).contiguous()
-                b["valid"] = torch.ones(B, T, dtype=torch.bool, device=dev)
-
+                sub = on_all[lo:hi].repeat_interleave(n_ctx, 0)
+                b["on_ctx"] = sub.view(B, 1, 14).expand(B, T, 14).contiguous()
                 ph = pa = edt = None
                 for m in models:
                     h, _ = m.encode(b, rapm)
                     p = torch.softmax(m.h_tt(h), -1)
                     e = expected_dt(m.h_dt(h), m.c.k_dt)
-                    a_ = p[..., gh].sum(-1)
-                    b_ = p[..., ga].sum(-1)
+                    a_, b_ = p[..., gh].sum(-1), p[..., ga].sum(-1)
                     ph = a_ if ph is None else ph + a_
                     pa = b_ if pa is None else pa + b_
                     edt = e if edt is None else edt + e
@@ -162,7 +223,7 @@ def main():
     s = Season(args.season)
     eras, _ = era_vectors(TRAIN + [VAL])
     rapm = s.rapm.to(dev)
-    ctx = context_bank(s, eras, dev)
+    cells = state_matched_contexts(s, eras, dev)
 
     units = projected_units(args.season, pmap)
     gc = pd.read_parquet(TENSORS / f"games_ctx_{args.season}.parquet")
@@ -175,8 +236,9 @@ def main():
     for r in gc.itertuples():
         U.append(units.get(int(r.home_idx), dflt) + units.get(int(r.away_idx), dflt))
     t0 = time.time()
-    H = hazards_for_games(models, ctx, U, eras[args.season].to(dev), rapm, dev,
-                          inv_tt, len(gc))
+    print(f"state-matched context cells: {len(cells)} of 27 "
+          f"(period x score, all 5v5)")
+    H = hazards_for_games(models, cells, U, rapm, dev, inv_tt, len(gc))
     print(f"hazards in {time.time()-t0:.0f}s  "
           f"(median lambda_home {np.median(H[:, :, :, 0])*3600:.2f} g/60, "
           f"away {np.median(H[:, :, :, 1])*3600:.2f} g/60)")
