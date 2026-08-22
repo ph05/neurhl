@@ -1,5 +1,5 @@
 {
- "checkpoint": "s1b_seed20260821.pt",
+ "checkpoint": "ensemble[5]",
  "step": 12000,
  "season": 2017,
  "val_loss": {
@@ -14,58 +14,58 @@
   "per_game": [
    {
     "event": "blocked-shot",
-    "expected": 29.081,
+    "expected": 28.407,
     "observed": 28.848,
-    "rel_err": 0.0081,
+    "rel_err": -0.0153,
     "pass": true
    },
    {
     "event": "faceoff",
-    "expected": 61.297,
+    "expected": 61.428,
     "observed": 60.885,
-    "rel_err": 0.0068,
+    "rel_err": 0.0089,
     "pass": true
    },
    {
     "event": "goal",
-    "expected": 5.584,
+    "expected": 5.348,
     "observed": 5.32,
-    "rel_err": 0.0496,
+    "rel_err": 0.0053,
     "pass": true
    },
    {
     "event": "hit",
-    "expected": 43.801,
+    "expected": 47.251,
     "observed": 44.23,
-    "rel_err": -0.0097,
+    "rel_err": 0.0683,
     "pass": true
    },
    {
     "event": "missed-shot",
-    "expected": 23.285,
+    "expected": 22.997,
     "observed": 23.372,
-    "rel_err": -0.0038,
+    "rel_err": -0.0161,
     "pass": true
    },
    {
     "event": "penalty",
-    "expected": 7.291,
+    "expected": 8.074,
     "observed": 8.098,
-    "rel_err": -0.0996,
+    "rel_err": -0.0029,
     "pass": true
    },
    {
     "event": "shot-on-goal",
-    "expected": 55.215,
+    "expected": 54.575,
     "observed": 54.932,
-    "rel_err": 0.0051,
+    "rel_err": -0.0065,
     "pass": true
    },
    {
     "event": "stoppage",
-    "expected": 48.31,
+    "expected": 48.333,
     "observed": 47.87,
-    "rel_err": 0.0092,
+    "rel_err": 0.0097,
     "pass": true
    }
   ],
@@ -73,100 +73,100 @@
    {
     "period": 1,
     "event": "goal",
-    "expected": 1.585,
+    "expected": 1.527,
     "observed": 1.502,
-    "rel_err": 0.0548
+    "rel_err": 0.0165
    },
    {
     "period": 1,
     "event": "shot-on-goal",
-    "expected": 17.987,
+    "expected": 17.751,
     "observed": 17.97,
-    "rel_err": 0.001
+    "rel_err": -0.0122
    },
    {
     "period": 2,
     "event": "goal",
-    "expected": 1.838,
+    "expected": 1.787,
     "observed": 1.847,
-    "rel_err": -0.005
+    "rel_err": -0.0326
    },
    {
     "period": 2,
     "event": "shot-on-goal",
-    "expected": 18.915,
+    "expected": 18.734,
     "observed": 18.733,
-    "rel_err": 0.0097
+    "rel_err": 0.0001
    },
    {
     "period": 3,
     "event": "goal",
-    "expected": 2.046,
+    "expected": 1.92,
     "observed": 1.81,
-    "rel_err": 0.1305
+    "rel_err": 0.061
    },
    {
     "period": 3,
     "event": "shot-on-goal",
-    "expected": 17.491,
+    "expected": 17.272,
     "observed": 17.332,
-    "rel_err": 0.0091
+    "rel_err": -0.0035
    }
   ],
-  "pass": false,
+  "pass": true,
   "pass_overall": true,
-  "pass_per_period": false
+  "pass_per_period": true
  },
  "E2": {
   "rows": [
    {
     "own_lead": -3,
     "n": 5845,
-    "pred_share": 0.14212,
+    "pred_share": 0.13894,
     "obs_share": 0.13482
    },
    {
     "own_lead": -2,
     "n": 15295,
-    "pred_share": 0.14407,
+    "pred_share": 0.13985,
     "obs_share": 0.14384
    },
    {
     "own_lead": -1,
     "n": 38352,
-    "pred_share": 0.13594,
+    "pred_share": 0.13234,
     "obs_share": 0.13415
    },
    {
     "own_lead": 0,
     "n": 73786,
-    "pred_share": 0.12742,
+    "pred_share": 0.12579,
     "obs_share": 0.12687
    },
    {
     "own_lead": 1,
     "n": 38352,
-    "pred_share": 0.11705,
+    "pred_share": 0.11743,
     "obs_share": 0.11757
    },
    {
     "own_lead": 2,
     "n": 15295,
-    "pred_share": 0.11082,
+    "pred_share": 0.10993,
     "obs_share": 0.10899
    },
    {
     "own_lead": 3,
     "n": 5845,
-    "pred_share": 0.11138,
+    "pred_share": 0.11312,
     "obs_share": 0.1148
    }
   ],
-  "grad_pred": -0.006343,
+  "grad_pred": -0.005436,
   "grad_obs": -0.005226,
-  "ratio": 1.214,
+  "ratio": 1.04,
   "same_direction": true,
-  "corr": 0.9774,
+  "corr": 0.9792,
   "pass": true
  },
  "E2_all_strength": {
@@ -174,87 +174,87 @@
    {
     "own_lead": -3,
     "n": 7478,
-    "pred_share": 0.15276,
+    "pred_share": 0.14955,
     "obs_share": 0.1471
    },
    {
     "own_lead": -2,
     "n": 19389,
-    "pred_share": 0.15554,
+    "pred_share": 0.15138,
     "obs_share": 0.15287
    },
    {
     "own_lead": -1,
     "n": 47399,
-    "pred_share": 0.1472,
+    "pred_share": 0.14325,
     "obs_share": 0.14599
    },
    {
     "own_lead": 0,
     "n": 91006,
-    "pred_share": 0.13519,
+    "pred_share": 0.13346,
     "obs_share": 0.13502
    },
    {
     "own_lead": 1,
     "n": 47399,
-    "pred_share": 0.121,
+    "pred_share": 0.1213,
     "obs_share": 0.12173
    },
    {
     "own_lead": 2,
     "n": 19389,
-    "pred_share": 0.11805,
+    "pred_share": 0.11656,
     "obs_share": 0.1161
    },
    {
     "own_lead": 3,
     "n": 7478,
-    "pred_share": 0.11736,
+    "pred_share": 0.1184,
     "obs_share": 0.12049
    }
   ],
-  "grad_pred": -0.007406,
+  "grad_pred": -0.006609,
   "grad_obs": -0.006344,
-  "ratio": 1.167,
+  "ratio": 1.042,
   "same_direction": true,
-  "corr": 0.9916,
+  "corr": 0.993,
   "pass": true
  },
  "dt_pit": {
   "n": 124423,
   "decile_fracs": [
-   0.0656,
-   0.0868,
-   0.0824,
-   0.0813,
-   0.0895,
-   0.1143,
-   0.1166,
-   0.1189,
-   0.1239,
-   0.1208
+   0.0659,
+   0.0934,
+   0.0846,
+   0.08,
+   0.0902,
+   0.118,
+   0.1182,
+   0.1183,
+   0.1195,
+   0.1119
   ],
-  "max_decile_dev": 0.0344,
-  "ks": 0.0971,
-  "mean": 0.5542
+  "max_decile_dev": 0.0341,
+  "ks": 0.0882,
+  "mean": 0.546
  },
  "dt_pit_naive": {
   "n": 124423,
   "decile_fracs": [
-   0.0822,
-   0.0734,
-   0.083,
-   0.081,
-   0.2729,
-   0.073,
-   0.0715,
-   0.0755,
-   0.082,
-   0.1056
+   0.0791,
+   0.084,
+   0.0861,
+   0.0789,
+   0.272,
+   0.0776,
+   0.0744,
+   0.0744,
+   0.0795,
+   0.0941
   ],
-  "max_decile_dev": 0.1729,
-  "ks": 0.0925,
-  "mean": 0.5043
+  "max_decile_dev": 0.172,
+  "ks": 0.1023,
+  "mean": 0.4966
  }
 }

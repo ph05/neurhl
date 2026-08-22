@@ -92,7 +92,16 @@ def randomised_pit(o, dt, k_dt, gen=None):
 
 @torch.no_grad()
 def collect(model, season, eras, dev, rapm, vocab, max_games=None, bs=8):
-    """Predicted distributions and observed outcomes over every held-out step."""
+    """Predicted distributions and observed outcomes over every held-out step.
+
+    `model` may be a single model or a list, in which case the ensemble is a
+    uniform MIXTURE: predictive probabilities are averaged, and for dt the
+    mixture CDFs are averaged. Averaging the mixture PARAMETERS instead would be
+    wrong -- the mean of two log-normal means is not the mean of their mixture --
+    and would quietly narrow the predictive distribution, which is the opposite
+    of what an ensemble is for.
+    """
+    models = model if isinstance(model, (list, tuple)) else [model]
     inv_tt = {v: k for k, v in vocab["type_team"].items()}
     n_games = season.n_games if max_games is None else min(max_games,
                                                            season.n_games)
@@ -102,12 +111,27 @@ def collect(model, season, eras, dev, rapm, vocab, max_games=None, bs=8):
     for start in range(0, n_games, bs):
         picks = [(season, g) for g in range(start, min(start + bs, n_games))]
         b = make_batch([season], picks, eras, dev)
-        h, _ = model.encode(b, rapm)
-        p = torch.softmax(model.h_tt(h), -1)
         y = torch.log1p(b["tgt_dt"])
-        g = torch.Generator(device=h.device); g.manual_seed(7)
-        pit = randomised_pit(model.h_dt(h), b["tgt_dt"], model.c.k_dt, g)
-        raw_pit = mixture_cdf_at(model.h_dt(h), y, model.c.k_dt)
+        p = pit = raw_pit = None
+        for mm in models:
+            h, _ = mm.encode(b, rapm)
+            pi = torch.softmax(mm.h_tt(h), -1)
+            g = torch.Generator(device=h.device); g.manual_seed(7)
+            o = mm.h_dt(h)
+            lo = torch.log1p((b["tgt_dt"] - 0.5).clamp(min=0.0))
+            hi = torch.log1p(b["tgt_dt"] + 0.5)
+            c_lo = mixture_cdf_at(o, lo, mm.c.k_dt)
+            c_hi = mixture_cdf_at(o, hi, mm.c.k_dt)
+            rp = mixture_cdf_at(o, y, mm.c.k_dt)
+            p = pi if p is None else p + pi
+            pit = (c_lo, c_hi) if pit is None else (pit[0] + c_lo, pit[1] + c_hi)
+            raw_pit = rp if raw_pit is None else raw_pit + rp
+        n_m = len(models)
+        p = p / n_m
+        c_lo, c_hi = pit[0] / n_m, pit[1] / n_m
+        u = torch.rand(c_lo.shape, device=c_lo.device)
+        pit = c_lo + u * (c_hi - c_lo).clamp(min=0)
+        raw_pit = raw_pit / n_m
         v = b["tgt_valid"]
         acc["p_tt"].append(p[v].float().cpu().numpy())
         acc["obs_tt"].append(b["tgt_tt"][v].cpu().numpy())
@@ -236,13 +260,23 @@ def pit_report(c: dict) -> dict:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", type=str, default=None)
+    ap.add_argument("--ckpts", type=str, nargs="*", default=None,
+                    help="ensemble: several checkpoints, averaged as a mixture")
     ap.add_argument("--season", type=int, default=VAL)
     ap.add_argument("--max-games", type=int, default=400)
     args = ap.parse_args()
 
     dev = device()
-    path = Path(args.ckpt) if args.ckpt else sorted(CKPT.glob("s1_seed*.pt"))[0]
-    model, ck = load_model(path, dev)
+    if args.ckpts:
+        paths = [Path(x) for x in args.ckpts]
+        loaded = [load_model(q, dev) for q in paths]
+        model = [m for m, _ in loaded]
+        ck = loaded[0][1]
+        path = Path(f"ensemble[{len(paths)}]")
+        print("ensemble members: " + ", ".join(q.name for q in paths))
+    else:
+        path = Path(args.ckpt) if args.ckpt else sorted(CKPT.glob("s1_seed*.pt"))[0]
+        model, ck = load_model(path, dev)
     vocab = json.loads((TENSORS / "seq_vocab.json").read_text())
     s = Season(args.season)
     eras, _ = era_vectors(TRAIN + [VAL])

@@ -526,3 +526,53 @@ X3 has no preregistered consequence (unlike X2's "delete L0"). Carried forward a
 a known limitation: top-decile xG is over-predicted by ~1.2pp pooled and up to
 ~4pp in the drift era. The mitigation already exists in the plan as S4's
 mandatory rollout rate-adjustment, fitted on train seasons only.
+
+### P5 — S1 event simulator (gates E1 PASS, E2 PASS)
+
+Transformer-Hawkes marked temporal point process over the unified stream,
+5,280,555 parameters, 5-seed deep ensemble. Train 2008-2016, validate and gate on
+2017, CONFIRM untouched, splits by GAME. Held-out per-seed loss 2.4425-2.6670.
+
+**Ship: the score-state orientation bug.** The model conditioned on score and
+strength encoded relative to whoever owned the PREVIOUS event, while its target
+(type, team) is absolute home/away. "Home leads 2-0" arrived as +2 or -2
+depending on which team last touched the puck; a home 5v4 arrived as n_for=5 or
+n_for=4 for the identical state. Verified directly on stream_2016. No model can
+learn a score effect from a label that flips arbitrarily, and E2 measured it:
+gradient ratio 0.076 at 5v5. Adding absolute home-relative state (score_abs,
+n_home, n_away, g_home, g_away) plus a score x time-remaining interaction took
+E2 to ratio 1.214, and the ensemble to 1.04 with corr 0.979.
+
+The E2 MEASUREMENT had the same flaw: grouping by the home lead nets the two
+sides against each other, because when home leads it suppresses while away
+pushes. Each step now contributes two rows keyed on that side's OWN lead.
+
+**Ship: the dt PIT diagnostic was invalid, not the model.** Inter-event times are
+whole seconds, so a continuous density cannot give a uniform PIT however good it
+is. Randomised (Dunn-Smyth) PIT over [dt-0.5, dt+0.5]: max decile deviation
+0.1720 -> 0.0341.
+
+**The ensemble earned its place, measurably.** A single seed FAILED E1 on
+third-period goals at +13.05%, localised to empty-net states (+47.8%, expected
+0.336 vs observed 0.228 per game) which are 1.8% of steps but decide close games.
+The 5-seed ensemble cut that to +6.10% and E1 passes. Over-confidence in a rare
+regime is exactly what deep ensembles correct, and this is the measurement.
+
+Final ensemble gates on 2017 (400 games, 124,423 held-out steps):
+
+  E1 per game   goal +0.53%  SOG -0.65%  penalty -0.29%  faceoff +0.89%
+                miss -1.61%  block -1.53%  stoppage +0.97%  hit +6.83%
+  E1 per period P1 goal +1.65%  P2 -3.26%  P3 +6.10%   (tolerance 10%)
+  E2 5v5        gradient pred -0.005436 vs obs -0.005226, ratio 1.04, corr 0.9792
+  dt            randomised PIT max decile deviation 0.0341
+
+Gates are computed ANALYTICALLY from predictive distributions, not by rollout: a
+rollout over ~300 sequential events compounds its own error, so a wrong-looking
+rollout says nothing about whether the one-step process is wrong. Rollout
+calibration remains a separate obligation attached to S5's Monte Carlo path
+(neurhl/sim/rollout.py).
+
+Also built in P5: S0 unified stream (7.5M events, shot coordinates 0.991-1.000 in
+every season after reconstructing 2008-2011 from MoneyPuck distance/angle,
+verified at 97.3%/97.6% within one foot), and walk-forward RAPM priors for every
+vantage 2009-2027 including the 2027 projection target.
