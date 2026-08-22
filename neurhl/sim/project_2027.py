@@ -42,9 +42,10 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common import RAW, TENSORS  # noqa: E402
-from sim.game_model import (fit_tie_calibration, integrate,  # noqa: E402
-                            observed_tie_rate, outcome, run_elo,
+from sim.game_model import (TEAM_SIGMA, fit_tie_calibration,  # noqa: E402
+                            integrate, observed_tie_rate, outcome, run_elo,
                             score_effect_curve, team_strength)
+from eval.backtest_season import rate_sensitivity  # noqa: E402
 import windows as W  # noqa: E402
 
 SEASON = 2027                       # season_end 2027 == the 2026-27 season
@@ -200,11 +201,19 @@ def main():
     pts_all = np.zeros((args.sims, len(teams)), np.int16)
     wins_all = np.zeros((args.sims, len(teams)), np.int16)
 
+    # PARAMETER UNCERTAINTY -- one draw of each team's true strength per
+    # simulated season, held fixed across that season. Without it the only
+    # variance is game-outcome noise and the 80% intervals cover 0.639 of
+    # outcomes instead of 0.80.
+    csens = rate_sensitivity(curve)
+    l0 = np.log(np.clip(prh, 1e-6, 1 - 1e-6) / (1 - np.clip(prh, 1e-6, 1 - 1e-6)))
     for s in range(args.sims):
+        dt = rng.normal(0.0, TEAM_SIGMA, len(teams))
+        prs = (1.0 / (1.0 + np.exp(-(l0 + csens * (dt[hi] - dt[ai]))))) * (1 - pot)
         u = rng.random(len(gid))
         v = rng.random(len(gid))
-        home_reg = u < prh
-        ot = (u >= prh) & (u < prh + pot)
+        home_reg = u < prs
+        ot = (u >= prs) & (u < prs + pot)
         home_ot = ot & (v < 0.53)
         pts = np.zeros(len(teams), np.int32)
         np.add.at(pts, hi[home_reg], 2)

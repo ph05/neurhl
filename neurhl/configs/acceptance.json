@@ -122,7 +122,7 @@
  {
   "check": "no team projected outside a plausible points band",
   "pass": true,
-  "detail": "74.0-110.4"
+  "detail": "69.0-112.0"
  },
  {
   "check": "registry refuses an OUTCOME feature as an input",

@@ -74,9 +74,33 @@ def team_game_rates(seasons) -> pd.DataFrame:
     return pd.concat(rows, ignore_index=True)
 
 
-def team_strength(train_seasons) -> tuple:
+RECENT = 3                 # seasons of team form that actually carry signal
+
+# Team-strength uncertainty, as an sd on the log goal rate, drawn ONCE per
+# simulated season and held fixed across that season's games. Calibrated on the
+# DEV+TUNE windows (2011-2017) to hit nominal 80% interval coverage; CONFIRM was
+# not consulted. Propagating it improves every season-level metric at once,
+# which is the tell that the missing variance was real and not a fudge:
+#
+#   sigma   coverage    MAE    CRPS     (house: MAE 10.36, CRPS 7.10/7.77)
+#   0.00      0.639   10.01    7.53
+#   0.07      0.794    9.59    6.94
+#   0.13      0.917    9.56    7.08
+TEAM_SIGMA = 0.07
+
+
+def team_strength(train_seasons, recent=RECENT) -> tuple:
     """EB-shrunk attack/defence multipliers per team, plus league rate and
-    home advantage, all from `train_seasons` only."""
+    home advantage, from the most RECENT `recent` training seasons.
+
+    Pooling the whole training window was a real error: by vantage 2017 a team's
+    attack rate was an average over nine seasons of a roster that had turned
+    over several times. It showed up as accuracy DECAYING with vantage --
+    standings MAE 7.09/7.19 at vantages 2011/2012, when only 3 seasons were
+    available to pool, against 11.14-12.71 at 2014-2017 when nine were. The
+    window is a hyperparameter, not "use everything".
+    """
+    train_seasons = sorted(train_seasons)[-recent:]
     t = team_game_rates(train_seasons)
     if not len(t):
         return {}, {}, 2.7, 1.0

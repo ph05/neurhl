@@ -737,3 +737,45 @@ matching 2024-2026 exactly. League mean 93.3 points.
 
 **Acceptance: 27/27 checks pass** (neurhl/tests/review_tests_neurhl2.py), each
 re-deriving its verdict from the recorded numbers rather than trusting a report.
+
+
+### Season-level validation — the simulator's real contribution
+
+The fallback said the engine ships "only for what it uniquely provides". This is
+that: the season layer BEATS both house benchmarks, and the two fixes that got it
+there were both genuine bugs rather than tuning.
+
+  pooled over DEV+TUNE (2011, 2012, 2014-2017; CONFIRM untouched)
+
+    standings points MAE    9.61   (HOWE 10.36)          BETTER
+    CRPS                    6.93   (v1 sim 7.10 / 7.77)  BETTER than both
+    80% interval coverage  0.794   (nominal 0.80)        CALIBRATED
+
+**Bug 1 — team strength pooled the entire training window.** By vantage 2017 a
+team's attack rate was an average over NINE seasons of a roster that had turned
+over several times. It showed up as accuracy DECAYING with vantage: standings MAE
+7.09 / 7.19 at vantages 2011 / 2012, when only three seasons existed to pool,
+against 11.14-12.71 at 2014-2017 when nine did. Fixed with a rolling 3-season
+window. The window is a hyperparameter, not "use everything".
+
+**Bug 2 — parameter uncertainty was not propagated**, exactly the failure
+PLAN_NeurHL2 S5 exists to prevent ("without this the season spread is wrong even
+when the means are right"). Only game-outcome noise was simulated, giving
+predicted sd 8.22 against an actual 13.79 and 80% intervals covering 0.639.
+Fixed by drawing each team's true strength ONCE per simulated season from a
+log-rate Gaussian, held fixed across that season's games.
+
+The tell that the missing variance was real rather than a fudge factor: adding it
+improved EVERY metric simultaneously, not just coverage.
+
+    sigma   coverage    MAE    CRPS
+    0.00      0.639   10.01    7.53
+    0.07      0.794    9.59    6.94     <- adopted
+    0.13      0.917    9.56    7.08
+
+sigma = 0.07 was calibrated on DEV+TUNE only; CONFIRM was never consulted.
+
+So the honest summary of the whole build: the engine does NOT improve game-by-game
+prediction (G-STOP fired, Elo unbeaten), but it DOES improve season-level
+projection over the incumbent, which is precisely the split the preregistered
+fallback anticipated.
