@@ -811,3 +811,56 @@ NOT FIXED AT SOURCE, and flagged as the top follow-up: recovering HTM assists
 needs a regex fix plus re-running tensorize_htm for 2008-2012 and rebuilding the
 downstream chain, which was not safe to start late in the session. Goals, shots,
 on-ice sets and TOI are unaffected, so nothing else in the build depends on it.
+
+### Player projections REBUILT — the low-scoring-era bias, and four more bugs
+
+The first version projected a 97-point league leader for 2026-27. That is wrong on
+its face, and the diagnosis found five compounding errors, every one of them a
+constant chosen by hand rather than estimated.
+
+  1. ERA BIAS. Raw per-60 rates were averaged across an era boundary. League
+     points per game ran 14.5-14.9 in 2012-2017 and 16.3-17.1 in 2018-2026 -- a
+     13% shift -- so history dragged projections toward the lower-scoring era.
+     Rates are now RATIOS to their own season's league level, re-inflated to the
+     level projected for the target season.
+  2. OVER-SHRINKAGE. A single constant (90,000s) pulled a 3,300-minute veteran
+     31% toward the positional mean, turning a 4.5 P/60 player into 3.6. The
+     empirically justified weight is 0.83, not 0.69 (true-talent sd 0.714 against
+     a Poisson sampling sd of 0.329 for regular forwards).
+  3. ICE TIME IS A FIXED BUDGET, which the model ignored. Five skaters for sixty
+     minutes is 300 minutes per team-game; measured 296.8-298.2 across 2016-2026.
+     Projecting each player independently under-projected first-line ice time by
+     28% -- the single largest source of compression.
+  4. THE BUDGET IS SPLIT BY POSITION. Forwards draw 181.0 min/team-game and
+     defencemen 116.9, a 60.8/39.2 split stable across 2023-2026. Normalising
+     across the whole roster let a star on a thin team take 28.4 min/game, when
+     no forward in the league exceeds 23.0.
+  5. SCHEDULE LENGTH unnormalised. 2013 was 48 games and 2021 was 56, so a raw
+     games-played feature made the model predict a short season for the year
+     AFTER a shortened one: vantage 2022 carried a -7.4 point bias against -0.5
+     to -3.4 elsewhere. Availability is now a share of the schedule.
+
+Rebuilt as a LEARNED model (gradient boosting, the Grinsztajn regime again) over
+four walk-forward targets: usage share, availability share, and era-relative goal
+and assist rates. Plus a walk-forward top-end recalibration, because trees cannot
+extrapolate and left the top decile 4.1 points short.
+
+  backtest, 5 held-out seasons (2022-2026), n=2,956 with >=40 GP
+
+    points MAE   9.55   against a league-mean baseline of 18.54
+    correlation  0.855
+    calibration  8 of 10 deciles within 1.5 pts; top 2% within 2.0
+
+  2026-27 top projections   123.2 / 117.8 / 115.9 / 113.5 / 101.4
+  (the first version's league leader was 97.4)
+
+Integrity, all enforced rather than hoped for: forward budget exactly 15,204
+min/team, defence 9,810 of a 9,820 target, zero players above the positional
+TOI/game ceiling, implied league 16.50 points per game against an actual
+16.3-16.8, no negatives and no NaNs.
+
+WINDOW SPEND, declared: 2025 and 2026 were used as held-out validation seasons
+for the PLAYER model. They sit inside CONFIRM, which had been reserved for the
+game-level C1 test -- but G-STOP already fired, so C1 will not run and the
+reservation was moot. Recording it rather than letting it pass silently: a future
+player-projection claim on those seasons is no longer independent.
