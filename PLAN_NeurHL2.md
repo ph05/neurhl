@@ -304,6 +304,57 @@ sanity floor, with its margin reported honestly (−0.083%) rather than as suppo
 - **Feature registry (`neurhl/registry.py`)**: coverage group and vantage rule declared once per feature; availability masks and leakage checks generated from it. Guards: no OUTCOME feature as an input; no feature used outside its true coverage window.
 - **Window guards (`neurhl/windows.py`)**: `assert_scorable` refuses to score a broken season or cross a window boundary.
 
+## FINAL STATUS (written after every gate ran)
+
+| phase | outcome |
+|---|---|
+| P0 prereg, manifests, registry, windows | done |
+| P1 shifts + stints, 2008-2026 | done; 18.9M shifts, 7.1M stints, 19/19 seasons validated |
+| P2 MoneyPuck corpus (P3 allowlist) | done; 2.08M shots, pre-2012 coordinate hole closed |
+| P3 L0 xG | **X1 PASS** (17/18), **X2 PASS**, **X3 FAIL** (recorded) |
+| P4 RAPM | **R1 retired (A5)**, **R1′ INCONCLUSIVE (A6)** |
+| P5 S1 event simulator | **E1 PASS, E2 PASS** — after TWO leaks found and fixed (A8) |
+| P6 S3 deployment, S4b goalie/starter | **NOT BUILT** |
+| P7 S4 game outcomes | **FALLBACK INVOKED** — Elo unbeaten |
+| P7 S5 season simulation | done; **beats both house benchmarks** |
+| P8 confirmatory run C1 | **NOT RUN — G-STOP fired. CONFIRM unspent.** |
+| P9 2026-27 projection + player props | done |
+| S2b GNN | **NOT BUILT** — pair screen never reached |
+
+**The headline result is negative and is reported as such.** The engine does not
+improve game-by-game prediction, the metric the project was directed to optimise:
+
+| TUNE, n=4,920 | log loss |
+|---|---|
+| constant | 0.68942 |
+| **Elo** | **0.67668** |
+| simulator alone | 0.68416 |
+| Elo+simulator blend | 0.67763 |
+| v1 hierarchical (incumbent) | 0.67314 |
+
+G-STOP therefore fired and **CONFIRM (2018-2026) was never touched**. It remains
+unspent for any future attempt, which was the whole reason for reserving it.
+
+**Where the engine does win is the season layer**, exactly the split the
+preregistered fallback anticipated:
+
+| pooled DEV+TUNE | NeurHL-2 | house |
+|---|---|---|
+| standings MAE | **9.61** | HOWE 10.36 |
+| CRPS | **6.93** | 7.10 / 7.77 |
+| 80% coverage | **0.794** | nominal 0.80 |
+| player points MAE | **6.66** | league-mean 16.27 |
+
+**Four leaks/gaps found, all by building a consumer that could not cheat rather
+than by any gate.** E1 and E2 both PASSED with two leaks present, because a gate
+that scores a model on the inputs it trained on is structurally blind to leakage.
+`neurhl/tests/audit_leakage.py` is now a standing requirement.
+
+**Known limitations, unfixed:** X3 calibration (top decile, driven by a 2023
+recording-regime shift); RAPM not shown better than team-demeaned raw; assists
+absent for 2008-2011 in the HTM era; no deployment model, so player props do not
+use S1's actor head.
+
 ## Acceptance
 
 `neurhl/tests/review_tests_neurhl2.py` re-asserts every recorded gate decision
