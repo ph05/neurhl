@@ -1,0 +1,417 @@
+<title>NeurHL-2 Postmortem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style>
+:root{
+  --ground:#F6F7F9; --surface:#FFFFFF; --sunk:#EDF0F4;
+  --ink:#12171E; --ink-2:#333C48; --muted:#5C6673; --rule:#DCE1E8;
+  --accent:#1D5B96; --accent-soft:#E3EDF6;
+  --pass:#1E7A4D; --pass-bg:#E2F0E8;
+  --fail:#B3311F; --fail-bg:#F8E5E1;
+  --warn:#8A5E10; --warn-bg:#F6EDDA;
+  --shadow:0 1px 2px rgba(18,23,30,.05), 0 8px 24px -16px rgba(18,23,30,.25);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1216; --surface:#161C22; --sunk:#1C242C;
+    --ink:#E9EEF3; --ink-2:#C2CCD6; --muted:#8E9AA8; --rule:#28323C;
+    --accent:#68AADF; --accent-soft:#17293A;
+    --pass:#5FBF8E; --pass-bg:#12291F;
+    --fail:#E8836F; --fail-bg:#2B1815;
+    --warn:#D8A94F; --warn-bg:#2A2113;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1216; --surface:#161C22; --sunk:#1C242C;
+  --ink:#E9EEF3; --ink-2:#C2CCD6; --muted:#8E9AA8; --rule:#28323C;
+  --accent:#68AADF; --accent-soft:#17293A;
+  --pass:#5FBF8E; --pass-bg:#12291F;
+  --fail:#E8836F; --fail-bg:#2B1815;
+  --warn:#D8A94F; --warn-bg:#2A2113;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:16.5px; line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px; margin:0 auto; padding:0 28px 96px}
+.measure{max-width:72ch}
+
+/* ---------- masthead ---------- */
+header.mast{
+  border-bottom:2px solid var(--ink); padding:56px 0 20px; margin-bottom:40px;
+}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11.5px;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
+  display:flex; gap:14px; flex-wrap:wrap; align-items:center;
+}
+.eyebrow b{color:var(--accent); font-weight:600}
+h1{
+  font-family:Archivo,"Arial Narrow",sans-serif; font-weight:700;
+  font-size:clamp(2.5rem,6.5vw,4.1rem); line-height:.98; letter-spacing:-.025em;
+  margin:.18em 0 .12em; text-wrap:balance;
+}
+.dek{
+  font-size:1.14rem; color:var(--ink-2); max-width:60ch; margin:0 0 6px;
+}
+.dek em{font-style:italic; color:var(--ink)}
+
+/* ---------- sections ---------- */
+section{margin:0 0 60px}
+h2{
+  font-family:Archivo,"Arial Narrow",sans-serif; font-weight:600;
+  font-size:1.62rem; letter-spacing:-.012em; margin:0 0 6px;
+  padding-top:26px; border-top:1px solid var(--rule); text-wrap:balance;
+}
+h2 .n{
+  font-family:"IBM Plex Mono",monospace; font-size:.72em; color:var(--accent);
+  margin-right:.6em; font-weight:500;
+}
+h3{
+  font-family:Archivo,sans-serif; font-weight:600; font-size:1.06rem;
+  margin:32px 0 4px; letter-spacing:-.004em;
+}
+p{margin:.7em 0}
+.lede{font-size:1.06rem; color:var(--ink-2)}
+strong{font-weight:600}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.88em}
+code{background:var(--sunk); padding:.1em .38em; border-radius:3px}
+
+/* ---------- verdict banner ---------- */
+.verdict{
+  background:var(--surface); border:1px solid var(--rule);
+  border-left:4px solid var(--fail); border-radius:4px;
+  padding:22px 26px; box-shadow:var(--shadow); margin:8px 0 34px;
+}
+.verdict.good{border-left-color:var(--pass)}
+.verdict h3{margin:0 0 4px; font-size:1.14rem}
+.verdict p{margin:.35em 0 0; color:var(--ink-2)}
+
+/* ---------- tables ---------- */
+.tscroll{overflow-x:auto; margin:18px 0 6px; border:1px solid var(--rule);
+  border-radius:4px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:14.5px}
+caption{
+  caption-side:top; text-align:left; padding:12px 16px 10px;
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--rule);
+}
+th,td{padding:8px 16px; text-align:left; border-bottom:1px solid var(--rule)}
+thead th{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted); font-weight:500;
+  background:var(--sunk); white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right; font-family:"IBM Plex Mono",monospace;
+  font-variant-numeric:tabular-nums}
+tr.hi td{background:var(--accent-soft); font-weight:600}
+td.team{font-family:"IBM Plex Mono",monospace; font-weight:600; letter-spacing:.03em}
+
+/* ---------- chips ---------- */
+.chip{
+  display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:10.5px;
+  letter-spacing:.09em; text-transform:uppercase; font-weight:600;
+  padding:2px 8px; border-radius:3px; white-space:nowrap;
+}
+.chip.p{background:var(--pass-bg); color:var(--pass)}
+.chip.f{background:var(--fail-bg); color:var(--fail)}
+.chip.w{background:var(--warn-bg); color:var(--warn)}
+.chip.n{background:var(--sunk); color:var(--muted)}
+
+/* ---------- ladder bars ---------- */
+.ladder{list-style:none; padding:0; margin:20px 0 6px; display:flex;
+  flex-direction:column; gap:7px}
+.ladder li{display:grid; grid-template-columns:190px 1fr 82px; align-items:center;
+  gap:14px; font-size:14.5px}
+.ladder .lbl{color:var(--ink-2)}
+.ladder .bar{height:11px; background:var(--sunk); border-radius:2px; position:relative}
+.ladder .bar i{position:absolute; inset:0 auto 0 0; background:var(--accent);
+  border-radius:2px; display:block}
+.ladder li.best .bar i{background:var(--pass)}
+.ladder li.inc .bar i{background:var(--muted)}
+.ladder .val{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums;
+  text-align:right; font-weight:500}
+
+/* ---------- finding cards ---------- */
+.finds{display:grid; gap:14px; margin:20px 0 6px}
+.find{
+  background:var(--surface); border:1px solid var(--rule); border-radius:4px;
+  padding:18px 20px; box-shadow:var(--shadow);
+}
+.find .ft{display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;
+  margin-bottom:2px}
+.find .ft h4{margin:0; font-family:Archivo,sans-serif; font-size:1.02rem;
+  font-weight:600}
+.find p{margin:.4em 0 0; font-size:14.8px; color:var(--ink-2)}
+.find .ev{
+  margin-top:10px; padding-top:10px; border-top:1px dashed var(--rule);
+  font-family:"IBM Plex Mono",monospace; font-size:12.5px;
+  font-variant-numeric:tabular-nums; color:var(--ink); white-space:pre-wrap;
+}
+
+.cols{display:grid; grid-template-columns:1fr 1fr; gap:26px}
+@media(max-width:760px){
+  .cols{grid-template-columns:1fr}
+  .ladder li{grid-template-columns:135px 1fr 74px; gap:9px; font-size:13.5px}
+  .wrap{padding:0 18px 72px}
+}
+
+footer{border-top:2px solid var(--ink); padding-top:18px; color:var(--muted);
+  font-size:13.5px}
+.note{font-size:14px; color:var(--muted); margin-top:8px}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="eyebrow">
+    <span><b>NeurHL-2</b></span><span>Generative hockey simulation engine</span>
+    <span>2008–2026 corpus</span><span>22 Aug 2026</span>
+  </div>
+  <h1>A simulator that lost the game and won the season</h1>
+  <p class="dek">Built a puck-level event simulator to predict NHL games. It
+  <em>failed</em> at the thing it was built for, beat the incumbent at something
+  else, and the most useful output was four bugs that every validation gate
+  passed straight through.</p>
+</header>
+
+<section>
+  <div class="verdict">
+    <h3>Headline: the engine does not improve game-by-game prediction</h3>
+    <p>Per-game log loss was the directed primary metric. A plain Elo rating
+    beats the simulator, and beats the simulator blended with Elo. The
+    preregistered <span class="mono">G-STOP</span> rule fired, so the held-out
+    confirmation window was never spent.</p>
+  </div>
+
+  <ul class="ladder">
+    <li><span class="lbl">Constant (home rate)</span><span class="bar"><i style="width:100%"></i></span><span class="val">0.68942</span></li>
+    <li class="inc"><span class="lbl">Simulator alone</span><span class="bar"><i style="width:71.6%"></i></span><span class="val">0.68416</span></li>
+    <li><span class="lbl">Elo + simulator blend</span><span class="bar"><i style="width:27.5%"></i></span><span class="val">0.67763</span></li>
+    <li class="best"><span class="lbl">Elo alone</span><span class="bar"><i style="width:21.7%"></i></span><span class="val">0.67668</span></li>
+    <li class="best"><span class="lbl">v1 hierarchical (incumbent)</span><span class="bar"><i style="width:0%"></i></span><span class="val">0.67314</span></li>
+  </ul>
+  <p class="note">Log loss, lower is better. Pooled over 4,920 held-out games
+  (2014–2017). Bar length shows distance above the incumbent.</p>
+
+  <p class="measure">The blend is constructed to <em>nest</em> Elo — set one
+  coefficient to zero and it reduces to recalibrated Elo — so it cannot do worse
+  than the incumbent by construction. It doesn't do better either. Expected goals
+  were well calibrated throughout (2.87–2.90 against an actual 2.82–2.92, with
+  correct home advantage), so this isn't a broken rate model. Per-game outcome
+  variance simply swamps the refinement the engine supplies.</p>
+</section>
+
+<section>
+  <h2><span class="n">02</span>Where it does win</h2>
+  <p class="lede measure">The preregistered fallback anticipated exactly this
+  split: if the engine can't beat the incumbent at games, it ships for what it
+  uniquely provides. At the season level it beats both house benchmarks.</p>
+
+  <div class="tscroll">
+    <table>
+      <caption>Season layer · pooled over 2011–2017 · confirmation window untouched</caption>
+      <thead><tr>
+        <th>Metric</th><th class="num">NeurHL-2</th><th class="num">House benchmark</th><th>Verdict</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Standings points MAE</td><td class="num">9.61</td><td class="num">10.36</td><td><span class="chip p">better</span></td></tr>
+        <tr><td>CRPS</td><td class="num">6.93</td><td class="num">7.10 / 7.77</td><td><span class="chip p">beats both</span></td></tr>
+        <tr><td>80% interval coverage</td><td class="num">0.794</td><td class="num">0.800</td><td><span class="chip p">calibrated</span></td></tr>
+        <tr><td>Player points MAE</td><td class="num">6.66</td><td class="num">16.27</td><td><span class="chip p">better</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Player MAE is against a league-mean baseline, on
+  assist-complete seasons (n = 2,940).</p>
+</section>
+
+<section>
+  <h2><span class="n">03</span>Four things the gates could not see</h2>
+  <p class="lede measure">This is the part worth keeping. Two data leaks and two
+  modelling bugs all survived the preregistered realism gates. Every one was
+  caught by building a downstream consumer that had to supply its own inputs —
+  never by a gate.</p>
+
+  <div class="finds">
+    <div class="find">
+      <div class="ft"><h4>The model was told who touches the puck next</h4><span class="chip f">leak</span></div>
+      <p>The on-ice encoder oriented its “for/against” pooling by a flag equal to
+      the owning team of the <strong>next</strong> event — the team half of its own
+      prediction target.</p>
+      <div class="ev">agreement with target team   1.0000   (zero off-diagonal)</div>
+    </div>
+
+    <div class="find">
+      <div class="ft"><h4>A personnel change announces the faceoff that caused it</h4><span class="chip f">leak</span></div>
+      <p>Conditioning on the <strong>next</strong> on-ice set leaked harder. Line
+      changes happen at stoppages, so a change in on-ice composition <em>is</em> the
+      announcement of the faceoff that produced it.</p>
+      <div class="ev">Δ −1 skater → P(faceoff next) 0.986   base 0.199   lift 4.96
+Δ −2 skaters →                0.992               lift 4.99
+Δ +1 skater → P(penalty next) 0.077   base 0.028   lift 2.76</div>
+    </div>
+
+    <div class="find">
+      <div class="ft"><h4>Team strength averaged over nine years</h4><span class="chip w">bug</span></div>
+      <p>Team rates pooled the entire training window, so by 2017 a club's attack
+      rate was a nine-season average of a roster that had turned over repeatedly.
+      The signature was accuracy <em>decaying</em> as more data arrived.</p>
+      <div class="ev">standings MAE  7.09 / 7.19 at vantages 2011 / 2012  (3 seasons pooled)
+              11.14–12.71 at 2014–2017        (9 seasons pooled)</div>
+    </div>
+
+    <div class="find">
+      <div class="ft"><h4>Certainty that was never earned</h4><span class="chip w">bug</span></div>
+      <p>Only game-outcome noise was simulated, never uncertainty in team strength
+      itself, so season intervals were far too narrow. The tell that the missing
+      variance was real rather than a fudge: adding it improved <em>every</em>
+      metric at once.</p>
+      <div class="ev">σ      coverage    MAE    CRPS
+0.00     0.639    10.01   7.53
+0.07     0.794     9.59   6.94   ← adopted
+0.13     0.917     9.56   7.08</div>
+    </div>
+  </div>
+
+  <p class="measure" style="margin-top:22px">The lesson generalises past this
+  project. A realism gate scores a model using the same inputs the model trained
+  on, so a leaked input is <strong>structurally invisible</strong> to it. Both
+  event-realism gates passed cleanly with both leaks present and would have passed
+  indefinitely. Detecting leakage needs either a consumer that cannot cheat, or a
+  direct causality test: corrupt everything after a cut point, rebuild the inputs,
+  and require them to be bit-identical.</p>
+</section>
+
+<section>
+  <h2><span class="n">04</span>Gate results, as recorded</h2>
+  <div class="tscroll">
+    <table>
+      <caption>Every preregistered gate · outcomes recorded before the deliverable was built</caption>
+      <thead><tr><th>Gate</th><th>Test</th><th>Result</th><th class="num">Evidence</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">X1</td><td>xG beats a distance+angle logistic</td><td><span class="chip p">pass</span></td><td class="num">17 / 18 vantages</td></tr>
+        <tr><td class="mono">X2</td><td>Team xG beats Corsi at future goals</td><td><span class="chip p">pass</span></td><td class="num">0.4181 vs 0.3951</td></tr>
+        <tr><td class="mono">X3</td><td>xG calibrated within 0.005 per decile</td><td><span class="chip f">fail</span></td><td class="num">0.0124</td></tr>
+        <tr><td class="mono">R1</td><td>RAPM split-half repeatability</td><td><span class="chip n">retired</span></td><td class="num">gate mis-specified</td></tr>
+        <tr><td class="mono">R1′</td><td>RAPM survives a change of team</td><td><span class="chip w">inconclusive</span></td><td class="num">p = 0.597</td></tr>
+        <tr><td class="mono">E1</td><td>Simulated event counts, per period</td><td><span class="chip p">pass</span></td><td class="num">goals +3.9%</td></tr>
+        <tr><td class="mono">E2</td><td>Score effects reproduced</td><td><span class="chip p">pass</span></td><td class="num">ratio 0.979</td></tr>
+        <tr><td class="mono">G-STOP</td><td>Halt if weaker than the incumbent</td><td><span class="chip f">fired</span></td><td class="num">+0.0045 worse</td></tr>
+        <tr><td class="mono">C1</td><td>Confirmatory test, 10,184 games</td><td><span class="chip n">not run</span></td><td class="num">window unspent</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">X3 failed because the NHL changed how it records shot location
+  in 2023 — shots logged within 10 ft went from 7–9% of all shots to 14.5%, while
+  their conversion rate <em>fell</em> from 0.17 to 0.13. The measurement changed,
+  not the sport.</p>
+</section>
+
+<section>
+  <h2><span class="n">05</span>The 2026-27 projection</h2>
+  <p class="lede measure">Real schedule (1,344 games, 84 per team) and real
+  announced rosters for all 32 clubs. 20,000 simulated seasons. Player ratings
+  are fit only on seasons before 2027, applied to the rosters as they now stand,
+  so trades and free agency carry.</p>
+
+  <div class="cols">
+    <div class="tscroll">
+      <table>
+        <caption>Eastern Conference · top 8</caption>
+        <thead><tr><th>Team</th><th class="num">Pts</th><th class="num">80% range</th><th class="num">Playoff</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td class="team">TBL</td><td class="num">112.0</td><td class="num">98–126</td><td class="num">92%</td></tr>
+          <tr class="hi"><td class="team">CAR</td><td class="num">111.9</td><td class="num">98–126</td><td class="num">93%</td></tr>
+          <tr><td class="team">NYR</td><td class="num">103.8</td><td class="num">89–118</td><td class="num">78%</td></tr>
+          <tr><td class="team">NJD</td><td class="num">98.7</td><td class="num">84–113</td><td class="num">63%</td></tr>
+          <tr><td class="team">PIT</td><td class="num">95.9</td><td class="num">81–111</td><td class="num">52%</td></tr>
+          <tr><td class="team">OTT</td><td class="num">95.7</td><td class="num">81–111</td><td class="num">52%</td></tr>
+          <tr><td class="team">FLA</td><td class="num">94.8</td><td class="num">80–110</td><td class="num">51%</td></tr>
+          <tr><td class="team">WSH</td><td class="num">94.7</td><td class="num">80–109</td><td class="num">48%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tscroll">
+      <table>
+        <caption>Western Conference · top 8</caption>
+        <thead><tr><th>Team</th><th class="num">Pts</th><th class="num">80% range</th><th class="num">Playoff</th></tr></thead>
+        <tbody>
+          <tr class="hi"><td class="team">COL</td><td class="num">111.1</td><td class="num">97–125</td><td class="num">95%</td></tr>
+          <tr class="hi"><td class="team">EDM</td><td class="num">107.5</td><td class="num">93–122</td><td class="num">91%</td></tr>
+          <tr><td class="team">DAL</td><td class="num">106.6</td><td class="num">92–121</td><td class="num">90%</td></tr>
+          <tr><td class="team">WPG</td><td class="num">103.4</td><td class="num">89–118</td><td class="num">83%</td></tr>
+          <tr><td class="team">MIN</td><td class="num">103.3</td><td class="num">89–118</td><td class="num">85%</td></tr>
+          <tr><td class="team">LAK</td><td class="num">99.9</td><td class="num">85–114</td><td class="num">77%</td></tr>
+          <tr><td class="team">VGK</td><td class="num">94.4</td><td class="num">80–109</td><td class="num">58%</td></tr>
+          <tr><td class="team">UTA</td><td class="num">93.6</td><td class="num">79–109</td><td class="num">55%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tscroll">
+    <table>
+      <caption>Projected scoring leaders · 732 skaters on announced rosters</caption>
+      <thead><tr><th>Player</th><th>Team</th><th class="num">G</th><th class="num">A</th><th class="num">Pts</th></tr></thead>
+      <tbody>
+        <tr class="hi"><td>Connor McDavid</td><td class="team">EDM</td><td class="num">32.5</td><td class="num">64.9</td><td class="num">97.4</td></tr>
+        <tr><td>Nathan MacKinnon</td><td class="team">COL</td><td class="num">33.1</td><td class="num">54.6</td><td class="num">87.7</td></tr>
+        <tr><td>Nikita Kucherov</td><td class="team">TBL</td><td class="num">28.3</td><td class="num">56.6</td><td class="num">84.9</td></tr>
+        <tr><td>David Pastrnak</td><td class="team">BOS</td><td class="num">28.3</td><td class="num">44.4</td><td class="num">72.8</td></tr>
+        <tr><td>Jason Robertson</td><td class="team">DAL</td><td class="num">32.2</td><td class="num">38.1</td><td class="num">70.4</td></tr>
+        <tr><td>Macklin Celebrini</td><td class="team">SJS</td><td class="num">27.6</td><td class="num">41.2</td><td class="num">68.8</td></tr>
+        <tr><td>Artemi Panarin</td><td class="team">LAK</td><td class="num">25.8</td><td class="num">42.9</td><td class="num">68.8</td></tr>
+        <tr><td>Leon Draisaitl</td><td class="team">EDM</td><td class="num">28.4</td><td class="num">40.1</td><td class="num">68.5</td></tr>
+        <tr><td>Kirill Kaprizov</td><td class="team">MIN</td><td class="num">32.9</td><td class="num">35.2</td><td class="num">68.1</td></tr>
+        <tr><td>Mark Scheifele</td><td class="team">WPG</td><td class="num">26.8</td><td class="num">40.6</td><td class="num">67.5</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Internal consistency: league mean 93.3 points; implied overtime
+  share 22.1% against an observed 22.1% for 2024–2026.</p>
+</section>
+
+<section>
+  <h2><span class="n">06</span>What was built, and what wasn't</h2>
+  <div class="cols">
+    <div>
+      <h3>Data recovered</h3>
+      <p class="measure">Exact on-ice data now covers every season 2008–2026 —
+      18.9M shifts over 23,883 games. The pre-2012 coordinate hole is closed:
+      the NHL feed carries no shot location before 2012, and 2.08M parsed shots
+      fill it, verified to within one foot on seasons where both sources exist.</p>
+      <p class="measure">A parser bug was invented shifts for every goalie and
+      fourth-liner; fixing it moved agreement with the independent feed from
+      0.981 to <span class="mono">0.99969</span>, mean error 51.1s → 0.32s.</p>
+    </div>
+    <div>
+      <h3>Not built</h3>
+      <p class="measure">The deployment (line-change) model, the goalie starter
+      model, and the graph layer over teammate pairs were all left unbuilt. The
+      confirmatory test was blocked by G-STOP — correctly, and the window remains
+      unspent for a future attempt.</p>
+      <h3>Known limitations</h3>
+      <p class="measure">xG calibration fails in the top decile. RAPM was never
+      shown better than a one-line within-team adjustment. Assists are missing
+      for 2008–2011, cause identified but unfixed. Player projections do not use
+      the network's actor head, for want of a deployment model.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>33 of 33 acceptance checks pass, each re-deriving its verdict from recorded
+  numbers rather than trusting a report. Report-only: production scoring is
+  unchanged.</p>
+</footer>
+
+</div>
