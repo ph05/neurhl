@@ -36,7 +36,7 @@ from common import TENSORS, CKPT  # noqa: E402
 from models.event_sim import Cfg, EventSim, count_params  # noqa: E402
 import windows as W  # noqa: E402
 
-MAX_LEN = 384
+MAX_LEN = 512      # covers every game; longest observed is 512
 TRAIN = list(range(2008, 2017))
 VAL = 2017
 SEED = 20260821
@@ -101,7 +101,7 @@ def make_batch(seasons, picks, eras, dev):
         ints[k] = np.zeros((B, T), np.int64)
     for k in F:
         ints[k] = np.zeros((B, T), np.float32)
-    on_next = np.zeros((B, T, 14), np.int64)
+    on_ctx = np.zeros((B, T, 14), np.int64)
     valid = np.zeros((B, T), bool)
     tgt = {k: np.zeros((B, T), np.int64) for k in
            ["tgt_tt", "tgt_zone", "tgt_actor"]}
@@ -125,12 +125,31 @@ def make_batch(seasons, picks, eras, dev):
             ints[k][i, :n] = d[k][sl]
         for k in Bm + ["n_for", "n_against"]:
             ints[k][i, :n] = d[k][sl]
-        on_next[i, :n] = d["on"][nx]
+        # CURRENT on-ice set, never the next interval's. Using the next set
+        # leaks catastrophically: line changes happen AT STOPPAGES, so a change
+        # in on-ice composition IS the announcement of the faceoff that caused
+        # it. Measured on held-out steps: P(faceoff next) = 0.986 when one
+        # skater differs and 0.992 when two do, against a 0.199 base rate, and
+        # P(penalty next) lifts 2.76x when a skater is added back. The
+        # generative order is: condition on CURRENT personnel -> sample the
+        # event -> let S3 change personnel at the resulting stoppage.
+        on_ctx[i, :n] = d["on"][sl]
+        # actor target = slot of the NEXT event's actor within the CURRENT
+        # on-ice set; -1 (masked) when he is not on the ice yet.
+        nxt_slot = d["actor"][nx]
+        cur = d["on"][sl]
+        rows_ = np.arange(n)
+        pid_next = np.where(nxt_slot >= 0,
+                            d["on"][nx][rows_, np.clip(nxt_slot, 0, 13)], 0)
+        slot = np.full(n, -1, np.int64)
+        for c in range(14):
+            mm = (cur[:, c] == pid_next) & (pid_next > 0) & (slot < 0)
+            slot[mm] = c
+        tgt["tgt_actor"][i, :n] = slot
         valid[i, :n] = True
         tgt_valid[i, :n] = True
         tgt["tgt_tt"][i, :n] = d["tt"][nx]
         tgt["tgt_zone"][i, :n] = d["zone"][nx]
-        tgt["tgt_actor"][i, :n] = d["actor"][nx]
         tgt["tgt_dt"][i, :n] = d["dt"][nx]
         tgt["tgt_xa"][i, :n] = d["xa"][nx]
         tgt["tgt_ya"][i, :n] = d["ya"][nx]
@@ -139,7 +158,7 @@ def make_batch(seasons, picks, eras, dev):
 
     out = {k: torch.from_numpy(v).to(dev) for k, v in ints.items()}
     out.update({k: torch.from_numpy(v).to(dev) for k, v in tgt.items()})
-    out["on_next"] = torch.from_numpy(on_next).to(dev)
+    out["on_ctx"] = torch.from_numpy(on_ctx).to(dev)
     out["valid"] = torch.from_numpy(valid).to(dev)
     out["tgt_valid"] = torch.from_numpy(tgt_valid).to(dev)
     out["era"] = torch.from_numpy(era).to(dev)
@@ -175,6 +194,8 @@ def main():
     ap.add_argument("--tag", type=str, default="s1")
     ap.add_argument("--d-model", type=int, default=256)
     ap.add_argument("--layers", type=int, default=6)
+    ap.add_argument("--d-ff", type=int, default=1024)
+    ap.add_argument("--dropout", type=float, default=0.1)
     args = ap.parse_args()
 
     torch.manual_seed(args.seed)
@@ -191,7 +212,8 @@ def main():
     rapm_by = {s.se: s.rapm.to(dev) for s in tr + va}
 
     c = Cfg(n_players=vocab["n_players"], n_tt=vocab["n_type_team"],
-            d_model=args.d_model, n_layer=args.layers, n_era=len(ERA_KEYS))
+            d_model=args.d_model, n_layer=args.layers, d_ff=args.d_ff,
+            dropout=args.dropout, n_era=len(ERA_KEYS))
     model = EventSim(c).to(dev)
     print(f"device {dev} | params {count_params(model):,} | "
           f"train {sum(s.n_games for s in tr):,} games "

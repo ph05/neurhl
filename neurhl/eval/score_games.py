@@ -108,7 +108,7 @@ def hazards_for_games(models, ctx, units, era, rapm, dev, inv_tt, n_games):
                         b[k] = v.repeat(G, 1) if v.dim() == 2 else v
                 B = b["etype"].shape[0]
                 on = on_all[lo:hi].repeat_interleave(n_ctx, 0)
-                b["on_next"] = on.view(B, 1, 14).expand(B, T, 14).contiguous()
+                b["on_ctx"] = on.view(B, 1, 14).expand(B, T, 14).contiguous()
                 b["score_abs"] = torch.full((B, T), sc + 4, dtype=torch.long, device=dev)
                 b["n_home"] = torch.full((B, T), 5, dtype=torch.long, device=dev)
                 b["n_away"] = torch.full((B, T), 5, dtype=torch.long, device=dev)

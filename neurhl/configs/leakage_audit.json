@@ -1,0 +1,167 @@
+{
+ "causality": {
+  "causality": [
+   {
+    "game": 0,
+    "n_events": 349,
+    "cut": 174,
+    "horizon": 173,
+    "inputs_checked": [
+     "dt",
+     "etype",
+     "g_away",
+     "g_home",
+     "has_xg",
+     "has_xy",
+     "n_against",
+     "n_away",
+     "n_for",
+     "n_home",
+     "on_ctx",
+     "period",
+     "score",
+     "score_abs",
+     "strength",
+     "stype",
+     "t_rem",
+     "team",
+     "xa",
+     "xg",
+     "ya",
+     "zone"
+    ],
+    "inputs_that_moved": [],
+    "clean": true
+   },
+   {
+    "game": 5,
+    "n_events": 352,
+    "cut": 176,
+    "horizon": 175,
+    "inputs_checked": [
+     "dt",
+     "etype",
+     "g_away",
+     "g_home",
+     "has_xg",
+     "has_xy",
+     "n_against",
+     "n_away",
+     "n_for",
+     "n_home",
+     "on_ctx",
+     "period",
+     "score",
+     "score_abs",
+     "strength",
+     "stype",
+     "t_rem",
+     "team",
+     "xa",
+     "xg",
+     "ya",
+     "zone"
+    ],
+    "inputs_that_moved": [],
+    "clean": true
+   },
+   {
+    "game": 17,
+    "n_events": 317,
+    "cut": 158,
+    "horizon": 157,
+    "inputs_checked": [
+     "dt",
+     "etype",
+     "g_away",
+     "g_home",
+     "has_xg",
+     "has_xy",
+     "n_against",
+     "n_away",
+     "n_for",
+     "n_home",
+     "on_ctx",
+     "period",
+     "score",
+     "score_abs",
+     "strength",
+     "stype",
+     "t_rem",
+     "team",
+     "xa",
+     "xg",
+     "ya",
+     "zone"
+    ],
+    "inputs_that_moved": [],
+    "clean": true
+   }
+  ]
+ },
+ "actor_coverage": {
+  "steps": 36946,
+  "actor_in_current_onice": 22016,
+  "coverage": 0.5959
+ },
+ "target_identity": {
+  "identical_pairs": [],
+  "reveals_target_team": []
+ },
+ "onice_information": {
+  "n": 62094,
+  "penalty": {
+   "base_rate": 0.02796,
+   "by_delta_skaters": {
+    "0": {
+     "n": 62094,
+     "rate": 0.02796,
+     "lift": 1.0
+    }
+   },
+   "max_lift": 1.0
+  },
+  "goal": {
+   "base_rate": 0.01762,
+   "by_delta_skaters": {
+    "0": {
+     "n": 62094,
+     "rate": 0.01762,
+     "lift": 1.0
+    }
+   },
+   "max_lift": 1.0
+  },
+  "faceoff": {
+   "base_rate": 0.19884,
+   "by_delta_skaters": {
+    "0": {
+     "n": 62094,
+     "rate": 0.19884,
+     "lift": 1.0
+    }
+   },
+   "max_lift": 1.0
+  },
+  "stoppage": {
+   "base_rate": 0.15613,
+   "by_delta_skaters": {
+    "0": {
+     "n": 62094,
+     "rate": 0.15613,
+     "lift": 1.0
+    }
+   },
+   "max_lift": 1.0
+  },
+  "delta_skater_dist": {
+   "0": 62094
+  },
+  "delta_goalie_dist": {
+   "0": 62094
+  }
+ },
+ "exempt": {
+  "on_ctx": "p"
+ }
+}

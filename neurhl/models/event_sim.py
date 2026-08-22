@@ -70,7 +70,7 @@ class OnIceEncoder(nn.Module):
         self.scale = nn.Parameter(torch.zeros(1))
 
     def forward(self, on, rapm_tab):
-        """on: [B,T,14] player indices, ALWAYS home slots 0-6 then away 7-13.
+        """on: [B,T,14] CURRENT on-ice indices, home slots 0-6, away 7-13.
 
         Orientation is fixed to home/away and is deliberately NOT keyed to the
         next event's owner. An earlier version oriented 'for'/'against' by a
@@ -164,7 +164,7 @@ class EventSim(nn.Module):
             scal], -1)
         h = self.in_proj(tok)
 
-        on_ctx, pemb = self.onice(b["on_next"], rapm_tab)
+        on_ctx, pemb = self.onice(b["on_ctx"], rapm_tab)
         h = h + self.ctx_proj(on_ctx)
 
         gamma, beta = self.era_proj(b["era"]).chunk(2, -1)
@@ -205,10 +205,10 @@ class EventSim(nn.Module):
         nll = -torch.logsumexp(logw + comp, -1)
         return (nll * mask).sum() / mask.sum().clamp(min=1)
 
-    def actor_nll(self, h, pemb, on_next, target, mask):
+    def actor_nll(self, h, pemb, on_ctx, target, mask):
         q = self.h_actor(h).unsqueeze(-2)                   # [B,T,1,dp]
         logits = (q * pemb).sum(-1) / math.sqrt(self.c.d_player)
-        logits = logits.masked_fill(on_next == 0, -1e9)
+        logits = logits.masked_fill(on_ctx == 0, -1e9)
         tgt = target.clamp(min=0).long()
         nll = F.cross_entropy(logits.flatten(0, 1), tgt.flatten(),
                               reduction="none").view_as(target)
@@ -229,7 +229,7 @@ class EventSim(nn.Module):
             self.h_zone(h).flatten(0, 1), b["tgt_zone"].flatten(),
             reduction="none").view_as(v) * v).sum() / v.sum().clamp(min=1)
         am = v * (b["tgt_actor"] >= 0).float()
-        out["actor"] = self.actor_nll(h, pemb, b["on_next"], b["tgt_actor"], am)
+        out["actor"] = self.actor_nll(h, pemb, b["on_ctx"], b["tgt_actor"], am)
         out["loss"] = sum(w[k] * out[k] for k in w)
         return out
 

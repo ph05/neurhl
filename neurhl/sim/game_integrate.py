@@ -95,7 +95,7 @@ def hazard_grid(models, ctx_bank, home_unit, away_unit, era, rapm, dev,
             b = {k: (v.clone() if torch.is_tensor(v) else v)
                  for k, v in ctx_bank["batch"].items()}
             B, T = b["etype"].shape
-            b["on_next"] = on.view(1, 1, 14).expand(B, T, 14).contiguous()
+            b["on_ctx"] = on.view(1, 1, 14).expand(B, T, 14).contiguous()
             b["score_abs"] = torch.full((B, T), sc + 4, dtype=torch.long,
                                         device=dev)
             b["n_home"] = torch.full((B, T), 5, dtype=torch.long, device=dev)
