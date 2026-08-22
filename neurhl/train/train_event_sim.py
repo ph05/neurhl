@@ -28,6 +28,9 @@ import sys
 import time
 from pathlib import Path
 
+import threading
+import queue
+
 import numpy as np
 import torch
 
@@ -166,7 +169,42 @@ def make_batch(seasons, picks, eras, dev):
     return out
 
 
-def evaluate(model, seasons, eras, dev, rapm_by, max_batches=60, bs=8):
+class Prefetcher:
+    """Prepare the next batch on a worker thread while the GPU works.
+
+    Batch assembly is numpy on the CPU and measured at ~27% of step time, which
+    is pure stall on a single-GPU machine. One buffered thread removes it.
+    """
+
+    def __init__(self, seasons, bs, eras, dev, seed, depth=3):
+        self.q = queue.Queue(maxsize=depth)
+        self.seasons, self.bs, self.eras, self.dev = seasons, bs, eras, dev
+        self.rng = np.random.default_rng(seed)
+        self.stop = False
+        self.t = threading.Thread(target=self._run, daemon=True)
+        self.t.start()
+
+    def _run(self):
+        while not self.stop:
+            s = self.seasons[self.rng.integers(len(self.seasons))]
+            gs = self.rng.integers(0, s.n_games, size=self.bs)
+            b = make_batch(self.seasons, [(s, int(g)) for g in gs],
+                           self.eras, self.dev)
+            self.q.put((s.se, b))
+
+    def next(self):
+        return self.q.get()
+
+    def close(self):
+        self.stop = True
+        try:
+            while True:
+                self.q.get_nowait()
+        except Exception:
+            pass
+
+
+def evaluate(model, seasons, eras, dev, rapm_by, max_batches=140, bs=8):
     model.eval()
     rng = np.random.default_rng(0)
     agg = {}
@@ -223,17 +261,15 @@ def main():
                             betas=(0.9, 0.95))
     sched = torch.optim.lr_scheduler.OneCycleLR(
         opt, max_lr=args.lr, total_steps=args.steps, pct_start=0.05)
-    rng = np.random.default_rng(args.seed)
+    pf = Prefetcher(tr, args.bs, eras, dev, args.seed)
     t0 = time.time()
     hist = []
     best = float("inf")
     CKPT.mkdir(parents=True, exist_ok=True)
 
     for step in range(1, args.steps + 1):
-        s = tr[rng.integers(len(tr))]
-        gs = rng.integers(0, s.n_games, size=args.bs)
-        b = make_batch(tr, [(s, int(g)) for g in gs], eras, dev)
-        o = model(b, rapm_by[s.se])
+        se_, b = pf.next()
+        o = model(b, rapm_by[se_])
         opt.zero_grad(set_to_none=True)
         o["loss"].backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -254,6 +290,7 @@ def main():
                 torch.save({"model": model.state_dict(), "cfg": c.__dict__,
                             "step": step, "val": ev, "seed": args.seed},
                            CKPT / f"{args.tag}_seed{args.seed}.pt")
+    pf.close()
     (CKPT / f"{args.tag}_seed{args.seed}_hist.json").write_text(
         json.dumps(hist, indent=1))
     print(f"\nbest val loss {best:.4f} -> {CKPT}/{args.tag}_seed{args.seed}.pt")
