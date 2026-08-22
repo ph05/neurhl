@@ -142,17 +142,17 @@
  {
   "check": "player points MAE beats a league-mean baseline",
   "pass": true,
-  "detail": "6.66 vs 16.27, n=2,940"
+  "detail": "9.55 vs 18.54, n=2,956"
  },
  {
   "check": "player projections are not materially biased",
-  "pass": true,
-  "detail": "mean |bias| 1.65 pts"
+  "pass": false,
+  "detail": "mean |bias| 3.12 pts"
  },
  {
   "check": "player deliverable exists",
   "pass": true,
-  "detail": "732 skaters"
+  "detail": "711 skaters"
  },
  {
   "check": "registry refuses an OUTCOME feature as an input",

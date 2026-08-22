@@ -179,7 +179,7 @@ footer{border-top:2px solid var(--ink); padding-top:18px; color:var(--muted);
   <h1>A simulator that lost the game and won the season</h1>
   <p class="dek">Built a puck-level event simulator to predict NHL games. It
   <em>failed</em> at the thing it was built for, beat the incumbent at something
-  else, and the most useful output was four bugs that every validation gate
+  else, and the most useful output was five bugs that every validation gate
   passed straight through.</p>
 </header>
 
@@ -235,11 +235,11 @@ footer{border-top:2px solid var(--ink); padding-top:18px; color:var(--muted);
 </section>
 
 <section>
-  <h2><span class="n">03</span>Four things the gates could not see</h2>
-  <p class="lede measure">This is the part worth keeping. Two data leaks and two
+  <h2><span class="n">03</span>Five things the gates could not see</h2>
+  <p class="lede measure">This is the part worth keeping. Two data leaks and three
   modelling bugs all survived the preregistered realism gates. Every one was
-  caught by building a downstream consumer that had to supply its own inputs —
-  never by a gate.</p>
+  caught downstream — by a consumer that had to supply its own inputs, or by a
+  reader who looked at an output and said it could not be right.</p>
 
   <div class="finds">
     <div class="find">
@@ -279,6 +279,20 @@ footer{border-top:2px solid var(--ink); padding-top:18px; color:var(--muted);
 0.00     0.639    10.01   7.53
 0.07     0.794     9.59   6.94   ← adopted
 0.13     0.917     9.56   7.08</div>
+    </div>
+    <div class="find">
+      <div class="ft"><h4>Every player projected into a colder era</h4><span class="chip w">bug</span></div>
+      <p>The first player projection put the 2026-27 league leader at 97 points.
+      Five compounding errors, each a constant chosen by hand instead of
+      estimated — and the backtest could not see any of them, because it only
+      ever tested 2014–2017 vantages, all inside the low-scoring era.</p>
+      <div class="ev">era        raw per-60 rates averaged across a 13% league shift
+shrinkage  one constant pulled a 3,300-min veteran 31% to the mean
+ice time   modelled per player, ignoring a fixed 300 min/team-game budget
+position   forwards (181 min) and defence (117) share one pool -> 28.4 min/gm
+schedule   48- and 56-game seasons read as "this player plays 56 games"
+
+projected leader   97.4  ->  123.2      backtest MAE 9.55 vs 18.54 baseline</div>
     </div>
   </div>
 
@@ -360,24 +374,27 @@ footer{border-top:2px solid var(--ink); padding-top:18px; color:var(--muted);
 
   <div class="tscroll">
     <table>
-      <caption>Projected scoring leaders · 732 skaters on announced rosters</caption>
-      <thead><tr><th>Player</th><th>Team</th><th class="num">G</th><th class="num">A</th><th class="num">Pts</th></tr></thead>
+      <caption>Projected scoring leaders · 711 skaters · 84-game season</caption>
+      <thead><tr><th>Player</th><th>Team</th><th class="num">GP</th><th class="num">G</th><th class="num">A</th><th class="num">Pts</th></tr></thead>
       <tbody>
-        <tr class="hi"><td>Connor McDavid</td><td class="team">EDM</td><td class="num">32.5</td><td class="num">64.9</td><td class="num">97.4</td></tr>
-        <tr><td>Nathan MacKinnon</td><td class="team">COL</td><td class="num">33.1</td><td class="num">54.6</td><td class="num">87.7</td></tr>
-        <tr><td>Nikita Kucherov</td><td class="team">TBL</td><td class="num">28.3</td><td class="num">56.6</td><td class="num">84.9</td></tr>
-        <tr><td>David Pastrnak</td><td class="team">BOS</td><td class="num">28.3</td><td class="num">44.4</td><td class="num">72.8</td></tr>
-        <tr><td>Jason Robertson</td><td class="team">DAL</td><td class="num">32.2</td><td class="num">38.1</td><td class="num">70.4</td></tr>
-        <tr><td>Macklin Celebrini</td><td class="team">SJS</td><td class="num">27.6</td><td class="num">41.2</td><td class="num">68.8</td></tr>
-        <tr><td>Artemi Panarin</td><td class="team">LAK</td><td class="num">25.8</td><td class="num">42.9</td><td class="num">68.8</td></tr>
-        <tr><td>Leon Draisaitl</td><td class="team">EDM</td><td class="num">28.4</td><td class="num">40.1</td><td class="num">68.5</td></tr>
-        <tr><td>Kirill Kaprizov</td><td class="team">MIN</td><td class="num">32.9</td><td class="num">35.2</td><td class="num">68.1</td></tr>
-        <tr><td>Mark Scheifele</td><td class="team">WPG</td><td class="num">26.8</td><td class="num">40.6</td><td class="num">67.5</td></tr>
+        <tr class="hi"><td>Nathan MacKinnon</td><td class="team">COL</td><td class="num">75</td><td class="num">43.9</td><td class="num">79.3</td><td class="num">123.2</td></tr>
+        <tr class="hi"><td>Connor McDavid</td><td class="team">EDM</td><td class="num">74</td><td class="num">39.9</td><td class="num">77.9</td><td class="num">117.8</td></tr>
+        <tr><td>Leon Draisaitl</td><td class="team">EDM</td><td class="num">72</td><td class="num">42.5</td><td class="num">73.4</td><td class="num">115.9</td></tr>
+        <tr><td>Macklin Celebrini</td><td class="team">SJS</td><td class="num">76</td><td class="num">42.2</td><td class="num">71.4</td><td class="num">113.5</td></tr>
+        <tr><td>David Pastrnak</td><td class="team">BOS</td><td class="num">75</td><td class="num">37.1</td><td class="num">64.3</td><td class="num">101.4</td></tr>
+        <tr><td>Kirill Kaprizov</td><td class="team">MIN</td><td class="num">73</td><td class="num">46.3</td><td class="num">52.6</td><td class="num">98.9</td></tr>
+        <tr><td>Nikita Kucherov</td><td class="team">TBL</td><td class="num">74</td><td class="num">34.0</td><td class="num">64.2</td><td class="num">98.3</td></tr>
+        <tr><td>Jack Hughes</td><td class="team">NJD</td><td class="num">72</td><td class="num">35.0</td><td class="num">60.4</td><td class="num">95.4</td></tr>
+        <tr><td>Jason Robertson</td><td class="team">DAL</td><td class="num">76</td><td class="num">40.9</td><td class="num">54.1</td><td class="num">94.9</td></tr>
+        <tr><td>Nick Suzuki</td><td class="team">MTL</td><td class="num">76</td><td class="num">31.6</td><td class="num">63.1</td><td class="num">94.7</td></tr>
       </tbody>
     </table>
   </div>
   <p class="note">Internal consistency: league mean 93.3 points; implied overtime
-  share 22.1% against an observed 22.1% for 2024–2026.</p>
+  share 22.1% against an observed 22.1% for 2024–2026. Player side: forward ice
+  time sums to exactly 15,204 minutes per team, no skater exceeds his position's
+  observed ceiling, and the implied league rate is 16.50 points per game against
+  an actual 16.3–16.8.</p>
 </section>
 
 <section>
