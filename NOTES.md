@@ -527,7 +527,7 @@ a known limitation: top-decile xG is over-predicted by ~1.2pp pooled and up to
 ~4pp in the drift era. The mitigation already exists in the plan as S4's
 mandatory rollout rate-adjustment, fitted on train seasons only.
 
-### P5 — S1 event simulator (gates E1 PASS, E2 PASS)
+### P5 — S1 event simulator  [SUPERSEDED — see P5-v2; results below were produced with TWO leaks present and are VOID]
 
 Transformer-Hawkes marked temporal point process over the unified stream,
 5,280,555 parameters, 5-seed deep ensemble. Train 2008-2016, validate and gate on
@@ -576,3 +576,51 @@ Also built in P5: S0 unified stream (7.5M events, shot coordinates 0.991-1.000 i
 every season after reconstructing 2008-2011 from MoneyPuck distance/angle,
 verified at 97.3%/97.6% within one foot), and walk-forward RAPM priors for every
 vantage 2009-2027 including the 2027 projection target.
+
+
+### P5-v2 — after the leakage audit (supersedes the P5 section above)
+
+**Two leaks. Both gates passed with both present.** That is the finding worth
+keeping; the fixes are secondary.
+
+  Leak 1  `home_next` -- the on-ice encoder's for/against orientation equalled
+          the owning team of the NEXT event, i.e. the team half of the target.
+          Agreement 1.0000, zero off-diagonal.
+  Leak 2  `on_next`  -- the trunk conditioned on the NEXT event's on-ice set.
+          Line changes happen AT STOPPAGES, so a composition change IS the
+          announcement of the faceoff that caused it:
+            -1 skater -> P(faceoff next) 0.986   (base 0.199, lift 4.96)
+            -2 skaters ->                 0.992   (lift 4.99)
+            +1 skater -> P(penalty next) 0.077   (base 0.028, lift 2.76)
+          ~3,000 of 62,094 held-out steps had a near-deterministic answer.
+
+**Why E1/E2 could never have caught them.** Both gates score the model on the
+same inputs it trained on, so a leaked input is structurally invisible. Realism
+gates test whether the model reproduces reality GIVEN its inputs; they cannot
+test whether those inputs are legitimate. Leak 1 surfaced only because S4 had to
+supply every input itself and produced lambda_home 0.39 g/60 vs lambda_away 3.30.
+Leak 2 surfaced only because that prompted a real audit.
+
+**Standing requirement**: neurhl/tests/audit_leakage.py passes before any S1
+number is reported. Its decisive check is CAUSALITY -- corrupt every event after
+a cut point, rebuild the batch, require every input before the cut to be
+bit-identical (22 inputs x 3 games, CLEAN). Static source analysis is not
+sufficient: it tells you which slice a line reads, not whether the value reaches
+the model.
+
+**Honest cost of the fix**: the actor head now chooses from CURRENT personnel, so
+its ceiling drops -- the next actor is already on the ice for 0.5959 of steps
+against the 0.827 the leaked version enjoyed. Held-out loss is correspondingly
+worse and should be: the task is now the real one.
+
+**Capacity, decided on evidence rather than ambition.** The plan said start at
+~5M and scale only where held-out likelihood earns it. Matched comparison:
+
+  small d256 L6   5.28M params   48,000 games seen    719s    loss 3.0278
+  large d512 L8  26.32M params   64,000 games seen   1801s    loss 3.4445
+
+The large model saw MORE data in 2.5x the wall clock and lost on every head. This
+is the Grinsztajn et al. regime: 3.37M events are massively correlated within
+games, so effective sample size is far below nominal. Memory was never the
+constraint (26M peaked at 2.2 GB of 32 GB); MPS throughput peaks at batch 32 and
+collapses at 48+. The hardware went into longer training and the ensemble instead.

@@ -122,6 +122,62 @@ stratified by availability regime.
 **Ablations required before any causal claim:** remove EDGE (G5), graph edges,
 goalie module, score effects, scratches.
 
+### A8 — TWO leaks found in S1; all P5 results before this point are VOID
+
+*Recorded because the failure matters more than the fix: the preregistered gates
+passed with both leaks present, and would have passed forever.*
+
+**Leak 1 — `home_next`.** The on-ice encoder chose its "for"/"against" pooling
+using a flag equal to the owning team of the **next** event — which is the team
+component of the `(type, team)` target. Agreement with the target's team:
+**1.0000**, zero off-diagonal.
+
+**Leak 2 — `on_next`, and worse.** The trunk conditioned on the on-ice set at the
+**next** event. Line changes happen *at stoppages*, so a change in on-ice
+composition **is** the announcement of the faceoff that caused it:
+
+| Δ on-ice → next event | P(faceoff) | lift |
+|---|---|---|
+| −1 skater | 0.986 | 4.96 |
+| −2 skaters | 0.992 | 4.99 |
+| next event has no on-ice data | 0.995 | 5.00 |
+| **baseline** | **0.199** | — |
+
+and Δ+1 skater lifted P(penalty) 2.76×. About 3,000 of 62,094 held-out steps had
+a near-deterministic answer supplied to them.
+
+**Why the gates did not catch either.** E1 and E2 score the model using the same
+inputs the model was trained on, so a leaked input is *structurally invisible* to
+them. Realism gates test whether the model reproduces reality given its inputs;
+they cannot test whether its inputs are legitimate. **Leakage requires either a
+downstream consumer that must supply every input itself, or a direct causality
+test.** Leak 1 surfaced only because S4 had to fabricate the flag and produced
+λ_home = 0.39 g/60 against λ_away = 3.30. Leak 2 surfaced only because that
+prompted an actual audit.
+
+**Fix.** Orientation is fixed to home slots 0-6 / away slots 7-13, and the trunk
+conditions on the **current** on-ice set. This is also the correct generative
+order: condition on current personnel → sample the event → let S3 change
+personnel at the resulting stoppage. The actor head now chooses from current
+personnel, lowering its ceiling honestly — the next actor is already on the ice
+for **0.5959** of steps, against the 0.827 the leaked version enjoyed.
+
+**New standing requirement — `neurhl/tests/audit_leakage.py` must pass before any
+S1 number is reported.** Three checks:
+1. **Causality** (decisive): corrupt every event after a cut point, rebuild the
+   batch, and require every model input before the cut to be bit-identical. 22
+   inputs × 3 games. Static source analysis is *not* sufficient — it tells you
+   which slice a line reads, not whether the value reaches the model.
+2. **Target identity**: no input may agree with any target above 98%, nor recover
+   the target's team.
+3. **Empirical**: the exempted input (personnel, legitimately supplied by S3)
+   must carry no lift on the next event's type.
+
+**All P5 gate results reported before this amendment are VOID.** The leaked
+checkpoints are retained under `neurhl/checkpoints/leaked/` so the void numbers
+stay reproducible and clearly labelled, and every seed has been retrained on
+audited inputs.
+
 ### A7 — X3 failed; calibration method corrected (chosen on DEV/TUNE, never on CONFIRM)
 
 *Declared before the corrected walk-forward is run. The original X3 failure
