@@ -75,7 +75,7 @@ def projected_units(season: int, pmap: dict) -> dict:
     return out
 
 
-def state_matched_contexts(season, eras, dev, n_per_cell=6, n_games=260,
+def state_matched_contexts(season, eras, dev, n_per_cell=64, n_games=400,
                            seed=11):
     """Real histories INDEXED BY THE STATE THEY ALREADY HAVE.
 
@@ -108,7 +108,7 @@ def state_matched_contexts(season, eras, dev, n_per_cell=6, n_games=260,
             if key[0] < 1 or key[0] > 3:
                 continue
             cells.setdefault(key, [])
-            if len(cells[key]) < n_per_cell * 4:
+            if len(cells[key]) < n_per_cell * 3:
                 cells[key].append((g, pos))
     out = {}
     for key, lst in cells.items():
@@ -133,6 +133,7 @@ def build_window(season, picks, eras, dev):
     out = {k: np.zeros((B, T), np.int64) for k in I + Bm}
     out.update({k: np.zeros((B, T), np.float32) for k in F})
     on = np.zeros((B, T, 14), np.int64)
+    pos_idx = np.zeros((B, T), np.int64)
     for i, (g, pos) in enumerate(picks):
         a0 = int(season.off[g])
         sl = slice(a0 + pos - T + 1, a0 + pos + 1)
@@ -141,7 +142,9 @@ def build_window(season, picks, eras, dev):
         for k in F:
             out[k][i] = d[k][sl]
         on[i] = d["on"][sl]
+        pos_idx[i] = np.arange(pos - T + 1, pos + 1)
     r = {k: torch.from_numpy(v).to(dev) for k, v in out.items()}
+    r["pos_idx"] = torch.from_numpy(pos_idx).to(dev)
     r["on_ctx"] = torch.from_numpy(on).to(dev)
     r["valid"] = torch.ones(B, T, dtype=torch.bool, device=dev)
     r["era"] = eras[season.se].to(dev).view(1, -1).expand(B, -1).contiguous()
@@ -190,8 +193,13 @@ def hazards_for_games(models, cells, units, rapm, dev, inv_tt, n_games):
                     pa = b_ if pa is None else pa + b_
                     edt = e if edt is None else edt + e
                 nm = len(models)
-                lh = ((ph / nm) / (edt / nm))[:, -1].view(G, n_ctx).mean(1)
-                la = ((pa / nm) / (edt / nm))[:, -1].view(G, n_ctx).mean(1)
+                # rate = mean(p) / mean(E[dt]) -- a time-average. The mean of
+                # ratios is not the rate, and with few contexts it is wildly
+                # unstable: at 6 contexts the away estimate had sd 1.41 g/60.
+                mp_h = (ph / nm)[:, -1].view(G, n_ctx).mean(1)
+                mp_a = (pa / nm)[:, -1].view(G, n_ctx).mean(1)
+                m_dt = (edt / nm)[:, -1].view(G, n_ctx).mean(1)
+                lh, la = mp_h / m_dt, mp_a / m_dt
                 res[lo:hi, per - 1, si, 0] = lh.float().cpu().numpy()
                 res[lo:hi, per - 1, si, 1] = la.float().cpu().numpy()
     return res

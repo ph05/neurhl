@@ -171,7 +171,15 @@ class EventSim(nn.Module):
         h = h * (1 + gamma.unsqueeze(1)) + beta.unsqueeze(1)
 
         T = h.shape[1]
-        h = h + self.pos[:, :T]
+        # Positional index = the event's TRUE position in its game, not its
+        # position in the tensor. A mid-game window sliced out and laid at
+        # slots 0..T-1 tells the model "this is the opening faceoff" while
+        # t_rem says otherwise -- contradictory inputs that produced badly
+        # skewed hazards in S4. Callers that slice windows pass pos_idx.
+        if "pos_idx" in b:
+            h = h + self.pos[0][b["pos_idx"].clamp(max=self.pos.shape[1] - 1)]
+        else:
+            h = h + self.pos[:, :T]
         causal = torch.triu(torch.ones(T, T, device=h.device, dtype=torch.bool),
                             diagonal=1)
         h = self.enc(h, mask=causal, src_key_padding_mask=~b["valid"])

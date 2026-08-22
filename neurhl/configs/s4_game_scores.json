@@ -1,13 +1,13 @@
 {
  "season": 2017,
  "n": 400,
- "ll_model": 0.7202077465092742,
+ "ll_model": 0.7332158261245968,
  "ll_constant": 0.6749869805043391,
  "base_rate": 0.595,
- "mean_p_home": 0.4453940117092322,
- "sd_p_home": 0.033035556124483265,
- "exp_goals_home": 2.4963808063676103,
- "exp_goals_away": 2.6498904247909896,
+ "mean_p_home": 0.4251963029442809,
+ "sd_p_home": 0.026054424365599484,
+ "exp_goals_home": 2.425286716828185,
+ "exp_goals_away": 2.745808810459272,
  "actual_goals_home": 2.8975,
  "actual_goals_away": 2.4725,
  "ensemble": [
