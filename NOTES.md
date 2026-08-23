@@ -878,3 +878,58 @@ totals follow. The bias runs monotonically with the filter --
 essentially unbiased: -0.34 points over 4,149 player-seasons, with a projected
 league point total 0.986 of actual. The >=40 GP figure is retained for accuracy
 comparability and never quoted as a bias estimate.
+
+### Games played as a conservation law, and a dead age curve
+
+Two more defects, both found by checking outputs against identities rather than
+against a loss.
+
+**GAMES ARE A BUDGET.** Exactly 18 skaters dress per team per game, so the sum of
+every skater's EXPECTED games is fixed: 18 x 84 x 32 = 48,384, of which players
+on announced rosters take 0.966-0.972 (measured 2024-2026) and the rest go to
+call-ups. The projection summed to 45,853 against a 46,836 target -- 2% short,
+and the reason projected games looked systematically light. Now enforced exactly
+(ratio 1.0000).
+
+Normalising PER TEAM was wrong and was caught immediately: announced rosters run
+17 to 27 skaters, and the games a thin roster does not cover go to call-ups, not
+to its own players. Forcing every club to the same total pushed a 17-man roster
+to 86 games a man and pinned four Detroit players at a full 84. League-wide
+normalisation fixes the identity without inventing durability.
+
+Scoping that normalisation also mattered: the projection path is filtered to the
+711 rostered skaters but the backtest path carries every player in history, and
+normalising that whole population to one league's-worth of games crushed
+everything -- MAE 9.55 -> 15.66, top projections from ~110 to ~60. A conservation
+law has to be applied over exactly the population it conserves over.
+
+What normalising does NOT do is push anyone to a full season, and it should not.
+A player who just appeared in 80+ games averages 71.9 the next year and repeats
+80+ only 44% of the time, so an EXPECTATION above 80 is wrong however odd it
+looks beside a realised season. Ceiling set at 78.
+
+**The age curve was dead code.** `project()` called it with an empty bios dict, so
+it always returned {} and multiplied by 1.0 -- it never once ran. Removed rather
+than repaired, because the profile it would have fitted is pure survivorship:
+only good players last to 34, so mean relative scoring RISES with age (1.19 at
+20, 1.06 at 33). Applied as a multiplier it would have rewarded being old. Age
+reaches the model as a plain feature instead.
+
+Final player backtest, 5 held-out seasons (2022-2026), n=2,956:
+  MAE 9.54 against a league-mean baseline of 18.54, correlation 0.856,
+  unconditional bias -0.33, projected league total 0.986 of actual.
+
+Distribution against the top-711 actual skaters, scaled to 84 games:
+                max    p99    p95    p90    p75    med
+  actual    125-148  98-107  77-79  66-69  43-44  25-26
+  projected     123      96     74     62     43     26
+
+The projected maximum sits BELOW the realised maxima, which is correct: the
+highest outcome belongs to whoever combines a high expectation with a lucky
+season, so max(expectation) must be less than expectation(max).
+
+Honest residual: individual elite projections still carry real error. Kucherov
+projects 98 against a 141 per-84 recent average, Celebrini 116 against 98. The
+aggregate is calibrated; single players are not, and a projection that regresses
+outliers will always read as too cautious on the sustained stars and too generous
+on a young riser.

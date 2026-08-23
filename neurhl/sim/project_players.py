@@ -129,25 +129,13 @@ def player_seasons(seasons) -> pd.DataFrame:
     return pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
 
 
-def age_curve(hist: pd.DataFrame, bios: dict) -> dict:
-    """Multiplicative points-per-60 factor by age, estimated from history."""
-    h = hist[hist.toi > 30000].copy()
-    h["age"] = [bios.get(int(p), {}).get("age_at", {}).get(int(s), np.nan)
-                for p, s in zip(h.player_id, h.season_end)]
-    h = h.dropna(subset=["age"])
-    if len(h) < 500:
-        return {}
-    h["p60"] = 3600 * (h.g + h.a) / h.toi
-    lg = h.p60.mean()
-    h["bin"] = h.age.clip(18, 40).astype(int)
-    c = (h.groupby("bin").p60.mean() / lg).to_dict()
-    # smooth: 3-point moving average, so a thin age bin cannot swing the curve
-    ks = sorted(c)
-    sm = {}
-    for i, k in enumerate(ks):
-        w = [c[ks[j]] for j in range(max(0, i - 1), min(len(ks), i + 2))]
-        sm[k] = float(np.mean(w))
-    return sm
+# NOTE: an explicit age curve was removed. It was dead code -- project() called
+# it with an empty bios dict, so it always returned {} and multiplied by 1.0 --
+# and the raw profile it would have fitted is pure survivorship: only good
+# players last to 34, so mean relative scoring RISES with age (1.19 at 20, 1.06
+# at 33). Applied as a multiplier that rewards being old. Age reaches the model
+# as a plain feature instead, where the tree can condition on it alongside the
+# player's own history rather than scaling everyone by a cohort average.
 
 
 def load_bios() -> dict:

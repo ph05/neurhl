@@ -79,6 +79,26 @@ SKATER_MIN_PER_TEAM_GAME = sum(POS_BUDGET_MIN_PER_GAME.values())
 # observed ceilings, used only as a sanity bound on an individual projection
 MAX_TOI_PER_GP_MIN = {0: 23.2, 1: 28.0}
 
+# GAMES ARE A BUDGET TOO. Exactly 18 skaters dress per team per game, so the sum
+# of every skater's EXPECTED games is a fixed total: 18 * 84 = 1,512 per team.
+# Measured 2024-2026, the players on a club's announced roster take 0.966-0.972
+# of them and the rest go to call-ups, so a projection covering only the
+# announced roster should sum to ~0.968 of the budget. Left unnormalised the
+# projection came to 0.979 of that target -- a real shortfall, and the reason
+# projected games looked systematically light.
+#
+# What normalising does NOT do is push anyone to a full season, and it should
+# not: a player who just appeared in 80+ games averages 71.9 the next year and
+# repeats 80+ only 44% of the time, so an EXPECTATION above 80 would be wrong
+# however unfamiliar it looks next to a realised season.
+DRESSED_SKATERS_PER_GAME = 18
+ROSTER_SHARE_OF_GAMES = 0.968
+# No player's EXPECTED games should approach a full season. The most durable
+# cohort -- players who just appeared in 80+ games -- averages 71.9 the next
+# year and repeats 80+ only 44% of the time, so 78 (on an 82-game basis) is a
+# generous ceiling on an expectation, not a conservative one.
+MAX_EXPECTED_GP = 78.0
+
 
 def load_player_seasons(seasons) -> pd.DataFrame:
     """One row per player-season, skaters only, regular season only."""
@@ -299,6 +319,32 @@ def to_totals(pred: pd.DataFrame, lg_g60: float, lg_a60: float,
     else:
         d["toi_proj"] = d.toi_share * d.pos_budget
     d["exp_gp"] = d.gp_share.clip(0.02, 1.0) * games
+    if team_of is not None:
+        # Normalise LEAGUE-WIDE, not per team. Announced rosters vary in size,
+        # and the games a short roster does not cover go to call-ups rather than
+        # to its own players -- forcing every club to the same total pushed a
+        # 19-man roster to 77 games a man and pinned four Detroit players at a
+        # full 84. A single league factor fixes the identity without inventing
+        # durability for whoever happens to sit on a thin roster.
+        # Only players WITH a roster place share the budget. The projection path
+        # is already filtered to the announced rosters, but the backtest path is
+        # not -- it carries every player in history -- and normalising that whole
+        # set to one team's-worth of games crushed everyone's ice time (MAE 9.55
+        # -> 15.66, top projections from ~110 to ~60). The scope of a
+        # conservation law has to be exactly the population it conserves over.
+        on_roster = d["team"].notna() if "team" in d else pd.Series(True, index=d.index)
+        n_teams = max(len(set(team_of.values())), 1)
+        budget_gp = (DRESSED_SKATERS_PER_GAME * games * n_teams
+                     * ROSTER_SHARE_OF_GAMES)
+        cap_gp = MAX_EXPECTED_GP * games / 82.0
+        for _ in range(4):
+            tot = float(d.loc[on_roster, "exp_gp"].sum())
+            if tot <= 0:
+                break
+            d.loc[on_roster, "exp_gp"] = (
+                d.loc[on_roster, "exp_gp"] * budget_gp / tot).clip(upper=cap_gp)
+            if abs(float(d.loc[on_roster, "exp_gp"].sum()) - budget_gp) < 5:
+                break
     # No skater exceeds the observed positional ceiling, and minutes taken off a
     # capped player are RETURNED to his position-mates rather than deleted --
     # the budget is conserved, so capping one player must feed the rest.

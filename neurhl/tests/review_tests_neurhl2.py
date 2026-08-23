@@ -226,6 +226,33 @@ def main():
         pp = ROOT / "output" / "player_proj_2027.csv"
         check("player deliverable exists", pp.exists(),
               f"{len(pd.read_csv(pp)):,} skaters" if pp.exists() else "missing")
+        if pp.exists():
+            # CONSERVATION LAWS. Ice time and games played are both fixed totals,
+            # not free parameters, and getting them wrong was the single largest
+            # source of error in the first player projection.
+            q = pd.read_csv(pp)
+            q["tpg"] = q.proj_toi_min / q.exp_gp
+            tg = 18 * 84 * 32 * 0.968
+            check("skater-games match the dressed-roster identity",
+                  abs(q.exp_gp.sum() / tg - 1) < 0.01,
+                  f"{q.exp_gp.sum():,.0f} vs {tg:,.0f}")
+            f = q[q.pos_group == 0].groupby("team").proj_toi_min.sum()
+            dd = q[q.pos_group == 1].groupby("team").proj_toi_min.sum()
+            check("forward ice-time budget is exact per team",
+                  abs(f.mean() / (181.0 * 84) - 1) < 0.005,
+                  f"{f.mean():,.0f} vs {181.0*84:,.0f}")
+            check("defence ice-time budget is exact per team",
+                  abs(dd.mean() / (116.9 * 84) - 1) < 0.01,
+                  f"{dd.mean():,.0f} vs {116.9*84:,.0f}")
+            over = int(((q.pos_group == 0) & (q.tpg > 23.25)).sum()
+                       + ((q.pos_group == 1) & (q.tpg > 28.05)).sum())
+            check("no skater exceeds his position's TOI/game ceiling", over == 0,
+                  f"{over} violations")
+            check("no player projected a full season (expectation, not outcome)",
+                  q.exp_gp.max() <= 80, f"max {q.exp_gp.max():.0f} of 84")
+            ppg = q.proj_p.sum() / 1344
+            check("implied league scoring rate is in the observed band",
+                  16.0 <= ppg <= 17.2, f"{ppg:.2f} pts/game (actual 16.3-16.8)")
 
     # ------------------------------------------------------------- registry
     print("\nFEATURE REGISTRY")

@@ -142,12 +142,12 @@
  {
   "check": "player points MAE beats a league-mean baseline",
   "pass": true,
-  "detail": "9.55 vs 18.54, n=2,956"
+  "detail": "9.54 vs 18.54, n=2,956"
  },
  {
   "check": "player projections are unbiased (all players, unfiltered)",
   "pass": true,
-  "detail": "-0.34 pts over n=4,149"
+  "detail": "-0.33 pts over n=4,149"
  },
  {
   "check": "projected league point total matches actual",
@@ -158,6 +158,36 @@
   "check": "player deliverable exists",
   "pass": true,
   "detail": "711 skaters"
+ },
+ {
+  "check": "skater-games match the dressed-roster identity",
+  "pass": true,
+  "detail": "46,836 vs 46,836"
+ },
+ {
+  "check": "forward ice-time budget is exact per team",
+  "pass": true,
+  "detail": "15,204 vs 15,204"
+ },
+ {
+  "check": "defence ice-time budget is exact per team",
+  "pass": true,
+  "detail": "9,816 vs 9,820"
+ },
+ {
+  "check": "no skater exceeds his position's TOI/game ceiling",
+  "pass": true,
+  "detail": "0 violations"
+ },
+ {
+  "check": "no player projected a full season (expectation, not outcome)",
+  "pass": true,
+  "detail": "max 78 of 84"
+ },
+ {
+  "check": "implied league scoring rate is in the observed band",
+  "pass": true,
+  "detail": "16.53 pts/game (actual 16.3-16.8)"
  },
  {
   "check": "registry refuses an OUTCOME feature as an input",
