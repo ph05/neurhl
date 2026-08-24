@@ -72,6 +72,33 @@ def assert_scorable(seasons, window: str) -> None:
                 f"negotiable after the fact.")
 
 
+# ------------------------------------------------- player-layer windows (NeurHL-3)
+# The player layers' spend history differs from the game level's: the A10
+# era-diverse protocol spent {2011, 2012, 2014-2017} and the declared A-series
+# spend covers {2022-2026}. {2018, 2019, 2020} are reserved for the ONE-SHOT
+# player confirm (PLAN_NeurHL3 PG-STOP); 2021 is NO_SCORE and belongs to no
+# player window.
+PLAYER_DEV = [2011, 2012]
+PLAYER_TUNE = [2014, 2015, 2016, 2017]
+PLAYER_EVAL = [2022, 2023, 2024, 2025, 2026]
+PLAYER_CONFIRM = [2018, 2019, 2020]
+
+
+def assert_scorable_player(seasons, window: str) -> None:
+    """Player-layer guard: refuse broken seasons and window crossings."""
+    allowed = {"dev": PLAYER_DEV, "tune": PLAYER_TUNE,
+               "eval": PLAYER_EVAL, "confirm": PLAYER_CONFIRM}[window]
+    for s in seasons:
+        if s in NO_SCORE:
+            raise ValueError(
+                f"season {s} is structurally broken and must never be scored "
+                f"({SEASON_NOTES[s]}). It may still be TRAINED on.")
+        if s not in allowed:
+            raise ValueError(
+                f"season {s} is not in the player '{window}' window — "
+                f"window boundaries are not negotiable after the fact.")
+
+
 def train_seasons_for(predict_season: int, start: int = TRAIN_FROM) -> list:
     """Every season usable to TRAIN a model that predicts `predict_season`.
 

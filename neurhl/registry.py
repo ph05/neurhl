@@ -163,6 +163,12 @@ REG = Registry().add(
     Feature("shot_xy", "G1", "INGAME", "events", "normalised coordinates"),
     Feature("shot_dist", "G2", "INGAME", "events+htm",
             "distance in feet; HTM PL carries it pre-2012"),
+    Feature("rink_dist_offset", "G2", "INGAME", "mp_shots",
+            "A11: expanding per-venue recorded-distance bias, strictly "
+            "pre-game — house-built, never MoneyPuck's arenaAdjusted"),
+    Feature("rink_disagree", "G1", "INGAME", "events+mp_shots",
+            "A11: trailing per-rink-season NHL-vs-MP location disagreement — "
+            "shot-location uncertainty; 2012+ (NaN-masked before)"),
 
     # --- G3 shifts / deployment / fatigue
     Feature("toi_share_proj", "G3", "PRIOR", "player_games",
@@ -186,9 +192,24 @@ REG = Registry().add(
     Feature("goalie_starts_7d", "G3", "INGAME", "player_games",
             "goalie workload; backup usually starts a back-to-back"),
 
+    # --- G3 deployment structure (NeurHL-3, from stints/usage + mp_extra)
+    Feature("pp_toi_share", "G3", "INGAME", "usage",
+            "power-play TOI share — opportunity a total-TOI EWMA cannot see"),
+    Feature("line_rank", "G3", "INGAME", "usage",
+            "5v5 line rank within (team, pos_group); its short-vs-long delta "
+            "is the role-change detector"),
+    Feature("linemate_quality", "G3", "INGAME", "usage",
+            "TOI-weighted modal-linemate EWMA production"),
+    Feature("linemate_churn", "G3", "INGAME", "usage",
+            "Jaccard distance of the modal 5v5 linemate set vs last game"),
+    Feature("vacated_toi", "G3", "INGAME", "absences",
+            "EWMA-TOI of same-position absent regulars — minutes opened up"),
+
     # --- G4 lineup availability
     Feature("scratches", "G4", "INGAME", "right_rail",
             "who is OUT — precisely Elo's blind spot"),
+    Feature("coach_change", "G4", "INGAME", "coaches.csv",
+            "bench boss changed since last game — deployment reset risk"),
     Feature("replacement_delta", "G4", "INGAME", "right_rail+rapm",
             "quality drop from absent player to his replacement — the quantity "
             "that actually moves a game, not mere absence"),

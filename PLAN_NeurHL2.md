@@ -122,6 +122,39 @@ stratified by availability regime.
 **Ablations required before any causal claim:** remove EDGE (G5), graph edges,
 goalie module, score effects, scratches.
 
+### A11 — X3 residual after A9: per-rink recording effects (ladder declared before any rung runs; caps in PLAN_NeurHL3 §L)
+
+*Declared before the corrected walk-forward is run. The A9 results stand
+recorded: sequential in-season isotonic 0.00596; + era covariates (the
+pre-committed fallback, final) 0.00678 — both FAIL the 0.005/decile bar;
+progression 0.02224 (original) → 0.01239 (A7) → 0.00678.*
+
+**Hypothesis.** Recorded shot location is produced by rink-specific scorers,
+and the biases are persistent: eda_02 measured mean venue distance deviations
+from −2.31 ft (NYR) to +2.10 ft (BOS), worst venue-season −6.67 ft, and
+prototyped an expanding arena-offset table. A league-pooled calibrator cannot
+see a per-rink bias, and the 2023 regime change need not have hit every rink
+equally. All covariates below are house-built, walk-forward, strictly
+pre-game; MoneyPuck's fitted `arenaAdjusted*` columns remain P3-excluded.
+
+**Ladder (one config each, cap 4 on ledger v3; X1 and X2 must not regress
+below pass on any rung; window/min-shots constants fixed on DEV vantages
+only):**
+1. `rink_dist_offset` — per home-venue expanding mean of (recorded
+   shotDistance − trailing league mean), min 300 shots else 0, added to the
+   xG feature set beside the A9 era covariates.
+2. `rink_disagree` — per rink-season trailing disagreement between the NHL
+   feed's shot location and MoneyPuck's for the same shots (join proven:
+   corr 0.99972, 15.8% whole-game end flips), 2012+ with NaN-mask before —
+   a shot-location-uncertainty covariate.
+3. Trailing `era_rush_share` (the 0.19% → 0.06% flag collapse is the sharpest
+   marker of the definition change) + trailing realised close-shot conversion,
+   letting the GBM learn the distance × regime interaction directly.
+
+A residual failure after all three rungs stands recorded with the next
+hypothesis pre-registered: a per-rink coordinate re-registration study on the
+dual-source corpus. Not final.
+
 ### A10 — HTM assists recovered at source (2008-2011); player backtest widened to era-diverse vantages (declared before the rebuild is scored)
 
 *Declared before the rebuilt tensors are scored. The defect and its workaround
