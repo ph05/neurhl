@@ -1,1 +1,6 @@
 run_id,date,layer,config_delta,window,metric,value,notes
+x3-a11-r1,2026-08-24,xg,"+rink_dist_offset (expanding per-venue mean dist deviation, min 300 shots)",pooled_18v,x3_max_decile,0.00653,"X1 18/18 pass; X2 pass; improved from 0.00678; ladder continues to rung 2"
+x3-a11-r2,2026-08-24,xg,"+rink_disagree (trailing per-rink NHL-vs-MP |dist| disagreement, 2012+)",pooled_18v,x3_max_decile,0.00737,"X1 18/18 pass; X2 pass; DEGRADED vs rung 1 (0.00653); ladder continues to rung 3 stacked, per declaration"
+pg-01,2026-08-24,player_game,"chained HistGBM B0-B3 (base config)",player_dev_2011_2012,pg_all,PASS,"toi .00665 vs .00693; shots dev 1.243 vs 1.396; goal .3751 vs .3856; assist .4990 vs .5112; all Holm p<1e-5, season-dir ok"
+pg-01b,2026-08-24,player_game,"same config, PLAYER_TUNE robustness",player_tune_2014_2017,pg_all,PASS,"all 4 heads better every season; toi -.000263 shots -.1407 goal -.0125 assist -.0138, Holm p<1e-5"
+x3-a11-r3,2026-08-24,xg,"+era_rush_share +era_close_conv (full ladder stacked)",pooled_18v,x3_max_decile,0.00688,"X1 18/18 pass; X2 pass; ladder complete; FAIL vs 0.005 stands recorded; next hypothesis pre-registered: per-rink coordinate re-registration"

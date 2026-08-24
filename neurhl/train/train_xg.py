@@ -37,6 +37,7 @@ import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -53,48 +54,118 @@ GBM = dict(max_iter=400, learning_rate=0.06, max_leaf_nodes=31,
            min_samples_leaf=200, l2_regularization=1.0,
            early_stopping=True, validation_fraction=0.1,
            random_state=SEED)
+SEQ_W = 120_000   # A9: trailing out-of-sample shots the calibrator sees
+SEQ_K = 25        # A9: league games between isotonic refits
 
 
-def fit_vantage(v: int, cache: dict) -> dict:
+def game_dates(seasons) -> pd.DataFrame:
+    parts = []
+    for s in seasons:
+        p = TENSORS / f"games_ctx_{s}.parquet"
+        if p.exists():
+            parts.append(pd.read_parquet(p, columns=["game_id", "date"]))
+    if not parts:
+        return pd.DataFrame(columns=["game_id", "date"])
+    return pd.concat(parts, ignore_index=True)
+
+
+def seq_calibrate(seed_p, seed_y, seed_gid, p_raw, y_te, te_gid, v,
+                  w=SEQ_W, k=SEQ_K):
+    """A9 sequential calibrator. At game one of season V this is exactly the
+    A7 map (isotonic on V-1's out-of-sample predictions from the same GBM);
+    in-season it refits every `k` league games on the trailing `w`
+    out-of-sample shots strictly before the block being scored, so it tracks
+    the recording-regime ramp with the data the ramp is happening in (P1's
+    in-season clause; declared in PLAN_NeurHL2 A9 before this run).
+    Deterministic: (date, game_id) ordering, fixed refit boundaries, no new
+    seeds. Every isotonic fit sees only games strictly before the block it
+    scores."""
+    gd = game_dates([v - 1, v])
+    gd["date"] = pd.to_datetime(gd.date)
+    dmap = pd.Series(gd.date.to_numpy(), index=gd.game_id)
+
+    sd = pd.DataFrame({"gid": seed_gid, "p": seed_p, "y": seed_y})
+    sd["date"] = sd.gid.map(dmap)
+    sd = sd.sort_values(["date", "gid"], kind="stable")
+    pool_p, pool_y = list(sd.p), list(sd.y)
+
+    td = pd.DataFrame({"pos": np.arange(len(te_gid)), "gid": te_gid})
+    td["date"] = td.gid.map(dmap)
+    td = td.sort_values(["date", "gid", "pos"], kind="stable")
+    game_rank = {g: i for i, g in enumerate(td.gid.drop_duplicates())}
+    td["blk"] = td.gid.map(game_rank) // k
+
+    p_out = np.empty(len(te_gid))
+    for _, grp in td.groupby("blk", sort=True):
+        iso = IsotonicRegression(out_of_bounds="clip").fit(
+            np.asarray(pool_p[-w:], float), np.asarray(pool_y[-w:], float))
+        idx = grp.pos.to_numpy()
+        p_out[idx] = iso.predict(p_raw[idx])
+        pool_p.extend(p_raw[idx])
+        pool_y.extend(y_te[idx])
+    return p_out
+
+
+def fit_vantage(v: int, cache: dict, era=None) -> dict:
     tr_seasons = [s for s in range(2008, v)]
     tr = XG.load_shots(tr_seasons)
     te = XG.load_shots([v])
-    Xtr, ytr = XG.build_features(tr), tr[XG.TARGET].to_numpy()
-    Xte = XG.align_categories(Xtr, XG.build_features(te))
+    Xtr, ytr = XG.build_features(tr, era), tr[XG.TARGET].to_numpy()
+    Xte = XG.align_categories(Xtr, XG.build_features(te, era))
     yte = te[XG.TARGET].to_numpy()
 
-    cat_mask = [c in XG.CATS for c in XG.FEATURES]
-    # A7 calibration. Fit the GBM on seasons < V-1, then fit isotonic on THAT
-    # SAME model's predictions for season V-1, and apply to V.
-    #
-    # Two failures this fixes. (1) CalibratedClassifierCV(ensemble=False) fits
-    # the isotonic map on out-of-fold predictions from models trained on 2/3 of
-    # the data, then applies it to a final model trained on all of it -- it
-    # corrects a weaker model than the one deployed, and on DEV V=2011 that made
-    # calibration WORSE than none (0.0088 vs 0.0061). Here the base model and
-    # the calibrated model are the same object. (2) A recording-regime shift
-    # from 2023 -- shots logged within 10 ft went 7.3-8.7% to 14.5% while their
-    # goal rate fell 0.17 to 0.13 -- so a calibrator fit across all history
-    # encodes a mapping that no longer holds. Fitting it on the most recent
-    # AVAILABLE season tracks the drift automatically, and season V is never
-    # touched.
+    # A7 established the two calibration failures this pipeline corrects:
+    # CalibratedClassifierCV(ensemble=False) corrected a weaker model than the
+    # one deployed (on DEV V=2011 that made calibration WORSE than none,
+    # 0.0088 vs 0.0061), and the shot-location recording regime drifts (<10 ft
+    # share 7.3-8.7% through 2021, then ramping to 14.5% by 2026 while its
+    # conversion falls 0.18 -> 0.13). A7's answer -- isotonic frozen on season
+    # V-1 -- is right but one season LATE at every transition. A9 makes the
+    # calibrator sequential in-season (seq_calibrate above): identical to A7
+    # at game one, drift-tracking by spring. The GBM itself is unchanged:
+    # fit on seasons < V-1, never touching V.
     hold = v - 1
     m_fit = tr.season_end.to_numpy() != hold
     cal_idx = ~m_fit
-    if m_fit.sum() == 0 or cal_idx.sum() == 0:
-        # V=2009 has exactly one prior season, so holding it out leaves nothing
-        # to fit on. Fall back to fitting and calibrating on the same rows: the
-        # calibrator is then in-sample and near-identity, which is honest for a
-        # vantage that cannot support a holdout at all. It is also the one
-        # vantage X1 does not clear, for the same reason -- too little history.
+    oof_seed = m_fit.sum() == 0 or cal_idx.sum() == 0
+    if oof_seed:
+        # V=2009 has exactly one prior season, so holding it out leaves
+        # nothing to fit on. The GBM fits on all of 2008; the calibrator seed
+        # comes from 5-fold OUT-OF-FOLD predictions within 2008. The old
+        # in-sample seed was actively destructive -- it turned an uncalibrated
+        # +0.0141 X1 win into the recorded -0.0030 (A9 records the repair).
         m_fit = np.ones(len(ytr), bool)
-        cal_idx = m_fit
+    # A feature with <2 distinct observed values on the FIT subset cannot be
+    # binned (and could not inform anything anyway) -- drop it consistently
+    # from train and test at this vantage. The subset matters: at V=2013 the
+    # 2012+ covariate rink_disagree has values in the held-out calibration
+    # season but none in the fit seasons. Availability-mask principle: absent
+    # early, present later.
+    dead = [c for c in Xtr.columns if c not in XG.CATS
+            and Xtr.loc[m_fit, c].dropna().nunique() < 2]
+    if dead:
+        Xtr = Xtr.drop(columns=dead)
+        Xte = Xte.drop(columns=dead)
+    cat_mask = [c in XG.CATS for c in Xtr.columns]
     base = HistGradientBoostingClassifier(categorical_features=cat_mask, **GBM)
     base.fit(Xtr[m_fit], ytr[m_fit])
-    p_cal = base.predict_proba(Xtr[cal_idx])[:, 1]
-    iso = IsotonicRegression(out_of_bounds="clip").fit(p_cal, ytr[cal_idx])
     p_raw = base.predict_proba(Xte)[:, 1]
-    p = iso.predict(p_raw)
+    if oof_seed:
+        seed_p = np.zeros(len(ytr))
+        kf = KFold(n_splits=5, shuffle=True, random_state=SEED)
+        for itr, ite in kf.split(np.arange(len(ytr))):
+            f = HistGradientBoostingClassifier(categorical_features=cat_mask,
+                                               **GBM)
+            f.fit(Xtr.iloc[itr], ytr[itr])
+            seed_p[ite] = f.predict_proba(Xtr.iloc[ite])[:, 1]
+        seed_y = ytr
+        seed_gid = tr.game_id.to_numpy()
+    else:
+        seed_p = base.predict_proba(Xtr[cal_idx])[:, 1]
+        seed_y = ytr[cal_idx]
+        seed_gid = tr.game_id.to_numpy()[cal_idx]
+    p = seq_calibrate(seed_p, seed_y, seed_gid,
+                      p_raw, yte, te.game_id.to_numpy(), v)
 
     # baseline: the classic two-variable xG
     sc = StandardScaler().fit(Xtr[XG.BASELINE])
@@ -247,8 +318,21 @@ def main():
           f"{'ll_d+a':>9} {'gain':>8} {'ll_const':>9} {'predbar':>8}")
     res, cache = [], {}
     t0 = time.time()
+    # A9 fallback stage: era covariates, one table over all seasons (each
+    # game's value uses only games strictly before it -- walk-forward safe).
+    # A11 rung 1: per-rink expanding distance offset joined onto the same
+    # game-keyed table.
+    era = XG.era_covariates(range(2008, max(args.vantages) + 1))
+    era = era.join(XG.rink_offsets(range(2008, max(args.vantages) + 1)),
+                   how="outer")
+    # A11 rung 2: cross-source location-disagreement covariate (2012+)
+    era = era.join(XG.rink_disagreement(range(2008, max(args.vantages) + 1)),
+                   how="outer")
+    # A11 rung 3: rush-share + realized close-conversion regime covariates
+    era = era.join(XG.regime_covariates(range(2008, max(args.vantages) + 1)),
+                   how="outer")
     for v in args.vantages:
-        r = fit_vantage(v, cache)
+        r = fit_vantage(v, cache, era)
         res.append(r)
         print(f"{v:>5} {W.window_of(v):>7} {r['n_train']:>9,} "
               f"{r['n_test']:>8,} {r['ll_model']:>9.5f} "
@@ -292,7 +376,19 @@ def main():
                                    "n": len(res), "min_gain": X1_MIN_GAIN,
                                    "gains": gains},
            "X2": x2r, "X3": {"pass": bool(x3), **cal},
-           "gbm": GBM, "features": XG.FEATURES}
+           "gbm": GBM, "features": XG.FEATURES,
+           "calibration": {"method": "A9 sequential isotonic",
+                           "W": SEQ_W, "K": SEQ_K,
+                           "seed_2009": "5-fold OOF within 2008"},
+           "era_covariates": {"stage": "A9 pre-committed fallback",
+                              "trail_games": XG.ERA_TRAIL_GAMES,
+                              "close_ft": XG.ERA_CLOSE_FT},
+           "a11": {"rung": 3,
+                   "features": ["rink_dist_offset", "rink_disagree",
+                                "era_rush_share", "era_close_conv"],
+                   "rink_min_shots": XG.RINK_MIN_SHOTS,
+                   "rung1_max_abs_diff_deciles": 0.00653,
+                   "rung2_max_abs_diff_deciles": 0.00737}}
     p = Path(__file__).resolve().parents[1] / "configs" / "xg_gates.json"
     p.write_text(json.dumps(out, indent=1, default=float))
     print(f"\n-> {p}")
