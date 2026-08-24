@@ -1,0 +1,82 @@
+{
+ "window": "dev",
+ "seasons": [
+  2011,
+  2012
+ ],
+ "per_season": [
+  {
+   "season": 2011,
+   "n_gate": 44056,
+   "coverage": 0.9969,
+   "toi_mae_model": 0.006653,
+   "toi_mae_base": 0.006933,
+   "shots_dev_model": 1.24482,
+   "shots_dev_base": 1.39616,
+   "goal_ll_model": 0.37408,
+   "goal_ll_base": 0.38557,
+   "assist_ll_model": 0.49818,
+   "assist_ll_base": 0.51119
+  },
+  {
+   "season": 2012,
+   "n_gate": 44152,
+   "coverage": 0.9971,
+   "toi_mae_model": 0.00655,
+   "toi_mae_base": 0.006825,
+   "shots_dev_model": 1.22801,
+   "shots_dev_base": 1.36152,
+   "goal_ll_model": 0.37215,
+   "goal_ll_base": 0.38067,
+   "assist_ll_model": 0.49299,
+   "assist_ll_base": 0.5051
+  }
+ ],
+ "gates": {
+  "toi_share": {
+   "mean_diff": -0.000277,
+   "z": -26.746,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.000277,
+   "p_season_clustered": 0.0063,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  },
+  "shots": {
+   "mean_diff": -0.142414,
+   "z": -11.874,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.142424,
+   "p_season_clustered": 0.0398,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  },
+  "goal1": {
+   "mean_diff": -0.010003,
+   "z": -16.469,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.010004,
+   "p_season_clustered": 0.0935,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  },
+  "assist1": {
+   "mean_diff": -0.01256,
+   "z": -17.984,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.01256,
+   "p_season_clustered": 0.0228,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  }
+ },
+ "PG_ALL": true
+}

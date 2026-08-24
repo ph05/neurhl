@@ -4,10 +4,14 @@ Forward-looking archival infrastructure ONLY (the v6 D7 odds-logger precedent):
 no history exists to backfill, so value accrues by running this daily from now.
 Nothing here can feed any backtest — 2026-27 context for future report-only use.
 
-Snapshots, stored raw (parsing deferred to whenever a consumer exists):
+Snapshots, stored raw (a consumer now exists: NeurHL-3 G6 parsing):
   data/raw/lineup_snapshots/<ISO date>/df_lines_<slug>.html.gz   (DailyFaceoff line combos, 32 teams)
   data/raw/lineup_snapshots/<ISO date>/df_injuries.html.gz       (DailyFaceoff injury report)
+  data/raw/lineup_snapshots/<ISO date>/df_goalies.html.gz        (DailyFaceoff starting goalies — D4)
   data/raw/lineup_snapshots/<ISO date>/puckpedia.html.gz         (PuckPedia cap landing page)
+
+Scheduling: this must run DAILY through 2026-27 (launchd plist
+com.neurhl.snapshot — see neurhl/data/fetch/README_scheduler.md).
 
 Idempotent per day (existing files skipped); single-threaded, 2 s between
 requests; a failed page is logged and skipped, never retried in a loop.
@@ -78,6 +82,8 @@ def main():
 
     counts["injuries:" + grab(ses, "https://www.dailyfaceoff.com/hockey-player-news/injuries",
                               ddir / "df_injuries.html.gz")] = 1
+    counts["goalies:" + grab(ses, "https://www.dailyfaceoff.com/starting-goalies",
+                             ddir / "df_goalies.html.gz")] = 1
     counts["puckpedia:" + grab(ses, "https://puckpedia.com/",
                                ddir / "puckpedia.html.gz")] = 1
     print(f"{day}: {counts}")

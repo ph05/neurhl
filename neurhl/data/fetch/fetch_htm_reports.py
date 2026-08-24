@@ -28,7 +28,11 @@ from common import RAW, UA  # noqa: E402
 DEST = RAW / "htm_reports"
 BASE = "https://www.nhl.com/scores/htmlreports"
 BACKFILL_ENDS = [2008, 2009, 2010, 2011, 2012]
-REPORTS_BACKFILL = ["PL", "ES", "TH", "TV"]
+# RO (roster: official scratches, coaches, officials) and GS (game summary:
+# officials) added by NeurHL-3 D3 — the G4 source for the pre-2012 hole.
+# Existing PL/ES/TH/TV files are cached, so re-running only fetches the new
+# report types.
+REPORTS_BACKFILL = ["PL", "ES", "TH", "TV", "RO", "GS"]
 SLEEP = 0.2    # per request, per worker; observed bottleneck is server latency
 
 

@@ -1,0 +1,31 @@
+{
+ "season": 2016,
+ "cut_rule": "median date",
+ "results": [
+  {
+   "artifact": "absences",
+   "n_rows": 2557,
+   "moved_columns": [],
+   "pass": true
+  },
+  {
+   "artifact": "usage",
+   "n_rows": 22428,
+   "moved_columns": [],
+   "pass": true
+  },
+  {
+   "artifact": "goalie_games",
+   "n_rows": 2492,
+   "moved_columns": [],
+   "pass": true
+  },
+  {
+   "artifact": "player_game_frame_features",
+   "n_rows": 22428,
+   "moved_columns": [],
+   "pass": true
+  }
+ ],
+ "pass": true
+}

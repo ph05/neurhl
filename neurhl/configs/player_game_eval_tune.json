@@ -1,0 +1,110 @@
+{
+ "window": "tune",
+ "seasons": [
+  2014,
+  2015,
+  2016,
+  2017
+ ],
+ "per_season": [
+  {
+   "season": 2014,
+   "n_gate": 44137,
+   "coverage": 0.9969,
+   "toi_mae_model": 0.006519,
+   "toi_mae_base": 0.006804,
+   "shots_dev_model": 1.24753,
+   "shots_dev_base": 1.3937,
+   "goal_ll_model": 0.37609,
+   "goal_ll_base": 0.38673,
+   "assist_ll_model": 0.49701,
+   "assist_ll_base": 0.50991
+  },
+  {
+   "season": 2015,
+   "n_gate": 44149,
+   "coverage": 0.9971,
+   "toi_mae_model": 0.00607,
+   "toi_mae_base": 0.006315,
+   "shots_dev_model": 1.23907,
+   "shots_dev_base": 1.37193,
+   "goal_ll_model": 0.37585,
+   "goal_ll_base": 0.39017,
+   "assist_ll_model": 0.49988,
+   "assist_ll_base": 0.51377
+  },
+  {
+   "season": 2016,
+   "n_gate": 44130,
+   "coverage": 0.9966,
+   "toi_mae_model": 0.006134,
+   "toi_mae_base": 0.006401,
+   "shots_dev_model": 1.24009,
+   "shots_dev_base": 1.38328,
+   "goal_ll_model": 0.37211,
+   "goal_ll_base": 0.38647,
+   "assist_ll_model": 0.49018,
+   "assist_ll_base": 0.50376
+  },
+  {
+   "season": 2017,
+   "n_gate": 44129,
+   "coverage": 0.9967,
+   "toi_mae_model": 0.005963,
+   "toi_mae_base": 0.006218,
+   "shots_dev_model": 1.23208,
+   "shots_dev_base": 1.37364,
+   "goal_ll_model": 0.37844,
+   "goal_ll_base": 0.39097,
+   "assist_ll_model": 0.4991,
+   "assist_ll_base": 0.51182
+  }
+ ],
+ "gates": {
+  "toi_share": {
+   "mean_diff": -0.000263,
+   "z": -39.099,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.000263,
+   "p_season_clustered": 0.0001,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  },
+  "shots": {
+   "mean_diff": -0.140947,
+   "z": -16.266,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.140948,
+   "p_season_clustered": 0.0,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  },
+  "goal1": {
+   "mean_diff": -0.012961,
+   "z": -23.578,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.012961,
+   "p_season_clustered": 0.0007,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  },
+  "assist1": {
+   "mean_diff": -0.013269,
+   "z": -21.459,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.013269,
+   "p_season_clustered": 0.0,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  }
+ },
+ "PG_ALL": true
+}
