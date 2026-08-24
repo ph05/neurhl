@@ -19,8 +19,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy import stats
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import HistGradientBoostingClassifier
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -29,8 +28,8 @@ import windows as W  # noqa: E402
 from train.rapm_folds import steiger  # noqa: E402
 
 CFG = ROOT / "configs"
-FEATS = ["rest_days", "b2b", "starts_7d", "gq", "gsax60", "share_todate",
-         "is_last_starter"]
+FEATS = ["rest_days", "b2b", "starts_7d", "gq", "gsax60", "gsax_ew",
+         "share_todate", "is_last_starter"]
 
 
 def load(seasons) -> pd.DataFrame:
@@ -69,6 +68,14 @@ def load(seasons) -> pd.DataFrame:
     d["prev_starter"] = d.groupby(["season_end", "team"],
                                   sort=False).prev_starter.ffill()
     d["is_last_starter"] = (d.player_id == d.prev_starter).astype(float)
+    # recency-weighted GSAx (diagnosed repair: the career-cumulative gsax60
+    # is stale next to gq's EWMA -- compute a shifted per-game EWMA here)
+    d["_g60"] = np.where(d.toi_sec > 0, (d.xgf - d.ga) * 3600.0
+                         / np.maximum(d.toi_sec, 1), np.nan)
+    d = d.sort_values(["player_id", "date", "game_id"], kind="stable")
+    d["gsax_ew"] = d.groupby("player_id", sort=False)["_g60"].transform(
+        lambda s: s.ewm(alpha=0.05, adjust=False).mean().shift(1))
+    d = d.sort_values(["team", "date", "game_id"], kind="stable")
     return d
 
 
@@ -81,19 +88,24 @@ def gs1(seasons_fit, seasons_score) -> dict:
         te = d[d.season_end == v].copy()
         if not len(fit) or not len(te):
             continue
-        sc = StandardScaler().fit(fit[FEATS].fillna(0))
-        m = LogisticRegression(max_iter=1000, C=1.0)
-        m.fit(sc.transform(fit[FEATS].fillna(0)), fit.started)
-        te["p_model"] = m.predict_proba(sc.transform(te[FEATS].fillna(0)))[:, 1]
+        m = HistGradientBoostingClassifier(
+            max_iter=300, learning_rate=0.05, max_leaf_nodes=15,
+            min_samples_leaf=50, early_stopping=True,
+            validation_fraction=0.1, random_state=20260824)
+        m.fit(fit[FEATS], fit.started)
+        te["p_model"] = m.predict_proba(te[FEATS])[:, 1]
         # renormalise within team-game (exactly one starter per side)
         tot = te.groupby(["game_id", "team"]).p_model.transform("sum")
         te["p_model"] = te.p_model / tot.clip(lower=1e-9)
-        for base, col in (("repeat", "is_last_starter"),
-                          ("share", "share_todate")):
-            b = te[col].clip(0.02, 0.98)
-            tot = te.groupby(["game_id", "team"])[col].transform("sum")
-            te[f"p_{base}"] = (te[col].clip(lower=0.02)
-                               / tot.clip(lower=1e-9)).clip(0.01, 0.99)
+        # repeat baseline CALIBRATED on the fit window (the naive 0.98
+        # cliff scored ll ~2.2 -- that measured the cliff, not the heuristic)
+        p_rep = float(fit[fit.is_last_starter == 1].started.mean())
+        te["p_repeat"] = np.where(te.is_last_starter == 1, p_rep, 1 - p_rep)
+        tot = te.groupby(["game_id", "team"]).p_repeat.transform("sum")
+        te["p_repeat"] = (te.p_repeat / tot.clip(lower=1e-9)).clip(0.01, 0.99)
+        tot = te.groupby(["game_id", "team"]).share_todate.transform("sum")
+        te["p_share"] = (te.share_todate.clip(lower=0.02)
+                         / tot.clip(lower=1e-9)).clip(0.01, 0.99)
         eps = 1e-12
         y = te.started.to_numpy()
         out = {"season": v, "n": int(len(te))}
@@ -127,7 +139,7 @@ def gq1() -> dict:
     d = d[d.sf > 0]
     agg = d.groupby(["season_end", "player_id"]).agg(
         sv=("ga", lambda x: np.nan), sf=("sf", "sum"), ga=("ga", "sum"),
-        gq_last=("gq", "last"), gsax_last=("gsax60", "last")).reset_index()
+        gq_last=("gq", "last"), gsax_last=("gsax_ew", "last")).reset_index()
     agg["sv"] = 1 - agg.ga / agg.sf.clip(lower=1)
     nxt = agg[["season_end", "player_id", "sv", "sf"]].copy()
     nxt["season_end"] -= 1
