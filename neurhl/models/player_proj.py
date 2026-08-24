@@ -46,7 +46,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common import TENSORS  # noqa: E402
 
 POS_G = 2
-ASSISTS_FROM = 2012          # assists absent for 2008-2011 (HTM parser gap)
+# A10: assists recovered at source for 2008-2011 (build_htm assist fix;
+# configs/assist_recovery.json — 2012 ground-truth p2/p3 agreement
+# 0.9994/0.9989, zero invented). The full history is assist-complete now.
+ASSISTS_FROM = 2008
 # Train on EVERY player who appeared, not just regulars. Filtering to >=10 games
 # meant the model never saw how little a depth player actually gets, so it
 # over-predicted their usage by 46% (share 0.0257 against an actual 0.0176 for
@@ -248,14 +251,21 @@ def fit_predict(hist: pd.DataFrame, target: int, train_from: int,
     X = pd.concat(X_tr, ignore_index=True)
     cols = feature_cols(X)
     models = {}
+    use_cols = {}
     for t in TARGETS:
         y = np.concatenate(Y_tr[t])
         ok = np.isfinite(y)
+        # a feature with <2 distinct observed values on THIS fit subset
+        # cannot be binned (early vantages: lag-3 columns are all-NaN when
+        # only one training vantage exists) -- drop per target, consistently
+        # applied at predict time below
+        tc = [c for c in cols if X.loc[ok, c].dropna().nunique() >= 2]
+        use_cols[t] = tc
         m = HistGradientBoostingRegressor(
             max_iter=400, learning_rate=0.05, max_leaf_nodes=31,
             min_samples_leaf=40, l2_regularization=1.0,
             early_stopping=True, validation_fraction=0.12, random_state=seed)
-        m.fit(X.loc[ok, cols], y[ok])
+        m.fit(X.loc[ok, tc], y[ok])
         models[t] = m
 
     f = build_features(hist, target, bios=bios, ids=ids)
@@ -263,7 +273,7 @@ def fit_predict(hist: pd.DataFrame, target: int, train_from: int,
         return pd.DataFrame(), models
     out = f[["player_id", "pos_group"]].copy()
     for t in TARGETS:
-        out[t] = models[t].predict(f[cols])
+        out[t] = models[t].predict(f[use_cols[t]])
     return out, models
 
 

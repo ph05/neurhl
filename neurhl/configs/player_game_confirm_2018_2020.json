@@ -1,0 +1,97 @@
+{
+ "window": "confirm",
+ "seasons": [
+  2018,
+  2019,
+  2020
+ ],
+ "per_season": [
+  {
+   "season": 2018,
+   "n_gate": 45632,
+   "coverage": 0.9973,
+   "toi_mae_model": 0.006067,
+   "toi_mae_base": 0.006339,
+   "shots_dev_model": 1.24913,
+   "shots_dev_base": 1.39948,
+   "goal_ll_model": 0.39715,
+   "goal_ll_base": 0.40583,
+   "assist_ll_model": 0.51238,
+   "assist_ll_base": 0.5249
+  },
+  {
+   "season": 2019,
+   "n_gate": 45624,
+   "coverage": 0.9971,
+   "toi_mae_model": 0.006127,
+   "toi_mae_base": 0.006388,
+   "shots_dev_model": 1.24301,
+   "shots_dev_base": 1.37547,
+   "goal_ll_model": 0.3904,
+   "goal_ll_base": 0.40386,
+   "assist_ll_model": 0.51248,
+   "assist_ll_base": 0.52473
+  },
+  {
+   "season": 2020,
+   "n_gate": 38836,
+   "coverage": 0.997,
+   "toi_mae_model": 0.006139,
+   "toi_mae_base": 0.00639,
+   "shots_dev_model": 1.23634,
+   "shots_dev_base": 1.37463,
+   "goal_ll_model": 0.39764,
+   "goal_ll_base": 0.40926,
+   "assist_ll_model": 0.51404,
+   "assist_ll_base": 0.53014
+  }
+ ],
+ "gates": {
+  "toi_share": {
+   "mean_diff": -0.000262,
+   "z": -34.513,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.000261,
+   "p_season_clustered": 0.0005,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  },
+  "shots": {
+   "mean_diff": -0.140475,
+   "z": -14.705,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.140366,
+   "p_season_clustered": 0.0014,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  },
+  "goal1": {
+   "mean_diff": -0.011236,
+   "z": -11.465,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.011255,
+   "p_season_clustered": 0.0149,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  },
+  "assist1": {
+   "mean_diff": -0.013493,
+   "z": -17.829,
+   "p_game_clustered": 0.0,
+   "per_season_mean": -0.013623,
+   "p_season_clustered": 0.0082,
+   "direction_agrees": true,
+   "better": true,
+   "p_holm": 0.0,
+   "pass": true
+  }
+ },
+ "PG_ALL": true,
+ "spend": "one-shot {2018,2019,2020}; spent exactly once"
+}
