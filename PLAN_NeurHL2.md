@@ -122,6 +122,88 @@ stratified by availability regime.
 **Ablations required before any causal claim:** remove EDGE (G5), graph edges,
 goalie module, score effects, scratches.
 
+### A10 — HTM assists recovered at source (2008-2011); player backtest widened to era-diverse vantages (declared before the rebuild is scored)
+
+*Declared before the rebuilt tensors are scored. The defect and its workaround
+stand recorded: assists were 0.000/game in 2008-2011 and `ASSISTS_FROM = 2012`
+masked the hole.*
+
+**Cause.** `build_htm.parse_pl`'s actor regex requires a team-code prefix; HTM
+assist entries carry none (`...27 ft.Assists: #17 VISNOVSKY(1); #24 FROLOV(1)`).
+Verified on all 6,150 games / 35,623 goals of 2008-2012: the regex matches
+exactly once per goal — scorers 100%, assists never.
+
+**Fix.** Append the assist jerseys to the actor list with the SCORER's team;
+resolution stays (team, jersey) through the per-game jersey map — assist names
+are decorative. Scorer parsing is byte-identical; non-goal events untouched.
+
+**Acceptance thresholds, pre-declared.** (1) Season-2012 ground truth (HTM
+parse vs NHL JSON, all goals): p2 and p3 agreement each ≥ 0.97, zero invented
+assists. (2) 2008-2011 plausibility: assists/game in 9.0-10.7; p2>0 share
+≥ 0.93 on period ≤ 4 goals; zero self-assists; ≤ 2 assists per goal.
+(3) Invariance: event rows may differ ONLY in p2/p3, player_games only in
+assists. (4) `seq_<V>.npz` must be BIT-IDENTICAL after the rebuild — the S1
+event-simulator consumes p1 only, so its 5 seeds and every recorded E1/E2
+number remain valid without retraining; the bit-identity check is the
+certificate. The v1-track event-LM (which does consume p2 as an input factor)
+is NOT retrained: its preregistered nulls are recorded against the old tensors
+and stay frozen evidence.
+
+**Protocol change.** `ASSISTS_FROM` 2012 → 2008. The player-projection
+backtest widens from vantages 2022-2026 to the era-diverse set
+{2011, 2012, 2014-2017} ∪ {2022-2026} — NO_SCORE {2013, 2021} stay excluded,
+and 2018-2021 remain untouched CONFIRM. This directly removes the era
+blindness that hid the six projection bugs (all prior vantages sat inside one
+scoring era). Both the previous window's pooled result and the widened pooled
+result are reported, whatever they show.
+
+### A9 — X3 residual after A7; the calibrator becomes in-season, per P1's existing clause (chosen on DEV/TUNE, never on CONFIRM)
+
+*Declared before the corrected walk-forward is run. The A7 result stands
+recorded: pooled max decile deviation 0.01239, 3/18 vantages within tolerance,
+the entire residual in the top decile.*
+
+**Cause — the A7 calibrator is right but late, plus one self-inflicted vantage.**
+(1) The recording-regime drift A7 identified is a ramp, not a step: <10 ft share
+8.6 → 9.5 → 11.8 → 12.7 → 12.4 → 14.5% across 2021-2026 while its conversion
+falls 0.180 → 0.134. An isotonic frozen at season V−1 is exactly one season
+behind a moving target, so every transition year (2022, 2023, 2026 — and 2010,
+where the same signature appears in DEV: share 5.8 → 7.7%, conversion
+0.189 → 0.174) over-predicts the top decile. Decomposition of the pooled
+−0.01239: 2022-2026 contribute −0.00803 (65%), 2009-2010 −0.00285 (23%).
+(2) V=2009's fallback fits the isotonic in-sample on the GBM's own overfit
+training predictions; the uncalibrated model already beats the X1 baseline by
++0.0141 there (ll_uncalibrated 0.2159 vs baseline 0.2300, in the gates file
+since the A7 run), and the fallback turns that into the recorded −0.0030. Both
+diagnoses are training-side.
+
+**Corrected method.** The GBM is unchanged (seasons < V−1). The isotonic is
+refit every 25 league games on the most recent 120,000 out-of-sample shots
+strictly before the game being scored — season V−1's predictions from the same
+deployed GBM, plus season-V shots already played. At game one this is identical
+to A7; in-season it tracks the drift with the data the drift is happening in.
+This invokes no new liberty: P1 has always provided that in-season predictions
+may use season-V games strictly before the predicted game's date, and the house
+Elo and C1's team-form features are already scored exactly this way. For the
+2026-27 deliverable the calibrator is frozen at end-2026 for preseason and
+updates in-season, per the same precedent. V=2009 alone seeds the sequence with
+an isotonic on 5-fold out-of-fold predictions within 2008 instead of the
+in-sample fit. Deterministic: fixed ordering (date, game_id), fixed refit
+boundaries, no new seeds.
+
+**Window discipline.** Selected on DEV: V=2010 0.0150 → 0.0105, V=2011
+0.0037 → 0.0015, V=2009 0.0307 → 0.0031 with X1 gain −0.0030 → +0.0131;
+confirmed on TUNE V=2016 as development signal (0.0060 → 0.0018). The (W, K)
+pair was chosen from a six-point grid on the same DEV vantages. Per-distance-
+bucket isotonic was tested and rejected on the same evidence (no effect: 0.0152
+vs 0.0150 at V=2010). CONFIRM vantages were not consulted. **Pre-committed
+branch:** if pooled X3 still fails, the P5-form era covariates (trailing league
+<10 ft recorded-share and rebound-flag share, computed strictly pre-game — no
+season one-hots) are added to the feature set and the run repeated once —
+declared here, before any result, so no decision is taken after seeing it. A
+residual failure after both stages stands recorded, attributed to the 2023
+transition, which no walk-forward method can see before it happens.
+
 ### A8 — TWO leaks found in S1; all P5 results before this point are VOID
 
 *Recorded because the failure matters more than the fix: the preregistered gates
