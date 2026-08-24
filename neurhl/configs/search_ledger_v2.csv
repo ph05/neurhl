@@ -1,3 +1,7 @@
 run_id,date,phase,config_delta,window,metric,value,notes
 g-retro-1,2026-08-22,s4v2,"simulator alone (S4-v2 integration)",tune_2014_2017,pooled_logloss,0.68416,"retroactive ledger row per PLAN_NeurHL3 L; recorded in configs/s4v2.json before the ledger discipline attached here"
 g-retro-2,2026-08-22,s4v2,"Elo+simulator blend (nests Elo)",tune_2014_2017,pooled_logloss,0.67763,"retroactive; configs/s4v2_blend.json; G-STOP fired on this number vs v1-H 0.67314"
+g-01,2026-08-24,n5,"v1-H + repl_delta_diff",pregate_2011_2017,pooled_logloss,0.67491,"+.00024 vs nested v1-H 0.67468; null"
+g-02,2026-08-24,n5,"+gq_diff (realized starters)",pregate_2011_2017,pooled_logloss,0.67494,"+.00027; null"
+g-03,2026-08-24,n5,"+schedule-density block (g7d/toi7d/km3d/signed-tz)",pregate_2011_2017,pooled_logloss,0.67556,"+.00088; null"
+g-04,2026-08-24,n5,"+sched_strength_todate",pregate_2011_2017,pooled_logloss,0.68009,"+.00541; null. G-STOP FIRED -> C1 unspent, preserved. Next-data ladder pre-registered (in-season D4 accrual, RO/GS tranche 2); g-05..g-10 unspent"

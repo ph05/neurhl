@@ -1,0 +1,123 @@
+{
+ "v1H": {
+  "pooled": 0.6746775507413637,
+  "n": 7380,
+  "per_season": {
+   "2011": 0.68236,
+   "2012": 0.67515,
+   "2014": 0.67413,
+   "2015": 0.66826,
+   "2016": 0.67885,
+   "2017": 0.66931
+  }
+ },
+ "g-01": {
+  "pooled": 0.6749133761000813,
+  "n": 7380,
+  "diff_vs_v1H": 0.000236,
+  "z": 1.06,
+  "cl_p": 0.4685,
+  "cl_direction_neg": false,
+  "cols": [
+   "elo_logit",
+   "proj_diff",
+   "proj_cl_diff",
+   "rest_diff",
+   "repl_delta_diff"
+  ],
+  "per_season": {
+   "2011": 0.68398,
+   "2012": 0.67509,
+   "2014": 0.6737,
+   "2015": 0.66867,
+   "2016": 0.67894,
+   "2017": 0.66909
+  }
+ },
+ "g-02": {
+  "pooled": 0.6749444860341699,
+  "n": 7380,
+  "diff_vs_v1H": 0.000267,
+  "z": 1.102,
+  "cl_p": 0.4349,
+  "cl_direction_neg": false,
+  "cols": [
+   "elo_logit",
+   "proj_diff",
+   "proj_cl_diff",
+   "rest_diff",
+   "repl_delta_diff",
+   "gq_diff"
+  ],
+  "per_season": {
+   "2011": 0.68409,
+   "2012": 0.6751,
+   "2014": 0.67385,
+   "2015": 0.66855,
+   "2016": 0.67916,
+   "2017": 0.66893
+  }
+ },
+ "g-03": {
+  "pooled": 0.6755591535731565,
+  "n": 7380,
+  "diff_vs_v1H": 0.000882,
+  "z": 2.588,
+  "cl_p": 0.2321,
+  "cl_direction_neg": false,
+  "cols": [
+   "elo_logit",
+   "proj_diff",
+   "proj_cl_diff",
+   "rest_diff",
+   "repl_delta_diff",
+   "gq_diff",
+   "games7d_diff",
+   "toi7d_diff",
+   "km3d_diff",
+   "dtz_signed_diff"
+  ],
+  "per_season": {
+   "2011": 0.68617,
+   "2012": 0.67507,
+   "2014": 0.67428,
+   "2015": 0.66983,
+   "2016": 0.67914,
+   "2017": 0.66887
+  }
+ },
+ "g-04": {
+  "pooled": 0.6800884858682915,
+  "n": 7380,
+  "diff_vs_v1H": 0.005411,
+  "z": 2.23,
+  "cl_p": 0.3329,
+  "cl_direction_neg": false,
+  "cols": [
+   "elo_logit",
+   "proj_diff",
+   "proj_cl_diff",
+   "rest_diff",
+   "repl_delta_diff",
+   "gq_diff",
+   "games7d_diff",
+   "toi7d_diff",
+   "km3d_diff",
+   "dtz_signed_diff",
+   "sched_str_diff"
+  ],
+  "per_season": {
+   "2011": 0.71296,
+   "2012": 0.6743,
+   "2014": 0.67411,
+   "2015": 0.66989,
+   "2016": 0.67947,
+   "2017": 0.6698
+  }
+ },
+ "G_STOP": {
+  "candidate": null,
+  "clears": false,
+  "note": "no candidate beat v1-H pooled"
+ }
+}
