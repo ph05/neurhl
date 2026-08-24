@@ -1,0 +1,101 @@
+{
+ "per_season": [
+  {
+   "season": 2011,
+   "n": 534,
+   "mae_B": 9.775,
+   "mae_A": 14.022,
+   "mae_blend": 10.254,
+   "B_wins": true
+  },
+  {
+   "season": 2012,
+   "n": 534,
+   "mae_B": 9.774,
+   "mae_A": 10.399,
+   "mae_blend": 9.561,
+   "B_wins": true
+  },
+  {
+   "season": 2014,
+   "n": 541,
+   "mae_B": 9.22,
+   "mae_A": 9.385,
+   "mae_blend": 8.966,
+   "B_wins": true
+  },
+  {
+   "season": 2015,
+   "n": 551,
+   "mae_B": 9.143,
+   "mae_A": 9.137,
+   "mae_blend": 8.55,
+   "B_wins": false
+  },
+  {
+   "season": 2016,
+   "n": 534,
+   "mae_B": 8.64,
+   "mae_A": 8.453,
+   "mae_blend": 8.145,
+   "B_wins": false
+  },
+  {
+   "season": 2017,
+   "n": 538,
+   "mae_B": 9.394,
+   "mae_A": 9.313,
+   "mae_blend": 8.904,
+   "B_wins": false
+  },
+  {
+   "season": 2022,
+   "n": 587,
+   "mae_B": 10.114,
+   "mae_A": 10.619,
+   "mae_blend": 9.981,
+   "B_wins": true
+  },
+  {
+   "season": 2023,
+   "n": 600,
+   "mae_B": 9.582,
+   "mae_A": 9.172,
+   "mae_blend": 8.95,
+   "B_wins": false
+  },
+  {
+   "season": 2024,
+   "n": 589,
+   "mae_B": 9.468,
+   "mae_A": 9.056,
+   "mae_blend": 8.917,
+   "B_wins": false
+  },
+  {
+   "season": 2025,
+   "n": 579,
+   "mae_B": 8.985,
+   "mae_A": 8.846,
+   "mae_blend": 8.515,
+   "B_wins": false
+  },
+  {
+   "season": 2026,
+   "n": 581,
+   "mae_B": 9.32,
+   "mae_A": 9.238,
+   "mae_blend": 9.037,
+   "B_wins": false
+  }
+ ],
+ "pooled": {
+  "B": 9.405,
+  "A": 9.766,
+  "blend": 9.07
+ },
+ "B_wins": 4,
+ "n_vantages": 11,
+ "ship": "blend",
+ "rule": "PS1: B iff pooled<B beats A AND wins>=6/11; blend only if beats both; else A"
+}
