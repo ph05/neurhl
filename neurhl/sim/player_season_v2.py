@@ -44,13 +44,17 @@ BACKTEST_V = [2011, 2012, 2014, 2015, 2016, 2017,
               2022, 2023, 2024, 2025, 2026]
 
 
-def frozen_rows(frame: pd.DataFrame, v: int, team_of: dict) -> pd.DataFrame:
+def frozen_rows(frame: pd.DataFrame, v: int, team_of: dict,
+                gc: pd.DataFrame | None = None) -> pd.DataFrame:
     """Per (player, scheduled team-game of season v): the player's last
-    pre-v feature row with per-game schedule context substituted."""
+    pre-v feature row with per-game schedule context substituted. `gc` is the
+    season's schedule context; by default the recorded games_ctx table, and
+    for an unplayed season sim/schedule_context.build."""
     hist = frame[frame.season_end < v]
     last = hist.sort_values(["player_id", "date", "game_id"]) \
         .groupby("player_id").tail(1).set_index("player_id")
-    gc = pd.read_parquet(TENSORS / f"games_ctx_{v}.parquet")
+    if gc is None:
+        gc = pd.read_parquet(TENSORS / f"games_ctx_{v}.parquet")
     gc = gc[gc.game_type == 2].copy()
     gc["date"] = pd.to_datetime(gc.date)
 
@@ -101,11 +105,15 @@ def frozen_rows(frame: pd.DataFrame, v: int, team_of: dict) -> pd.DataFrame:
     return pd.concat(rows, ignore_index=True)
 
 
-def project_b(frame: pd.DataFrame, v: int, games: int = 82) -> pd.DataFrame:
-    """Path B season totals for vantage v."""
-    team_of = team_map_actual(v)
+def project_b(frame: pd.DataFrame, v: int, games: int = 82,
+              team_of: dict | None = None,
+              gc: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Path B season totals for vantage v. Backtests map players to the team
+    they actually played for; the live projection passes announced rosters
+    (`team_of`, player -> team index) and the published schedule (`gc`)."""
+    team_of = team_map_actual(v) if team_of is None else team_of
     ch = fit_chain(frame, v)
-    rows = frozen_rows(frame, v, team_of)
+    rows = frozen_rows(frame, v, team_of, gc)
     pred = predict_rows(ch, rows)
     lam_g = -np.log(np.clip(1 - pred.p_goal, 1e-6, 1.0))
     lam_a = -np.log(np.clip(1 - pred.p_assist, 1e-6, 1.0))

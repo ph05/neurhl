@@ -47,17 +47,17 @@
  {
   "check": "X1 re-derived: gain >= 0.002 nats in >= 15 vantages",
   "pass": true,
-  "detail": "17/18, mean +0.01495"
+  "detail": "18/18, mean +0.01669"
  },
  {
   "check": "X2 re-derived: team xG beats Corsi at future goal share",
   "pass": true,
-  "detail": "xG 0.4181 vs Corsi 0.3951, n=554"
+  "detail": "xG 0.4225 vs Corsi 0.3951, n=554"
  },
  {
   "check": "X3 recorded as FAILED (not silently passed)",
   "pass": true,
-  "detail": "max decile deviation 0.01239 > 0.005 \u2014 recorded as a known limitation, no preregistered consequence"
+  "detail": "max decile deviation 0.00688 > 0.005 \u2014 recorded as a known limitation, no preregistered consequence"
  },
  {
   "check": "R1' recorded as INCONCLUSIVE (A6), not passed",
@@ -172,7 +172,7 @@
  {
   "check": "defence ice-time budget is exact per team",
   "pass": true,
-  "detail": "9,816 vs 9,820"
+  "detail": "9,814 vs 9,820"
  },
  {
   "check": "no skater exceeds his position's TOI/game ceiling",
@@ -182,12 +182,12 @@
  {
   "check": "no player projected a full season (expectation, not outcome)",
   "pass": true,
-  "detail": "max 78 of 84"
+  "detail": "max 77 of 84"
  },
  {
   "check": "implied league scoring rate is in the observed band",
   "pass": true,
-  "detail": "16.53 pts/game (actual 16.3-16.8)"
+  "detail": "16.70 pts/game (actual 16.3-16.8)"
  },
  {
   "check": "registry refuses an OUTCOME feature as an input",

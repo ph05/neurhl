@@ -6,19 +6,17 @@ into a season projection needs the deployment process (S3), which was not built.
 Claiming a neural-network provenance it does not have would be worse than using
 the honest estimator.
 
-What it is built on:
+What it is built on (models/player_proj.py, the live model):
 
-  * **own-history EWMA of per-60 rates**, which is the baseline v1 measured as
-    beating every learned player-rate head it tried. That null is respected here
-    rather than re-litigated.
-  * **empirical-Bayes shrinkage toward the position mean**, with each player's
-    own ice time as the evidence weight, so a 200-minute season is pulled hard
-    and a 1,400-minute season barely moves.
-  * **RAPM prior** as a team-context and quality signal.
-  * **an empirically fitted age curve**, estimated from the training seasons
-    rather than assumed — PLAN_NeurHL2 lists "age enters raw; the curve should be
-    estimated, not assumed" as a known gap.
-  * **projected ice time** from prior usage, regressed toward the position mean.
+  * **gradient boosting on walk-forward features**: own-history EWMAs of per-60
+    rates as RATIOS to each season's league level (the era control), usage and
+    availability as SHARES of fixed budgets, RAPM prior, age, career shape.
+  * **conservation-law totals** in to_totals(): positional ice-time budgets and
+    the dressed-roster games identity, enforced rather than hoped for.
+  * **walk-forward top-end calibration** fitted on the season before the target.
+  An explicit age-curve multiplier was removed as dead code — the raw profile
+  it would fit is survivorship (only good players last to 34) — so age enters
+  as a feature the trees condition on, not a cohort multiplier.
 
 Every input for season V comes from seasons < V. `--backtest` scores the same
 machinery on DEV/TUNE seasons against each player's realised totals.
@@ -41,101 +39,13 @@ import models.player_proj as PP  # noqa: E402
 
 SEASON = 2027
 GAMES = 84                   # the 2026-27 schedule is 84 games, not 82
-EWMA_HALFLIFE = 1.4          # seasons
-TOI_SHRINK_GP = 25.0         # games of evidence to half-weight a TOI/GP estimate
-ERA_WINDOW = 3               # seasons averaged for the projected league level
-
-
-# Assists are ZERO for season_end 2008-2011. Cause identified: build_htm's
-# actor regex requires a dotted team-code prefix, but HTM goal descriptions list
-# assists as "Assists: #26 NAME; #91 NAME" with no team code, so tensorize_htm's
-# p2/p3 assignment -- which is otherwise correct -- never sees them. Measured:
-# assists per game 0.00 for 2008-2011 against 9.16-10.62 from 2012 on, and
-# p2>0 is 0.000 for those goals against 0.891-0.908 later.
-#
-# Including those seasons in the rate history was a real error: it biased
-# projections DOWN by 18.3 points at vantage 2012 (which trains entirely on
-# zero-assist seasons) and 4.9-8.7 points at 2014-2017. Assist rates are
-# therefore estimated only from assist-complete seasons; GOAL rates still use
-# the full history, since goals are intact throughout.
-ASSISTS_FROM = 2012
-
-
-def league_rates(hist: pd.DataFrame) -> pd.DataFrame:
-    """League goals/60 and assists/60 among skaters, per season.
-
-    THE ERA CONTROL. League scoring is not stationary: points per game ran
-    14.5-14.9 across 2012-2017 and 16.3-17.1 across 2018-2026, a ~13% shift.
-    A player's raw per-60 rate therefore means different things in different
-    seasons, and averaging raw rates across an era boundary silently drags a
-    projection toward whichever era supplied most of the history.
-
-    Rates are converted to a RATIO against their own season's league level,
-    averaged in that space, then re-inflated to the level projected for the
-    target season. This is also why the original backtest missed the problem:
-    it only ever tested 2014-2017 vantages, all inside the low-scoring era, so
-    era drift was never exercised.
-    """
-    g = hist.groupby("season_end").agg(toi=("toi", "sum"), g=("g", "sum"),
-                                       a=("a", "sum"))
-    g["g60"] = 3600.0 * g.g / g.toi
-    g["a60"] = 3600.0 * g.a / g.toi
-    return g[["g60", "a60"]]
-
-
-def projected_league(lg: pd.DataFrame, target: int) -> pd.Series:
-    """League level expected in `target`, from the most recent seasons only."""
-    recent = lg[lg.index < target].tail(ERA_WINDOW)
-    return recent.mean()
-
-
-def talent_sd(hist: pd.DataFrame, target: int, col: str) -> dict:
-    """True-talent variance by position, net of Poisson sampling noise.
-
-    Empirical Bayes done properly: the shrinkage weight for a player is
-    tau^2 / (tau^2 + sigma_i^2), where sigma_i^2 is HIS OWN sampling variance and
-    therefore falls as he accumulates ice time. The previous version used a
-    single constant (90,000 seconds), which shrank a 3,300-minute veteran 31%
-    toward the positional mean -- measured, that turned a 4.5 P/60 player into
-    3.6 and compressed the whole projected distribution. The justified weight
-    for a regular is ~0.83, not 0.69.
-    """
-    h = hist[(hist.season_end >= target - 3) & (hist.season_end < target)]
-    h = h[h.toi >= 50 * 12 * 60]
-    out = {}
-    for pos, d in h.groupby("pos_group"):
-        r = 3600.0 * d[col].astype(float) / d.toi
-        samp = (r * 3600.0 / d.toi).mean()
-        out[int(pos)] = float(max(r.var() - samp, 1e-6))
-    return out
-
-
-def player_seasons(seasons) -> pd.DataFrame:
-    """Per player-season totals from the regular season only."""
-    rows = []
-    for s in seasons:
-        p = TENSORS / f"player_games_{s}.parquet"
-        if not p.exists():
-            continue
-        d = pd.read_parquet(p, columns=["player_id", "game_type", "toi_sec",
-                                        "goals", "assists", "sog",
-                                        "pos_group"])
-        d = d[d.game_type == 2]
-        g = d.groupby(["player_id", "pos_group"], as_index=False).agg(
-            toi=("toi_sec", "sum"), g=("goals", "sum"), a=("assists", "sum"),
-            sh=("sog", "sum"), gp=("toi_sec", "size"))
-        g["season_end"] = s
-        rows.append(g)
-    return pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
-
-
-# NOTE: an explicit age curve was removed. It was dead code -- project() called
-# it with an empty bios dict, so it always returned {} and multiplied by 1.0 --
-# and the raw profile it would have fitted is pure survivorship: only good
-# players last to 34, so mean relative scoring RISES with age (1.19 at 20, 1.06
-# at 33). Applied as a multiplier that rewards being old. Age reaches the model
-# as a plain feature instead, where the tree can condition on it alongside the
-# player's own history rather than scaling everyone by a cohort average.
+# Earliest training vantage for the GBMs. Was 2015 when assists only existed
+# from 2012 (a training vantage needs assist-complete rel_a60 targets plus
+# history before it). A10 recovered assists at source for 2008-2011
+# (configs/assist_recovery.json: 2012 ground truth p2/p3 agreement
+# 0.9994/0.9989, zero invented assists), so vantage 2010 -- features from
+# 2008-2009, targets 2010 -- is now the earliest supportable one.
+TRAIN_FROM = 2010
 
 
 def load_bios() -> dict:
@@ -149,105 +59,6 @@ def load_bios() -> dict:
                 if by.isdigit():
                     out[int(p["id"])] = {"birth_year": int(by)}
     return out
-
-
-def project(target: int, hist: pd.DataFrame, roster_ids=None,
-            bios=None, games=GAMES) -> pd.DataFrame:
-    """Era-relative EWMA rates, empirical-Bayes shrunk, on projected ice time."""
-    prior = hist[hist.season_end < target]
-    if not len(prior):
-        return pd.DataFrame()
-    lg = league_rates(prior)
-    tgt_lg = projected_league(lg, target)
-
-    p = prior.merge(lg, left_on="season_end", right_index=True,
-                    suffixes=("", "_lg"))
-    p = p[p.toi > 0].copy()
-    # per-season rate as a RATIO to that season's league level
-    p["rg"] = (3600.0 * p.g.astype(float) / p.toi) / p.g60
-    p["ra"] = (3600.0 * p.a.astype(float) / p.toi) / p.a60
-    p["w"] = 0.5 ** ((target - 1 - p.season_end) / EWMA_HALFLIFE)
-    p["wt"] = p.w * p.toi
-
-    agg = p.groupby(["player_id", "pos_group"], as_index=False).apply(
-        lambda d: pd.Series({
-            "toi_w": d.wt.sum(),
-            "rg": np.average(d.rg, weights=d.wt),
-            "ra": np.average(d.ra, weights=d.wt),
-        }), include_groups=False)
-    agg = agg[agg.toi_w > 0].copy()
-
-    # assists are absent before ASSISTS_FROM; estimate them from complete seasons
-    ap = p[p.season_end >= ASSISTS_FROM]
-    if len(ap):
-        aa = ap.groupby("player_id", as_index=False).apply(
-            lambda d: pd.Series({"atoi": d.wt.sum(),
-                                 "ra2": np.average(d.ra, weights=d.wt)}),
-            include_groups=False)
-        agg = agg.merge(aa, on="player_id", how="left")
-        agg["ra"] = agg.ra2.where(agg.ra2.notna(), agg.ra)
-        agg["atoi"] = agg.atoi.fillna(agg.toi_w)
-    else:
-        agg["atoi"] = agg.toi_w
-
-    # EMPIRICAL BAYES with a per-player weight, not a global constant
-    tau_g = talent_sd(prior, target, "g")
-    tau_a = talent_sd(prior, target, "a")
-    lg_g = float(tgt_lg.g60)
-    lg_a = float(tgt_lg.a60)
-    for col, tau, base, toicol in (("rg", tau_g, lg_g, "toi_w"),
-                                   ("ra", tau_a, lg_a, "atoi")):
-        t2 = agg.pos_group.map(tau).fillna(np.mean(list(tau.values())))
-        t2_rel = t2 / base ** 2                       # tau^2 in RATIO units
-        samp = agg[col].clip(lower=.05) * 3600.0 / agg[toicol].clip(lower=1) / base
-        k = t2_rel / (t2_rel + samp)
-        agg[col] = k * agg[col] + (1 - k) * 1.0
-        agg[col + "_k"] = k
-
-    agg["g60"] = agg.rg * lg_g
-    agg["a60"] = agg.ra * lg_a
-
-    # ---- ICE TIME: model minutes-per-game and games separately.
-    # Regressing total TOI toward a positional mean conflated "plays less" with
-    # "played fewer games", and cost a first-line forward ~15% of his minutes.
-    # collapse to one row per player-season: player_seasons keys on
-    # (player_id, pos_group), so anyone recorded at two positions appears twice
-    def one_per_player(df):
-        return (df.groupby("player_id")
-                .agg(toi=("toi", "sum"), gp=("gp", "sum"),
-                     pos_group=("pos_group", "first")))
-    last = one_per_player(prior[prior.season_end == target - 1])
-    prev = one_per_player(prior[prior.season_end == target - 2])
-    tpg = agg.player_id.map(last.toi / last.gp)
-    tpg2 = agg.player_id.map(prev.toi / prev.gp)
-    gp1 = agg.player_id.map(last.gp)
-    pos_tpg = agg.pos_group.map(
-        (last.toi / last.gp).groupby(last.pos_group).median())
-    blend = (2 * tpg.fillna(tpg2) + tpg2.fillna(tpg)) / 3
-    blend = blend.fillna(pos_tpg * 0.75)
-    kt = gp1.fillna(0) / (gp1.fillna(0) + TOI_SHRINK_GP)
-    agg["toi_per_gp"] = kt * blend + (1 - kt) * pos_tpg * 0.8
-    # expected games: last season's availability, regressed toward the norm
-    lg_gp = float(last[last.gp >= 20].gp.mean())
-    agg["exp_gp"] = np.clip(0.55 * gp1.fillna(lg_gp) + 0.45 * lg_gp,
-                            10, 82) * (games / 82.0)
-    agg["toi_proj"] = agg.toi_per_gp * agg.exp_gp
-
-    if bios:
-        curve = age_curve(prior, {})
-        yr = agg.player_id.map({k_: v["birth_year"] for k_, v in bios.items()})
-        age = (target - 1 - yr).clip(18, 40)
-        mult = age.map(curve).fillna(1.0) if curve else 1.0
-        agg["g60"] = agg.g60 * mult
-        agg["a60"] = agg.a60 * mult
-
-    if roster_ids is not None:
-        agg = agg[agg.player_id.isin(roster_ids)]
-    agg["proj_g"] = agg.g60 * agg.toi_proj / 3600
-    agg["proj_a"] = agg.a60 * agg.toi_proj / 3600
-    agg["proj_p"] = agg.proj_g + agg.proj_a
-    agg["proj_toi_min"] = agg.toi_proj / 60
-    return agg
 
 
 def team_map_actual(season: int) -> dict:
@@ -273,8 +84,8 @@ def backtest(seasons) -> None:
           f"{'base':>7} {'top10 proj':>26} {'top10 actual':>26}")
     rows = []
     for V in seasons:
-        cal = PP.fit_top_calibration(hist, V, 2015, bios, team_map_actual)
-        pred, _ = PP.fit_predict(hist, V, train_from=2015, bios=bios)
+        cal = PP.fit_top_calibration(hist, V, TRAIN_FROM, bios, team_map_actual)
+        pred, _ = PP.fit_predict(hist, V, train_from=TRAIN_FROM, bios=bios)
         lg_g, lg_a = PP.league_level(hist, V)
         tot = PP.to_totals(pred, lg_g, lg_a, games=82,
                            team_of=team_map_actual(V), calib=cal)
@@ -311,15 +122,23 @@ def backtest(seasons) -> None:
               f"{naive:>7.2f} {str(r['top10_proj'][:5]):>26} "
               f"{str(r['top10_act'][:5]):>26}")
     if rows:
-        n = sum(r["n"] for r in rows)
-        print(f"\nPOOLED n={n:,}  MAE "
-              f"{sum(r['mae_pts']*r['n'] for r in rows)/n:.2f} vs a league-mean "
-              f"baseline of {sum(r['naive_mae']*r['n'] for r in rows)/n:.2f}  "
-              f"bias(>=40GP, selected) "
-              f"{sum(r['bias']*r['n'] for r in rows)/n:+.2f}  "
-              f"bias(all) "
-              f"{sum(r['bias_unconditional']*r['n_all'] for r in rows)/sum(r['n_all'] for r in rows):+.2f}  "
-              f"corr {np.mean([r['corr'] for r in rows]):.3f}")
+        def pooled(rs, label):
+            n = sum(r["n"] for r in rs)
+            na = sum(r["n_all"] for r in rs)
+            print(f"POOLED {label:<34} n={n:,}  MAE "
+                  f"{sum(r['mae_pts']*r['n'] for r in rs)/n:.2f} vs league-mean "
+                  f"{sum(r['naive_mae']*r['n'] for r in rs)/n:.2f}  "
+                  f"bias(>=40GP, selected) "
+                  f"{sum(r['bias']*r['n'] for r in rs)/n:+.2f}  bias(all) "
+                  f"{sum(r['bias_unconditional']*r['n_all'] for r in rs)/na:+.2f}  "
+                  f"corr {np.mean([r['corr'] for r in rs]):.3f}")
+        # A10: report BOTH windows, whatever they show -- the widened
+        # era-diverse pool and the previous 2022-2026 window for continuity.
+        print()
+        pooled(rows, "era-diverse (A10)")
+        prev = [r for r in rows if r["season"] >= 2022]
+        if prev and len(prev) < len(rows):
+            pooled(prev, "previous window 2022-2026")
         p = Path(__file__).resolve().parents[1] / "configs" / "player_backtest.json"
         p.write_text(json.dumps(rows, indent=1))
         print(f"-> {p}")
@@ -330,7 +149,11 @@ def main():
     ap.add_argument("--backtest", action="store_true")
     args = ap.parse_args()
     if args.backtest:
-        backtest([2022, 2023, 2024, 2025, 2026])
+        # A10 era-diverse vantages: DEV/TUNE-era 2011-2017 (NO_SCORE 2013
+        # excluded) plus the previously declared 2022-2026 spend. 2018-2021
+        # remain untouched CONFIRM (2021 is also NO_SCORE).
+        backtest([2011, 2012, 2014, 2015, 2016, 2017,
+                  2022, 2023, 2024, 2025, 2026])
         return
 
     hist = PP.load_player_seasons(range(2008, SEASON))
@@ -348,19 +171,47 @@ def main():
                                    f"{pl['lastName']['default']}")
         rosters[ab] = ids
 
-    cal = PP.fit_top_calibration(hist, SEASON, 2015, bios, team_map_actual)
-    pred, _ = PP.fit_predict(hist, SEASON, train_from=2015, bios=bios,
+    cal = PP.fit_top_calibration(hist, SEASON, TRAIN_FROM, bios, team_map_actual)
+    pred, _ = PP.fit_predict(hist, SEASON, train_from=TRAIN_FROM, bios=bios,
                              ids=set(team_of))
     lg_g, lg_a = PP.league_level(hist, SEASON)
     pr = PP.to_totals(pred, lg_g, lg_a, games=GAMES, team_of=team_of, calib=cal)
     pr["team"] = pr.player_id.map(team_of)
     pr["name"] = pr.player_id.map(names)
-    pr = pr[pr.team.notna()].sort_values("proj_p", ascending=False)
+    pr = pr[pr.team.notna()]
+
+    # ---- PS1 (PLAN_NeurHL3) shipped the 50/50 blend of Path A (above) and
+    # Path B (the player-game chain aggregated over the schedule). The blend
+    # averages goals and assists exactly as the backtest averaged points;
+    # games and ice time stay Path A's, because those carry the conservation
+    # laws. A skater with no NHL feature row (no games before 2026-27) has no
+    # Path B estimate and keeps Path A.
+    import models.player_game as PGM
+    from sim.player_season_v2 import project_b
+    from sim.project_2027 import load_schedule
+    from sim.schedule_context import build as schedule_ctx
+    team_idx = json.loads((TENSORS / "maps.json").read_text())["team"]
+    b = project_b(PGM.build_frames(), SEASON, games=GAMES,
+                  team_of={p: team_idx[t] for p, t in team_of.items()},
+                  gc=schedule_ctx(load_schedule(), SEASON))
+    pr = pr.merge(b[["player_id", "proj_g", "proj_a"]].rename(
+        columns={"proj_g": "b_g", "proj_a": "b_a"}), on="player_id", how="left")
+    pr["proj_g_a"], pr["proj_a_a"] = pr.proj_g, pr.proj_a
+    has_b = pr.b_g.notna()
+    pr.loc[has_b, "proj_g"] = 0.5 * (pr.proj_g_a + pr.b_g)[has_b]
+    pr.loc[has_b, "proj_a"] = 0.5 * (pr.proj_a_a + pr.b_a)[has_b]
+    pr["proj_p"] = pr.proj_g + pr.proj_a
+    pr["proj_p_path_a"] = pr.proj_g_a + pr.proj_a_a
+    pr["proj_p_path_b"] = pr.b_g + pr.b_a
+    pr = pr.sort_values("proj_p", ascending=False)
 
     out = Path(__file__).resolve().parents[1] / "output" / "player_proj_2027.csv"
     cols = ["player_id", "name", "team", "pos_group", "exp_gp", "proj_toi_min",
-            "toi_per_gp_min", "g60", "a60", "proj_g", "proj_a", "proj_p"]
-    pr[cols].to_csv(out, index=False)
+            "toi_per_gp_min", "g60", "a60", "proj_g", "proj_a", "proj_p",
+            "proj_p_path_a", "proj_p_path_b"]
+    pr[cols].round(3).to_csv(out, index=False)
+    print(f"PS1 blend: {int(has_b.sum())} skaters blended, "
+          f"{int((~has_b).sum())} Path A only (no NHL feature history)")
 
     n_ros = sum(len(v) for v in rosters.values())
     cold = int(pr.proj_p.isna().sum())
