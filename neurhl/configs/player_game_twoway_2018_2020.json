@@ -1,0 +1,48 @@
+{
+ "seasons": [
+  2018,
+  2019,
+  2020
+ ],
+ "n_rows": 130092,
+ "n_players": 1152,
+ "n_games": 3624,
+ "heads": {
+  "toi_share": {
+   "mean_diff": -0.0002618855172116844,
+   "relative_to_baseline": -0.04110306582518977,
+   "z_game": -34.51256476844035,
+   "z_player": -26.020264632015923,
+   "z_twoway": -23.90228811795766,
+   "recorded_z_game": -34.513,
+   "reproduces_record": true
+  },
+  "shots": {
+   "mean_diff": -0.1404753604438842,
+   "relative_to_baseline": -0.10152597909604699,
+   "z_game": -14.704964135875034,
+   "z_player": -13.797443352655321,
+   "z_twoway": -13.69511944849505,
+   "recorded_z_game": -14.705,
+   "reproduces_record": true
+  },
+  "goal1": {
+   "mean_diff": -0.011235630175876947,
+   "relative_to_baseline": -0.027662863737873085,
+   "z_game": -11.464975428098294,
+   "z_player": -8.080366521996362,
+   "z_twoway": -8.080366521996362,
+   "recorded_z_game": -11.465,
+   "reproduces_record": true
+  },
+  "assist1": {
+   "mean_diff": -0.013493353102829533,
+   "relative_to_baseline": -0.02563304233486612,
+   "z_game": -17.829421987676394,
+   "z_player": -16.059480749513042,
+   "z_twoway": -15.90472668821356,
+   "recorded_z_game": -17.829,
+   "reproduces_record": true
+  }
+ }
+}
