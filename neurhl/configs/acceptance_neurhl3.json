@@ -1,0 +1,107 @@
+[
+ {
+  "check": "PG-ALL passed on PLAYER_EVAL before the spend (PG-STOP)",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "PG-ALL on the one-shot confirm re-derives from the rule",
+  "pass": true,
+  "detail": "heads ['toi_share', 'shots', 'goal1', 'assist1']"
+ },
+ {
+  "check": "player confirm covers exactly {2018, 2019, 2020}",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "two-way clustered re-analysis reproduces the recorded z",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "every head still clears |z| > 3 under two-way clustering",
+  "pass": true,
+  "detail": "min |z| 8.1"
+ },
+ {
+  "check": "GS1 decision matches its rule (must beat both heuristics)",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "GQ1 decision matches its rule (GSAx must out-predict gq)",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "PS1 ship decision re-derives from the declared rule",
+  "pass": true,
+  "detail": "blend (B wins 4/11)"
+ },
+ {
+  "check": "the shipped player file is the blend PS1 selected",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "G-STOP decision matches its rule (no block cleared -0.0015)",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "ledger v3 caps respected",
+  "pass": true,
+  "detail": "player_game 3/10, player_season 1/4, goalie 2/4, xg 3/4"
+ },
+ {
+  "check": "ledger v2 game cap respected (12)",
+  "pass": true,
+  "detail": "6/12"
+ },
+ {
+  "check": "amendment A5 is committed",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "confirmation not yet run (pending is allowed before the run)",
+  "pass": true,
+  "detail": "pending"
+ },
+ {
+  "check": "neurhl/output/games_2027.csv matches its frozen SHA-256",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "neurhl/output/projection_2027.csv matches its frozen SHA-256",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "neurhl/output/player_proj_2027.csv matches its frozen SHA-256",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "output/projections_2026_27_howe.csv matches its frozen SHA-256",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "games file covers the full 1,344-game schedule",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "probabilities are valid",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "src/ never imports neurhl",
+  "pass": true,
+  "detail": ""
+ }
+]
