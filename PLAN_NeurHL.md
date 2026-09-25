@@ -465,6 +465,116 @@ it was diluting a real effect with anomalous noise:
 
 Both figures are reported everywhere. S1 fails on both.
 
+## A5. AMENDMENT 5 (2026-09-25) — record correction, and the one-shot confirmation of NeurHL-H
+
+Committed BEFORE any 2018-2026 game outcome is scored by any NeurHL-H
+artifact. Walk-forward training for the confirmation (event-LM snapshots,
+embeddings, Layer 1) began at 2026-09-25 14:40 local time; training reads no
+game outcome from the window, and scoring is a separate, single-use step.
+
+### A5.1 Record correction: how the tune-window S1 result was reached
+
+A4.2 as committed (346a645) requires every headline result to be reported both
+with and without the anomalous seasons. PLAN_NeurHL2 (510af38) replaced that
+rule with NO_SCORE = {2013, 2021} and described it as "carried verbatim". It
+was not carried verbatim. The replacement was written after tune-window results
+were visible, and the same commit recorded the NeurHL-H S1 pass
+(output/hier_result.json: diff -0.00283, p = 0.0075, n = 6,150).
+
+Between the committed S1 failure (p = 0.120, seasons 2013-2017) and that pass,
+three things changed on the same window: the scored set (2012 added, 2013
+removed), Layer 1 (season-position features and the playoff-contamination fix,
+ledger l1-fix-1 and l1-fix-2), and the scoring rule itself. Each change is
+defensible alone. Together they are a sequence of decisions taken with the
+result in view, so the tune-window p-value is not a test.
+
+Classification, binding from this commit: the NeurHL-H tune-window result is
+EXPLORATORY. It is reported with and without 2012 and 2013, as A4.2 requires
+(EVIDENCE.md). No document may cite p = 0.0075 as confirmatory.
+
+### A5.2 The confirmatory test (C1, spent once)
+
+Hypothesis: NeurHL-H has lower per-game log loss than v1 Elo on NHL
+regular-season games of season_end 2018-2026.
+
+The frozen model is NeurHL-H exactly as evaluated in output/hier_result.json:
+Layer 1 = train/train_player.py (walk-forward, seed 50000 + T); Layer 2 = the
+TOI-weighted aggregate over dressed skaters; Layer 3 = eval/backtest_hier.py's
+thin head (StandardScaler + LogisticRegression on elo_logit, proj_diff,
+proj_cl_diff, rest_diff; C from {0.01, 0.03, 0.1, 0.3, 1.0}), refit for each
+predict-season T on seasons < T. The head's C is selected on training loss, a
+known weakness that favours the least-regularised C. It is kept verbatim,
+because changing it now would test a different model.
+
+- Primary scored set: {2018, 2019, 2020, 2022, 2023, 2024, 2025, 2026},
+  n = 10,184. 2021 (division-only) is excluded per NO_SCORE.
+- Primary test: mean paired per-game log-loss difference (NeurHL-H - Elo) < 0,
+  two-sided p < 0.05 (normal approximation, as S1). Co-requirement: the
+  season-clustered t (df = 7) agrees in direction.
+- Reported alongside, never as substitutes: the same test including 2021
+  (n = 11,052), as A4.2 requires; a wild cluster bootstrap on season,
+  enumerating all 2^8 Rademacher sign patterns exactly; a moving-block
+  bootstrap over date-ordered games (block = 100 games, 9,999 draws, seed 711);
+  a sign test across the 8 seasons; the Murphy decomposition of the Brier score
+  (reliability, resolution, uncertainty) for both models; and 95% intervals for
+  the pooled and per-season differences.
+
+Power, with the paired SE scaled from the tune window (0.00106 at n = 6,150 to
+about 0.00082 at n = 10,184). The tune estimate was selected, so the true
+effect is expected to be smaller than -0.0028:
+
+| true effect | z | power, two-sided 0.05 |
+|---|---|---|
+| -0.0028 | 3.4 | about 0.93 |
+| -0.0020 | 2.4 | about 0.68 |
+| -0.0014 | 1.7 | about 0.40 |
+
+A null result is therefore evidence against an effect of the tune-window size,
+not against every positive effect.
+
+### A5.3 What has already touched the window
+
+The game-level window has never scored a NeurHL-H game prediction. It is not
+pristine, and these exposures are recorded so a reader can weigh them:
+
+1. Player seasons 2025 and 2026 served as validation for the player
+   projection model (NOTES, "Player projections REBUILT").
+2. The xG ladders (A7, A9, A11) were scored pooled over all 18 vantages,
+   including 2018-2026, and the final xG configuration was chosen on that
+   pooled figure. NeurHL-H does not consume xG.
+3. The player-game layer's one-shot confirmation scored player-level targets
+   on 2018-2020.
+4. Walk-forward Layer 1 artifacts for 2018 and 2019 were built during
+   NeurHL-2 and NeurHL-3 work. They are superseded (below) and were never
+   scored against game outcomes.
+
+### A5.4 Declared deviations
+
+- Data corrections since the tune-window evaluation: the A10 rebuild changed
+  2008-2011 player_games (assists, and toi_sec through the phantom-shift fix).
+  All Layer 1 artifacts for T = 2010-2026 are therefore rebuilt from the
+  current tensors (train/run_confirm_chain.sh). The superseded artifacts are
+  kept under superseded_2026-09-25/.
+- Event-LM snapshots v2019-v2026 are warm-started from v2018 and trained on
+  the corrected event shards. Snapshots v2010-v2018 are unchanged.
+- The tune window is re-derived with the rebuilt artifacts and reported as a
+  consistency check. It is not a gate, and it does not decide whether C1 runs.
+- eval/restate_hier.py required "seasons_evaluated >= 6", which cannot hold
+  under NO_SCORE (the tune window scores 5 seasons). The guard becomes: a
+  recorded tune-window result exists AND this amendment is committed.
+
+### A5.5 Consequences, fixed now
+
+- PASS (primary test and co-requirement): NeurHL-H is reported as a confirmed
+  improvement over Elo, with the effect size and its interval as the headline.
+  It remains report-only for the 2026-27 holdout, per S.
+- FAIL: documented null. The game-level claim reverts to "no confirmed
+  improvement over Elo".
+- Either way the window is spent. It is never re-run and never reused for a
+  game-level confirmatory claim by any NeurHL version. PLAN_NeurHL3's C1 is
+  thereby consumed; a future game-level confirmation needs the 2026-27 live
+  season or later.
+
 ## H. Boundaries
 
 NeurHL touches only neurhl/ + this file + .gitignore additions. Nothing in
