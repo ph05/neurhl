@@ -51,7 +51,10 @@ CFG = {"window": WINDOW, "lam": LAM, "min_toi": MIN_TOI, "team_fe": True,
 
 
 def raw_net_table(st: pd.DataFrame) -> pd.DataFrame:
-    """Team-demeaned raw on-ice net rate — the A6 alternative anchor."""
+    """Raw on-ice net rate, UNdemeaned. Emitted so the A6 alternative anchor
+    (team-demeaned raw) stays derivable downstream — demeaning is a
+    consumer-side step given a team assignment, which stints alone don't fix.
+    An earlier docstring called this "team-demeaned"; the code never was."""
     h = st[R.H_COLS].to_numpy(np.int64)
     a = st[R.A_COLS].to_numpy(np.int64)
     dur = st.dur_s.to_numpy(np.float64)
@@ -104,9 +107,6 @@ def build(v: int) -> pd.DataFrame:
         "cf_off_se", "cf_def_se", "toi_s", "is_replacement"])
 
     rn = raw_net_table(st)
-    tm = rn.merge(
-        pd.DataFrame({"player_id": list(des.pid_to_slot)}), on="player_id",
-        how="inner")
     out = out.merge(rn[["player_id", "raw_net"]], on="player_id", how="left")
     out["raw_net"] = out.raw_net.fillna(0.0)
     out["vantage"] = v

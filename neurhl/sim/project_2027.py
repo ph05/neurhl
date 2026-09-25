@@ -9,8 +9,9 @@ it failed to beat Elo (blend 0.67763 vs Elo 0.67668 on TUNE):
 
   * **real 2026-27 schedule and rosters** — 32 team files each, so this is the
     actual season, not a synthetic one;
-  * **Elo** carried through 2026 and regressed to the mean, then updated inside
-    each simulated season so in-season form evolves;
+  * **Elo** carried through 2026 and regressed to the mean, reported as a
+    reference column (`elo_start`); in-season variation is carried by the
+    per-season team-strength draw (TEAM_SIGMA), not by Elo updates;
   * **team attack/defence** EB-shrunk from 2024-2026;
   * **roster RAPM** from `rapm_prior_2027` (fit on 2024-2026 only) applied to the
     ANNOUNCED 2026-27 rosters — this is what carries trades and free agency,
@@ -164,7 +165,8 @@ def main():
     curve = score_effect_curve(Path(__file__).resolve().parents[1] /
                                "configs" / "event_sim_gates.json")
 
-    # ---- per-game base rates (Elo enters dynamically inside the sim)
+    # ---- per-game base rates (fixed for the season; per-season strength
+    # noise is added inside the Monte Carlo below)
     base_h, base_a = {}, {}
     for r in sched.itertuples():
         ah = att.get(ab2i.get(r.home, -1), 1.0)
@@ -189,7 +191,7 @@ def main():
         P_ot[gid] = o["p_tie"]
         P_reg_a[gid] = o["p_reg_away"]
 
-    # ---- season Monte Carlo with Elo evolving inside each simulation
+    # ---- season Monte Carlo: per-season strength draw + game outcome draws
     rng = np.random.default_rng(args.seed)
     teams = sorted(rosters)
     idx = {t: i for i, t in enumerate(teams)}
@@ -200,6 +202,7 @@ def main():
     pot = np.array([P_ot[g] for g in gid])
     pts_all = np.zeros((args.sims, len(teams)), np.int16)
     wins_all = np.zeros((args.sims, len(teams)), np.int16)
+    rw_all = np.zeros((args.sims, len(teams)), np.int16)
 
     # PARAMETER UNCERTAINTY -- one draw of each team's true strength per
     # simulated season, held fixed across that season. Without it the only
@@ -227,17 +230,60 @@ def main():
         np.add.at(w, hi[home_reg | home_ot], 1)
         np.add.at(w, ai[(~home_reg & ~ot) | (ot & ~home_ot)], 1)
         wins_all[s] = w
+        rw = np.zeros(len(teams), np.int32)
+        np.add.at(rw, hi[home_reg], 1)
+        np.add.at(rw, ai[~home_reg & ~ot], 1)
+        rw_all[s] = rw
 
     # ---- standings and playoff odds (top 8 per conference)
+    #
+    # Tie resolution: points, then regulation wins, then total wins (the
+    # tiebreakers the sim can see), then a COIN FLIP from a dedicated
+    # generator. An earlier build relied on Python's stable sort over an
+    # alphabetically ordered team list, which handed EVERY tie to the
+    # alphabetically earlier club -- a systematic identity bias worth up to
+    # ~1.6 playoff points (WSH -1.58, WPG -0.99; Spearman(alphabet rank,
+    # bias) = -0.91). The tiebreak generator is separate from the game rng,
+    # so the simulated seasons above are bit-identical either way. A
+    # fractional split of the cutoff tie group is recorded alongside as an
+    # identity-blind reference; the acceptance battery asserts the two agree.
     conf_of = {t: ("E" if t in CONF["E"] else "W") for t in teams}
+    conf_ids = {c: [idx[t] for t in teams if conf_of[t] == c]
+                for c in ("E", "W")}
     playoff = np.zeros(len(teams))
+    playoff_frac = np.zeros(len(teams))
+    tie_rng = np.random.default_rng(args.seed + 7)
     for s in range(args.sims):
         for c in ("E", "W"):
-            ids = [idx[t] for t in teams if conf_of[t] == c]
-            order = sorted(ids, key=lambda i: -pts_all[s, i])
-            for i in order[:8]:
-                playoff[i] += 1
+            ids = conf_ids[c]
+            key = {i: (-int(pts_all[s, i]), -int(rw_all[s, i]),
+                       -int(wins_all[s, i])) for i in ids}
+            u = tie_rng.random(len(ids))
+            order = sorted(range(len(ids)), key=lambda j: key[ids[j]] + (u[j],))
+            for j in order[:8]:
+                playoff[ids[j]] += 1
+            cut = key[ids[order[7]]]
+            above = [i for i in ids if key[i] < cut]
+            ties = [i for i in ids if key[i] == cut]
+            for i in above:
+                playoff_frac[i] += 1.0
+            share = (8 - len(above)) / len(ties)
+            for i in ties:
+                playoff_frac[i] += share
     playoff /= args.sims
+    playoff_frac /= args.sims
+
+    chk = {
+        "rule": "points, regulation wins, total wins, dedicated-rng coin flip",
+        "max_abs_diff_pct": float(np.max(np.abs(playoff - playoff_frac)) * 100.0),
+        "teams": {teams[i]: {"actual_pct": round(float(playoff[i] * 100), 3),
+                             "fractional_pct": round(float(playoff_frac[i] * 100), 3)}
+                  for i in range(len(teams))},
+    }
+    cfg = Path(__file__).resolve().parents[1] / "configs"
+    (cfg / "playoff_tiebreak_check.json").write_text(json.dumps(chk, indent=1))
+    print(f"tiebreak guard: max |actual - fractional| = "
+          f"{chk['max_abs_diff_pct']:.3f} playoff points")
 
     res = pd.DataFrame({
         "team": teams,

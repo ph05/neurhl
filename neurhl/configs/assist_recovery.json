@@ -1,0 +1,180 @@
+{
+ "date": "2026-08-24",
+ "declared": "PLAN_NeurHL2 A10 @ 87da58b",
+ "ground_truth_2012": {
+  "n_json_goals": 6545,
+  "n_joined": 6545,
+  "join_rate": 1.0,
+  "p2_agreement": 0.9994,
+  "p3_agreement": 0.9989,
+  "invented_assists": 0,
+  "pass": true
+ },
+ "plausibility": {
+  "2008": {
+   "assists_per_game": 9.33,
+   "p2_share_reg": 0.9377,
+   "self_assists": 0,
+   "pass": true
+  },
+  "2009": {
+   "assists_per_game": 9.86,
+   "p2_share_reg": 0.9393,
+   "self_assists": 0,
+   "pass": true
+  },
+  "2010": {
+   "assists_per_game": 9.56,
+   "p2_share_reg": 0.946,
+   "self_assists": 0,
+   "pass": true
+  },
+  "2011": {
+   "assists_per_game": 9.38,
+   "p2_share_reg": 0.9357,
+   "self_assists": 0,
+   "pass": true
+  }
+ },
+ "invariance": {
+  "events_2008": {
+   "changed_cols": [
+    "p2",
+    "p3"
+   ],
+   "pass": true
+  },
+  "events_2009": {
+   "changed_cols": [
+    "p2",
+    "p3"
+   ],
+   "pass": true
+  },
+  "events_2010": {
+   "changed_cols": [
+    "p2",
+    "p3"
+   ],
+   "pass": true
+  },
+  "events_2011": {
+   "changed_cols": [
+    "p2",
+    "p3"
+   ],
+   "pass": true
+  },
+  "events_htm_2012": {
+   "changed_cols": [
+    "p2",
+    "p3"
+   ],
+   "pass": true
+  },
+  "player_games_2008": {
+   "changed_cols": [
+    "toi_sec",
+    "assists"
+   ],
+   "pass": true,
+   "toi_delta": {
+    "n_changed": 11579,
+    "mean_by_pos": {
+     "0": -137.2,
+     "2": -2013.8
+    },
+    "sum_abs_hours": 3165.4
+   }
+  },
+  "player_games_2009": {
+   "changed_cols": [
+    "toi_sec",
+    "assists"
+   ],
+   "pass": true,
+   "toi_delta": {
+    "n_changed": 10820,
+    "mean_by_pos": {
+     "0": -36.5,
+     "2": -373.2
+    },
+    "sum_abs_hours": 719.2
+   }
+  },
+  "player_games_2010": {
+   "changed_cols": [
+    "toi_sec",
+    "assists"
+   ],
+   "pass": true,
+   "toi_delta": {
+    "n_changed": 10475,
+    "mean_by_pos": {
+     "0": -35.3,
+     "2": -336.7
+    },
+    "sum_abs_hours": 679.8
+   }
+  },
+  "player_games_2011": {
+   "changed_cols": [
+    "toi_sec",
+    "assists"
+   ],
+   "pass": true,
+   "toi_delta": {
+    "n_changed": 10163,
+    "mean_by_pos": {
+     "0": -34.0,
+     "2": -331.3
+    },
+    "sum_abs_hours": 661.5
+   }
+  },
+  "player_games_htm_2012": {
+   "changed_cols": [
+    "toi_sec",
+    "assists"
+   ],
+   "pass": true,
+   "toi_delta": {
+    "n_changed": 10245,
+    "mean_by_pos": {
+     "0": -35.4,
+     "2": -311.2
+    },
+    "sum_abs_hours": 663.4
+   }
+  }
+ },
+ "declared_deviation": "A10 clause (3) declared player_games may change only in assists; toi_sec ALSO changed because the committed 2008-2011 player_games predate the recorded shift-parser fix (goalie/fourth-liner invented shifts, corr 0.981->0.99969) -- they were stale against the current parser, the same invisible-staleness class the manifests exist to catch. The rebuild bakes the already-recorded fix in; deltas quantified per file above. Events invariance held exactly as declared.",
+ "pass": true,
+ "failures": [],
+ "seq_bit_identity": {
+  "what": "A10 certificate: seq_<V>.npz rebuilt from assist-fixed events (with the pre-fix xg_shots restored) must equal the pre-fix arrays exactly -- proves S1 consumes no assist field and its 5 seeds + recorded E1/E2 need no retrain for A10",
+  "seasons": {
+   "2008": {
+    "keys_match": true,
+    "differing_arrays": [],
+    "identical": true
+   },
+   "2009": {
+    "keys_match": true,
+    "differing_arrays": [],
+    "identical": true
+   },
+   "2010": {
+    "keys_match": true,
+    "differing_arrays": [],
+    "identical": true
+   },
+   "2011": {
+    "keys_match": true,
+    "differing_arrays": [],
+    "identical": true
+   }
+  },
+  "pass": true
+ }
+}

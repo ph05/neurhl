@@ -1,13 +1,15 @@
 """NeurHL-2 — S4-v2: game outcomes from validated components.
 
-PLAN_NeurHL2 validation item 7 preregistered this path and named it the most
-likely route to the best game-level number:
+This path was a BUILD-TIME decision (S4-v2, 22 Aug 2026), not a preregistered
+route: PLAN_NeurHL2's S4 prereg specifies semi-analytic integration of
+competing hazards, and the blend-into-the-hierarchical-head idea arose during
+the build. An earlier revision of this docstring attributed the idea to a
+"PLAN_NeurHL2 validation item 7" with a quoted sentence that exists in no
+committed revision of the plan; that attribution was wrong and is corrected
+here. G-STOP itself is genuinely preregistered and fired on this path's
+result.
 
-  "the engine's hazard rates can also be BLENDED into the hierarchical head as an
-   additional feature, which is the most likely route to the best game-level
-   number."
-
-It is taken here because the direct S1 hazard query failed three separate ways
+It was taken because the direct S1 hazard query failed three separate ways
 and the failures were all in the QUERY, not the model. On natural data the S1
 ensemble reproduces home advantage correctly (expected +0.329 goals/game against
 an observed +0.450, and +0.195 vs +0.268 at 5v5). But asking it for a hazard at a
@@ -29,8 +31,9 @@ So the game layer is built from the pieces that ARE validated:
 
   * **team attack/defence** from prior-season scoring rates, empirical-Bayes
     shrunk — the part a rate model does well;
-  * **roster strength** from the walk-forward RAPM prior, TOI-weighted over the
-    projected lineup, which carries player turnover that team-level rates cannot;
+  * **roster strength** from the walk-forward RAPM prior, TOI-weighted — over
+    the PREVIOUS season's lineups in this module; the announced-roster
+    turnover carry lives in project_2027.roster_ratings, not here;
   * **score effects** from S1's own curve, the thing E2 verified at ratio 0.979
     and correlation 0.979 — applied inside the integration so leading teams
     suppress and trailing teams push;
@@ -117,8 +120,14 @@ def team_strength(train_seasons, recent=RECENT) -> tuple:
 def roster_strength(season: int, prev: int) -> dict:
     """TOI-weighted RAPM net rating per team, from the walk-forward prior.
 
-    Team-level scoring rates cannot see a roster that turned over; RAPM can.
-    Both are walk-forward, so this stays a projection.
+    Players map to teams by PREVIOUS-season TOI, so this function does NOT
+    carry roster turnover — the announced-roster carry is
+    project_2027.roster_ratings. The term's season-level backtest
+    contribution is small and statistically unproven (dropping it: MAE
+    9.605 -> 9.251, n.s. p=0.32; the A6 alternative, team-demeaned raw, is
+    WORSE at 9.996 — recorded in configs/roster_prior_comparison.json).
+    RAPM is retained: it beats the declared alternative, and swapping or
+    dropping the term on an n=6 backtest would be a forking path.
     """
     pr = TENSORS / f"rapm_prior_{season}.parquet"
     pg = TENSORS / f"player_games_{prev}.parquet"

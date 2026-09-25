@@ -45,6 +45,8 @@ _TEAMJ = re.compile(
     r"([A-Z]\.?[A-Z]\.?[A-Z]?)\s+(?:ONGOAL - |GIVEAWAY - |TAKEAWAY - )?"
     r"#?(\d+)\s+([A-Z' .-]+?)(?:\(\d+\))?(?=,|$|\s(?:HIT|BLOCKED|vs|Drawn)|\s[A-Z][a-z])",
     re.M)
+_ASSIST = re.compile(r"Assists?:\s*(.*)", re.S)
+_AJERSEY = re.compile(r"#(\d+)\s+([A-Z' .-]+?)(?:\(\d*\))?\s*(?:;|$)")
 _ZONE = re.compile(r"(Off|Def|Neu)\. Zone")
 _DIST = re.compile(r"(\d+) ft\.")
 _MMSS = re.compile(r"(\d+):(\d\d)")
@@ -124,6 +126,15 @@ def parse_pl(html: str) -> list[dict]:
         home_on = _fonts(cells[7]) if len(cells) > 7 else []
         pairs = [(norm_team(tm), int(j), norm_name(nm))
                  for tm, j, nm in _TEAMJ.findall(desc)]
+        if code == "GOAL" and pairs and (am := _ASSIST.search(desc)):
+            # A10: HTM assist entries carry no team code, so _TEAMJ never
+            # matched them (assists were 0.000/game for 2008-2011). Assists
+            # belong to the scoring team, and (team, jersey) is all the
+            # jersey-map resolution needs -- the name is decorative. The
+            # empty-paren form "NAME()" occurs on 9 early-2008 goals, hence
+            # \d* in _AJERSEY.
+            pairs += [(pairs[0][0], int(j), norm_name(nm))
+                      for j, nm in _AJERSEY.findall(am.group(1))]
         zone = ZONE_MAP.get((_ZONE.search(desc) or [None, ""])[1], "")
         dist = int(d.group(1)) if (d := _DIST.search(desc)) else -1
         shot_type = ""
