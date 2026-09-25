@@ -1,0 +1,185 @@
+{
+ "artifacts": "original",
+ "proj_dir": "neurhl/data/tensors/superseded_2026-09-25",
+ "classification": "EXPLORATORY (PLAN_NeurHL A5.1)",
+ "sets": {
+  "2012-2017 (all six)": {
+   "n_games": 6870,
+   "neurhl_h": 0.6731958227640942,
+   "elo": 0.67585041357121,
+   "diff": -0.0026545908071157844,
+   "se": 0.0010115482821349872,
+   "ci95": [
+    -0.004637225440100359,
+    -0.0006719561741312095
+   ],
+   "z": -2.624284825547793,
+   "p_two_sided": 0.008683113838121445,
+   "seasons": 6,
+   "clustered_t": -4.357482426582344,
+   "clustered_p": 0.007307546123341636,
+   "wild_cluster_p_exact": 0.03125,
+   "block_bootstrap_ci95": [
+    -0.0045763733978139145,
+    -0.0008989892119962302
+   ],
+   "block_bootstrap": {
+    "block": 100,
+    "draws": 9999,
+    "seed": 711
+   },
+   "seasons_won": 6,
+   "sign_test_p": 0.03125,
+   "murphy": {
+    "neurhl_h": {
+     "brier": 0.2402205346079389,
+     "reliability": 0.0006945973943219117,
+     "resolution": 0.007726643843339542,
+     "uncertainty": 0.24774824193961892
+    },
+    "elo": {
+     "brier": 0.24152554031330958,
+     "reliability": 0.00035544019121476543,
+     "resolution": 0.006401007191101663,
+     "uncertainty": 0.24774824193961892
+    }
+   },
+   "pass": true
+  },
+  "2012, 2014-2017 (recorded pass: NO_SCORE)": {
+   "n_games": 6150,
+   "neurhl_h": 0.6731415366889674,
+   "elo": 0.6759711962358106,
+   "diff": -0.0028296595468432443,
+   "se": 0.0010577320342162017,
+   "ci95": [
+    -0.004902814333906999,
+    -0.0007565047597794887
+   ],
+   "z": -2.6752140006235816,
+   "p_two_sided": 0.007468156246506413,
+   "seasons": 5,
+   "clustered_t": -4.4857232559455165,
+   "clustered_p": 0.010941658950969768,
+   "wild_cluster_p_exact": 0.0625,
+   "block_bootstrap_ci95": [
+    -0.0048937589436136575,
+    -0.0009876561088520935
+   ],
+   "block_bootstrap": {
+    "block": 100,
+    "draws": 9999,
+    "seed": 711
+   },
+   "seasons_won": 5,
+   "sign_test_p": 0.0625,
+   "murphy": {
+    "neurhl_h": {
+     "brier": 0.24018994315445588,
+     "reliability": 0.0009579927534015382,
+     "resolution": 0.00825458027079341,
+     "uncertainty": 0.2479713398109591
+    },
+    "elo": {
+     "brier": 0.24158510290329052,
+     "reliability": 0.0004244608626330503,
+     "resolution": 0.006576975130603393,
+     "uncertainty": 0.2479713398109591
+    }
+   },
+   "pass": true
+  },
+  "2013-2017 (committed A4 run, with lockout)": {
+   "n_games": 5640,
+   "neurhl_h": 0.6727694539280215,
+   "elo": 0.6753987888838121,
+   "diff": -0.0026293349557905766,
+   "se": 0.0011215989908112101,
+   "ci95": [
+    -0.004827668977780548,
+    -0.00043100093380060494
+   ],
+   "z": -2.3442736462243765,
+   "p_two_sided": 0.01906417841379901,
+   "seasons": 5,
+   "clustered_t": -3.506586140908832,
+   "clustered_p": 0.024748194687524858,
+   "wild_cluster_p_exact": 0.0625,
+   "block_bootstrap_ci95": [
+    -0.004616631246428314,
+    -0.00046749101564129886
+   ],
+   "block_bootstrap": {
+    "block": 100,
+    "draws": 9999,
+    "seed": 711
+   },
+   "seasons_won": 5,
+   "sign_test_p": 0.0625,
+   "murphy": {
+    "neurhl_h": {
+     "brier": 0.24000869185952417,
+     "reliability": 0.0006600684759083477,
+     "resolution": 0.00811674244656604,
+     "uncertainty": 0.2479718072531563
+    },
+    "elo": {
+     "brier": 0.2412992925396998,
+     "reliability": 0.0002944443470362709,
+     "resolution": 0.006783460658198859,
+     "uncertainty": 0.2479718072531563
+    }
+   },
+   "pass": true
+  },
+  "2014-2017 (committed A4 run, without lockout)": {
+   "n_games": 4920,
+   "neurhl_h": 0.6726392008946878,
+   "elo": 0.675483675796895,
+   "diff": -0.0028444749022071875,
+   "se": 0.0011858216437796265,
+   "ci95": [
+    -0.005168685324015255,
+    -0.0005202644803991197
+   ],
+   "z": -2.3987375480353483,
+   "p_two_sided": 0.016451701619211966,
+   "seasons": 4,
+   "clustered_t": -3.49378223553217,
+   "clustered_p": 0.03965842679526494,
+   "wild_cluster_p_exact": 0.125,
+   "block_bootstrap_ci95": [
+    -0.0052611986387743415,
+    -0.0008159034141885802
+   ],
+   "block_bootstrap": {
+    "block": 100,
+    "draws": 9999,
+    "seed": 711
+   },
+   "seasons_won": 4,
+   "sign_test_p": 0.125,
+   "murphy": {
+    "neurhl_h": {
+     "brier": 0.23993945116485355,
+     "reliability": 0.0010721318253556684,
+     "resolution": 0.008900849333845124,
+     "uncertainty": 0.2482638888888889
+    },
+    "elo": {
+     "brier": 0.2413406363468916,
+     "reliability": 0.00037677720897667485,
+     "resolution": 0.0070443354155055125,
+     "uncertainty": 0.2482638888888889
+    }
+   },
+   "pass": true
+  }
+ },
+ "reproduces_record": {
+  "recorded_diff": -0.0028296595468432443,
+  "reproduced_diff": -0.0028296595468432443,
+  "abs_err": 0.0,
+  "ok": true
+ }
+}

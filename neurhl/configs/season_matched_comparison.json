@@ -1,0 +1,106 @@
+{
+ "seasons": [
+  2012,
+  2014,
+  2015,
+  2016,
+  2017
+ ],
+ "note": "per-season standings-points MAE and CRPS; all five seasons are 82-game seasons, so v1's per-82 MAE is on the same scale",
+ "models": {
+  "v1 (Elo + xG)": {
+   "mae": 9.165536719860196,
+   "crps": 6.431279886666667,
+   "per_season_mae": {
+    "2012": 7.507,
+    "2014": 8.977,
+    "2015": 11.406,
+    "2016": 8.19,
+    "2017": 9.748
+   }
+  },
+  "NeurHL-2 season layer (shipped, RAPM roster prior)": {
+   "mae": 9.986223333333333,
+   "crps": 7.16513,
+   "per_season_mae": {
+    "2012": 6.982,
+    "2014": 10.873,
+    "2015": 11.868,
+    "2016": 10.336,
+    "2017": 9.871
+   }
+  },
+  "NeurHL-2 season layer, no roster term": {
+   "mae": 9.457283333333333,
+   "crps": 6.7466099999999996,
+   "per_season_mae": {
+    "2012": 7.079,
+    "2014": 9.982,
+    "2015": 11.639,
+    "2016": 8.684,
+    "2017": 9.903
+   }
+  },
+  "NeurHL-2 season layer, raw on-ice prior": {
+   "mae": 9.797118333333334,
+   "crps": 7.006959999999998,
+   "per_season_mae": {
+    "2012": 7.584,
+    "2014": 9.625,
+    "2015": 11.949,
+    "2016": 8.845,
+    "2017": 10.983
+   }
+  }
+ },
+ "vs_v1": {
+  "NeurHL-2 season layer (shipped, RAPM roster prior)": {
+   "mae": {
+    "mean_diff": 0.8206866134731363,
+    "t": 1.588673133440628,
+    "p_two_sided": 0.18733263755653695,
+    "a_better_in": 1,
+    "of": 5
+   },
+   "crps": {
+    "mean_diff": 0.7338501133333336,
+    "t": 2.0502965122586976,
+    "p_two_sided": 0.10965337436150302,
+    "a_better_in": 1,
+    "of": 5
+   }
+  },
+  "NeurHL-2 season layer, no roster term": {
+   "mae": {
+    "mean_diff": 0.2917466134731372,
+    "t": 1.2505687967551646,
+    "p_two_sided": 0.2792526378095669,
+    "a_better_in": 1,
+    "of": 5
+   },
+   "crps": {
+    "mean_diff": 0.3153301133333333,
+    "t": 2.4479022584325847,
+    "p_two_sided": 0.0706045957063433,
+    "a_better_in": 1,
+    "of": 5
+   }
+  },
+  "NeurHL-2 season layer, raw on-ice prior": {
+   "mae": {
+    "mean_diff": 0.6315816134731385,
+    "t": 3.423891321127188,
+    "p_two_sided": 0.026684702842976228,
+    "a_better_in": 0,
+    "of": 5
+   },
+   "crps": {
+    "mean_diff": 0.5756801133333325,
+    "t": 4.321659869603795,
+    "p_two_sided": 0.012431127628991885,
+    "a_better_in": 0,
+    "of": 5
+   }
+  }
+ }
+}
