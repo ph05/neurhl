@@ -285,6 +285,22 @@ def main():
     print(f"tiebreak guard: max |actual - fractional| = "
           f"{chk['max_abs_diff_pct']:.3f} playoff points")
 
+    # ---- per-game preseason probabilities, frozen for live scoring. NeurHL:
+    # the engine's base-rate split (no per-season strength draw), with the
+    # overtime coin at the sim's 0.53 home share. Reference: v1 Elo frozen at
+    # its preseason ratings (0.7 carry, H = 35), the same static footing.
+    H_ELO = json.loads((Path(__file__).resolve().parents[2] / "output" /
+                        "params.json").read_text())["H"]
+    gm = sched.copy()
+    gm["p_home_reg"] = [P_reg_h[g] for g in gm.game_id]
+    gm["p_ot"] = [P_ot[g] for g in gm.game_id]
+    gm["p_away_reg"] = [P_reg_a[g] for g in gm.game_id]
+    gm["p_home_win"] = gm.p_home_reg + 0.53 * gm.p_ot
+    d_elo = (gm.home.map(elo0) + H_ELO - gm.away.map(elo0)).to_numpy()
+    gm["p_home_win_elo"] = 1.0 / (1.0 + 10 ** (-d_elo / 400.0))
+    gm.round(6).to_csv(Path(__file__).resolve().parents[1] / "output" /
+                       "games_2027.csv", index=False)
+
     res = pd.DataFrame({
         "team": teams,
         "conf": [conf_of[t] for t in teams],
