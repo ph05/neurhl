@@ -1,56 +1,44 @@
-# NeurHL
+# neurhl/
 
-NeurHL is this repo's proprietary neural prediction model: a hierarchical network
-trained on the event-scale corpora (play-by-play, shifts, shots, careers) to
-simulate NHL **game, player, and season outcomes**. It lives entirely in this
-directory plus the prereg `PLAN_NeurHL.md` at the repo root, and is report-only
-with respect to the 2026-27 live holdout (production scoring stays v1/v4/HOWE).
-
-Branding: the model name is **NeurHL** — exactly this capitalization — in all
-prose, reports, and output model/column names. Filesystem artifacts are lowercase
-(`neurhl/`, `params_neurhl.json`).
+The NeurHL package: data builders, models, training, evaluation, simulation
+and tests. The project overview, findings and reproduction commands are in
+the [top-level README](../README.md); the evidence behind each claim is in
+[EVIDENCE.md](../EVIDENCE.md).
 
 ## Layout
 
 | Path | Contents |
 |---|---|
-| `common.py` | shared paths/seeds + one-way import shim to repo `src/` |
-| `configs/` | pinned env + locked hyperparams + `search_ledger.csv` (every tune-window config, committed) |
-| `data/fetch/` | NeurHL-owned acquisition crawlers (HTM reports, NST, NHL player reports, lineup snapshots) |
-| `data/` | vocab + tensorization (raw → `data/tensors/`, gitignored) |
-| `eda/` | exploratory data analysis scripts + committed reports/figures |
-| `models/` | Tier-0 baseline (xgboost/MLP), event-LM, career encoder, game model |
-| `train/` | pretraining / training / calibration entry points |
-| `eval/` | baselines harness, backtests, gates, one-shot 2018–2026 restatement |
-| `sim/` | ratings bridge → `engine.simulate_season`; season sim emits the `howe.rebuild_sim` dict contract |
-| `checkpoints/` | gitignored; SHA256s recorded in `output/params_neurhl.json` |
-| `output/` | params contract, committed prediction artifacts (`preds/`), projections |
-| `tests/` | `review_tests_neurhl.py` read-only verification battery |
+| `common.py` | Shared paths and seeds; makes the baselines in `src/` importable (one way only) |
+| `windows.py` | Season roles (development, tune, confirmation, never-scored) and the guards that enforce them |
+| `registry.py` | Feature registry: each feature's coverage and vantage rule, declared once |
+| `manifest.py` | Artifact lineage; consumers refuse stale inputs |
+| `data/fetch/` | Fetchers for NHL game reports, player reports, Natural Stat Trick, MoneyPuck and daily lineups |
+| `data/` | Builders: events, shifts, stints, on-ice rates, absences, usage, goalie games, tensors |
+| `models/` | xG, RAPM, event language model, event simulator, player-game chain, season player model, goalie starter, baselines |
+| `train/` | Training entry points; `run_confirm_chain.sh` rebuilds the walk-forward artifacts for the NeurHL-H confirmation |
+| `eval/` | Gates, backtests, one-shot confirmations (`confirm_player_2018_2020.py`, `restate_hier.py`), re-analyses and the live scorer |
+| `sim/` | Season simulation and the 2026-27 projections (`project_2027.py`, `project_players.py`) |
+| `site/` | Builds `docs/data.js` for the projection site |
+| `configs/` | Locked configurations, gate records and the search ledgers |
+| `output/` | Frozen 2026-27 predictions, committed prediction artifacts, live results |
+| `eda/` | Exploratory analyses and their reports |
+| `tests/` | Acceptance batteries and leakage audits |
 
-## Run convention
+`data/tensors/` and `checkpoints/` are large and are not committed; the
+builders and training scripts regenerate them, and every checkpoint's
+SHA-256 is recorded beside the numbers it produced.
 
-No venv, no pyproject (house rule). Every script runs via uv, e.g.:
+## Conventions
 
-```
-uv run --no-project --python 3.12 --with requests python neurhl/data/fetch/fetch_htm_reports.py
-uv run --no-project --python 3.12 --with numpy --with "pandas<3" --with pyarrow --with matplotlib python neurhl/eda/eda_01_corpus.py
-uv run --no-project --python 3.12 --with torch --with numpy --with "pandas<3" --with pyarrow python neurhl/train/pretrain_events.py
-```
-
-Resolved versions are pinned in `configs/env.json` at first successful run.
-
-## Determinism policy
-
-Torch-MPS training nondeterminism is accepted; checkpoints are ground truth
-(SHA256 in `output/params_neurhl.json`), all gated/report numbers come from CPU
-inference over saved checkpoints, and predictions are committed CSV artifacts
-that `tests/review_tests_neurhl.py` re-derives and asserts against (max|Δp| ≤ 1e-6).
-Sim/report seeds: 711 (h1) / 722 (h2).
-
-## Methodology
-
-See `PLAN_NeurHL.md` (repo root): protocol P1–P10 (vantage rule, pretrain
-snapshots, MoneyPuck exclusion, era conditioning, COVID handling, strict
-tune-window policy with a ≤40-config search budget, pre-committed restatement
-decision rule, determinism, market firewall) and gates G1–G6. The prereg is
-committed with locked numbers BEFORE any gate runs.
+- Every script runs through uv with explicit dependencies, for example
+  `uv run --no-project --python 3.12 --with numpy --with "pandas<3" --with pyarrow python neurhl/sim/project_2027.py`.
+  Resolved versions are pinned in `configs/env.json`.
+- Seasons are named by the year they end (2027 is 2026-27).
+- Any quantity used to predict season V is computed from seasons before V;
+  in-season predictions may also use games of V played before the game being
+  predicted.
+- Neural training uses Apple MPS and is not bit-deterministic. Reported
+  numbers come from CPU inference over saved checkpoints, and committed
+  prediction files re-derive within 1e-6.
+- The model name is written NeurHL; file and directory names are lowercase.
