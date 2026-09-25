@@ -809,7 +809,7 @@ throughout. Pooled MAE 9.05 -> 7.86.
 
 NOT FIXED AT SOURCE, and flagged as the top follow-up: recovering HTM assists
 needs a regex fix plus re-running tensorize_htm for 2008-2012 and rebuilding the
-downstream chain, which was not safe to start late in the session. Goals, shots,
+downstream chain, which was deferred to a declared follow-up (A10). Goals, shots,
 on-ice sets and TOI are unaffected, so nothing else in the build depends on it.
 
 ### Player projections REBUILT — the low-scoring-era bias, and four more bugs
