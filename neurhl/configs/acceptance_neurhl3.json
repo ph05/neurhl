@@ -65,9 +65,29 @@
   "detail": ""
  },
  {
-  "check": "confirmation not yet run (pending is allowed before the run)",
+  "check": "the confirmation record was added exactly once",
   "pass": true,
-  "detail": "pending"
+  "detail": ""
+ },
+ {
+  "check": "A5 was committed before the confirmation record",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "primary n = 10,184 games",
+  "pass": true,
+  "detail": "10,184"
+ },
+ {
+  "check": "recorded difference re-derives from the per-game file",
+  "pass": true,
+  "detail": "-0.004779 vs -0.004779"
+ },
+ {
+  "check": "verdict re-derives from the declared rule",
+  "pass": true,
+  "detail": "PASS, p = 0.0000"
  },
  {
   "check": "neurhl/output/games_2027.csv matches its frozen SHA-256",

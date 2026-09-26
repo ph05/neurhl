@@ -933,3 +933,23 @@ projects 98 against a 141 per-84 recent average, Celebrini 116 against 98. The
 aggregate is calibrated; single players are not, and a projection that regresses
 outliers will always read as too cautious on the sustained stars and too generous
 on a young riser.
+
+## NeurHL 1.0 (2026-09-25) — confirmation, corrections, live freeze
+
+**NeurHL-H confirmed against Elo.** PLAN_NeurHL A5 froze the model, the scored
+set and the test battery before any 2018-2026 game was scored. Run once on
+10,184 games: log loss 0.66495 vs 0.66973, diff -0.00478 (95% CI -0.00650 to
+-0.00306), season-clustered p = 0.0007, better in all 8 seasons, gain in
+resolution rather than calibration. The effect is larger than the exploratory
+tune estimate (-0.00283) and concentrated in 2022-2026. It is conditional on
+the dressed lineup. The game-level window is spent.
+
+**Corrections recorded in EVIDENCE.md.** The season layer's "beats both house
+benchmarks" compared different seasons; on matched seasons v1 is better
+(MAE 9.17 vs 9.99, n.s.). The NO_SCORE rule replaced A4's report-both-ways rule
+after results were visible (A5.1). The PS1 blend had not actually shipped; it
+now does. Playoff ties were broken alphabetically; fixed.
+
+**2026-27 frozen.** PLAN_NeurHL_LIVE.md fixes per-game, team and skater
+predictions by SHA-256 before opening night and declares one end-of-season
+inference per level.

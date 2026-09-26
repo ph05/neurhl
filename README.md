@@ -20,15 +20,20 @@ lists every claim with the strength of the evidence behind it.
   targets. It was frozen after development and scored once on 2017-18 through
   2019-20 (130,092 skater-games). Gains range from 2.6% to 10.2%, and the
   model wins in every season.
-- **Game outcomes: see [EVIDENCE.md](EVIDENCE.md#confirmed).** NeurHL-H, a
-  neural player layer feeding a small logistic head, beat Elo on the tune
-  window (log loss -0.0028, p = 0.0075). That estimate is exploratory. The
-  one-shot test on 2017-18 through 2025-26 (10,184 games) decides it.
+- **Game outcomes: confirmed.** NeurHL-H, a neural player layer feeding a
+  small logistic head, beats Elo on 10,184 held-out games from 2017-18
+  through 2025-26: log loss 0.6650 vs 0.6697 (95% CI of the difference
+  -0.0065 to -0.0031), better in all eight seasons. The test was frozen in
+  advance and run once. NeurHL-H uses each game's dressed lineup, known
+  about an hour before puck drop, which Elo does not.
 - **Neural representations of hockey events: a documented null.** A
   transformer trained on 7.6 million play-by-play events learns what kind of
   player someone is (position is linearly decodable at 95%). Pooled over a
-  roster, it says almost nothing about how good a team is. Every attempt to
-  beat Elo from those embeddings finished level with a constant home-win rate.
+  roster, it says almost nothing about how good a team is, and every attempt
+  to beat Elo from pooled embeddings finished level with a constant home-win
+  rate. NeurHL-H does use the embeddings, inside a player-level model anchored
+  on each player's own history; no ablation has yet isolated what they add
+  there.
 - **Season standings: level with Elo, not better.** The season simulator's
   80% intervals are calibrated (0.794 coverage). On matched backtest seasons
   its points error is slightly worse than the Elo baseline's (9.99 vs 9.17,
@@ -57,7 +62,7 @@ flowchart LR
 | Player-game layer | Chained models for opportunity, volume and conversion, using usage, absences and opponent context | Confirmed on 2017-18 to 2019-20 |
 | Season simulator | Team scoring rates, roster RAPM and score effects, integrated per game; team strength drawn once per simulated season | Calibrated intervals; level with Elo on points error |
 | Player season projection | 50/50 blend of a gradient-boosted season model and the player-game layer summed over the schedule | Best of three in backtest (9.07 points per 82 games) |
-| NeurHL-H | Neural player layer aggregated to team shot share, combined with Elo in a thin logistic head | Exploratory win over Elo; one-shot test decides |
+| NeurHL-H | Neural player layer aggregated over the dressed lineup to team shot share, combined with Elo in a thin logistic head | Confirmed on 2017-18 to 2025-26: log loss -0.0048 vs Elo |
 
 ## How it was tested
 

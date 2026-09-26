@@ -14,13 +14,15 @@ Seasons are named by the year they end: 2018 is the 2017-18 season.
 | Claim | Result | Window | Record |
 |---|---|---|---|
 | The player-game layer beats each skater's own recent average on all four targets | Ice-time share MAE -4.1%, shots deviance -10.2%, P(goal) log loss -2.8%, P(assist) log loss -2.6%. Holm p < 1e-5; two-way clustered z from -8.1 to -23.9; better in every season | 2018-2020, 130,092 skater-games, one config, spent once | `neurhl/configs/player_game_confirm_2018_2020.json`, `player_game_twoway_2018_2020.json` |
-| NeurHL-H beats Elo game by game | **Pending.** Frozen in PLAN_NeurHL A5 before scoring; runs once | 2018-2026, n = 10,184 | `neurhl/output/hier_restatement.json` (written by the run) |
+| NeurHL-H beats Elo game by game, given the dressed lineup | Log loss 0.66495 vs 0.66973, diff -0.00478 (95% CI -0.00650 to -0.00306), p < 1e-6; season-clustered p = 0.0007; better in 8 of 8 seasons. The gain is resolution (0.0122 vs 0.0098), not recalibration. Against a constant home-win rate (0.6899) it improves Elo's skill by 24% | 2018-2026 excluding 2021, n = 10,184; frozen in PLAN_NeurHL A5, run once (including 2021: -0.00459, 9 of 9 seasons) | `neurhl/output/hier_restatement.json`, `neurhl/output/preds/hier_restatement_games.csv` |
+
+NeurHL-H uses which skaters dressed for each game, known about an hour before puck drop; Elo does not. The confirmed gain is conditional on that lineup.
 
 ## Exploratory
 
 | Claim | Result | Why it is not a test | Record |
 |---|---|---|---|
-| NeurHL-H beats Elo game by game (tune window) | Log loss 0.67314 vs 0.67597, diff -0.00283, p = 0.0075; won 5 of 5 seasons | The scored seasons, Layer 1 and the scoring rule changed on this window while results were visible (PLAN_NeurHL A5.1). The estimate does not depend on the season choice: p runs 0.0075-0.019 across the four scored sets | `neurhl/output/hier_result.json`, `neurhl/configs/hier_both_ways_original.json` |
+| NeurHL-H beats Elo game by game (tune window) | Log loss 0.67314 vs 0.67597, diff -0.00283, p = 0.0075; won 5 of 5 seasons. Superseded by the confirmation above | The scored seasons, Layer 1 and the scoring rule changed on this window while results were visible (PLAN_NeurHL A5.1). The estimate does not depend on the season choice: p runs 0.0075-0.019 across the four scored sets | `neurhl/output/hier_result.json`, `neurhl/configs/hier_both_ways_original.json` |
 | Rolling shot-share form adds to Elo | All six variants improve log loss (-0.0009 to -0.0022); best single p = 0.041 | Exploration on 2015-2017; not significant after correcting for six tests | PLAN_NeurHL A3.1 |
 
 ## Development only
