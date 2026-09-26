@@ -479,7 +479,7 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
     c1card = `<div class="card"><span class="pill ${pass?"green":"red"}"><i></i>${pass?"Confirmed":"Null"}: one-shot test</span>
       <h3>NeurHL-H against Elo, game by game</h3>
       <div class="big">${c1.diff>=0?"+":""}${c1.diff.toFixed(4)} <small>log loss vs Elo, ${c1.n_games.toLocaleString()} games</small></div>
-      <p>95% interval ${c1.ci95[0].toFixed(4)} to ${c1.ci95[1].toFixed(4)}; p = ${c1.p_two_sided.toFixed(4)}; better in ${c1.seasons_won} of ${c1.seasons} seasons. Tune-window estimate was ${E.tune.diff.toFixed(4)}.</p></div>`;
+      <p>95% interval ${c1.ci95[0].toFixed(4)} to ${c1.ci95[1].toFixed(4)}; ${c1.p_two_sided < 1e-4 ? "p &lt; 0.0001" : "p = " + c1.p_two_sided.toFixed(4)}; season-clustered p = ${c1.clustered_p.toFixed(4)}; better in ${c1.seasons_won} of ${c1.seasons} seasons. Tune-window estimate was ${E.tune.diff.toFixed(4)}.</p></div>`;
   }
   $("#ev").innerHTML = `
     <div class="card"><span class="pill green"><i></i>Confirmed</span>
