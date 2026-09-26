@@ -140,6 +140,10 @@ number comes from CPU inference over a saved checkpoint.
 Nothing in `src/` imports NeurHL. The baselines' own history is in `PLAN.md`
 and `PLAN_V3.md` through `PLAN_V6.md`.
 
+Commit IDs quoted inside plan documents and records were assigned before the
+repository was published; `neurhl/configs/commit_map.csv` maps each one to
+its commit here.
+
 ## Data
 
 Play-by-play, shifts, rosters, schedules and player statistics come from the

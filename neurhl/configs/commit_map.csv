@@ -1,0 +1,81 @@
+cited_id,commit,subject
+00ab7ad,65d0ae6,"PLAN: record final status of every phase, including what was not built"
+047b8ce,92b3437,"v1 frozen: team-level Elo+xG model (K=6,H=35,w=0.6,phi1=0.85,phi2=0.75), walk-forward validated 2018-2026, 2027-28 projections spreadsheet"
+08000b1,5329faa,P3: carry time/period/shooter on saved xG predictions so they join to stints
+127f070,68cb90b,PLAN_NeurHL_LIVE: freeze the 2026-27 predictions before opening night
+14276e3,c1a409a,Report: final player table and the conservation-law identities
+174aecd,933b73c,Confirmation artifacts hashed; tune window re-derived on the rebuilt set
+18f7c91,2ae8bef,"v3.1: amended overlay applied (partial-regression identification, rho*=0.506); form/skew/persistence screens null"
+19309f5,e916cc7,"Fix the bias MEASUREMENT, not the threshold: 34/34 acceptance checks pass"
+1ea6204,a084172,"Record cleanup: corrected docstrings, identity-blind playoff tiebreaks, A10 assist recovery"
+1f2614b,68a0652,PLAN_NeurHL AMENDMENT A3 (committed BEFORE its run): shot-based form; my A2 ceiling claim was wrong
+2123e05,8480626,"A6 result: team FE fixes a real defect but R1' stays INCONCLUSIVE; RAPM retained on structure, not on winning"
+244a30f,7477f13,Games played is a conservation law too; remove a dead age curve; 40/40 checks
+28920c7,fdeedba,"complete $100 test-budget allocation: two-stage joint log-optimization, sum-to-100 constraint, 15% caps; cross-book Cup line shopping (overround 1.255 -> 1.118); 20 tickets, blended EV +$24"
+2aec238,f3a965b,batch 3: rest/b2b effect shipped into sims (+alignment bugfix); tank/familiarity/team-HFA/heavy-hockey nulls; relative-age + SO documented
+2baf694,0bf7279,P1/P4: stint table validated 19/19 seasons; RAPM anchor; event-attribution fix
+2d05645,6376e67,"Record the confirmed NeurHL-H result across README, ledger, notes and site"
+346a645,28b2724,PLAN_NeurHL AMENDMENT A4: the 2012-13 lockout season was a protocol omission
+34d9165,ac7f8c1,v5 data expansion: MP shots + NHL PBP corpus + EDGE + HR + fastRhockey; F3 gates
+389e9a2,3863864,"milestone-prop pricing: exact ENS threshold probs for all teams (75-125), recorded board priced — BOS ladder & SEA +EV, MTL fair, NYR negative"
+39d03bf,200edee,rename ENS -> HOWE (Hockey Outcomes via Weighted Ensemble); canonical howe.py
+3ee69ff,f510c4c,"NeurHL-3 acceptance battery (declared in PLAN_NeurHL3, section Q)"
+3f0b2db,1e1bfcb,P3: walk-forward xG (L0) + gates X1/X2/X3; X2 diagnostics written before the result
+3ff1285,b34977f,"ONE-SHOT PLAYER CONFIRM {2018-2020}: PG-ALL PASS, window spent once"
+46b1bb7,6adec4a,P1: unified shift table across both eras; fix phantom-shift bug in parse_toi
+4a24595,be8bf92,Rebuild player projections: fix era bias and four more hand-tuned constants
+4bb92d9,64baf45,"v4 prereg: gates for goalie layer/availability2/prospects, ensemble decision locked, bug list — committed before any result is computed"
+4c57d8c,ea51a56,Ship the PS1 player-season blend for 2026-27
+4d34a51,29c6231,"full-board portfolio optimizer: joint Kelly over 10k ENS scenarios, market-blended probs (50% vote), quarter-scale + caps -> $19 funded of $100; book coherent (totals sum 2998 ~ feasible 2997)"
+510af38,474a828,PLAN_NeurHL2 prereg + engineering foundation (committed BEFORE any NeurHL-2 number)
+5b3f293,a73d504,Add the NeurHL-2 build report (published artifact)
+6221892,6ae5a97,P2: parse MoneyPuck shot corpus (P3 allowlist) - closes the pre-2012 coordinate hole
+6946107,49d43d4,"P5: S0 unified stream, walk-forward RAPM priors, and the S1 event simulator"
+6ab059a,f558b99,Season layer BEATS both house benchmarks; two real bugs fixed to get there
+7338636,9db970e,"v4 bugs B1-B4: float64 standings key (+W tiebreak), per-game noise + banked hooks, b2b_flags helper, assert fix; repro_b2b.py REPRODUCES 38 Elo (t -5.3/+6.7); overlay amendment as code — 1.011 reproduced (intercept spec recovered; gain was centering artifact not selection control), production-consistent rho_full=0.843 -> rho*=0.421"
+75d6ee4,e405139,v3.1 notes
+76decb6,b3d777e,A6: R1' INCONCLUSIVE on DEV -- team-demeaned raw matches RAPM; fix declared first
+77510bf,c0f050c,v3 notes
+77bf3d3,3b58f3b,"v6 second data expansion (all 8): shifts, careers, coaches, travel, playoff pbp, EDGE players, odds log, absence spells; F4 ships toi_hhi_f + coach_tenure"
+7b65576,821fcf5,PS1: the A+B blend SHIPS for player season projections (pooled MAE 9.07)
+82089e7,237bef5,"v4 production: ENS co-headline (COL 109.7/CAR 109.5; 27-28 MTL 106.2); market sheet vs hand-recorded Cup board (overround 1.255, quarter-Kelly total $2.94); LOCKED report-only: ENS beats both parents both horizons (10.397/11.533), CRPS 31-32% sharper than point forecasts; deterministic (hash-identical reruns)"
+8620890,088b2a5,"P3 result: X1 PASS (17/18), X2 PASS, X3 FAIL; A7 calibration correction"
+87da58b,ad3d699,A9+A10: declare in-season xG calibrator and HTM assist recovery BEFORE the runs
+88d74f8,079fd52,"N5 game reattempt: four new-information blocks all NULL on the pre-gate; G-STOP fired, C1 preserved unspent"
+8b5864d,e896b3e,Player-game confirmation: two-way (player x game) clustered standard errors
+8c8e6d8,31f8245,prereg PLAN_NeurHL LOCKED with tune-only baseline numbers — committed BEFORE any NeurHL gate runs
+8d97827,969da5b,"hypothesis batch 2: star aging, playoff leverage (sign-flip null), cup hangover, goalie workload — all null, documented"
+94a6795,689b461,"PLAN_NeurHL A5: record correction and one-shot NeurHL-H confirmation, frozen before scoring"
+9518c8f,9780e09,neurhl/README: package guide for the 1.0 release
+9999cca,d4b08d9,Site: format very small p-values
+9d8bc6c,e3ac91d,Update report with the corrected player projections and the era-bias finding
+9f8dafa,a981933,v2: confirm (R3 adopted) + final validation + notes
+b0ff517,c55f7aa,"Capacity comparison: 5M BEATS 26M; keep the small model, spend hardware elsewhere"
+b1c2bd5,47560a0,"v2 complete: report2 with 2026-27 headline (real schedule), goalie/age/player sheets, ledger, honest final-window verdict"
+b312506,fe66f52,A5: gate R1 FAILED as written and is retired; declared before replacement runs
+b5d7207,b44311d,"NeurHL 1.0 publication layer: README, evidence ledger, projection site"
+b719257,ae2141f,"prereg PLAN_V6: second data expansion (shifts, careers, coaches, travel, playoff pbp, EDGE players, odds log, absence spells) — committed BEFORE fetch/gates"
+b7dbd80,6e0e17b,PLAN_NeurHL AMENDMENT A1 (committed BEFORE its run) + config #1 result and the diagnostic behind it
+bd715ad,58db524,"P5 FIX: S1 was leaking the next event's owning team; removed, retraining"
+bf90072,50d0349,P2: fetch the MoneyPuck datasets not already held (681 MB)
+c36b95a,393f4ff,FREEZE pg-01: player-game layer + D-stages; PG-ALL green on dev/tune/eval; causality audit clean
+c4ff910,eab1d5e,P5: fix score-state orientation bug; E2 goes from FAIL (ratio 0.076) to PASS (0.977 corr)
+c5e00a9,08528d9,"A11 ladder run: rink offset / disagreement / regime covariates; X3 0.00653-0.00737-0.00688 recorded, X1 18/18"
+c723475,4650f4c,"P5 complete: S1 event simulator, gates E1 and E2 both PASS with the 5-seed ensemble"
+ccbd1ee,2cf85a9,"v2: features, ridge, stage_t tuning + ledger, overlay mechanism test (prereg: overlay blocked by placebo)"
+cd289d9,6101a8c,"v4 live rebuild (validated estimator, parity 0.000000 Elo, full odds+CLV outputs); battery 68/68; NOTES v4 section"
+d019417,09aab2f,"v4 gates run: goalie layer SHIP (cov .861, true mean shift .002 — first-run 0.809 was gate-harness MC noise, measurement corrected & documented); availability2 SHIP (P0 mass to 14.6% at 36+, goalie slot 14.5x OD; spread passes by .004; persistence DROPPED — EB lost to bucket baseline, 24x OD diagnosis); prospect pipeline SHIP both horizons (join 98%, h2 dMAE -0.134 stab 1.00)"
+d02b48a,a01fa56,M2 goalie gates: GS1/GQ1 recorded as NULLS with declared consequences
+d0b33a5,a68b0fa,P5-v2: leak-free ensemble retrained; E1/E2 PASS on audited inputs; S4 still failing
+d159362,669b354,Player projections for 2026-27 + a fourth data gap found; acceptance 33/33
+ddb5cfb,53a24d0,A8: record both S1 leaks in the prereg; all prior P5 gate results VOID
+dfb3e20,9df69a9,"v3: finishing+PP features (gated in), availability noise in sims, living model with replay validation, live.py"
+e09696f,21b8e43,"S4-v2: game layer from validated components; G-STOP FIRES, CONFIRM not spent"
+e6e2a1c,5ccaf95,"PLAN_NeurHL AMENDMENT A2 (committed BEFORE its run): Elo-residual hybrid + gate S1, an actual paired significance test"
+e9a699a,05ff602,Evidence corrections and the confirmation harness
+ea6aae2,58e0411,"v2: player/NHL data fetchers, player panels, goalie EB+consistency module, skater Marcel, age curves"
+ed0d7d3,51fbb2f,"P0: PLAN_NeurHL3 prereg + A11 rink ladder, committed BEFORE any NeurHL-3 number"
+edc9bbf,3314ceb,P9: 2026-27 projection delivered; acceptance battery 27/27; project complete
+f078f56,975ff77,"NeurHL: documented null at game, season and player level; prereg consequences applied"
+f8a324a,8de3cd2,"C1 RESULT: NeurHL-H beats Elo on 2018-2026, one-shot confirmation PASSES"
+f9a6cbc,bf29587,"CRITICAL: second leak found and fixed; on_ctx replaces on_next, full audit added"
