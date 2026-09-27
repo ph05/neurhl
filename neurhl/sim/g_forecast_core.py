@@ -58,7 +58,9 @@ def load_bundle(name):
     for f in sorted(x for x in meta["files"] if x.endswith(".pt")):
         m = NeurHLG(len(n["sk_feat"]), len(n["gk_feat"]), len(n["tm_feat"]),
                     len(n["ctx"]), d=cfg.get("d", 64), p=cfg.get("dropout", 0.2),
-                    attn=cfg.get("attn", False), freeze_heads=cfg.get("freeze_heads", False))
+                    attn=cfg.get("attn", False), freeze_heads=cfg.get("freeze_heads", False),
+                    elo_anchor=cfg.get("elo_anchor", False),
+                    lineup_terms=cfg.get("lineup_terms", False))
         m.load_state_dict(torch.load(d / f, map_location="cpu"))
         m.eval()
         models.append(m)
@@ -76,6 +78,8 @@ def standardise(A, stats, names):
     P["TMR"] = A["TM"][..., [names["tm_feat"].index(c) for c in TEAM_RAW]].astype(np.float32)
     P["GKR"] = A["GK"][..., names["gk_feat"].index("gk_gsax_shrunk")].astype(np.float32)
     P["ELO"] = np.nan_to_num(A["CTX"][:, 0]).astype(np.float32)
+    ri = [names["sk_feat"].index(c) for c in ("rapm_cf_off", "rapm_cf_def")]
+    P["RAPM"] = np.nan_to_num(A["SK"][..., ri]).astype(np.float32)
     return P
 
 

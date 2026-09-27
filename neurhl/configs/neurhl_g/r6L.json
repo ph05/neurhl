@@ -1,0 +1,9 @@
+{
+ "epochs1": 10,
+ "epochs2": 4,
+ "w_out1": 0.3,
+ "seeds": 3,
+ "lineup_terms": true,
+ "parent": "r6",
+ "delta": "R6L = R6 + lineup-vs-usual team-rate multipliers (TOI-weighted on-ice xGF60/xGA60 vs team history, TOI-weighted RAPM), zero-init coefficients"
+}

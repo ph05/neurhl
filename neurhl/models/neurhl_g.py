@@ -54,9 +54,14 @@ def mlp(i, h, o, p=0.1, out_zero=False):
 
 class NeurHLG(nn.Module):
     def __init__(self, n_sk, n_gk, n_tm, n_ctx, d=64, p=0.2, attn=False,
-                 freeze_heads=False):
+                 freeze_heads=False, elo_anchor=False, lineup_terms=False):
         super().__init__()
         self.freeze_heads = freeze_heads
+        self.elo_anchor = elo_anchor
+        self.lineup_terms = lineup_terms
+        # lineup vs usual: tonight's TOI-weighted on-ice xGF60 / xGA60 relative to
+        # the team's history, and TOI-weighted RAPM; coefficients start at zero
+        self.kappa = nn.Parameter(torch.zeros(3))
         self.sk_enc = mlp(n_sk + 2, 128, d, p)
         self.tm_enc = mlp(n_tm, 64, 32, p)
         self.gk_enc = mlp(n_gk, 32, 16, p)
@@ -116,6 +121,7 @@ class NeurHLG(nn.Module):
         sf, sa = sh(raw[..., 6], L_sog), sh(raw[..., 7], L_sog)
         opp_i = [1, 0]
         b = {}
+        b["xf_ev"], b["xa_ev"] = xf_ev, xa_ev
         b["ev"] = xf_ev * xa_ev[:, opp_i] / L_ev
         b["pp"] = xf_pp * xa_sh[:, opp_i] / L_pp
         b["ppo"] = ppo * pko[:, opp_i] / L_ppo
@@ -182,7 +188,16 @@ class NeurHLG(nn.Module):
         w_ev = toi_ev / (5.0 * T_ev[..., None])                   # sums to 1 per side
         lineup = (w_ev * off).sum(-1) - (w_ev[:, opp] * dfn[:, opp]).sum(-1)
         sgn = torch.tensor([1.0, -1.0])
-        elo_sh = 0.5 * self.elo_beta * bt["ELO"][:, None] * sgn
+        elo_sh = 0.5 * self.elo_beta * bt["ELO"][:, None] * sgn if self.elo_anchor \
+            else torch.zeros_like(lineup)
+        if self.lineup_terms:
+            lin_f = (w_ev * SKB[..., 8]).sum(-1).clamp(min=0.3)
+            lin_a = (w_ev * SKB[..., 9]).sum(-1).clamp(min=0.3)
+            rp = torch.nan_to_num(bt["RAPM"], nan=0.0)
+            r_off, r_def = (w_ev * rp[..., 0]).sum(-1), (w_ev * rp[..., 1]).sum(-1)
+            lineup = lineup + self.kappa[0] * torch.log(lin_f / base["xf_ev"]) \
+                + self.kappa[1] * torch.log(lin_a[:, opp] / base["xa_ev"][:, opp]) \
+                + self.kappa[2] * (r_off - r_def[:, opp])
         r_ev = base["ev"] * torch.exp(lineup + dtm[..., 0] + elo_sh
                                       + self.home_ev * sgn)
         w_pp = toi_pp / (5.0 * T_pp[..., None]).clamp(min=eps)

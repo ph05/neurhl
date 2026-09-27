@@ -44,11 +44,14 @@ def append_ledger(row: dict) -> None:
 
 
 def model_sha() -> bytes:
-    """Hash of the model and trainer source, so cached snapshot predictions
-    are reused only for identical code."""
+    """Hash of the model and trainer source and the master tensor, so cached
+    snapshot predictions are reused only for identical code and data."""
     root = Path(__file__).resolve().parents[1]
+    data = [(TENSORS / f).stat() for f in ("g_master.npz", "g_meta.parquet")]
+    fp = "|".join(f"{x.st_size}:{int(x.st_mtime)}" for x in data).encode()
     return hashlib.sha256((root / "models" / "neurhl_g.py").read_bytes()
-                          + (root / "train" / "train_neurhl_g.py").read_bytes()).digest()
+                          + (root / "train" / "train_neurhl_g.py").read_bytes()
+                          + fp).digest()
 
 
 def nll(p, y):

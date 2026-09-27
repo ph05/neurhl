@@ -74,6 +74,8 @@ class Data:
         out["SKY"], out["TMY"] = A["SKY"], A["TMY"]
         out["O4"] = self.meta.outcome4.to_numpy().astype(np.int64)
         out["ELO"] = np.nan_to_num(A["CTX"][:, 0]).astype(np.float32)
+        ri = [self.names["sk_feat"].index(c) for c in ("rapm_cf_off", "rapm_cf_def")]
+        out["RAPM"] = np.nan_to_num(A["SK"][..., ri]).astype(np.float32)
         return out
 
 
@@ -126,7 +128,9 @@ def train_snapshot(D, T, cfg):
     n = D.names
     model = NeurHLG(len(n["sk_feat"]), len(n["gk_feat"]), len(n["tm_feat"]),
                     len(n["ctx"]), d=cfg["d"], p=cfg["dropout"], attn=cfg["attn"],
-                    freeze_heads=cfg["freeze_heads"])
+                    freeze_heads=cfg["freeze_heads"],
+                    elo_anchor=cfg.get("elo_anchor", False),
+                    lineup_terms=cfg.get("lineup_terms", False))
     idx_tr = np.where(tr)[0]
     rng = np.random.default_rng(cfg["seed"] * 7919 + T)
 
