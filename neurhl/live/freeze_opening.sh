@@ -20,6 +20,12 @@ log() { echo "[freeze_opening $(date '+%H:%M:%S')] $*"; }
 
 log "1. roster snapshot $DATE"
 "${UV[@]}" python neurhl/live/fetch_rosters.py --date "$DATE" || exit 1
+"${UV[@]}" python -c "
+import pandas as pd
+r = pd.read_csv('data/raw/rosters/$DATE/rosters.csv')
+n = r.groupby('team').size()
+print('roster sizes: min', n.min(), 'max', n.max(), '| over 23:', ', '.join(f'{t} {k}' for t, k in n[n > 23].items()) or 'none')
+"
 log "2. refreshed 1.0 files"
 "${UV[@]}" python neurhl/live/refresh_preseason.py --date "$DATE" || exit 1
 log "3. DailyFaceoff snapshot"
@@ -36,7 +42,7 @@ done
 git add data/raw/rosters/"$DATE" neurhl/output/*_20260928.csv PLAN_NeurHL_LIVE_U1_20260928.md \
         neurhl/configs/playoff_tiebreak_check_20260928.json neurhl/configs/live_goal_calibration.json \
         neurhl/output/live/2027 docs neurhl/configs/acceptance_neurhl3.json \
-        neurhl/configs/acceptance_neurhl4.json 2>/dev/null
+        neurhl/configs/acceptance_neurhl4.json neurhl/output/live/scorecard_2027.json 2>/dev/null
 git commit -q -m "Opening-night freeze: post-deadline rosters, dated 1.0 update U1, goal calibration m0, preview forecasts" \
   && log "committed $(git rev-parse --short HEAD)"
 log "7. push"
