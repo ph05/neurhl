@@ -1,0 +1,25 @@
+{
+ "pass": true,
+ "checks": {
+  "skater state, cut 2016-01-15": {
+   "rows_checked": 358713,
+   "features": 100,
+   "identical": true
+  },
+  "skater state, cut 2024-06-30": {
+   "rows_checked": 726910,
+   "features": 100,
+   "identical": true
+  },
+  "goalie state": {
+   "rows_checked": 30878,
+   "features": 23,
+   "identical": true
+  },
+  "team state": {
+   "rows_checked": 19968,
+   "features": 53,
+   "identical": true
+  }
+ }
+}
