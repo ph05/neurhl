@@ -12,10 +12,10 @@ Run everything from the repo root with
 | `lineup_resolver.py` | `resolve(game_id, date, home, away, snapshot_dir=None)` returns, per side, 12 F + 6 D NHL ids (`forwards`, `defense`, `skaters`), one starting `goalie`, `lineup_source` (NHL_API, DF_CONFIRMED, DF_PROJECTED, FALLBACK), `goalie_source` (NHL_API, DF_CONFIRMED, DF_LIKELY, DF_LINES, FALLBACK) and `notes` (why each step was or was not used). Priority: the game's boxscore once it lists the lineup; then the latest DailyFaceoff lines snapshot for the team updated within 36 h of the start (goalie from the starting-goalies feed if Confirmed/Likely, else DailyFaceoff g1/g2); then FALLBACK (skaters dressed in the team's last 2026-27 game, or for game 1 the latest roster snapshot ranked by 2025-26 TOI, minus `status.unavailable(date)` and DailyFaceoff IR/out players, topped up by prior TOI; goalie by 2026-27 starts to date, prior-season starts for game 1). Never raises; degrades to FALLBACK. | `python neurhl/live/lineup_resolver.py [--date D] [--game GID] [--snapshot-dir DIR] [--rosters D] [--no-api] [--json OUT] [--ids]` |
 | `publish.sh` | Publishes files through the bot clone (default `/Users/ph/Development/nhl-2026-2027-models-live`): `git pull --rebase`, copies the given repo-relative files/dirs, stages only `neurhl/output/live/`, `data/manual/`, `data/raw/rosters/`, `docs/`, commits with a plain message (`PUBLISH_MSG`; trailers/attribution are refused, and undone if a hook adds one), pushes to main with 3 retries, then checks with `git ls-remote` that the commit is on origin/main. Last stdout line is the sha; nonzero exit on any failure (2 bad path, 3 clone/pull, 4 commit, 5 push, 6 not on origin). | `neurhl/live/publish.sh [BOT_CLONE] FILE...` |
 | `deadline.py` | `check(start_utc, sha)` via `gh api`: committer date (`.commit.committer.date`) before the start, commit on main (compare API), and the earliest `stamp.yml` run for the sha (server-side time). `precedes(start, sha)` is the plain committer-date test. For the acceptance tests. | `python neurhl/live/deadline.py --sha SHA (--start ISO \| --game GID) [--require-stamp]` (exit 0/1/2) |
-| `forecast.py` | PLACEHOLDER entry point for `--mode morning` / `--mode pregame`; only logs. | `python neurhl/live/forecast.py --mode M` |
+| `forecast.py` | Morning, pregame and preview forecasts: resolves lineups, builds the NeurHL-G inputs (`sim/g_live.py`), runs NeurHL-G, the NeurHL-H comparator and in-season Elo, simulates the stat sheets, writes `neurhl/output/live/2027/<date>/`, rebuilds the site and publishes through `publish.sh`. | `python neurhl/live/forecast.py --mode {morning,pregame,preview} [--date D] [--now ISO] [--dry-run]` |
 | `ingest_2027.py` | Nightly ingest of completed 2026-27 regular-season games into the `*_2027` tables that `data/build_g_state.py` and `sim/g_live.py` read (see "Nightly ingest" below). | `python neurhl/live/ingest_2027.py [--no-fetch] [--force] [--through D]` |
 | `test_ingest_parity.py` | Sandbox parity and dry-run tests for the ingest (see below). Never writes to the real tables. | `python neurhl/live/test_ingest_parity.py {dryrun\|parity\|parity2013\|live\|all}` |
-| `run_morning.sh`, `run_nightly.sh` | launchd wrappers: morning calls `forecast.py --mode morning`; nightly runs `score_live_2027.py`, `ingest_2027.py`, then `build_g_state.py` (see below). | |
+| `run_forecast.sh`, `run_nightly.sh` | launchd wrappers. `run_forecast.sh MODE` runs `forecast.py --mode MODE` with every dependency the forecast needs (torch, numba, scikit-learn==1.9.1, scipy); nightly runs `score_live_2027.py`, `ingest_2027.py`, `build_g_state.py`, then publishes results, scorecard and site (see below). | |
 
 Intraday snapshots: `python neurhl/data/fetch/snapshot_lineups.py --intraday` writes
 `data/raw/lineup_snapshots/<date>/<HHMM>/` (local time) with `df_goalies.html.gz` and the
@@ -40,9 +40,9 @@ and logs to `data/raw/lineup_snapshots/launchd_<name>.log`.
 |---|---|---|
 | `com.neurhl.snapshot` (existing) | 17:30 daily | `snapshot_lineups.py` (daily mode) |
 | `com.neurhl.intraday` | every 30 min, 09:00-23:00 | `snapshot_lineups.py --intraday` |
-| `com.neurhl.morning` | 11:00 | `neurhl/live/run_morning.sh` -> `forecast.py --mode morning` |
-| `com.neurhl.pregame` | every 10 min, 11:00-23:50 | `forecast.py --mode pregame` (uv with numpy, pandas<3, pyarrow, requests; add `--with` deps to the plist if forecast.py needs more) |
-| `com.neurhl.nightly` | 04:30 | `neurhl/live/run_nightly.sh` (results, ingest, G state) |
+| `com.neurhl.morning` | 11:00 | `neurhl/live/run_forecast.sh morning` |
+| `com.neurhl.pregame` | every 10 min, 11:00-23:50 | `neurhl/live/run_forecast.sh pregame` (forecasts each game 45-75 minutes before its start) |
+| `com.neurhl.nightly` | 04:30 | `neurhl/live/run_nightly.sh` (results, ingest, G state, publish) |
 
 Forecasts are computed in this repo (the resolver reads the gitignored
 `neurhl/data/tensors/` and `data/raw/lineup_snapshots/`) and only the outputs go through the
@@ -57,7 +57,7 @@ file (also in the run summary). `deadline.py --require-stamp` uses that run's `c
 `run_nightly.sh` (uv with numpy, pandas<3, pyarrow, requests, numba, scikit-learn==1.9.1, scipy;
 scikit-learn is pinned to the version the frozen xG checkpoint was pickled with, and the ingest
 refuses a mismatch)
-runs three steps and logs to `data/raw/lineup_snapshots/launchd_nightly.log` (launchd
+runs four steps and logs to `data/raw/lineup_snapshots/launchd_nightly.log` (launchd
 redirects there; run any other way, the output is also appended). It exits nonzero if any step
 failed; a lock directory (`data/raw/lineup_snapshots/.nightly.lock`, with the holder's pid; a
 stale lock is removed) stops two runs overlapping.
@@ -71,6 +71,8 @@ stale lock is removed) stops two runs overlapping.
    every season; rows of earlier seasons depend only on earlier games, so they do not change
    when 2027 is added (checked in the sandbox), unless an earlier-season input has been rebuilt
    since the last run.
+4. Once `results_2027.csv` has a completed game: `neurhl/site/build_site.py`, then
+   `publish.sh` with the results file, the scorecard and `docs/`.
 
 `ingest_2027.py` builds, for season S = 2027 (`--season`), the same tables the historical
 pipeline built for 2008-2026, by calling the builders' own functions:

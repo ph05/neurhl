@@ -1,39 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- NeurHL LIVE (com.neurhl.morning): 11:00 daily: morning forecast (projected lineups).
-     Install with neurhl/live/launchd/install.sh; times are the Mac's local time (ET). -->
 <plist version="1.0">
 <dict>
-  <key>Label</key>
-  <string>com.neurhl.morning</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>/usr/bin/caffeinate</string>
-    <string>-i</string>
-    <string>/bin/bash</string>
-    <string>/Users/ph/Development/nhl-2026-2027-models/neurhl/live/run_morning.sh</string>
-  </array>
-  <key>WorkingDirectory</key>
-  <string>/Users/ph/Development/nhl-2026-2027-models</string>
-  <key>EnvironmentVariables</key>
-  <dict>
-    <key>PATH</key>
-    <string>/opt/homebrew/bin:/Users/ph/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
-    <key>HOME</key>
-    <string>/Users/ph</string>
-    <key>PYTHONUNBUFFERED</key>
-    <string>1</string>
-  </dict>
-  <key>StartCalendarInterval</key>
-  <dict>
-    <key>Hour</key>
-    <integer>11</integer>
-    <key>Minute</key>
-    <integer>0</integer>
-  </dict>
-  <key>StandardOutPath</key>
-  <string>/Users/ph/Development/nhl-2026-2027-models/data/raw/lineup_snapshots/launchd_morning.log</string>
-  <key>StandardErrorPath</key>
-  <string>/Users/ph/Development/nhl-2026-2027-models/data/raw/lineup_snapshots/launchd_morning.log</string>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOME</key>
+		<string>/Users/ph</string>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/Users/ph/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+		<key>PYTHONUNBUFFERED</key>
+		<string>1</string>
+	</dict>
+	<key>Label</key>
+	<string>com.neurhl.morning</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/caffeinate</string>
+		<string>-i</string>
+		<string>/bin/bash</string>
+		<string>/Users/ph/Development/nhl-2026-2027-models/neurhl/live/run_forecast.sh</string>
+		<string>morning</string>
+	</array>
+	<key>StandardErrorPath</key>
+	<string>/Users/ph/Development/nhl-2026-2027-models/data/raw/lineup_snapshots/launchd_morning.log</string>
+	<key>StandardOutPath</key>
+	<string>/Users/ph/Development/nhl-2026-2027-models/data/raw/lineup_snapshots/launchd_morning.log</string>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>11</integer>
+		<key>Minute</key>
+		<integer>0</integer>
+	</dict>
+	<key>WorkingDirectory</key>
+	<string>/Users/ph/Development/nhl-2026-2027-models</string>
 </dict>
 </plist>

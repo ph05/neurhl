@@ -5,6 +5,8 @@
 #   2. neurhl/live/ingest_2027.py       new completed games -> the *_2027 tables in neurhl/data/tensors/
 #   3. neurhl/data/build_g_state.py     pre-game state (gst_*), only when a *_2027 input table is newer
 #                                       than gst_tm_2027.parquet (or that file is missing)
+#   4. neurhl/site/build_site.py, then neurhl/live/publish.sh: results, scorecard and site, once
+#                                       2026-27 games have been played
 # Log: data/raw/lineup_snapshots/launchd_nightly.log (launchd redirects stdout/stderr there; run any
 # other way, the output is also appended to it). Exit status is nonzero if any step failed.
 # A failed results fetch does not stop the ingest (it then works from the cached results file);
@@ -75,6 +77,20 @@ if step "ingest_2027" "${UV[@]}" neurhl/live/ingest_2027.py; then
 else
   status=1
   echo "[run_nightly $(ts)] build_g_state: skipped (ingest failed)"
+fi
+
+# 4. publish results, scorecard and site once 2026-27 games have been played
+RES="$REPO/neurhl/output/live/results_2027.csv"
+if [ -f "$RES" ] && [ "$(wc -l < "$RES")" -gt 1 ]; then
+  if step "build_site" "${UV[@]}" neurhl/site/build_site.py; then
+    PUBLISH_MSG="live: results and scorecard through $(date -v-1d '+%Y-%m-%d')" \
+      step "publish" bash neurhl/live/publish.sh - neurhl/output/live/results_2027.csv \
+      neurhl/output/live/scorecard_2027.json docs || status=1
+  else
+    status=1
+  fi
+else
+  echo "[run_nightly $(ts)] publish: skipped (no completed 2026-27 games)"
 fi
 
 echo "[run_nightly $(ts)] exit $status"

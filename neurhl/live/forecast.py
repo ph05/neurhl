@@ -12,8 +12,8 @@ statistics and stack, all hash-checked), the Monte Carlo stat sheet, the
 in-season house Elo reference and the frozen 1.0 preseason probability.
 
 Writes neurhl/output/live/2027/<date>/{morning,pregame_<gid>}.csv, matching
-*_players.csv stat lines and *_lineups.json, then publishes through
-neurhl/live/publish.sh (bot clone; the push must land before puck drop).
+*_players.csv stat lines and *_lineups.json, rebuilds the site, then publishes
+through neurhl/live/publish.sh (bot clone; the push must land before puck drop).
 
   --date YYYY-MM-DD   override today (ET)     --dry-run   write, do not publish
   --now ISO-UTC       override the clock (rehearsals)
@@ -160,6 +160,12 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
                                   "p_home_win_elo", "lineup_home", "lineup_away"]].to_string())
     if not dry:
         rel = [str(f.relative_to(PROJ)) for f in files]
+        site = subprocess.run([sys.executable, str(ROOT / "site" / "build_site.py")],
+                              capture_output=True, text=True)
+        if site.returncode == 0:
+            rel.append("docs")
+        else:                # the forecast files publish regardless
+            print(f"[forecast] site rebuild failed: {site.stderr[-1500:]}")
         import os
         env = {**os.environ, "PUBLISH_MSG": f"live: {stem} forecast {date}"}
         r = subprocess.run(["bash", str(ROOT / "live" / "publish.sh"), "-", *rel],
@@ -184,6 +190,9 @@ def main():
         return
     R = _resolver()
     games = R.games_on(date)
+    if not games:
+        print(f"[forecast] no games on {date}")
+        return
     if a.mode in ("morning", "preview"):
         # preview: the evening before, on post-deadline rosters; published but
         # descriptive only (PLAN_NeurHL4 LIVE scores morning and pregame)
