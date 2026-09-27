@@ -254,3 +254,33 @@ published for every game, its win probability is reported and scored, and
 NeurHL-H is the live primary for win probability. Read plainly: NeurHL-G
 beats Elo by a margin comparable to NeurHL-H's and is calibrated, but it has
 not been shown to add win-probability information beyond NeurHL-H.
+
+## A1 (2026-09-27, before any 2026-27 game): stat-sheet goal level
+
+**Finding (from inputs, before any live game).** A dry run of NeurHL-G v1 on
+opening night projects 3.36 regulation goals per team-game, against a league
+level that has held at about 3.0 for years. The cause is measurement drift in
+the house xG, visible in the training-side tables: goals per team-game were
+flat (3.08, 3.01, 3.08 in 2024-2026) while measured xG rose (2.89, 3.03, 3.32),
+so the goals-to-xG ratio fell from 1.067 to 0.927. This is the recording drift
+that failed gate X3 in NeurHL 1.0. v1, trained through 2024, learned the older
+ratio and reads 2025-26-era xG inputs.
+
+**What it affects.** Only the stat sheet: goals, assists, points and score
+distributions. The scored win probability is unaffected: the stack is fitted
+on the engine's unscaled outputs, and the Monte Carlo conditions every score
+on the stacked outcome category.
+
+**Rule.** Each forecast multiplies the engine's regulation goal means (and so
+assists) by m:
+- m0 = L / M, fixed at the pre-season freeze: L is last season's league
+  regulation goals per team-game computed from the era inputs the model
+  already receives (prior_gpg / 2 minus half the prior OT and shootout shares);
+  M is v1's own mean projected regulation goals over every game scheduled in
+  the first 14 days (fallback lineups, inputs only).
+- In season, m = (A + k m0) / (P + k) with k = 300 team-games, where A and P are
+  the actual and unscaled-predicted regulation goals over completed 2026-27
+  games that have a primary forecast. Walk-forward: a forecast uses only games
+  already finished.
+NeurHL-G's weights, stack and win probabilities are untouched, and no 2025 or
+2026 game is scored or used to fit anything; the seal stays intact.
