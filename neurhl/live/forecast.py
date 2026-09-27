@@ -99,7 +99,21 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
             p_h = h_forecast(gdf, lu_in, A["CTX"][:, 0], sc, hproj)
     except Exception as e:  # noqa: BLE001
         print(f"[forecast] NeurHL-H comparator failed: {type(e).__name__}: {e}")
-    rows, sheets = forecast(bundle, A, p_h=p_h)
+    try:                     # stat-sheet goal level (PLAN_NeurHL4 A1)
+        from live.goal_calibration import current as goal_mult
+    except Exception:  # noqa: BLE001
+        import importlib.util
+        _sp = importlib.util.spec_from_file_location("goal_calibration",
+                                                     ROOT / "live" / "goal_calibration.py")
+        _gc = importlib.util.module_from_spec(_sp)
+        _sp.loader.exec_module(_gc)
+        goal_mult = _gc.current
+    try:
+        gm = goal_mult()
+    except Exception as e:  # noqa: BLE001
+        print(f"[forecast] goal calibration unavailable ({e}); using 1.0")
+        gm = 1.0
+    rows, sheets = forecast(bundle, A, p_h=p_h, goal_mult=gm)
     frozen = pd.read_csv(NOUT / "games_2027.csv").set_index("game_id")
     code = subprocess.run(["git", "-C", str(PROJ), "rev-parse", "--short", "HEAD"],
                           capture_output=True, text=True).stdout.strip()
@@ -118,8 +132,10 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
             "p_home_win_neurhl_h": round(float(p_h[i]), 5) if np.isfinite(p_h[i]) else None,
             "p_home_win_1p0": round(float(frozen.p_home_win.get(r.game_id, np.nan)), 5),
             "p_ot": round(rows[i]["p_ot"], 4), "stack_used": rows[i]["stack_used"],
-            **{k: round(rows[i][k], 3) for k in ("goals_home", "goals_away", "xgf_home",
-                                                   "xgf_away", "sog_home", "sog_away")},
+            **{k: round(rows[i][k], 3) for k in ("goals_home", "goals_away", "goals_home_raw",
+                                                   "goals_away_raw", "xgf_home", "xgf_away",
+                                                   "sog_home", "sog_away")},
+            "goal_mult": round(rows[i]["goal_mult"], 4),
             "lineup_home": lu["home"]["lineup_source"], "lineup_away": lu["away"]["lineup_source"],
             "goalie_home": lu["home"]["goalie"], "goalie_away": lu["away"]["goalie"],
             "goalie_src_home": lu["home"]["goalie_source"],

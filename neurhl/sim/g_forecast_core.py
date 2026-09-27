@@ -89,17 +89,24 @@ def standardise(A, stats, names):
 
 
 @torch.no_grad()
-def forecast(name, A, n_sims=10_000, seed=711, p_h=None):
-    """Returns (per-game rows, per-game stat sheets). p_h: NeurHL-H home-win
-    probabilities (sim/h_live.py); games without one use the Elo+G fallback stack."""
+def raw_outputs(name, A):
+    """Seed-averaged engine outputs (unscaled), the bundle's meta and sigma."""
     torch.set_num_threads(4)
     models, stats, meta = load_bundle(name)
-    names = meta["names"]
-    P = standardise(A, stats, names)
+    P = standardise(A, stats, meta["names"])
     bt = {k: torch.as_tensor(v) for k, v in P.items()}
     outs = [{k: v.numpy() for k, v in m(bt).items()} for m in models]
     o = {k: np.mean([x[k] for x in outs], 0) for k in outs[0]}
     sigma = float(np.mean([m.log_sigma.exp().item() for m in models]))
+    return o, meta, sigma
+
+
+def forecast(name, A, n_sims=10_000, seed=711, p_h=None, goal_mult=1.0):
+    """Returns (per-game rows, per-game stat sheets). p_h: NeurHL-H home-win
+    probabilities (sim/h_live.py); games without one use the Elo+G fallback stack.
+    goal_mult: stat-sheet goal-level calibration (PLAN_NeurHL4 A1); it scales
+    regulation goal means (and so assists) only, never the win probability."""
+    o, meta, sigma = raw_outputs(name, A)
     st = meta["stack"]
     lgt = lambda p: np.log(np.clip(p, 1e-6, 1 - 1e-6) / np.clip(1 - p, 1e-6, 1))
     lg = lgt(o["p_home_win"])
@@ -115,10 +122,10 @@ def forecast(name, A, n_sims=10_000, seed=711, p_h=None):
     for i in range(len(p_final)):
         # rescale outcome4 so its home-win mass equals the stacked probability
         o4 = o["o4"][i].copy()
-        ph = o4[0] + o4[2]
-        o4[[0, 2]] *= p_final[i] / max(ph, 1e-9)
-        o4[[1, 3]] *= (1 - p_final[i]) / max(1 - ph, 1e-9)
-        g = {"o4": o4, "goals": o["goals"][i], "sogf": o["sogf"][i], "xgf": o["xgf"][i],
+        home_mass = o4[0] + o4[2]
+        o4[[0, 2]] *= p_final[i] / max(home_mass, 1e-9)
+        o4[[1, 3]] *= (1 - p_final[i]) / max(1 - home_mass, 1e-9)
+        g = {"o4": o4, "goals": o["goals"][i] * goal_mult, "sogf": o["sogf"][i], "xgf": o["xgf"][i],
              "pp_opps": o["pp_opps"][i], "sigma": sigma, "mask": A["SKM"][i],
              "player_id": A["SKID"][i],
              **{k: o[k][i] for k in ("isog", "g", "a", "ixg", "toi_ev", "toi_pp", "toi_sh")}}
@@ -127,7 +134,10 @@ def forecast(name, A, n_sims=10_000, seed=711, p_h=None):
                      "stack_used": "elo+g+h" if ("lh" in st["cols"] and np.isfinite(ph[i])) else "elo+g",
                      "p_ot": float(o4[2] + o4[3]),
                      "xgf_home": float(o["xgf"][i, 0]), "xgf_away": float(o["xgf"][i, 1]),
-                     "goals_home": float(o["goals"][i, 0]), "goals_away": float(o["goals"][i, 1]),
+                     "goals_home": float(o["goals"][i, 0] * goal_mult),
+                     "goals_away": float(o["goals"][i, 1] * goal_mult),
+                     "goals_home_raw": float(o["goals"][i, 0]), "goals_away_raw": float(o["goals"][i, 1]),
+                     "goal_mult": float(goal_mult),
                      "sog_home": float(o["sogf"][i, 0]), "sog_away": float(o["sogf"][i, 1])})
         sheets.append(sh)
     return rows, sheets
