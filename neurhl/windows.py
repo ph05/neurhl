@@ -106,3 +106,44 @@ def train_seasons_for(predict_season: int, start: int = TRAIN_FROM) -> list:
     they are real hockey and the model should learn from them.
     """
     return [s for s in range(start, predict_season)]
+
+
+# ------------------------------------------------- game engine windows (NeurHL-G)
+# PLAN_NeurHL4. Every historical season has been consulted at game level by
+# 1.0, so these windows are procedural. SEALED seasons are scored exactly once,
+# by eval/seal_g.py; LIVE is the 2026-27 season, the only unseen test.
+G_BURN_IN = [2008, 2009, 2010, 2011]            # state and training only
+G_ITER = [2012, 2014, 2015, 2016, 2017, 2018]   # iteration and ablations
+G_GATE = [2019, 2020, 2022, 2023, 2024]         # gates and the pre-gate
+SEALED = [2025, 2026]                           # one-shot, eval/seal_g.py
+G_LIVE = 2027
+
+_UNSEALED = False
+
+
+def unseal(caller: str) -> None:
+    """Only the one-shot seal script may open SEALED seasons for scoring."""
+    global _UNSEALED
+    if not caller.endswith("eval/seal_g.py"):
+        raise PermissionError(f"unseal() refused for caller {caller!r}")
+    _UNSEALED = True
+
+
+def is_unsealed() -> bool:
+    return _UNSEALED
+
+
+def assert_scorable_g(seasons, window: str) -> None:
+    """NeurHL-G guard: refuse broken seasons, window crossings, and SEALED
+    seasons unless the seal script has unsealed them."""
+    allowed = {"iter": G_ITER, "gate": G_GATE, "sealed": SEALED}[window]
+    for s in seasons:
+        if s in NO_SCORE:
+            raise ValueError(f"season {s} is structurally broken and must never "
+                             f"be scored ({SEASON_NOTES[s]}).")
+        if s not in allowed:
+            raise ValueError(f"season {s} is not in the NeurHL-G '{window}' "
+                             f"window.")
+        if s in SEALED and not _UNSEALED:
+            raise PermissionError(f"season {s} is SEALED; only eval/seal_g.py "
+                                  f"may score it, once.")
