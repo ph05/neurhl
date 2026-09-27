@@ -126,7 +126,7 @@ button,select,input{font:inherit;color:var(--ink)}
 .split .a{background:var(--ink2);opacity:.35}
 .split .h{background:var(--blue);margin-left:auto}
 .split .elo{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--red)}
-.game .nums{display:flex;justify-content:space-between;font:400 13px/1.2 var(--mono);color:var(--ink2)}
+.game .nums,.tg .nums{display:flex;justify-content:space-between;font:400 13px/1.2 var(--mono);color:var(--ink2)}
 .empty{color:var(--mut);padding:20px 0}
 
 /* players */
@@ -216,7 +216,7 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
 <body>
 <header class="bar">
   <div class="wrap">
-    <a class="mark" href="#top">Neur<b>HL</b> <small>1.0</small></a>
+    <a class="mark" href="#top">Neur<b>HL</b> <small>2.0</small></a>
     <nav aria-label="Sections">
       <a href="#tonight" id="navtonight" hidden>Tonight</a><a href="#standings">Standings</a><a href="#games">Games</a><a href="#players">Players</a>
       <a href="#evidence">Evidence</a><a href="#method">Method</a>
@@ -236,7 +236,7 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
   <section id="tonight" hidden>
     <div class="wrap">
       <div class="sh">
-        <div><h2>Tonight <span class="label" id="tndate"></span></h2>
+        <div><h2><span id="tntitle">Tonight</span> <span class="label" id="tndate"></span></h2>
           <p>NeurHL-G's forecasts for the latest game day, each committed to the public repository before puck drop. The engine simulates every game 10,000 times from the dressed lineups; NeurHL-H and in-season Elo are shown for reference. Lineups marked confirmed come from posted lines; the others are projections.</p></div>
       </div>
       <div class="tn" id="tnlist"></div>
@@ -422,8 +422,10 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
   if (T.games && T.games.length) {
     $("#tonight").hidden = false; $("#navtonight").hidden = false;
     $("#tndate").textContent = fdate(T.date);
+    if (T.games.every(g => g.kind === "preview")) $("#tntitle").textContent = "Next game day";
     const pc = x => (x == null || isNaN(x)) ? "–" : Math.round(x * 100) + "%";
-    const chip = s => `<span class="chip${/CONFIRMED|NHL_API/.test(s) ? " ok" : ""}">${esc(String(s).replace("DF_", "").replace("_", " ").toLowerCase())}</span>`;
+    const LU = {NHL_API: "confirmed", DF_CONFIRMED: "confirmed", DF_PROJECTED: "projected lines", FALLBACK: "projected from roster"};
+    const chip = s => `<span class="chip${/CONFIRMED|NHL_API/.test(s) ? " ok" : ""}">${esc(LU[s] || String(s).toLowerCase())}</span>`;
     $("#tnlist").innerHTML = T.games.map(g => {
       const t = g.start ? new Date(g.start).toLocaleTimeString("en-US", {hour: "numeric", minute: "2-digit", timeZone: "America/New_York"}) + " ET" : "";
       const rows = (g.top || []).map(x => `<tr><td>${esc(x[0])} <span class="label">${x[1]}</span></td><td class="num">${x[2].toFixed(1)}</td><td class="num">${pc(x[3])}</td><td class="num">${pc(x[4])}</td></tr>`).join("");
