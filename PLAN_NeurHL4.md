@@ -278,9 +278,9 @@ assists) by m:
   already receives (prior_gpg / 2 minus half the prior OT and shootout shares);
   M is v1's own mean projected regulation goals over every game scheduled in
   the first 14 days (fallback lineups, inputs only).
-- In season, m = (A + k m0) / (P + k) with k = 300 team-games, where A and P are
-  the actual and unscaled-predicted regulation goals over completed 2026-27
-  games that have a primary forecast. Walk-forward: a forecast uses only games
-  already finished.
+- In season, m = (A + k L) / (P + k M) with k = 300 team-games of prior weight
+  (m = m0 before any game), where A and P are the actual and
+  unscaled-predicted regulation goals over completed 2026-27 games that have a
+  primary forecast. Walk-forward: a forecast uses only games already finished.
 NeurHL-G's weights, stack and win probabilities are untouched, and no 2025 or
 2026 game is scored or used to fit anything; the seal stays intact.
