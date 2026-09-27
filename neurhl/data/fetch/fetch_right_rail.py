@@ -8,7 +8,7 @@ opportunity counts as a target and the referees for a walk-forward penalty-rate
 feature (PLAN_NeurHL4, section D).
 
 Raw JSON goes to data/raw/right_rail/<season>/<gid>.json.gz (gitignored).
-Resumable: existing files are skipped. Two workers, 0.3 s politeness each.
+Resumable: existing files are skipped. Four workers, 0.3 s politeness each.
 
 Usage: ... python neurhl/data/fetch/fetch_right_rail.py [--seasons 2012-2026]
 """
@@ -62,7 +62,7 @@ def main():
                              columns=["game_id", "game_type"])
         jobs += [(s, int(g)) for g in gc.loc[gc.game_type == 2, "game_id"]]
     counts = {}
-    with ThreadPoolExecutor(max_workers=2) as ex:
+    with ThreadPoolExecutor(max_workers=4) as ex:
         for i, res in enumerate(ex.map(fetch, jobs), 1):
             counts[res] = counts.get(res, 0) + 1
             if i % 500 == 0:

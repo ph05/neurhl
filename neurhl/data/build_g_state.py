@@ -104,6 +104,11 @@ def skater_rows(dates: pd.DataFrame) -> pd.DataFrame:
         parts.append(d)
     d = pd.concat(parts, ignore_index=True)
     d = d.merge(dates[["game_id", "date"]], on="game_id", how="inner")
+    # Position from the bio table: the HTM-era player_games (2008-2011) code
+    # every skater as pos_group 0, with no defencemen. Bio positions agree
+    # 100% with player_games wherever both exist (checked on 2016).
+    bios = pd.read_parquet(TENSORS / "career_bios.parquet").set_index("player_id")
+    d["pos_group"] = d.player_id.map(bios.pos_group).fillna(d.pos_group).clip(0, 1)
     m = 1 / 60.0
     d["toi_all"] = d.toi_sec * m
     d["toi_ev"] = (d.ev_toi.fillna(d.toi_sec) + d.other_toi.fillna(0)) * m
