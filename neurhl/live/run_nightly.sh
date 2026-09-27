@@ -1,9 +1,81 @@
 #!/bin/bash
 # NeurHL LIVE: nightly job (launchd com.neurhl.nightly, 04:30 ET).
-# STUB: intended for results ingestion, scoring, roster refresh and publishing; not implemented yet.
+#   1. neurhl/eval/score_live_2027.py   completed 2026-27 results -> neurhl/output/live/results_2027.csv
+#                                       (+ interim scorecard)
+#   2. neurhl/live/ingest_2027.py       new completed games -> the *_2027 tables in neurhl/data/tensors/
+#   3. neurhl/data/build_g_state.py     pre-game state (gst_*), only when a *_2027 input table is newer
+#                                       than gst_tm_2027.parquet (or that file is missing)
+# Log: data/raw/lineup_snapshots/launchd_nightly.log (launchd redirects stdout/stderr there; run any
+# other way, the output is also appended to it). Exit status is nonzero if any step failed.
+# A failed results fetch does not stop the ingest (it then works from the cached results file);
+# a failed ingest skips build_g_state.
 set -uo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO" || exit 1
 export PATH="/opt/homebrew/bin:$HOME/.local/bin:$PATH"
-echo "[run_nightly $(date '+%Y-%m-%d %H:%M:%S %Z')] stub: nothing to do yet"
-exit 0
+export PYTHONUNBUFFERED=1
+LOG="$REPO/data/raw/lineup_snapshots/launchd_nightly.log"
+mkdir -p "$(dirname "$LOG")"
+# under launchd (com.neurhl.nightly) the plist already sends stdout/stderr to $LOG
+if [ "${XPC_SERVICE_NAME:-}" != "com.neurhl.nightly" ]; then
+  exec > >(tee -a "$LOG") 2>&1
+fi
+ts() { date '+%Y-%m-%d %H:%M:%S %Z'; }
+
+LOCK="$REPO/data/raw/lineup_snapshots/.nightly.lock"
+if ! mkdir "$LOCK" 2>/dev/null; then
+  pid="$(cat "$LOCK/pid" 2>/dev/null)"
+  if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+    echo "[run_nightly $(ts)] another nightly run (pid $pid) holds $LOCK; exiting"
+    exit 1
+  fi
+  echo "[run_nightly $(ts)] removing stale lock (pid ${pid:-?} not running)"
+  rm -rf "$LOCK"; mkdir "$LOCK" || exit 1
+fi
+echo $$ > "$LOCK/pid"
+trap 'rm -rf "$LOCK"' EXIT
+
+UV=(uv run --no-project --python 3.12 --with numpy --with "pandas<3" --with pyarrow
+    --with requests --with numba --with scikit-learn==1.9.1 --with scipy python)
+# scikit-learn is pinned to the version neurhl/checkpoints/xg_live_v2027.pkl was frozen with
+# (ingest_2027.py refuses a mismatch rather than score with a differently-unpickled model)
+T="$REPO/neurhl/data/tensors"
+status=0
+
+step() {  # step NAME CMD...
+  local name="$1"; shift
+  echo "[run_nightly $(ts)] $name: start"
+  local t0=$SECONDS
+  "$@"
+  local rc=$?
+  echo "[run_nightly $(ts)] $name: exit $rc ($((SECONDS - t0))s)"
+  return $rc
+}
+
+echo "[run_nightly $(ts)] start ($REPO)"
+
+step "score_live_2027" "${UV[@]}" neurhl/eval/score_live_2027.py || status=1
+
+if step "ingest_2027" "${UV[@]}" neurhl/live/ingest_2027.py; then
+  need=0
+  if [ -f "$T/games_ctx_2027.parquet" ]; then
+    if [ ! -f "$T/gst_tm_2027.parquet" ]; then
+      need=1
+    else
+      for f in games_ctx player_games usage onice_rates goalie_games pgx tgx; do
+        if [ "$T/${f}_2027.parquet" -nt "$T/gst_tm_2027.parquet" ]; then need=1; fi
+      done
+    fi
+  fi
+  if [ "$need" = 1 ]; then
+    step "build_g_state" "${UV[@]}" neurhl/data/build_g_state.py || status=1
+  else
+    echo "[run_nightly $(ts)] build_g_state: skipped (no new 2027 inputs)"
+  fi
+else
+  status=1
+  echo "[run_nightly $(ts)] build_g_state: skipped (ingest failed)"
+fi
+
+echo "[run_nightly $(ts)] exit $status"
+exit $status
