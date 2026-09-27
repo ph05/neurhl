@@ -73,6 +73,32 @@ NeurHL-H uses which skaters dressed for each game, known about an hour before pu
 - **Reproducibility.** Acceptance batteries pass 25/25 and 40/40; committed
   predictions re-derive on CPU within 1e-6.
 
+## NeurHL-G, the single-game engine (PLAN_NeurHL4)
+
+NeurHL-G simulates each game from the two dressed rosters: every skater's ice
+time by strength, shots, individual xG, goals and assists, both goalies,
+power-play opportunities and the score, with a win probability that stacks
+the engine with Elo and NeurHL-H. Its gate window (2019, 2020, 2022-2024) was
+scored once, for one candidate declared in advance; those seasons had already
+been used at game level by NeurHL 1.0, so this is gate evidence, not a clean
+confirmation. The one-shot seal (2025-2026) was not spent: the pre-gate failed
+exactly as the candidate commit predicted. The 2026-27 live season is the
+prospective test.
+
+| Claim | Result (G_GATE, n = 6,289 games) | Record |
+|---|---|---|
+| Beats Elo game by game | Log loss 0.66006 vs 0.66566, diff -0.0056 (SE 0.0013); better in 5 of 5 seasons | `neurhl/output/g_gates.json` |
+| Adds win-probability information beyond NeurHL-H | Not shown: diff -0.0005 (SE 0.0006), better in 3 of 5 seasons; the pre-gate required -0.0010 | same |
+| Player heads beat the confirmed player-game layer | Better on all four heads: ice-time share -0.59%, SOG -0.45%, P(goal) -0.45%, P(assist) -0.36%; every upper 95% bound below zero (225,752 skater-games, two-way clustered) | same |
+| Team box score beats team history | SOG, xGF, goals and PP opportunities all better | same |
+| Calibrated | Slope 0.968; OT share 22.4% predicted vs 22.0% observed | same |
+
+Components that did not earn their place on the iteration window (G_ITER,
+7,421 games): an Elo anchor on scoring rates, lineup-versus-usual multipliers,
+NeurHL-H's projections as inputs, and attention across rosters. Gradient-boosted
+trees and a logistic model on game-level features, stacked with Elo, did no
+better than Elo. Every run is in `neurhl/configs/search_ledger_g.csv`.
+
 ## The 2026-27 season
 
 Predictions for every game, team and skater were frozen before opening night

@@ -13,7 +13,31 @@ ran once on seasons no decision had touched. The record of what worked and
 what did not is kept as carefully as the model. [EVIDENCE.md](EVIDENCE.md)
 lists every claim with the strength of the evidence behind it.
 
-## Findings
+## NeurHL 2.0: the game engine
+
+**NeurHL-G** predicts one game at a time from the two dressed rosters. It
+carries every skater's state from every game he has played (this season's
+games so far and all earlier seasons), deploys ice time by strength so team
+budgets hold exactly, and simulates each game 10,000 times: ice time, shots,
+individual xG, goals and assists for every skater, both goalies, power-play
+opportunities, the score and the result, including overtime and shootouts.
+
+- **Against Elo:** better game by game on its gate window (2019-2024, 6,289
+  games): log loss 0.6601 vs 0.6657, better in all five seasons.
+- **Against NeurHL-H:** level (0.6601 vs 0.6606, not significant). The engine
+  has not been shown to add win-probability information beyond NeurHL-H, so
+  NeurHL-H stays the primary win-probability model and NeurHL-G is live as
+  exploratory. Its stat sheets pass every quality gate: its player projections
+  beat the confirmed player-game layer on all four targets.
+- **Live:** every 2026-27 game gets a morning forecast and a pregame forecast
+  about an hour before puck drop, committed here before the game, with lineup
+  provenance, win probabilities from NeurHL-G, NeurHL-H and Elo, and full
+  simulated stat lines ([neurhl/output/live/](neurhl/output/live/)).
+
+The plan, gates and every decision are in [PLAN_NeurHL4.md](PLAN_NeurHL4.md),
+committed before the numbers that tested them.
+
+## Findings (NeurHL 1.0)
 
 - **Player games: confirmed.** A chained gradient-boosted model of ice time,
   shots, goals and assists beats each skater's own recent average on all four
