@@ -54,7 +54,8 @@ def mlp(i, h, o, p=0.1, out_zero=False):
 
 class NeurHLG(nn.Module):
     def __init__(self, n_sk, n_gk, n_tm, n_ctx, d=64, p=0.2, attn=False,
-                 freeze_heads=False, elo_anchor=False, lineup_terms=False):
+                 freeze_heads=False, elo_anchor=False, lineup_terms=False,
+                 h_terms=False):
         super().__init__()
         self.freeze_heads = freeze_heads
         self.elo_anchor = elo_anchor
@@ -62,6 +63,10 @@ class NeurHLG(nn.Module):
         # lineup vs usual: tonight's TOI-weighted on-ice xGF60 / xGA60 relative to
         # the team's history, and TOI-weighted RAPM; coefficients start at zero
         self.kappa = nn.Parameter(torch.zeros(3))
+        # NeurHL-H lineup projections: own vs opponent projected Corsi share and
+        # close-shot share (logit differences), zero-initialised
+        self.h_terms = h_terms
+        self.kappa_h = nn.Parameter(torch.zeros(2))
         self.sk_enc = mlp(n_sk + 2, 128, d, p)
         self.tm_enc = mlp(n_tm, 64, 32, p)
         self.gk_enc = mlp(n_gk, 32, 16, p)
@@ -137,7 +142,13 @@ class NeurHLG(nn.Module):
         if self.attn is not None:
             flat = h.reshape(B, 2 * 20, -1)
             mask = (SKM.reshape(B, 40) == 0)
+            # a game with every slot masked would softmax over nothing (NaN in
+            # the forward pass and in its gradients): unmask such rows (gm-fix-1)
+            mask = mask & ~mask.all(-1, keepdim=True)
             a, _ = self.attn(flat, flat, flat, key_padding_mask=mask)
+            # a game with no skater rows makes every key masked -> NaN; the
+            # zero gate does not help (0 * NaN = NaN), so zero those rows
+            a = torch.nan_to_num(a, nan=0.0)
             h = h + self.attn_gate * a.reshape(h.shape)
         t = self.tm_enc(bt["TM"])                                 # (B,2,32)
         g = self.gk_enc(bt["GK"])                                 # (B,2,16)
@@ -190,6 +201,11 @@ class NeurHLG(nn.Module):
         sgn = torch.tensor([1.0, -1.0])
         elo_sh = 0.5 * self.elo_beta * bt["ELO"][:, None] * sgn if self.elo_anchor \
             else torch.zeros_like(lineup)
+        if self.h_terms:
+            hr = bt["HR"].clamp(0.05, 0.95)
+            lh = torch.log(hr / (1 - hr))
+            lineup = lineup + self.kappa_h[0] * (lh[..., 0] - lh[:, opp, 0]) \
+                + self.kappa_h[1] * (lh[..., 1] - lh[:, opp, 1])
         if self.lineup_terms:
             lin_f = (w_ev * SKB[..., 8]).sum(-1).clamp(min=0.3)
             lin_a = (w_ev * SKB[..., 9]).sum(-1).clamp(min=0.3)

@@ -131,7 +131,7 @@ def main():
             continue
         acc = None
         train_cfg = {k: v for k, v in cfg.items()
-                     if k not in ("stack_h", "parent", "delta", "seeds")}
+                     if k not in ("stack_h", "stack_window", "parent", "delta", "seeds")}
         ck = hashlib.sha256(json.dumps(train_cfg, sort_keys=True).encode()
                             + model_sha()).hexdigest()[:16]
         for sd in seeds:
@@ -182,6 +182,8 @@ def main():
     allp["p_stack"] = np.nan
     for T in scored:
         tr = allp[(allp.season_end < T) & ~allp.season_end.isin(W.NO_SCORE)]
+        if cfg.get("stack_window"):
+            tr = tr[tr.season_end >= T - int(cfg["stack_window"])]
         cols = ["elo_logit", "lg"] + (["lh"] if use_h else [])
         f = lambda d: np.column_stack([d.elo_logit, logit(d.p_g)] +
                                       ([logit(d.p_h)] if use_h else []))

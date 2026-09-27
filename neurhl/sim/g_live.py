@@ -74,7 +74,8 @@ def era_2027() -> dict:
             "season_scaled": (SEASON - 2006) / 20.0}
 
 
-def build(games: pd.DataFrame, lineups: dict, results: pd.DataFrame = None):
+def build(games: pd.DataFrame, lineups: dict, results: pd.DataFrame = None,
+          hproj: pd.DataFrame = None):
     """games: game_id, date (YYYY-MM-DD), home, away (NHL abbreviations).
     lineups: {game_id: {"home": {"skaters": [...], "goalie": id},
                         "away": {...}}}.  Returns (arrays, meta, names)."""
@@ -147,6 +148,13 @@ def build(games: pd.DataFrame, lineups: dict, results: pd.DataFrame = None):
                         ("dtz", "home_dtz", "away_dtz")):
         tm[col] = np.where(h, tm.game_id.map(sc[hc]), tm.game_id.map(sc[ac]))
     tm["b2b"] = (tm.rest <= 1).astype(float)
+    # NeurHL-H lineup projections for tonight (sim/h_live.lineup_projection)
+    if hproj is not None:
+        tm["h_cfpct"] = np.where(h, tm.game_id.map(hproj.cfpct_h), tm.game_id.map(hproj.cfpct_a))
+        tm["h_clshare"] = np.where(h, tm.game_id.map(hproj.clsh_h), tm.game_id.map(hproj.clsh_a))
+    for c in names["tm_feat"]:
+        if c not in tm:
+            tm[c] = np.nan
     TM = np.full((N, 2, len(names["tm_feat"])), np.nan, np.float32)
     TM[tm.gi, tm.side] = tm[names["tm_feat"]].to_numpy(np.float32)
 

@@ -147,7 +147,22 @@ def backtest(seasons) -> None:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--backtest", action="store_true")
+    ap.add_argument("--roster-dir", default=None,
+                    help="dated roster snapshot (data/raw/rosters/<date>); default = frozen 1.0 rosters")
+    ap.add_argument("--tag", default="")
     args = ap.parse_args()
+    roster_glob = str(RAW / "nhl_roster_*_20262027.json")
+    tag, exclude = "", set()
+    if args.roster_dir:
+        roster_glob = str(Path(args.roster_dir) / "nhl_roster_*.json")
+        tag = "_" + (args.tag or Path(args.roster_dir).name.replace("-", ""))
+        import importlib.util
+        _sp = importlib.util.spec_from_file_location(
+            "live_status", Path(__file__).resolve().parents[1] / "live" / "status.py")
+        _st = importlib.util.module_from_spec(_sp)
+        _sp.loader.exec_module(_st)
+        unavailable = _st.unavailable
+        exclude = set(unavailable(Path(args.roster_dir).name))
     if args.backtest:
         # A10 era-diverse vantages: DEV/TUNE-era 2011-2017 (NO_SCORE 2013
         # excluded) plus the previously declared 2022-2026 spend. 2018-2021
@@ -159,12 +174,14 @@ def main():
     hist = PP.load_player_seasons(range(2008, SEASON))
     bios = load_bios()
     rosters, team_of, names = {}, {}, {}
-    for f in sorted(glob.glob(str(RAW / "nhl_roster_*_20262027.json"))):
-        ab = Path(f).name.split("_")[2]
+    for f in sorted(glob.glob(roster_glob)):
+        ab = Path(f).stem.split("_")[2]
         d = json.loads(Path(f).read_text())
         ids = []
         for grp in ("forwards", "defensemen"):
             for pl in d.get(grp, []):
+                if pl["id"] in exclude:
+                    continue
                 ids.append(pl["id"])
                 team_of[pl["id"]] = ab
                 names[pl["id"]] = (f"{pl['firstName']['default']} "
@@ -205,7 +222,7 @@ def main():
     pr["proj_p_path_b"] = pr.b_g + pr.b_a
     pr = pr.sort_values("proj_p", ascending=False)
 
-    out = Path(__file__).resolve().parents[1] / "output" / "player_proj_2027.csv"
+    out = Path(__file__).resolve().parents[1] / "output" / f"player_proj_2027{tag}.csv"
     cols = ["player_id", "name", "team", "pos_group", "exp_gp", "proj_toi_min",
             "toi_per_gp_min", "g60", "a60", "proj_g", "proj_a", "proj_p",
             "proj_p_path_a", "proj_p_path_b"]

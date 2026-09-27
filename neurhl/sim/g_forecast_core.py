@@ -60,7 +60,8 @@ def load_bundle(name):
                     len(n["ctx"]), d=cfg.get("d", 64), p=cfg.get("dropout", 0.2),
                     attn=cfg.get("attn", False), freeze_heads=cfg.get("freeze_heads", False),
                     elo_anchor=cfg.get("elo_anchor", False),
-                    lineup_terms=cfg.get("lineup_terms", False))
+                    lineup_terms=cfg.get("lineup_terms", False),
+                    h_terms=cfg.get("h_terms", False))
         m.load_state_dict(torch.load(d / f, map_location="cpu"))
         m.eval()
         models.append(m)
@@ -80,6 +81,10 @@ def standardise(A, stats, names):
     P["ELO"] = np.nan_to_num(A["CTX"][:, 0]).astype(np.float32)
     ri = [names["sk_feat"].index(c) for c in ("rapm_cf_off", "rapm_cf_def")]
     P["RAPM"] = np.nan_to_num(A["SK"][..., ri]).astype(np.float32)
+    tf = names["tm_feat"]
+    hi = [tf.index(c) for c in ("h_cfpct", "h_clshare")] if "h_cfpct" in tf else []
+    P["HR"] = (np.nan_to_num(A["TM"][..., hi], nan=0.5).astype(np.float32) if hi
+               else np.full(A["TM"].shape[:2] + (2,), 0.5, np.float32))
     return P
 
 

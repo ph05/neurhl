@@ -77,15 +77,20 @@ def load_schedule() -> pd.DataFrame:
     return s
 
 
+ROSTER_GLOB = str(RAW / "nhl_roster_*_20262027.json")   # frozen 1.0 inputs
+OUT_TAG = ""                                            # "" = the frozen 1.0 files
+EXCLUDE: set = set()                                    # status entries (inputs only)
+
+
 def load_rosters() -> dict:
     out = {}
-    for f in sorted(glob.glob(str(RAW / "nhl_roster_*_20262027.json"))):
-        ab = Path(f).name.split("_")[2]
+    for f in sorted(glob.glob(ROSTER_GLOB)):
+        ab = Path(f).stem.split("_")[2]
         d = json.loads(Path(f).read_text())
         out[ab] = {
-            "F": [p["id"] for p in d.get("forwards", [])],
-            "D": [p["id"] for p in d.get("defensemen", [])],
-            "G": [p["id"] for p in d.get("goalies", [])],
+            "F": [p["id"] for p in d.get("forwards", []) if p["id"] not in EXCLUDE],
+            "D": [p["id"] for p in d.get("defensemen", []) if p["id"] not in EXCLUDE],
+            "G": [p["id"] for p in d.get("goalies", []) if p["id"] not in EXCLUDE],
         }
     return out
 
@@ -133,10 +138,24 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sims", type=int, default=20000)
     ap.add_argument("--seed", type=int, default=20260822)
+    ap.add_argument("--roster-dir", default=None,
+                    help="dated roster snapshot (data/raw/rosters/<date>); default = frozen 1.0 rosters")
+    ap.add_argument("--tag", default="", help="suffix for refreshed outputs, e.g. 20260928")
     args = ap.parse_args()
     assert W.PROJECT == SEASON, "PROJECT season mismatch"
 
     sched = load_schedule()
+    global ROSTER_GLOB, OUT_TAG, EXCLUDE
+    if args.roster_dir:
+        ROSTER_GLOB = str(Path(args.roster_dir) / "nhl_roster_*.json")
+        OUT_TAG = "_" + (args.tag or Path(args.roster_dir).name.replace("-", ""))
+        import importlib.util
+        _sp = importlib.util.spec_from_file_location(
+            "live_status", Path(__file__).resolve().parents[1] / "live" / "status.py")
+        _st = importlib.util.module_from_spec(_sp)
+        _sp.loader.exec_module(_st)
+        unavailable = _st.unavailable
+        EXCLUDE = set(unavailable(Path(args.roster_dir).name))
     rosters = load_rosters()
     rap, cold, repl_net = roster_ratings(rosters)
     ab2i = abbrev_map()
@@ -281,7 +300,7 @@ def main():
                   for i in range(len(teams))},
     }
     cfg = Path(__file__).resolve().parents[1] / "configs"
-    (cfg / "playoff_tiebreak_check.json").write_text(json.dumps(chk, indent=1))
+    (cfg / f"playoff_tiebreak_check{OUT_TAG}.json").write_text(json.dumps(chk, indent=1))
     print(f"tiebreak guard: max |actual - fractional| = "
           f"{chk['max_abs_diff_pct']:.3f} playoff points")
 
@@ -299,7 +318,7 @@ def main():
     d_elo = (gm.home.map(elo0) + H_ELO - gm.away.map(elo0)).to_numpy()
     gm["p_home_win_elo"] = 1.0 / (1.0 + 10 ** (-d_elo / 400.0))
     gm.round(6).to_csv(Path(__file__).resolve().parents[1] / "output" /
-                       "games_2027.csv", index=False)
+                       f"games_2027{OUT_TAG}.csv", index=False)
 
     res = pd.DataFrame({
         "team": teams,
@@ -314,7 +333,7 @@ def main():
         "cold_starts": [cold.get(t, 0) for t in teams],
     }).sort_values(["conf", "proj_points"], ascending=[True, False])
 
-    out = Path(__file__).resolve().parents[1] / "output" / "projection_2027.csv"
+    out = Path(__file__).resolve().parents[1] / "output" / f"projection_2027{OUT_TAG}.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
     res.to_csv(out, index=False)
     print(f"\n2026-27 PROJECTION ({args.sims:,} season simulations)\n")

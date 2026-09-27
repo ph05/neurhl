@@ -1,0 +1,10 @@
+{
+ "epochs1": 10,
+ "epochs2": 4,
+ "w_out1": 0.3,
+ "seeds": 3,
+ "threads": 3,
+ "h_terms": true,
+ "parent": "r6c",
+ "delta": "R13 = R6c + direct zero-init terms on NeurHL-H projected Corsi and close-shot share differences"
+}

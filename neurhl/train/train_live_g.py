@@ -30,7 +30,7 @@ from train.train_neurhl_g import Data, predict, train_snapshot  # noqa: E402
 
 def oos_preds(D, cfg, seasons, seeds):
     import hashlib
-    train_cfg = {k: v for k, v in cfg.items() if k not in ("stack_h", "parent", "delta", "seeds")}
+    train_cfg = {k: v for k, v in cfg.items() if k not in ("stack_h", "stack_window", "parent", "delta", "seeds")}
     ck = hashlib.sha256(json.dumps(train_cfg, sort_keys=True).encode() + model_sha()).hexdigest()[:16]
     rows = []
     for T in seasons:
@@ -64,7 +64,7 @@ def build(cfg_name, through, name, purpose="train"):
     cols = ["elo_logit", "lg"]
     stack = {"cols": [cols[i] for i in use], "coef": mdl.coef_[0].tolist(),
              "intercept": float(mdl.intercept_[0]), "fit_seasons": seasons}
-    train_cfg = {k: v for k, v in cfg.items() if k not in ("stack_h", "parent", "delta", "seeds")}
+    train_cfg = {k: v for k, v in cfg.items() if k not in ("stack_h", "stack_window", "parent", "delta", "seeds")}
     models = []
     for sd in seeds:
         m, _ = train_snapshot(D, through + 1, {**train_cfg, "seed": sd})

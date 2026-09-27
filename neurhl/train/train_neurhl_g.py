@@ -76,6 +76,10 @@ class Data:
         out["ELO"] = np.nan_to_num(A["CTX"][:, 0]).astype(np.float32)
         ri = [self.names["sk_feat"].index(c) for c in ("rapm_cf_off", "rapm_cf_def")]
         out["RAPM"] = np.nan_to_num(A["SK"][..., ri]).astype(np.float32)
+        tf = self.names["tm_feat"]
+        hi = [tf.index(c) for c in ("h_cfpct", "h_clshare")] if "h_cfpct" in tf else []
+        out["HR"] = (np.nan_to_num(A["TM"][..., hi], nan=0.5).astype(np.float32) if hi
+                     else np.full(A["TM"].shape[:2] + (2,), 0.5, np.float32))
         return out
 
 
@@ -130,7 +134,8 @@ def train_snapshot(D, T, cfg):
                     len(n["ctx"]), d=cfg["d"], p=cfg["dropout"], attn=cfg["attn"],
                     freeze_heads=cfg["freeze_heads"],
                     elo_anchor=cfg.get("elo_anchor", False),
-                    lineup_terms=cfg.get("lineup_terms", False))
+                    lineup_terms=cfg.get("lineup_terms", False),
+                    h_terms=cfg.get("h_terms", False))
     idx_tr = np.where(tr)[0]
     rng = np.random.default_rng(cfg["seed"] * 7919 + T)
 

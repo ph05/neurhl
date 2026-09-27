@@ -172,7 +172,20 @@ def main():
     t["dtz"] = np.where(h, t.game_id.map(g2.home_dtz), t.game_id.map(g2.away_dtz))
     t["b2b"] = (t.rest <= 1).astype(float)
     t["gf_reg"] = np.where(h, t.game_id.map(g2.gh_reg), t.game_id.map(g2.ga_reg))
-    tmf = tm_feat + SIDE_CTX
+    # NeurHL-H Layer-1 lineup projections (walk-forward: proj_team_{T} comes from a
+    # model trained on seasons < T, aggregated over the dressed skaters)
+    hp = []
+    for s_ in SEASONS:
+        f = TENSORS / f"proj_team_{s_}.parquet"
+        if f.exists():
+            hp.append(pd.read_parquet(f).reset_index() if "game_id" not in
+                      pd.read_parquet(f).columns else pd.read_parquet(f))
+    hp = pd.concat(hp, ignore_index=True).set_index("game_id")
+    clh = hp.p_clf_h / (hp.p_clf_h + hp.p_cla_h).clip(lower=1e-6)
+    cla = hp.p_clf_a / (hp.p_clf_a + hp.p_cla_a).clip(lower=1e-6)
+    t["h_cfpct"] = np.where(h, t.game_id.map(hp.cfpct_h), t.game_id.map(hp.cfpct_a))
+    t["h_clshare"] = np.where(h, t.game_id.map(clh), t.game_id.map(cla))
+    tmf = tm_feat + SIDE_CTX + ["h_cfpct", "h_clshare"]
     TM = np.full((N, 2, len(tmf)), np.nan, np.float32)
     TMY = np.full((N, 2, len(TM_TGT)), np.nan, np.float32)
     TM[t.gi, t.side] = t[tmf].to_numpy(np.float32)

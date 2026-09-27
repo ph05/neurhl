@@ -81,8 +81,24 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
         return []
     lu_in = {g: {s: {"skaters": lineups[g][s]["skaters"], "goalie": lineups[g][s]["goalie"]}
                  for s in ("home", "away")} for g in gdf.game_id}
-    A, meta, _ = GL.build(gdf, lu_in, results_2027())
+    hproj = None
+    try:                     # NeurHL-H lineup projections (G input and H comparator)
+        from sim.h_live import lineup_projection
+        hproj = lineup_projection(gdf, lu_in)
+    except Exception as e:  # noqa: BLE001
+        print(f"[forecast] NeurHL-H projection failed: {type(e).__name__}: {e}")
+    A, meta, _ = GL.build(gdf, lu_in, results_2027(), hproj)
     rows, sheets = forecast(bundle, A)
+    p_h = np.full(len(gdf), np.nan)
+    try:                     # comparator; a failure here never blocks NeurHL-G
+        from sim.h_live import forecast as h_forecast
+        from sim.project_2027 import load_schedule
+        from sim.schedule_context import build as sched_ctx
+        sc = sched_ctx(load_schedule(), 2027)[["game_id", "home_rest", "away_rest"]]
+        if hproj is not None:
+            p_h = h_forecast(gdf, lu_in, A["CTX"][:, 0], sc, hproj)
+    except Exception as e:  # noqa: BLE001
+        print(f"[forecast] NeurHL-H comparator failed: {type(e).__name__}: {e}")
     frozen = pd.read_csv(NOUT / "games_2027.csv").set_index("game_id")
     code = subprocess.run(["git", "-C", str(PROJ), "rev-parse", "--short", "HEAD"],
                           capture_output=True, text=True).stdout.strip()
@@ -98,6 +114,7 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
             "home": r.home, "away": r.away, "forecast": tag,
             "p_home_win_neurhl_g": round(rows[i]["p_home_win"], 5),
             "p_home_win_elo": round(float(elo), 5),
+            "p_home_win_neurhl_h": round(float(p_h[i]), 5) if np.isfinite(p_h[i]) else None,
             "p_home_win_1p0": round(float(frozen.p_home_win.get(r.game_id, np.nan)), 5),
             "p_ot": round(rows[i]["p_ot"], 4),
             **{k: round(rows[i][k], 3) for k in ("goals_home", "goals_away", "xgf_home",

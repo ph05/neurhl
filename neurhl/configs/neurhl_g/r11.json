@@ -1,2 +1,10 @@
-{"epochs1": 10, "epochs2": 4, "w_out1": 0.3, "seeds": 3, "stack_h": true,
- "parent": "r6", "delta": "R11 = R6 stacked with NeurHL-H in the walk-forward logistic stack"}
+{
+ "epochs1": 10,
+ "epochs2": 4,
+ "w_out1": 0.3,
+ "seeds": 3,
+ "stack_h": true,
+ "parent": "r6",
+ "delta": "R11 = R6 stacked with NeurHL-H in the walk-forward logistic stack",
+ "threads": 5
+}
