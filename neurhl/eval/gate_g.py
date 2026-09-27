@@ -44,7 +44,7 @@ def twoway(d, gid, pid):
 
 
 def cached_outputs(cfg, T, seeds):
-    train_cfg = {k: v for k, v in cfg.items() if k not in ("stack_h", "parent", "delta", "seeds")}
+    train_cfg = {k: v for k, v in cfg.items() if k not in ("stack_h", "stack_window", "parent", "delta", "seeds")}
     ck = hashlib.sha256(json.dumps(train_cfg, sort_keys=True).encode() + model_sha()).hexdigest()[:16]
     outs = [dict(np.load(RUNS / "cache" / f"{ck}_{T}_{sd}.npz")) for sd in seeds]
     return {k: np.mean([o[k] for o in outs], 0) for k in outs[0]}

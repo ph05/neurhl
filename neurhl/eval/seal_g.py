@@ -83,15 +83,25 @@ def main():
 
     cfg = json.loads((CONFIGS / "neurhl_g" / f"{cfg_name}.json").read_text())
     seeds = list(range(cfg.get("seeds", 5)))
-    train_cfg = {k: v for k, v in cfg.items() if k not in ("stack_h", "parent", "delta", "seeds")}
+    train_cfg = {k: v for k, v in cfg.items()
+                 if k not in ("stack_h", "stack_window", "parent", "delta", "seeds")}
+    from eval.run_g import RUNS, model_sha
+    ck = hashlib.sha256(json.dumps(train_cfg, sort_keys=True).encode() + model_sha()).hexdigest()[:16]
     D = Data("score")
     rows = []
     for T in W.SEALED:
         te = np.where(D.meta.season_end.to_numpy() == T)[0]
         outs = []
         for sd in seeds:
+            cp = RUNS / "cache" / f"{ck}_{T}_{sd}.npz"
+            if cp.exists():
+                outs.append(dict(np.load(cp)))
+                continue
             m, P = train_snapshot(D, T, {**train_cfg, "seed": sd})
-            outs.append(predict(m, P, te))
+            o_ = predict(m, P, te)
+            cp.parent.mkdir(parents=True, exist_ok=True)
+            np.savez_compressed(cp, **o_)      # so snapshot 2025 serves 2026's stack history
+            outs.append(o_)
         o = {k: np.mean([x[k] for x in outs], 0) for k in outs[0]}
         hist_seasons = sorted(set(range(2011, T)) - W.NO_SCORE)
         hist = oos_preds(D, cfg, hist_seasons, seeds)
