@@ -3,6 +3,7 @@
   --mode morning   every game today (ET), projected lineups, about 11:00 ET
   --mode pregame   each game starting 45-75 minutes from now that has no
                    pregame file yet, with the latest lineups and goalies
+  --mode preview   the evening before a game day (descriptive, not scored)
 
 For each game: lineups from lineup_resolver (NHL API > DailyFaceoff > fallback,
 flagged), NeurHL-G inputs through sim/g_live.py (state after every played game),
@@ -134,7 +135,7 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
                             "p_goal": round(p["p_goal"], 4), "p_point": round(p["p_point"], 4)})
     d = LIVE / date
     d.mkdir(parents=True, exist_ok=True)
-    stem = tag if tag == "morning" else f"pregame_{int(gdf.game_id.iloc[0])}"
+    stem = tag if tag in ("morning", "preview") else f"pregame_{int(gdf.game_id.iloc[0])}"
     files = [d / f"{stem}.csv", d / f"{stem}_players.csv", d / f"{stem}_lineups.json"]
     pd.DataFrame(out_rows).to_csv(files[0], index=False)
     pd.DataFrame(pl_rows).to_csv(files[1], index=False)
@@ -153,7 +154,7 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=("morning", "pregame", "nightly"), required=True)
+    ap.add_argument("--mode", choices=("morning", "pregame", "preview", "nightly"), required=True)
     ap.add_argument("--date")
     ap.add_argument("--now")
     ap.add_argument("--dry-run", action="store_true")
@@ -167,11 +168,13 @@ def main():
         return
     R = _resolver()
     games = R.games_on(date)
-    if a.mode == "morning":
-        if (LIVE / date / "morning.csv").exists():
-            print(f"[forecast] morning {date} already written")
+    if a.mode in ("morning", "preview"):
+        # preview: the evening before, on post-deadline rosters; published but
+        # descriptive only (PLAN_NeurHL4 LIVE scores morning and pregame)
+        if (LIVE / date / f"{a.mode}.csv").exists():
+            print(f"[forecast] {a.mode} {date} already written")
             return
-        run(games, date, "morning", now, a.dry_run)
+        run(games, date, a.mode, now, a.dry_run)
         return
     for gid, home, away in games:
         if (LIVE / date / f"pregame_{gid}.csv").exists():

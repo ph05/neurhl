@@ -35,9 +35,10 @@ def tonight() -> dict:
         return {}
     d = days[-1]
     frames, players = [], []
-    if (d / "morning.csv").exists():
-        frames.append(pd.read_csv(d / "morning.csv"))
-        players.append(pd.read_csv(d / "morning_players.csv"))
+    for stem in ("morning", "preview"):
+        if (d / f"{stem}.csv").exists():
+            frames.append(pd.read_csv(d / f"{stem}.csv"))
+            players.append(pd.read_csv(d / f"{stem}_players.csv").assign(forecast=stem))
     for f in sorted(d.glob("pregame_*.csv")):
         if f.name.endswith("_players.csv"):
             continue
@@ -48,7 +49,7 @@ def tonight() -> dict:
     if not frames:
         return {}
     g = pd.concat(frames, ignore_index=True)
-    order = {"pregame": 0, "morning": 1}
+    order = {"pregame": 0, "morning": 1, "preview": 2}
     g = g.sort_values("forecast", key=lambda x: x.map(order)).drop_duplicates("game_id")
     pl = pd.concat(players, ignore_index=True) if players else pd.DataFrame()
     games = []
