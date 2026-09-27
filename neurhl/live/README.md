@@ -138,3 +138,27 @@ checks the real 2027 path with an empty results file.
 - **Lineup sources.** DailyFaceoff lines pages have no "confirmed" flag. DF_CONFIRMED is a heuristic (updated within 12 h of the start and a source name without "project", "offseason" or "camp"); check it against the real regular-season `sourceName` values once games start. The injury news feed is not used for exclusions (it is news, not a list); the lines pages' `ir` group and `out`/`ir` statuses are. Day-to-day players in the lines stay in.
 - **Unavailable players.** `status.unavailable(date)` and DailyFaceoff IR players are removed on every path except NHL_API (the boxscore is the actual lineup). A goalie feed naming an unavailable goalie is ignored (Hellebuyck: WPG resolves to Skinner).
 - **Automation needs.** The bot clone must exist (`git clone https://github.com/ph05/neurhl.git /Users/ph/Development/nhl-2026-2027-models-live`). Git pushes use the `osxkeychain` credential helper, and the login keychain locks on sleep and after 1 h idle, so a push from launchd can fail while it is locked; use a credential that does not need the keychain for the bot clone (a fine-grained token in that clone's own `credential.helper store`, or an SSH deploy key), or change the keychain settings. The Mac sleeps after 1 min idle: launchd runs a missed calendar job once on wake, so keep the machine awake during game days (`sudo pmset -c sleep 0`, or a `pmset repeat wake` before 09:00).
+
+## Operating requirements for the 2026-27 season
+
+The scheduled jobs (neurhl/live/launchd/) need three things from the machine,
+which the operator provides (decided 2026-09-27):
+
+1. **GitHub push credentials usable without a UI.** Git's credential helper is
+   the macOS keychain; the login keychain locks after sleep and after an hour
+   idle (`security show-keychain-info` shows `lock-on-sleep timeout=3600s`), and a
+   push from launchd then fails with `failed to get: -25320`. Any of: keep the
+   session unlocked on game days, give the bot clone its own credential, or
+   relax the keychain lock settings.
+2. **The Mac awake on game days** from 10:30 ET to the last pregame freeze
+   (about 22:30 ET) and at 04:30 for the nightly ingest. `caffeinate -i` in each
+   job only holds while that job runs; a job missed during sleep runs late on
+   wake, and a pregame forecast that lands after puck drop counts as MISSED.
+3. **Network access** for the NHL API, DailyFaceoff and MoneyPuck.
+
+Known data risk: 2026-27 shot xG needs MoneyPuck's season shot file
+(`shots_2026.zip`), which returns 404 until MoneyPuck publishes it (usually
+within days of opening night). Until then the ingest defers each game up to
+2 days, then ingests it without xG and flags it degraded; it is re-ingested
+once the file appears. Forecasts are unaffected on opening night (state comes
+from completed seasons).
