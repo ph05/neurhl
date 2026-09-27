@@ -220,3 +220,37 @@ On G_ITER the network carries no win-probability information beyond Elo and
 NeurHL-H: R11 trails NeurHL-H alone by 0.00014. The S-STOP threshold is left
 exactly as declared; the expectation, written before the gate run, is that
 S-STOP fails and the seal stays unspent.
+
+## FREEZE (2026-09-27): G_GATE results and the decision
+
+Frozen candidate: config `g1` (sha256 `587746c6367d7ef78276162fc194d902e09a7c5a617f6beb19cb4239706ea750`), unchanged since the
+CANDIDATE section. One G_GATE run (1 of 2 allowed; ledger row
+`g1:full:gate`); every number below is in neurhl/output/g_gates.json and
+neurhl/output/preds via the runner's saved predictions.
+
+G_GATE: 2019, 2020, 2022-2024, n = 6,289 games.
+
+| Final probability | Log loss | NeurHL-G minus it |
+|---|---|---|
+| NeurHL-G (stack over Elo, NeurHL-G, NeurHL-H) | 0.66006 | — |
+| Elo | 0.66566 | -0.00559 (SE 0.00131), better in 5 of 5 seasons |
+| NeurHL-H | 0.66056 | -0.00049 (SE 0.00060), better in 3 of 5 seasons |
+
+| Gate | Result |
+|---|---|
+| PG, player heads vs the confirmed player-game layer (225,752 skater-games, two-way clustered) | PASS: better on all four heads (TOI share -0.59%, SOG -0.45%, P(goal) -0.45%, P(assist) -0.36%; every upper 95% bound below zero) |
+| T, team box score vs log5 team history | PASS: SOG, xGF, goals, PP opportunities all better |
+| C, calibration | PASS: slope 0.968; OT share 0.224 predicted vs 0.220 observed |
+| S-STOP | **FAIL**: the Elo condition holds (-0.00559 <= -0.0045) but the NeurHL-H condition does not (-0.00049 > -0.0010; 3 of 5 seasons < 4) |
+
+Recorded for the seal, had it been spent: at n = 2,624 the minimum detectable
+effect at 80% power would be 0.0057 against Elo and 0.0026 against NeurHL-H.
+
+**Decision, applied as section C declares:** the seal is not spent; 2025 and
+2026 remain sealed for a later version. NeurHL-G v1, trained on seasons
+<= 2024 with configuration g1, goes live for 2026-27 as an exploratory model:
+its stat sheets (ice time, shots, xG, goals, assists, goalie results) are
+published for every game, its win probability is reported and scored, and
+NeurHL-H is the live primary for win probability. Read plainly: NeurHL-G
+beats Elo by a margin comparable to NeurHL-H's and is calibrated, but it has
+not been shown to add win-probability information beyond NeurHL-H.
