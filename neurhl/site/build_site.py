@@ -128,6 +128,14 @@ def main():
                    for k, v in sm["models"].items()},
     }
 
+    gg = rd(NOUT / "g_gates.json")
+    if gg:
+        ss = gg["S_STOP"]
+        evidence["g"] = {"n": gg["n_games"], "d_elo": ss["g_minus_elo"], "se_elo": ss["se_g_minus_elo"],
+                         "d_h": ss["g_minus_h"], "se_h": ss["se_g_minus_h"],
+                         "beat_elo": ss["seasons_beat_elo"], "beat_h": ss["seasons_beat_h"],
+                         "pg": {h: v["rel_diff"] for h, v in gg["PG"]["heads"].items()},
+                         "sstop": ss["pass"]}
     card = rd(NOUT / "live" / "scorecard_2027.json") or {}
     sha = {f: hashlib.sha256((PROJ / f).read_bytes()).hexdigest() for f in FROZEN}
     data = {"frozen": "2026-09-25", "sha256": sha, "live": card, "tonight": tonight(),

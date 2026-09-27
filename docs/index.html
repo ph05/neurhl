@@ -534,6 +534,10 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
       <div class="bars">${pgRows}</div>
       <p>Improvement over the baseline on ${pg.n.toLocaleString()} held-out skater-games (2018-2020), frozen and scored once. It wins in every season; clustered by player and game, z runs from ${Math.abs(Math.max(...["toi_share","shots","goal1","assist1"].map(k=>pg[k].z2))).toFixed(0)} to ${Math.abs(Math.min(...["toi_share","shots","goal1","assist1"].map(k=>pg[k].z2))).toFixed(0)}.</p></div>
     ${c1card}
+    ${E.g ? `<div class="card"><span class="pill amber"><i></i>Gate evidence · live test running</span>
+      <h3>NeurHL-G, the game engine</h3>
+      <div class="big">${E.g.d_elo.toFixed(4)} <small>log loss vs Elo, ${E.g.n.toLocaleString()} gate games</small></div>
+      <p>Better than Elo in ${E.g.beat_elo} of 5 seasons, and level with NeurHL-H (${E.g.d_h >= 0 ? "+" : ""}${E.g.d_h.toFixed(4)}, not significant), so NeurHL-H stays the primary win-probability model. Its player projections beat the confirmed player-game layer on all four targets; its 2026-27 forecasts are the prospective test.</p></div>` : ""}
     <div class="card"><span class="pill">Development only</span>
       <h3>Season standings: level with Elo</h3>
       <div class="big">${sm[nk].mae.toFixed(2)} <small>vs Elo ${sm[v1k].mae.toFixed(2)} points MAE</small></div>
