@@ -76,8 +76,11 @@ def fetch_results(today: dt.date) -> pd.DataFrame:
     return out
 
 
+VARIANT = ""          # "" = the frozen 1.0 files; "_20260928" = a dated update (U1)
+
+
 def score_games(res: pd.DataFrame) -> dict:
-    g = pd.read_csv(NOUT / "games_2027.csv").merge(
+    g = pd.read_csv(NOUT / f"games_2027{VARIANT}.csv").merge(
         res[["game_id", "home_g", "away_g"]], on="game_id")
     if not len(g):
         return {"n_games": 0}
@@ -114,7 +117,7 @@ def team_points(res: pd.DataFrame) -> pd.DataFrame:
 
 def score_standings(res: pd.DataFrame, final: bool) -> dict:
     tp = team_points(res)
-    ne = pd.read_csv(NOUT / "projection_2027.csv").set_index("team")
+    ne = pd.read_csv(NOUT / f"projection_2027{VARIANT}.csv").set_index("team")
     ho = pd.read_csv(PROJ / "output" / "projections_2026_27_howe.csv").set_index("Abbr")
     t = tp.join(ne[["proj_points", "p10", "p90"]]).join(ho[["xPts"]])
     if not final:
@@ -138,7 +141,7 @@ def score_players() -> dict:
     act = act.rename(columns={"playerId": "player_id", "gamesPlayed": "gp",
                               "points": "pts"})[["player_id", "gp", "pts"]]
     act.to_csv(LIVE / "skaters_2027.csv", index=False)
-    pp = pd.read_csv(NOUT / "player_proj_2027.csv").merge(act, on="player_id")
+    pp = pd.read_csv(NOUT / f"player_proj_2027{VARIANT}.csv").merge(act, on="player_id")
     pp = pp[pp.gp >= 40]
     return {"n": int(len(pp)),
             **{f"mae_{k}": float((pp[c] - pp.pts).abs().mean())
@@ -148,9 +151,14 @@ def score_players() -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--variant", default="",
+                    help="dated update suffix, e.g. 20260928 (PLAN_NeurHL_LIVE_U1_*); "
+                         "scored alongside the frozen originals")
     ap.add_argument("--offline", action="store_true",
                     help="score the cached results only; no network")
     a = ap.parse_args()
+    global VARIANT
+    VARIANT = f"_{a.variant}" if a.variant else ""
     today = dt.date.today()
     res = (pd.read_csv(LIVE / "results_2027.csv") if a.offline
            else fetch_results(today))
@@ -162,7 +170,7 @@ def main():
     if final and not a.offline:
         card["L3_players"] = score_players()
     LIVE.mkdir(parents=True, exist_ok=True)
-    (LIVE / "scorecard_2027.json").write_text(json.dumps(card, indent=1))
+    (LIVE / f"scorecard_2027{VARIANT}.json").write_text(json.dumps(card, indent=1))
     print(json.dumps(card, indent=1))
 
 
