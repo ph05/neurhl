@@ -88,9 +88,8 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
     except Exception as e:  # noqa: BLE001
         print(f"[forecast] NeurHL-H projection failed: {type(e).__name__}: {e}")
     A, meta, _ = GL.build(gdf, lu_in, results_2027(), hproj)
-    rows, sheets = forecast(bundle, A)
     p_h = np.full(len(gdf), np.nan)
-    try:                     # comparator; a failure here never blocks NeurHL-G
+    try:                     # NeurHL-H; a failure here never blocks NeurHL-G
         from sim.h_live import forecast as h_forecast
         from sim.project_2027 import load_schedule
         from sim.schedule_context import build as sched_ctx
@@ -99,6 +98,7 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
             p_h = h_forecast(gdf, lu_in, A["CTX"][:, 0], sc, hproj)
     except Exception as e:  # noqa: BLE001
         print(f"[forecast] NeurHL-H comparator failed: {type(e).__name__}: {e}")
+    rows, sheets = forecast(bundle, A, p_h=p_h)
     frozen = pd.read_csv(NOUT / "games_2027.csv").set_index("game_id")
     code = subprocess.run(["git", "-C", str(PROJ), "rev-parse", "--short", "HEAD"],
                           capture_output=True, text=True).stdout.strip()
@@ -116,7 +116,7 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
             "p_home_win_elo": round(float(elo), 5),
             "p_home_win_neurhl_h": round(float(p_h[i]), 5) if np.isfinite(p_h[i]) else None,
             "p_home_win_1p0": round(float(frozen.p_home_win.get(r.game_id, np.nan)), 5),
-            "p_ot": round(rows[i]["p_ot"], 4),
+            "p_ot": round(rows[i]["p_ot"], 4), "stack_used": rows[i]["stack_used"],
             **{k: round(rows[i][k], 3) for k in ("goals_home", "goals_away", "xgf_home",
                                                    "xgf_away", "sog_home", "sog_away")},
             "lineup_home": lu["home"]["lineup_source"], "lineup_away": lu["away"]["lineup_source"],

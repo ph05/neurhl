@@ -78,6 +78,22 @@ def h_preds(seasons) -> pd.Series:
     return P.set_index("game_id").p_neurhl_h
 
 
+def h_ref(seasons) -> pd.Series:
+    """NeurHL-H walk-forward probabilities by game_id for any seasons: 2011-2024
+    from hier_core (cached), SEALED seasons from 1.0's published confirmation
+    file (neurhl/output/preds/hier_restatement_games.csv) only once unsealed."""
+    out = h_preds([s for s in seasons if s <= 2024]) if any(s <= 2024 for s in seasons) else pd.Series(dtype=float)
+    sealed = [s for s in seasons if s in W.SEALED]
+    if sealed:
+        if not W.is_unsealed():
+            raise PermissionError("NeurHL-H predictions for SEALED seasons need the seal")
+        from common import NOUT
+        r = pd.read_csv(NOUT / "preds" / "hier_restatement_games.csv")
+        r = r[r.season.isin(sealed)].set_index("game_id").p_neurhl_h
+        out = pd.concat([out, r])
+    return out
+
+
 def fit_stack(X, y, seasons):
     """Logistic stack; the column subset (always including Elo, column 0) is
     chosen by leave-one-season-out CV on the training seasons."""

@@ -89,8 +89,9 @@ def standardise(A, stats, names):
 
 
 @torch.no_grad()
-def forecast(name, A, n_sims=10_000, seed=711):
-    """Returns (per-game rows, per-game stat sheets)."""
+def forecast(name, A, n_sims=10_000, seed=711, p_h=None):
+    """Returns (per-game rows, per-game stat sheets). p_h: NeurHL-H home-win
+    probabilities (sim/h_live.py); games without one use the Elo+G fallback stack."""
     torch.set_num_threads(4)
     models, stats, meta = load_bundle(name)
     names = meta["names"]
@@ -100,10 +101,15 @@ def forecast(name, A, n_sims=10_000, seed=711):
     o = {k: np.mean([x[k] for x in outs], 0) for k in outs[0]}
     sigma = float(np.mean([m.log_sigma.exp().item() for m in models]))
     st = meta["stack"]
-    lg = np.log(np.clip(o["p_home_win"], 1e-6, 1 - 1e-6) /
-                np.clip(1 - o["p_home_win"], 1e-6, 1))
-    cols = {"elo_logit": A["CTX"][:, 0], "lg": lg}
-    z = st["intercept"] + sum(c * cols[k] for k, c in zip(st["cols"], st["coef"]))
+    lgt = lambda p: np.log(np.clip(p, 1e-6, 1 - 1e-6) / np.clip(1 - p, 1e-6, 1))
+    lg = lgt(o["p_home_win"])
+    ph = np.full(len(lg), np.nan) if p_h is None else np.asarray(p_h, float)
+    cols = {"elo_logit": A["CTX"][:, 0], "lg": lg, "lh": lgt(np.nan_to_num(ph, nan=0.5))}
+    z_of = lambda s_: s_["intercept"] + sum(c * cols[k] for k, c in zip(s_["cols"], s_["coef"]))
+    z = z_of(st)
+    if "lh" in st["cols"]:
+        fb = st.get("fallback", st)
+        z = np.where(np.isfinite(ph), z, z_of(fb))
     p_final = 1 / (1 + np.exp(-z))
     rows, sheets = [], []
     for i in range(len(p_final)):
@@ -118,6 +124,7 @@ def forecast(name, A, n_sims=10_000, seed=711):
              **{k: o[k][i] for k in ("isog", "g", "a", "ixg", "toi_ev", "toi_pp", "toi_sh")}}
         sh = simulate(g, n=n_sims, seed=seed + i)
         rows.append({"p_home_win": float(p_final[i]), "p_home_win_raw": float(o["p_home_win"][i]),
+                     "stack_used": "elo+g+h" if ("lh" in st["cols"] and np.isfinite(ph[i])) else "elo+g",
                      "p_ot": float(o4[2] + o4[3]),
                      "xgf_home": float(o["xgf"][i, 0]), "xgf_away": float(o["xgf"][i, 1]),
                      "goals_home": float(o["goals"][i, 0]), "goals_away": float(o["goals"][i, 1]),

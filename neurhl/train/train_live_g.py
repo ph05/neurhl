@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from common import CONFIGS  # noqa: E402
 import windows as W  # noqa: E402
-from eval.run_g import RUNS, fit_stack, logit, model_sha  # noqa: E402
+from eval.run_g import RUNS, fit_stack, h_ref, logit, model_sha  # noqa: E402
 from sim.g_forecast_core import save_bundle  # noqa: E402
 from train.train_neurhl_g import Data, predict, train_snapshot  # noqa: E402
 
@@ -46,7 +46,8 @@ def oos_preds(D, cfg, seasons, seeds):
                 cp.parent.mkdir(parents=True, exist_ok=True)
                 np.savez_compressed(cp, **o)
             acc = o["p_home_win"] if acc is None else acc + o["p_home_win"]
-        rows.append(pd.DataFrame({"season": T, "p_g": acc / len(seeds),
+        rows.append(pd.DataFrame({"season": T, "game_id": D.meta.game_id.iloc[te].values,
+                                  "p_g": acc / len(seeds),
                                   "elo_logit": D.A["CTX"][te, 0],
                                   "y": D.meta.outcome4.iloc[te].isin([0, 2]).astype(float).values}))
     return pd.concat(rows, ignore_index=True)
@@ -59,11 +60,22 @@ def build(cfg_name, through, name, purpose="train"):
     assert D.meta.season_end.max() >= through, "training seasons not available (sealed?)"
     seasons = sorted(set(range(2011, through + 1)) - W.NO_SCORE)
     P = oos_preds(D, cfg, seasons, seeds)
-    X = np.column_stack([P.elo_logit, logit(P.p_g)])
-    mdl, use = fit_stack(X, P.y.to_numpy(), P.season.to_numpy())
-    cols = ["elo_logit", "lg"]
-    stack = {"cols": [cols[i] for i in use], "coef": mdl.coef_[0].tolist(),
-             "intercept": float(mdl.intercept_[0]), "fit_seasons": seasons}
+
+    def fit(cols):
+        X = np.column_stack([P.elo_logit if c == "elo_logit" else logit(P[{"lg": "p_g", "lh": "p_h"}[c]])
+                             for c in cols])
+        ok = np.isfinite(X).all(1)
+        mdl, use = fit_stack(X[ok], P.y.to_numpy()[ok], P.season.to_numpy()[ok])
+        return {"cols": [cols[i] for i in use], "coef": mdl.coef_[0].tolist(),
+                "intercept": float(mdl.intercept_[0]), "fit_seasons": seasons,
+                "n": int(ok.sum())}
+    noh = fit(["elo_logit", "lg"])
+    if cfg.get("stack_h"):
+        P["p_h"] = P.game_id.map(h_ref(seasons))
+        stack = fit(["elo_logit", "lg", "lh"])
+        stack["fallback"] = noh
+    else:
+        stack = noh
     train_cfg = {k: v for k, v in cfg.items() if k not in ("stack_h", "stack_window", "parent", "delta", "seeds")}
     models = []
     for sd in seeds:

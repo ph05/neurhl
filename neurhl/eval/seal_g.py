@@ -77,7 +77,7 @@ def paired(a, b):
 def main():
     cfg_name, fz = preconditions()
     W.unseal(str(Path(__file__).resolve()))
-    from eval.run_g import fit_stack, logit, nll
+    from eval.run_g import fit_stack, h_ref, logit, nll
     from train.train_live_g import oos_preds
     from train.train_neurhl_g import Data, predict, train_snapshot
 
@@ -93,11 +93,20 @@ def main():
             m, P = train_snapshot(D, T, {**train_cfg, "seed": sd})
             outs.append(predict(m, P, te))
         o = {k: np.mean([x[k] for x in outs], 0) for k in outs[0]}
-        hist = oos_preds(D, cfg, sorted(set(range(2011, T)) - W.NO_SCORE), seeds)
-        X = np.column_stack([hist.elo_logit, logit(hist.p_g)])
-        mdl, use = fit_stack(X, hist.y.to_numpy(), hist.season.to_numpy())
-        Xt = np.column_stack([D.A["CTX"][te, 0], logit(o["p_home_win"])])
-        p = mdl.predict_proba(Xt[:, use])[:, 1]
+        hist_seasons = sorted(set(range(2011, T)) - W.NO_SCORE)
+        hist = oos_preds(D, cfg, hist_seasons, seeds)
+        cols = [hist.elo_logit, logit(hist.p_g)]
+        gid_te = D.meta.game_id.iloc[te].values
+        cols_t = [D.A["CTX"][te, 0], logit(o["p_home_win"])]
+        if cfg.get("stack_h"):          # the candidate's declared stack form
+            href = h_ref(hist_seasons + [T])
+            cols.append(logit(hist.game_id.map(href).to_numpy()))
+            cols_t.append(logit(pd.Series(gid_te).map(href).to_numpy()))
+        X = np.column_stack(cols)
+        ok = np.isfinite(X).all(1)
+        mdl, use = fit_stack(X[ok], hist.y.to_numpy()[ok], hist.season.to_numpy()[ok])
+        Xt = np.column_stack(cols_t)
+        p = mdl.predict_proba(np.nan_to_num(Xt[:, use]))[:, 1]
         df = D.meta.iloc[te][["game_id", "season_end", "outcome4"]].copy()
         df["p_g"], df["p_g_raw"] = p, o["p_home_win"]
         df["p_elo"] = 1 / (1 + np.exp(-D.A["CTX"][te, 0]))
