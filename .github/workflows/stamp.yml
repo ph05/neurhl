@@ -1,0 +1,60 @@
+# NeurHL LIVE: server-side timestamp for forecast files (PLAN_NeurHL4 LIVE).
+# On every push to main that touches neurhl/output/live/**, list the changed files with
+# their sha256 and print the run's own UTC time. The run's created_at (GitHub's clock) is
+# the evidence that the pushed commit existed on origin/main by then; neurhl/live/deadline.py
+# looks it up by head sha. No secrets needed.
+name: stamp
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "neurhl/output/live/**"
+
+permissions:
+  contents: read
+
+jobs:
+  stamp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Hash changed live files
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          PUSHED_AT: ${{ github.event.head_commit.timestamp }}
+          PUSHER: ${{ github.event.pusher.name }}
+        run: |
+          set -euo pipefail
+          now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+             || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            range_desc="$AFTER (no usable before sha; files of the head commit)"
+            files="$(git show --pretty=format: --name-only "$AFTER" -- neurhl/output/live | sed '/^$/d')"
+          else
+            range_desc="$BEFORE..$AFTER"
+            files="$(git diff --name-only "$BEFORE" "$AFTER" -- neurhl/output/live)"
+          fi
+          {
+            echo "run_utc:        $now"
+            echo "run_id:         ${GITHUB_RUN_ID} attempt ${GITHUB_RUN_ATTEMPT}"
+            echo "head_sha:       $AFTER"
+            echo "range:          $range_desc"
+            echo "commit_time:    ${PUSHED_AT:-unknown} (client-set)"
+            echo "pusher:         ${PUSHER:-unknown}"
+            echo "commits_in_push: $(git rev-list --count ${BEFORE:+$BEFORE..}$AFTER 2>/dev/null || echo '?')"
+            echo
+            echo "sha256                                                            file"
+            if [ -z "$files" ]; then
+              echo "(no files under neurhl/output/live changed)"
+            else
+              while IFS= read -r f; do
+                if [ -f "$f" ]; then sha256sum "$f"; else echo "(deleted)                                                         $f"; fi
+              done <<< "$files"
+            fi
+          } | tee stamp.txt
+          { echo '```'; cat stamp.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

@@ -40,6 +40,7 @@ GH_X, GH_W = [float(v) for v in (-2.0201828705, -0.9585724646, 0.0, 0.9585724646
              [float(v) for v in (0.0199532421, 0.3936193232, 0.9453087205,
                                  0.3936193232, 0.0199532421)]
 MAXG = 12
+STEP = 2          # integration step, minutes
 
 
 def mlp(i, h, o, p=0.1, out_zero=False):
@@ -75,6 +76,10 @@ class NeurHLG(nn.Module):
         self.logs = nn.ParameterDict({k: nn.Parameter(torch.tensor(math.log(v)))
                                       for k, v in g.items()})
         self.home_ev = nn.Parameter(torch.tensor(0.03))
+        # Elo anchor: log-rate shift +/- beta * elo_logit / 2 on the two sides'
+        # scoring rates, so team strength starts at Elo's level and the network
+        # learns what the lineup adds (a logit of 0.4 ~ a 0.1 goal edge)
+        self.elo_beta = nn.Parameter(torch.tensor(0.25))
         self.fin0 = nn.Parameter(torch.tensor(0.05))
         self.gk_coef = nn.Parameter(torch.tensor(1.0))
         self.log_sigma = nn.Parameter(torch.tensor(math.log(0.12)))
@@ -176,12 +181,14 @@ class NeurHLG(nn.Module):
         off, dfn = dsk[..., 8], dsk[..., 9]
         w_ev = toi_ev / (5.0 * T_ev[..., None])                   # sums to 1 per side
         lineup = (w_ev * off).sum(-1) - (w_ev[:, opp] * dfn[:, opp]).sum(-1)
-        r_ev = base["ev"] * torch.exp(lineup + dtm[..., 0]
-                                      + self.home_ev * torch.tensor([1.0, -1.0]))
+        sgn = torch.tensor([1.0, -1.0])
+        elo_sh = 0.5 * self.elo_beta * bt["ELO"][:, None] * sgn
+        r_ev = base["ev"] * torch.exp(lineup + dtm[..., 0] + elo_sh
+                                      + self.home_ev * sgn)
         w_pp = toi_pp / (5.0 * T_pp[..., None]).clamp(min=eps)
         w_sh = toi_sh / (4.0 * T_sh[..., None]).clamp(min=eps)
         lineup_pp = (w_pp * off).sum(-1) - (w_sh[:, opp] * dfn[:, opp]).sum(-1)
-        r_pp = base["pp"] * torch.exp(lineup_pp + dtm[..., 1])
+        r_pp = base["pp"] * torch.exp(lineup_pp + dtm[..., 1] + elo_sh)
         r_sh = self.L("L_sh") * torch.exp(dtm[..., 5])
         xgf_ev = r_ev * T_ev / 60.0
         xgf_pp = r_pp * T_pp / 60.0
@@ -229,7 +236,7 @@ class NeurHLG(nn.Module):
     def outcome(self, lh, la):
         """outcome4 probabilities: [home reg, away reg, home OT/SO, away OT/SO].
 
-        Minute-by-minute integration over the goal differential (home minus
+        Integration over the goal differential in STEP-minute steps (home minus
         away, -D..D). Each team's scoring rate is its mean rate times a learned
         multiplier indexed by its own lead (-3..3) and the game phase (minutes
         0-40, 40-50, 50-56, 56-58, 58-60): trailing teams push, leaders sit
@@ -248,11 +255,11 @@ class NeurHLG(nn.Module):
         p_home = p_away = p_tie = 0.0
         for x, w in zip(GH_X, GH_W):
             s = math.sqrt(2.0) * sig * x - 0.5 * sig ** 2
-            rh = (lh * torch.exp(s))[:, None] / 60.0             # per minute
-            ra = (la * torch.exp(s))[:, None] / 60.0
+            rh = (lh * torch.exp(s))[:, None] * (STEP / 60.0)    # per step
+            ra = (la * torch.exp(s))[:, None] * (STEP / 60.0)
             dist = torch.zeros(B, n)
             dist[:, D] = 1.0
-            for t in range(60):
+            for t in range(0, 60, STEP):
                 ph_ = 0 if t < 40 else 1 if t < 50 else 2 if t < 56 else 3 if t < 58 else 4
                 mh = torch.exp(self.hz[lead_h, ph_])[None, :]
                 ma = torch.exp(self.hz[lead_a, ph_])[None, :]

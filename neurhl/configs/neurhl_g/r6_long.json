@@ -1,0 +1,2 @@
+{"epochs1": 16, "epochs2": 6, "w_out1": 0.3, "seeds": 3,
+ "parent": "r6", "delta": "R6 with longer training (16+6 epochs)"}

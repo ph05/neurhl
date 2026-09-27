@@ -35,6 +35,22 @@ LEDGER = CONFIGS / "search_ledger_g.csv"
 RUNS = TENSORS / "g_runs"
 
 
+def append_ledger(row: dict) -> None:
+    """Append one run to the ledger, aligning columns with earlier rows."""
+    new = pd.DataFrame([row])
+    if LEDGER.exists():
+        new = pd.concat([pd.read_csv(LEDGER), new], ignore_index=True)
+    new.to_csv(LEDGER, index=False)
+
+
+def model_sha() -> bytes:
+    """Hash of the model and trainer source, so cached snapshot predictions
+    are reused only for identical code."""
+    root = Path(__file__).resolve().parents[1]
+    return hashlib.sha256((root / "models" / "neurhl_g.py").read_bytes()
+                          + (root / "train" / "train_neurhl_g.py").read_bytes()).digest()
+
+
 def nll(p, y):
     p = np.clip(p, 1e-9, 1 - 1e-9)
     return -(y * np.log(p) + (1 - y) * np.log(1 - p))
@@ -60,7 +76,8 @@ def h_preds(seasons) -> pd.Series:
 
 
 def fit_stack(X, y, seasons):
-    """Logistic stack with an Elo-only fallback judged by LOSO CV."""
+    """Logistic stack; the column subset (always including Elo, column 0) is
+    chosen by leave-one-season-out CV on the training seasons."""
     from sklearn.linear_model import LogisticRegression
 
     def loso(cols):
@@ -73,8 +90,14 @@ def fit_stack(X, y, seasons):
             tot += nll(m.predict_proba(X[te][:, cols])[:, 1], y[te]).sum()
             n += te.sum()
         return tot / max(n, 1)
-    full = list(range(X.shape[1]))
-    use = full if (len(np.unique(seasons)) < 2 or loso(full) < loso([0])) else [0]
+    from itertools import combinations
+    others = list(range(1, X.shape[1]))
+    subsets = [[0] + list(c) for r in range(len(others) + 1)
+               for c in combinations(others, r)]
+    if len(np.unique(seasons)) < 3:
+        use = list(range(X.shape[1]))
+    else:
+        use = min(subsets, key=loso)
     m = LogisticRegression(C=1.0, max_iter=2000).fit(X[:, use], y)
     return m, use
 
@@ -104,9 +127,19 @@ def main():
         if not len(te):
             continue
         acc = None
+        train_cfg = {k: v for k, v in cfg.items()
+                     if k not in ("stack_h", "parent", "delta", "seeds")}
+        ck = hashlib.sha256(json.dumps(train_cfg, sort_keys=True).encode()
+                            + model_sha()).hexdigest()[:16]
         for sd in seeds:
-            model, P = train_snapshot(D, T, {**cfg, "seed": sd})
-            o = predict(model, P, te)
+            cp = RUNS / "cache" / f"{ck}_{T}_{sd}.npz"
+            if cp.exists():
+                o = dict(np.load(cp))
+            else:
+                model, P = train_snapshot(D, T, {**train_cfg, "seed": sd})
+                o = predict(model, P, te)
+                cp.parent.mkdir(parents=True, exist_ok=True)
+                np.savez_compressed(cp, **o)
             acc = o if acc is None else {k: acc[k] + o[k] for k in acc}
         o = {k: v / len(seeds) for k, v in acc.items()}
         df = meta.iloc[te][["game_id", "season_end", "outcome4", "gh_reg", "ga_reg"]].copy()
@@ -194,7 +227,7 @@ def main():
            "parent": cfg.get("parent", ""), "delta": cfg.get("delta", ""),
            "seeds": len(seeds), **{k: v for k, v in res.items() if k != "per_season_d_elo"},
            "per_season_d_elo": json.dumps(res["per_season_d_elo"])}
-    pd.DataFrame([row]).to_csv(LEDGER, mode="a", header=not LEDGER.exists(), index=False)
+    append_ledger(row)
     print(json.dumps(res, indent=1))
 
 

@@ -52,6 +52,7 @@ class Data:
     def prepare(self, train_mask):
         A = self.A
         out = {}
+        self.stats = {}
         for key, arr, dims in (("SK", A["SK"], (0, 1, 2)), ("GK", A["GK"], (0, 1)),
                                ("TM", A["TM"], (0, 1)), ("CTX", A["CTX"], (0,))):
             x = arr[train_mask]
@@ -63,6 +64,7 @@ class Data:
             sd = np.nanstd(x, 0)
             mu = np.where(np.isfinite(mu), mu, 0.0)
             sd = np.where(np.isfinite(sd) & (sd > 1e-6), sd, 1.0)
+            self.stats[key] = (mu, sd)
             z = (arr - mu) / sd
             out[key] = np.nan_to_num(np.clip(z, -8, 8), nan=0.0).astype(np.float32)
         out["SKB"] = np.nan_to_num(A["SKB"], nan=0.0).astype(np.float32)
@@ -71,6 +73,7 @@ class Data:
         out["GKR"] = A["GK"][..., self.gk_raw_idx].astype(np.float32)
         out["SKY"], out["TMY"] = A["SKY"], A["TMY"]
         out["O4"] = self.meta.outcome4.to_numpy().astype(np.int64)
+        out["ELO"] = np.nan_to_num(A["CTX"][:, 0]).astype(np.float32)
         return out
 
 
@@ -153,6 +156,7 @@ def train_snapshot(D, T, cfg):
         anchor = [q.detach().clone() for q in model.parameters() if q.requires_grad]
         run(cfg["epochs2"], cfg["lr2"], 1.0, anchor)
     model.eval()
+    model.stats = dict(D.stats)
     return model, P
 
 

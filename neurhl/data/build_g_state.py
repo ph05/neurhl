@@ -30,7 +30,8 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common import TENSORS  # noqa: E402
 
-SEASONS = list(range(2008, 2027))
+SEASONS = sorted(int(p.stem.split("_")[-1]) for p in TENSORS.glob("games_ctx_*.parquet")
+                 if p.stem.split("_")[-1].isdigit())
 DECAYS = (0.98, 0.95, 0.85, 0.6)
 DTAG = ("d98", "d95", "d85", "d60")
 
@@ -80,7 +81,7 @@ SK_TOI = {"toi_pg": ("toi_all", "gp"), "toi_ev_pg": ("toi_ev", "gp"),
           "pp1_share": ("pp1", "gp")}
 
 
-def skater_rows(dates: pd.DataFrame) -> pd.DataFrame:
+def skater_rows(dates: pd.DataFrame, extra: pd.DataFrame = None) -> pd.DataFrame:
     parts = []
     for s in SEASONS:
         pg = pd.read_parquet(TENSORS / f"player_games_{s}.parquet")
@@ -104,6 +105,8 @@ def skater_rows(dates: pd.DataFrame) -> pd.DataFrame:
         parts.append(d)
     d = pd.concat(parts, ignore_index=True)
     d = d.merge(dates[["game_id", "date"]], on="game_id", how="inner")
+    if extra is not None:        # live: tonight's rows, state read after all games so far
+        d = pd.concat([d, extra.assign(toi_sec=0.0, has_xg=1.0)], ignore_index=True)
     # Position from the bio table: the HTM-era player_games (2008-2011) code
     # every skater as pos_group 0, with no defencemen. Bio positions agree
     # 100% with player_games wherever both exist (checked on 2016).
@@ -159,8 +162,8 @@ def add_state(d: pd.DataFrame, cols: list, rates: dict, levels: dict,
     return pd.concat([d, pd.DataFrame(feats, index=d.index)], axis=1)
 
 
-def skater_state(dates: pd.DataFrame) -> pd.DataFrame:
-    d = skater_rows(dates)
+def skater_state(dates: pd.DataFrame, extra: pd.DataFrame = None) -> pd.DataFrame:
+    d = skater_rows(dates, extra)
     d = add_state(d, SK_X, SK_RATES, SK_TOI)
     g = d.groupby("player_id")
     d["days_since"] = (d.date - g.date.shift(1)).dt.days.fillna(365).clip(0, 365)
@@ -175,7 +178,7 @@ def skater_state(dates: pd.DataFrame) -> pd.DataFrame:
     d["draft_overall"] = d.player_id.map(bios.draft_overall).fillna(260)
     # as-of RAPM prior: season s reads rapm_prior_{s} (fit on seasons < s)
     rp = []
-    for s in SEASONS:
+    for s in SEASONS + [SEASONS[-1] + 1]:     # +1: the season being predicted live
         p = TENSORS / f"rapm_prior_{s}.parquet"
         if p.exists():
             r = pd.read_parquet(p, columns=["player_id", "cf_off", "cf_def",
@@ -192,13 +195,15 @@ def skater_state(dates: pd.DataFrame) -> pd.DataFrame:
 GK_X = ["toi_m", "sf", "ga", "xga", "start", "gp"]
 
 
-def goalie_state(dates: pd.DataFrame) -> pd.DataFrame:
+def goalie_state(dates: pd.DataFrame, extra: pd.DataFrame = None) -> pd.DataFrame:
     parts = []
     for s in SEASONS:
         g = pd.read_parquet(TENSORS / f"goalie_games_{s}.parquet")
         parts.append(g.assign(season_end=s))
     g = pd.concat(parts, ignore_index=True)
     g = g.merge(dates[["game_id", "date"]], on="game_id", how="inner")
+    if extra is not None:
+        g = pd.concat([g, extra.assign(toi_sec=0.0, goalie_start=1)], ignore_index=True)
     g["toi_m"] = g.toi_sec / 60.0
     g["xga"] = g.xgf.fillna(0.0)            # goalie_games.xgf = xG FACED
     g["start"] = g.goalie_start.astype(float)
@@ -232,7 +237,7 @@ TM_X = ["xgf_ev", "xga_ev", "xgf_pp", "xga_sh", "xgf_all", "xga_all", "gf",
         "pp_m", "sh_m", "gp"]
 
 
-def team_state(dates: pd.DataFrame) -> pd.DataFrame:
+def team_state(dates: pd.DataFrame, extra: pd.DataFrame = None) -> pd.DataFrame:
     rows = []
     for s in SEASONS:
         p = TENSORS / f"tgx_{s}.parquet"
@@ -246,6 +251,8 @@ def team_state(dates: pd.DataFrame) -> pd.DataFrame:
                        "away_g", "season_end"]], on="game_id", how="inner")
         rows.append(t)
     t = pd.concat(rows, ignore_index=True)
+    if extra is not None:
+        t = pd.concat([t, extra], ignore_index=True)
     t["team"] = np.where(t.is_home == 1, t.home_idx, t.away_idx)
     t["gf"] = np.where(t.is_home == 1, t.home_g, t.away_g).astype(float)
     t["ga"] = np.where(t.is_home == 1, t.away_g, t.home_g).astype(float)

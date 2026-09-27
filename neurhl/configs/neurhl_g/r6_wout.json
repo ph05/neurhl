@@ -1,0 +1,2 @@
+{"epochs1": 10, "epochs2": 4, "w_out1": 0.7, "seeds": 3,
+ "parent": "r6", "delta": "R6 with outcome weight 0.7 in phase 1"}

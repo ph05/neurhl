@@ -1,0 +1,2 @@
+{"epochs1": 10, "epochs2": 4, "w_out1": 0.3, "seeds": 3,
+ "parent": "r6", "delta": "R6 + Elo anchor: +/- beta*elo_logit/2 on both sides' log scoring rates (full R6 raw G 0.6757 was worse than Elo 0.6753)"}
