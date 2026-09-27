@@ -1,0 +1,2 @@
+{"freeze_heads": true, "epochs1": 10, "epochs2": 0, "lr1": 5e-3, "w_out1": 1.0, "seeds": 1,
+ "parent": "", "delta": "R4 non-neural engine: shrunk baselines, conservation team layer, integration; only global scalars train"}

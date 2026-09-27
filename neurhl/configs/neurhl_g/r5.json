@@ -1,0 +1,2 @@
+{"epochs1": 10, "epochs2": 0, "w_out1": 0.3, "seeds": 3,
+ "parent": "r4", "delta": "R5 neural heads, box-score pretraining (outcome weight 0.3)"}

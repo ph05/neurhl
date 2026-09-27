@@ -46,6 +46,28 @@ def load(name: str, season: int, purpose: str = "train", **kw) -> pd.DataFrame:
     return pd.read_parquet(path(name, season, purpose), **kw)
 
 
+def load_master(purpose: str = "train"):
+    """The NeurHL-G master tensor (build_g_tensors.py) with SEALED seasons
+    removed unless unsealed or purpose == "live_inputs". Returns
+    (arrays: dict, meta: DataFrame, names: dict)."""
+    import json
+
+    import numpy as np
+    if purpose not in PURPOSES:
+        raise ValueError(f"purpose must be one of {PURPOSES}")
+    meta = pd.read_parquet(TENSORS / "g_meta.parquet")
+    z = np.load(TENSORS / "g_master.npz")
+    keep = ~meta.season_end.isin(W.SEALED).to_numpy()
+    if W.is_unsealed() or purpose == "live_inputs":
+        keep[:] = True
+        if purpose == "live_inputs" and not W.is_unsealed():
+            with open(TENSORS / "_g_loader_access.log", "a") as f:
+                f.write(f"{dt.datetime.now().isoformat()} live_inputs master\n")
+    arrays = {k: z[k][keep] for k in z.files}
+    names = json.loads((TENSORS / "g_names.json").read_text())
+    return arrays, meta[keep].reset_index(drop=True), names
+
+
 def load_many(name: str, seasons, purpose: str = "train", **kw) -> pd.DataFrame:
     parts = []
     for s in seasons:
