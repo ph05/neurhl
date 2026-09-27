@@ -121,6 +121,8 @@ dated and committed before the run it governs.
 | `neurhl/output/projection_2027.csv` | Team points (mean, 10th and 90th percentile), wins and playoff probability |
 | `neurhl/output/player_proj_2027.csv` | Skater games, ice time, goals, assists and points |
 | `neurhl/output/live/scorecard_2027.json` | Running live scorecard |
+| `neurhl/output/live/2027/<date>/` | NeurHL-G game-day forecasts (morning and pregame): home-win probability from NeurHL-G, NeurHL-H and Elo, the lineups used and where they came from, and simulated stat lines for every dressed player |
+| `neurhl/output/g_gates.json` | NeurHL-G gate results on 2019-2024 |
 
 ## Reproducing
 
@@ -130,10 +132,12 @@ and are not in the repository; the fetchers in `neurhl/data/fetch/` rebuild
 them.
 
 ```sh
-# acceptance battery
+# acceptance batteries (NeurHL 1.0, then NeurHL-G)
 uv run --no-project --python 3.12 --with numpy --with "pandas<3" --with pyarrow \
   --with scipy --with scikit-learn --with torch --with openpyxl \
   python neurhl/tests/review_tests_neurhl2.py
+uv run --no-project --python 3.12 --with numpy --with "pandas<3" --with pyarrow \
+  python neurhl/tests/review_tests_neurhl4.py
 
 # 2026-27 team and per-game projections (20,000 simulated seasons)
 uv run --no-project --python 3.12 --with numpy --with "pandas<3" --with pyarrow \

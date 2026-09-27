@@ -70,8 +70,9 @@ NeurHL-H uses which skaters dressed for each game, known about an hour before pu
 - **Shot quality.** Beats a distance-and-angle baseline in 18 of 18 seasons;
   team xG differential predicts future goal share better than Corsi or
   Fenwick (`neurhl/configs/xg_gates.json`, `x2_diagnostics.json`).
-- **Reproducibility.** Acceptance batteries pass 25/25 and 40/40; committed
-  predictions re-derive on CPU within 1e-6.
+- **Reproducibility.** The four acceptance batteries pass (25/25, 40/40,
+  25/25 and, for NeurHL-G, 10/10); committed predictions re-derive on CPU
+  within 1e-6.
 
 ## NeurHL-G, the single-game engine (PLAN_NeurHL4)
 

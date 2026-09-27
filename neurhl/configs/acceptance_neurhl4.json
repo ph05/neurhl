@@ -27,12 +27,12 @@
  {
   "check": "G_GATE runs within cap (2)",
   "pass": true,
-  "detail": "0/2"
+  "detail": "1/2"
  },
  {
   "check": "G_ITER full runs within cap (14)",
   "pass": true,
-  "detail": "10/14"
+  "detail": "13/14"
  },
  {
   "check": "state-builder causality audit clean",

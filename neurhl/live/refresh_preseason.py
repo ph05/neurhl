@@ -66,7 +66,7 @@ Only the inputs: the rosters teams filed at the deadline (snapshot
 `data/raw/rosters/{a.date}/`, with its moves file against the previous
 snapshot) and the availability entries in `data/manual/player_status_2027.csv`
 (sha256 `{sha(status)}`), which remove players who cannot dress (for example
-Connor Hellebuyck, suspended by Winnipeg since 2026-09-17). The 1.0 models,
+Connor Hellebuyck, whose suspension Winnipeg announced on 2026-09-16). The 1.0 models,
 code paths and random seeds are the frozen ones; the 1.0 team model has no
 goalie term, so a goalie's absence moves it only through the roster's skaters.
 
