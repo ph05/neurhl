@@ -3,6 +3,8 @@
   --mode morning   every game today (ET), projected lineups, about 11:00 ET
   --mode pregame   each game starting 45-75 minutes from now that has no
                    pregame file yet, with the latest lineups and goalies
+                   (launchd runs it every 10 minutes, 06:00-23:50 ET)
+Games that have already started are never forecast.
   --mode preview   the evening before a game day (descriptive, not scored)
 
 For each game: lineups from lineup_resolver (NHL API > DailyFaceoff > fallback,
@@ -75,7 +77,12 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
         rows_meta.append({"game_id": gid, "date": date, "home": home, "away": away,
                           "start_utc": lu.get("start_utc")})
     gdf = pd.DataFrame(rows_meta)
-    ok = [g for g in gdf.game_id if lineups[g]["home"]["skaters"] and lineups[g]["away"]["skaters"]]
+    started = [g for g, st in zip(gdf.game_id, gdf.start_utc)
+               if isinstance(st, str) and dt.datetime.fromisoformat(st.replace("Z", "+00:00")) <= now]
+    if started:              # a forecast is valid only before its game starts
+        print(f"[forecast] {tag}: skipping games already started: {started}")
+    ok = [g for g in gdf.game_id if g not in started
+          and lineups[g]["home"]["skaters"] and lineups[g]["away"]["skaters"]]
     gdf = gdf[gdf.game_id.isin(ok)].reset_index(drop=True)
     if not len(gdf):
         print(f"[forecast] {tag}: no resolvable games")

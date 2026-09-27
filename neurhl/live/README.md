@@ -41,7 +41,7 @@ and logs to `data/raw/lineup_snapshots/launchd_<name>.log`.
 | `com.neurhl.snapshot` (existing) | 17:30 daily | `snapshot_lineups.py` (daily mode) |
 | `com.neurhl.intraday` | every 30 min, 09:00-23:00 | `snapshot_lineups.py --intraday` |
 | `com.neurhl.morning` | 11:00 | `neurhl/live/run_forecast.sh morning` |
-| `com.neurhl.pregame` | every 10 min, 11:00-23:50 | `neurhl/live/run_forecast.sh pregame` (forecasts each game 45-75 minutes before its start) |
+| `com.neurhl.pregame` | every 10 min, 06:00-23:50 | `neurhl/live/run_forecast.sh pregame` (forecasts each game 45-75 minutes before its start; the early start covers the 08:00 ET Global Series game on 2026-12-20) |
 | `com.neurhl.nightly` | 04:30 | `neurhl/live/run_nightly.sh` (results, ingest, G state, publish) |
 
 Forecasts are computed in this repo (the resolver reads the gitignored
