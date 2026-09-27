@@ -39,17 +39,20 @@ def freeze(first_days: int = 14):
     R = importlib.util.module_from_spec(spec)
     sys.modules["lineup_resolver"] = R
     spec.loader.exec_module(R)
+    import tempfile
     bundle = json.loads((CONFIGS / "live_models.json").read_text())["neurhl_g"]
     sch = load_schedule()
     d0 = pd.Timestamp(sch.date.min())
     dates = sorted(d for d in sch.date.unique() if pd.Timestamp(d) < d0 + pd.Timedelta(days=first_days))
-    goals = []
+    no_df = tempfile.mkdtemp()      # an empty snapshot directory: fallback lineups only (A1)
+    goals, sources = [], []
     for d in dates:
         day = sch[sch.date == d]
         lus, keep = {}, []
         for r in day.itertuples():
-            lu = R.resolve(r.game_id, d, r.home, r.away, use_api=False,
+            lu = R.resolve(r.game_id, d, r.home, r.away, snapshot_dir=no_df, use_api=False,
                            as_of=dt.datetime.fromisoformat(f"{d}T15:00:00+00:00"))
+            sources += [lu[s]["lineup_source"] for s in ("home", "away")]
             if lu["home"]["skaters"] and lu["away"]["skaters"]:
                 lus[r.game_id] = {s: {"skaters": lu[s]["skaters"], "goalie": lu[s]["goalie"]}
                                   for s in ("home", "away")}
@@ -66,6 +69,7 @@ def freeze(first_days: int = 14):
     L = era["prior_gpg"] / 2 - (era["prior_ot_share"] + era["prior_so_share"]) / 2
     st = {"m0": L / M, "L": L, "M": M, "k": K, "first_days": first_days,
           "n_team_games": int(sum(len(x) for x in goals)), "dates": [str(x) for x in dates],
+          "lineup_sources": {k: sources.count(k) for k in sorted(set(sources))},
           "bundle": bundle,
           "bundle_sha": sha(ROOT / "checkpoints" / "g" / bundle / "bundle.json")[:16],
           "frozen_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")}
