@@ -38,6 +38,9 @@ CTX_COLS = ["elo_logit", "prior_gpg", "prior_ot_share", "prior_so_share",
             "prior_margin_abs", "prior_parity", "flag_3v3", "flag_covid",
             "season_scaled", "days_in"]
 SIDE_CTX = ["rest", "b2b", "km3d", "dtz"]
+# NeurHL-H lineup projections as team inputs (rung R6c/R13): rejected under the
+# adoption rule (G_ITER stack 0.67344 vs 0.67301 without), so off by default
+WITH_H = "--with-h" in sys.argv
 # baseline: (level column at decay tag, prior by position [F, D], pseudo-games)
 SK_BASE = {
     "toi_ev": ("toi_ev_pg_d85", None, 3.0),
@@ -175,17 +178,18 @@ def main():
     # NeurHL-H Layer-1 lineup projections (walk-forward: proj_team_{T} comes from a
     # model trained on seasons < T, aggregated over the dressed skaters)
     hp = []
-    for s_ in SEASONS:
+    for s_ in (SEASONS if WITH_H else []):
         f = TENSORS / f"proj_team_{s_}.parquet"
         if f.exists():
             hp.append(pd.read_parquet(f).reset_index() if "game_id" not in
                       pd.read_parquet(f).columns else pd.read_parquet(f))
-    hp = pd.concat(hp, ignore_index=True).set_index("game_id")
-    clh = hp.p_clf_h / (hp.p_clf_h + hp.p_cla_h).clip(lower=1e-6)
-    cla = hp.p_clf_a / (hp.p_clf_a + hp.p_cla_a).clip(lower=1e-6)
-    t["h_cfpct"] = np.where(h, t.game_id.map(hp.cfpct_h), t.game_id.map(hp.cfpct_a))
-    t["h_clshare"] = np.where(h, t.game_id.map(clh), t.game_id.map(cla))
-    tmf = tm_feat + SIDE_CTX + ["h_cfpct", "h_clshare"]
+    if WITH_H:
+        hp = pd.concat(hp, ignore_index=True).set_index("game_id")
+        clh = hp.p_clf_h / (hp.p_clf_h + hp.p_cla_h).clip(lower=1e-6)
+        cla = hp.p_clf_a / (hp.p_clf_a + hp.p_cla_a).clip(lower=1e-6)
+        t["h_cfpct"] = np.where(h, t.game_id.map(hp.cfpct_h), t.game_id.map(hp.cfpct_a))
+        t["h_clshare"] = np.where(h, t.game_id.map(clh), t.game_id.map(cla))
+    tmf = tm_feat + SIDE_CTX + (["h_cfpct", "h_clshare"] if WITH_H else [])
     TM = np.full((N, 2, len(tmf)), np.nan, np.float32)
     TMY = np.full((N, 2, len(TM_TGT)), np.nan, np.float32)
     TM[t.gi, t.side] = t[tmf].to_numpy(np.float32)

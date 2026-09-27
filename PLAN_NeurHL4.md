@@ -193,3 +193,30 @@ and it has never run. It trains snapshot 2025 on seasons <= 2024 and snapshot
 loader scan; ledger caps; every live forecast commit precedes its game's start;
 leakage audits pass for every new builder; reported numbers re-derive on CPU;
 the seal ran at most once.
+
+## CANDIDATE (2026-09-27, declared before any G_GATE number)
+
+The one configuration taken to G_GATE is config `g1`
+(neurhl/configs/neurhl_g/g1.json, sha256 `587746c6367d7ef78276162fc194d902e09a7c5a617f6beb19cb4239706ea750`), on the master tensor
+with sha256 `325390c3977c3be938b24e6a2327657fc0b039cd565c6404961863620821244c`.
+
+How it was chosen, on G_ITER (2012, 2014-2018; 7,421 games; Elo 0.67528,
+NeurHL-H 0.67244; every row in configs/search_ledger_g.csv):
+
+| Rung | Stack log loss | Decision |
+|---|---|---|
+| R4 non-neural engine (quick) | 0.67581 | baseline |
+| R3 trees / logistic on game features, Elo-stacked | 0.67611 / 0.69699 | no better than Elo |
+| R6 network (official PP target) | 0.67301 | parent |
+| R6e Elo anchor on scoring rates | 0.67330 | rejected |
+| R6L lineup-vs-usual multipliers | 0.67299 | rejected (< 0.0003) |
+| R6c NeurHL-H projections as team inputs | 0.67344 | rejected |
+| R13 R6c + direct H terms | 0.67344 | rejected |
+| R9 attention across rosters | 0.67366 | rejected |
+| R11 R6 with NeurHL-H in the stack (the form section M declares) | 0.67258 | carried forward |
+
+g1 is R11 with the 5-seed ensemble section M declares (the G_ITER runs used 3).
+On G_ITER the network carries no win-probability information beyond Elo and
+NeurHL-H: R11 trails NeurHL-H alone by 0.00014. The S-STOP threshold is left
+exactly as declared; the expectation, written before the gate run, is that
+S-STOP fails and the seal stays unspent.

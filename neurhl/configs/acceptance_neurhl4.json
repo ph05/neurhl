@@ -1,0 +1,52 @@
+[
+ {
+  "check": "sealed seasons refused before unseal",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "unseal() refuses callers other than eval/seal_g.py",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "master loader drops SEALED seasons",
+  "pass": true,
+  "detail": "max season 2024"
+ },
+ {
+  "check": "all 37 sealed inputs unchanged",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "model and trainer read data only through g_loader",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "check": "G_GATE runs within cap (2)",
+  "pass": true,
+  "detail": "0/2"
+ },
+ {
+  "check": "G_ITER full runs within cap (14)",
+  "pass": true,
+  "detail": "10/14"
+ },
+ {
+  "check": "state-builder causality audit clean",
+  "pass": true,
+  "detail": "4 checks"
+ },
+ {
+  "check": "seal not spent (allowed)",
+  "pass": true,
+  "detail": "no result yet"
+ },
+ {
+  "check": "every live forecast committed before its game's start",
+  "pass": true,
+  "detail": "0 files"
+ }
+]

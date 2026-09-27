@@ -1,0 +1,2 @@
+{"epochs1": 10, "epochs2": 4, "w_out1": 0.3, "seeds": 5, "stack_h": true, "threads": 8,
+ "parent": "r11", "delta": "Candidate: R6 structure (official PP target, no H inputs), 5-seed ensemble per PLAN_NeurHL4 M, final probability = LOSO-selected logistic stack over Elo, NeurHL-G and NeurHL-H"}

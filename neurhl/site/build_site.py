@@ -26,6 +26,52 @@ def rd(p):
     return json.loads(Path(p).read_text()) if Path(p).exists() else None
 
 
+def tonight() -> dict:
+    """The latest game day's committed live forecasts (pregame where present,
+    else morning), with the players most likely to score."""
+    base = NOUT / "live" / "2027"
+    days = sorted(d for d in base.iterdir() if d.is_dir()) if base.exists() else []
+    if not days:
+        return {}
+    d = days[-1]
+    frames, players = [], []
+    if (d / "morning.csv").exists():
+        frames.append(pd.read_csv(d / "morning.csv"))
+        players.append(pd.read_csv(d / "morning_players.csv"))
+    for f in sorted(d.glob("pregame_*.csv")):
+        if f.name.endswith("_players.csv"):
+            continue
+        frames.append(pd.read_csv(f))
+        pf = f.with_name(f.stem + "_players.csv")
+        if pf.exists():
+            players.append(pd.read_csv(pf).assign(forecast="pregame"))
+    if not frames:
+        return {}
+    g = pd.concat(frames, ignore_index=True)
+    order = {"pregame": 0, "morning": 1}
+    g = g.sort_values("forecast", key=lambda x: x.map(order)).drop_duplicates("game_id")
+    pl = pd.concat(players, ignore_index=True) if players else pd.DataFrame()
+    games = []
+    for r in g.sort_values("start_utc").itertuples():
+        top = []
+        if len(pl):
+            q = pl[pl.game_id == r.game_id]
+            if "forecast" in q:
+                q = q[q.forecast == r.forecast] if (q.forecast == r.forecast).any() else q
+            q = q.drop_duplicates("player_id").sort_values("p_goal", ascending=False).head(4)
+            top = [[x.name, x.team, round(x.sog_mean, 1), round(x.p_goal, 3), round(x.p_point, 3)]
+                   for x in q.itertuples()]
+        games.append({"id": int(r.game_id), "start": r.start_utc, "home": r.home, "away": r.away,
+                      "kind": r.forecast, "g": r.p_home_win_neurhl_g,
+                      "h": None if pd.isna(getattr(r, "p_home_win_neurhl_h", None)) else r.p_home_win_neurhl_h,
+                      "elo": r.p_home_win_elo, "ot": r.p_ot,
+                      "score": [round(r.goals_home, 2), round(r.goals_away, 2)],
+                      "xg": [round(r.xgf_home, 2), round(r.xgf_away, 2)],
+                      "sog": [round(r.sog_home, 1), round(r.sog_away, 1)],
+                      "lineup": [r.lineup_home, r.lineup_away], "top": top})
+    return {"date": d.name, "games": games}
+
+
 def main():
     howe = pd.read_csv(PROJ / "output" / "projections_2026_27_howe.csv")
     meta = howe.set_index("Abbr")[["Team", "Division", "xPts"]]
@@ -83,7 +129,7 @@ def main():
 
     card = rd(NOUT / "live" / "scorecard_2027.json") or {}
     sha = {f: hashlib.sha256((PROJ / f).read_bytes()).hexdigest() for f in FROZEN}
-    data = {"frozen": "2026-09-25", "sha256": sha, "live": card,
+    data = {"frozen": "2026-09-25", "sha256": sha, "live": card, "tonight": tonight(),
             "teams": teams, "games": games, "players": players,
             "evidence": evidence}
     DOCS.mkdir(exist_ok=True)
