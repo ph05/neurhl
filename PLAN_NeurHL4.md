@@ -328,3 +328,23 @@ condition, the seal stays unspent, and NeurHL-G v1 stays live as exploratory.
 The stat-sheet simulator draws team SOG from the same negative binomial
 (r = 40), so its team-SOG spread is too wide. Team means are unaffected. The
 dispersion stays frozen for 2026-27 and is recorded as a known limitation.
+
+## A3 (2026-09-28): record notes from preparing the figures
+
+1. **Loss definitions.** Where `eval/gate_g.py` and `eval/gate_g_record.py`
+   say "Poisson deviance", they compute mu - y log(mu), the Poisson negative log
+   likelihood without the terms that depend only on y. A paired difference in
+   this loss is exactly half the paired difference in deviance, so every sign,
+   standard-error ratio and p-value in the FREEZE and A2 records stands. The PG
+   gate's relative figure for shots on goal (-0.45%) is relative to this loss,
+   not to deviance. The 1.0 player-game confirmation used the true deviance.
+2. **Ladder provenance.** R6e and R6L ran before the master tensor was rebuilt
+   on official power-play opportunities. Their parent on the earlier tensor was
+   the R6 run at 0.67299, not the 0.67301 of the rebuilt R6 in the CANDIDATE
+   table. Against it R6e is +0.00031 and R6L -0.000004, so both rejections
+   stand.
+3. **R6e configuration.** The ledger's hash for R6e matches `r6e.json` as
+   committed when it ran. At that commit the Elo anchor was always on in the
+   model code. The next commit made the anchor optional and added
+   `"elo_anchor": true` to `r6e.json` to keep the same behaviour, which is why
+   the committed file's hash differs from the ledger.

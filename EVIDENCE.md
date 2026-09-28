@@ -91,7 +91,7 @@ prospective test.
 |---|---|---|
 | Beats Elo game by game | Log loss 0.66006 vs 0.66566, diff -0.0056 (SE 0.0013); better in 5 of 5 seasons | `neurhl/output/g_gates.json` |
 | Adds win-probability information beyond NeurHL-H | Not shown: diff -0.0005 (SE 0.0006), better in 3 of 5 seasons; the pre-gate required -0.0010 | same |
-| Player heads beat the confirmed player-game layer | Better on all four heads: ice-time share -0.59%, SOG -0.45%, P(goal) -0.45%, P(assist) -0.36%; every upper 95% bound below zero (225,752 skater-games, two-way clustered) | same |
+| Player heads beat the confirmed player-game layer | Better on all four heads: ice-time share -0.59%, SOG -0.45% (Poisson log loss), P(goal) -0.45%, P(assist) -0.36%; every upper 95% bound below zero (225,752 skater-games, two-way clustered) | same |
 | Team box score beats team history and the summed player-game layer | SOG, xGF, goals and PP opportunities beat team history; SOG and goals also beat the player-game layer summed over the dressed skaters, on deviance and CRPS | same, and `g_gates_record.json` |
 | Calibrated | Mixed. Slope 0.968 and OT share 22.4% predicted vs 22.0% observed pass; randomised-PIT 80% coverage passes for team goals (0.803) and skater SOG (0.783) but fails for team SOG (0.860: the intervals are too wide), so the declared calibration gate fails. First recorded as a pass; corrected in PLAN_NeurHL4 A2 | `neurhl/output/g_gates.json`, `g_gates_record.json` |
 
