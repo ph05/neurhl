@@ -160,3 +160,30 @@ inference. Interim scorecards are descriptive.
 - NeurHL-H's term does not respond to sampled absences.
 - Trades, call-ups and in-season injuries are unknown at the freeze.
 - The stat sheet's goal level depends on the A1 multiplier.
+
+## A1 (2026-09-28, before the freeze): goalie start shares
+
+In validation, the named starter took too many starts: 0.593 of his team's
+starts predicted against 0.496 realised in 2023-24. His recent start share is
+now shrunk toward an even split:
+
+p_start = clip(0.5 + 0.65 x (share - 0.5), 0.50, 0.72)
+
+- `share` = (starts in 2025-26 + 0.5 x starts in 2024-25) / (games dressed in
+  2025-26 + 0.5 x games dressed in 2024-25).
+- The factor 0.65 was chosen on 2022-23 only, from a grid of 0.00 to 1.50 in
+  steps of 0.05. The error curve is flat between 0.55 and 0.75.
+- The backup takes the rest, and the back-to-back factor of 0.54 still
+  applies.
+
+| Named starter's share of team starts | Predicted | Realised | MAE |
+|---|---|---|---|
+| 2022-23 (tuning), new rule | 0.556 | 0.545 | 0.130 |
+| 2022-23, previous rule | 0.588 | 0.545 | 0.136 |
+| 2023-24 (validation), new rule | 0.555 | 0.496 | 0.141 |
+| 2023-24, previous rule | 0.593 | 0.496 | 0.151 |
+
+The remaining over-prediction comes mostly from misnamed starters: in 11 of
+32 teams in 2023-24, the goalie named starter took fewer starts than the
+backup. No share rule fixes that. Skater lineups are unchanged: the same
+random draws give the same skaters.

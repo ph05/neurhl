@@ -74,9 +74,11 @@ unchanged; only the clustering is, which gives the realised spread of games
 played. persist=False makes every game independent.
 
 GOALIES. Starter = the available goalie with the most 2025-26 starts (any team),
-then career starts; backup = the next. p_start(starter) = his recent start share,
-(starts_2026 + 0.5 starts_2025) / (games dressed_2026 + 0.5 games dressed_2025),
-clipped to [G_START_MIN, G_START_MAX]; the backup gets the rest; a third goalie gets 0
+then career starts; backup = the next. With his recent start share
+share = (starts_2026 + 0.5 starts_2025) / (games dressed_2026 + 0.5 games dressed_2025),
+p_start(starter) = clip(0.5 + G_START_SHRINK * (share - 0.5), G_START_MIN, G_START_MAX)
+(starter_p_start; shrunk toward an even split, tuned on 2022-23); the backup gets
+the rest; a third goalie gets 0
 unless a starter is unavailable (injured goalies are out before their return game,
 and the ranking is redone among those available; reserve goalies are used only
 when the roster has fewer than two). Second game of a back-to-back (the team played
@@ -125,6 +127,12 @@ IR_RETURN_GAMES = 15            # DailyFaceoff IR players off the NHL roster mis
                                 # next 15 games and rejoin from game 16 (declared; a flat
                                 # prior, since DailyFaceoff gives no return dates)
 G_START_MIN, G_START_MAX = 0.50, 0.72     # starter's p_start clip (declared)
+G_START_SHRINK = 0.65           # p_start = clip(0.5 + 0.65 * (recent share - 0.5)). The raw share
+                                # over-predicted the named starter (2022-23: 0.588 of team starts
+                                # predicted vs 0.545 real, MAE 0.136). Tuned on 2022-23 only (named
+                                # starters of 2023 from 2021-22 inputs): the MAE minimiser over
+                                # 0.00-1.50 in steps of 0.05, clip kept (MAE 0.130, bias +0.011; a
+                                # clip of [0.50, 0.80] gained 0.002 MAE at a bias of +0.039).
 B2B_STARTER_MULT = 0.54       # tuned on 2022-23: number-one goalies started 54% as often
                               # in the second game of a back-to-back (2023-24: 0.59)
 TOI_W_PREV = 0.5                # weight of 2024-25 games against 2025-26 in recent TOI
@@ -701,6 +709,19 @@ def _goalie_table(team: str, g: pd.DataFrame, prev: int = SEASON - 1) -> pd.Data
     return g
 
 
+def starter_p_start(share, shrink: float = None, lo: float = None, hi: float = None):
+    """The named starter's per-game start probability from his recent start share:
+    clip(0.5 + G_START_SHRINK * (share - 0.5), G_START_MIN, G_START_MAX); no recent NHL games ->
+    G_START_MIN. The backup gets 1 - p_start, a third goalie 0 (goalie_probs)."""
+    shrink = G_START_SHRINK if shrink is None else shrink
+    lo = G_START_MIN if lo is None else lo
+    hi = G_START_MAX if hi is None else hi
+    sh = np.asarray(share, dtype=float)
+    p = np.where(np.isfinite(sh), 0.5 + shrink * (np.nan_to_num(sh, nan=0.5) - 0.5), lo)
+    p = np.clip(p, lo, hi)
+    return float(p) if p.ndim == 0 else p
+
+
 def goalie_probs(g: pd.DataFrame, avail: np.ndarray, b2b: bool) -> np.ndarray:
     """Start probabilities over g's rows given which goalies are available (rank order)."""
     p = np.zeros(len(g))
@@ -711,8 +732,7 @@ def goalie_probs(g: pd.DataFrame, avail: np.ndarray, b2b: bool) -> np.ndarray:
     if len(idx) == 1:
         p[idx[0]] = 1.0
         return p
-    sh = g["share_recent"].iat[idx[0]]
-    ps = float(np.clip(sh if np.isfinite(sh) else G_START_MIN, G_START_MIN, G_START_MAX))
+    ps = starter_p_start(g["share_recent"].iat[idx[0]])
     if b2b:
         ps *= B2B_STARTER_MULT
     p[idx[0]], p[idx[1]] = ps, 1.0 - ps
@@ -1146,6 +1166,73 @@ def _hist_roster(V: int, model: AvailModel) -> Roster:
     return out
 
 
+def _hist_games(V: int) -> pd.DataFrame:
+    ab = _team_abbrev()
+    gc = pd.read_parquet(TENSORS / f"games_ctx_{V}.parquet", columns=["game_id", "game_type", "date",
+                                                                       "home_idx", "away_idx"])
+    gc = gc[gc["game_type"] == 2]
+    games = pd.DataFrame({"game_id": gc["game_id"].astype(int), "date": gc["date"].astype(str).str[:10],
+                          "home": gc["home_idx"].map(ab), "away": gc["away_idx"].map(ab)})
+    return games.sort_values(["date", "game_id"]).reset_index(drop=True)
+
+
+def goalie_share_table(V: int) -> pd.DataFrame:
+    """Per team in season V: the named starter and backup (opening-night goalies ranked as in
+    load(), inputs from V-1 and V-2 only), the starter's recent share, the team's games and
+    back-to-back second games, and the realised share of the team's starts of both goalies."""
+    ab = _team_abbrev()
+    op = opening_roster(V)
+    op["team_ab"] = op["team"].map(ab)
+    _, pg, _ = _season(V)
+    gs = pg[pg["pos_group"] == 2].copy()
+    gs["team_ab"] = gs["team"].map(ab)
+    st = gs.groupby(["team_ab", "player_id"])["goalie_start"].sum()
+    tgs = team_games(_hist_games(V), context=_hist_games(V))
+    rows = []
+    for team, d in op[op["pos_group"] == 2].groupby("team_ab"):
+        g = d[["team_ab", "player_id"]].rename(columns={"team_ab": "team"}).assign(status="roster")
+        g = _goalie_table(team, g, prev=V - 1)
+        G, nb = len(tgs[team]), int(tgs[team]["b2b"].sum())
+        s0 = int(g["player_id"].iat[0])
+        s1 = int(g["player_id"].iat[1]) if len(g) > 1 else None
+        rows.append({"team": team, "starter": s0, "backup": s1, "n_goalies": len(g),
+                     "share": float(g["share_recent"].iat[0]), "G": G, "n_b2b": nb,
+                     "real": st.get((team, s0), 0) / G,
+                     "real_backup": st.get((team, s1), 0) / G if s1 is not None else np.nan})
+    return pd.DataFrame(rows)
+
+
+def expected_starter_share(T: pd.DataFrame, shrink: float = None, lo: float = None,
+                           hi: float = None) -> np.ndarray:
+    """The named starter's expected share of the team's starts under the start rule (exact: starts
+    are drawn independently per game), back-to-back second games at B2B_STARTER_MULT."""
+    p = np.where(T["n_goalies"] >= 2, starter_p_start(T["share"].to_numpy(), shrink, lo, hi), 1.0)
+    return (p * (T["G"] - T["n_b2b"]) + p * B2B_STARTER_MULT * T["n_b2b"]).to_numpy() / T["G"].to_numpy()
+
+
+def goalie_share_report(V: int, grid: bool = False) -> dict:
+    """Named starters of season V: expected vs realised share of team starts, and how many were
+    misnamed (took fewer of the team's starts than the named backup). grid=True adds the
+    G_START_SHRINK grid (clip fixed) used for the tuning on 2022-23."""
+    T = goalie_share_table(V)
+    pred = expected_starter_share(T)
+    out = {"season": V, "rule": {"shrink": G_START_SHRINK, "clip": [G_START_MIN, G_START_MAX],
+                                 "b2b_mult": B2B_STARTER_MULT},
+           "n_teams": int(len(T)), "pred_mean": round(float(pred.mean()), 4),
+           "real_mean": round(float(T["real"].mean()), 4),
+           "mae": round(float(np.mean(np.abs(pred - T["real"]))), 4),
+           "rmse": round(float(np.sqrt(np.mean((pred - T["real"]) ** 2))), 4),
+           "bias": round(float(np.mean(pred - T["real"])), 4),
+           "misnamed": int((T["real"] < T["real_backup"]).sum()),
+           "unshrunk_rule": {"pred_mean": round(float(expected_starter_share(T, 1.0).mean()), 4),
+                             "mae": round(float(np.mean(np.abs(expected_starter_share(T, 1.0) - T["real"]))), 4)}}
+    if grid:
+        out["grid"] = [{"shrink": float(s), "mae": round(float(np.mean(np.abs(expected_starter_share(T, s) - T["real"]))), 4),
+                        "bias": round(float(np.mean(expected_starter_share(T, s) - T["real"])), 4)}
+                       for s in np.round(np.arange(0.0, 1.501, 0.05), 2)]
+    return out
+
+
 def _metrics(pred: np.ndarray, act: np.ndarray) -> dict:
     ok = np.isfinite(pred) & np.isfinite(act)
     p, a = pred[ok], act[ok]
@@ -1338,7 +1425,9 @@ def validate(V: int = 2024, k: int = 64, seed: int = SEED, persist: bool = True)
                       "when_dressed_b2b_second_game": round(float(dr.loc[dr["b2b"], "start"].mean()), 4),
                       "when_dressed_other_games": round(float(dr.loc[~dr["b2b"], "start"].mean()), 4),
                       "realised_no1_when_dressed_b2b_second_game": round(float(b2t.loc[b2t["b2b"], "start"].mean()), 4),
-                      "realised_no1_when_dressed_other_games": round(float(b2t.loc[~b2t["b2b"], "start"].mean()), 4)}
+                      "realised_no1_when_dressed_other_games": round(float(b2t.loc[~b2t["b2b"], "start"].mean()), 4),
+                      "named_starter": goalie_share_report(V),
+                      "named_starter_tuning_2023": goalie_share_report(2023, grid=True)}
     res["seconds"] = round(time.time() - t0, 1)
     return res
 
@@ -1382,6 +1471,13 @@ def print_validation(res: dict) -> None:
           f"{g['when_dressed_b2b_second_game']:.3f} vs {g['when_dressed_other_games']:.3f}; each team's realised "
           f"number one when dressed {g['realised_no1_when_dressed_b2b_second_game']:.3f} vs "
           f"{g['realised_no1_when_dressed_other_games']:.3f}")
+    for key, tag in (("named_starter_tuning_2023", "tuning"), ("named_starter", "validation")):
+        n = g[key]
+        print(f"named starters {n['season'] - 1}-{str(n['season'])[2:]} ({tag}; shrink {n['rule']['shrink']}, clip "
+              f"{n['rule']['clip']}, b2b x{n['rule']['b2b_mult']}): expected share of team starts {n['pred_mean']:.3f} "
+              f"vs realised {n['real_mean']:.3f}, MAE {n['mae']:.3f}, bias {n['bias']:+.3f}; unshrunk rule "
+              f"{n['unshrunk_rule']['pred_mean']:.3f} (MAE {n['unshrunk_rule']['mae']:.3f}); misnamed "
+              f"{n['misnamed']} of {n['n_teams']}")
     print(f"\nsampler {res['sampler_seconds']} s for k={res['k']} over the season; total {res['seconds']} s")
 
 
