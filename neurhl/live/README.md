@@ -15,7 +15,7 @@ Run everything from the repo root with
 | `forecast.py` | Morning, pregame and preview forecasts: resolves lineups, builds the NeurHL-G inputs (`sim/g_live.py`), runs NeurHL-G, the NeurHL-H comparator and in-season Elo, simulates the stat sheets, writes `neurhl/output/live/2027/<date>/`, rebuilds the site and publishes through `publish.sh`. | `python neurhl/live/forecast.py --mode {morning,pregame,preview} [--date D] [--now ISO] [--dry-run]` |
 | `ingest_2027.py` | Nightly ingest of completed 2026-27 regular-season games into the `*_2027` tables that `data/build_g_state.py` and `sim/g_live.py` read (see "Nightly ingest" below). | `python neurhl/live/ingest_2027.py [--no-fetch] [--force] [--through D]` |
 | `test_ingest_parity.py` | Sandbox parity and dry-run tests for the ingest (see below). Never writes to the real tables. | `python neurhl/live/test_ingest_parity.py {dryrun\|parity\|parity2013\|live\|all}` |
-| `run_forecast.sh`, `run_nightly.sh` | launchd wrappers. `run_forecast.sh MODE` runs `forecast.py --mode MODE` with every dependency the forecast needs (torch, numba, scikit-learn==1.9.1, scipy); nightly runs `score_live_2027.py`, `ingest_2027.py`, `build_g_state.py`, then publishes results, scorecard and site (see below). | |
+| `run_forecast.sh`, `run_nightly.sh` | launchd wrappers. `run_forecast.sh MODE` runs `forecast.py --mode MODE` with every dependency the forecast needs (torch, numba, scikit-learn==1.9.1, scipy); nightly runs `score_live_2027.py`, `ingest_2027.py`, `build_g_state.py`, a fetch and `score_live_g_2027.py`, then publishes results, scorecards and site (see below). | |
 
 Intraday snapshots: `python neurhl/data/fetch/snapshot_lineups.py --intraday` writes
 `data/raw/lineup_snapshots/<date>/<HHMM>/` (local time) with `df_goalies.html.gz` and the
@@ -57,7 +57,7 @@ file (also in the run summary). `deadline.py --require-stamp` uses that run's `c
 `run_nightly.sh` (uv with numpy, pandas<3, pyarrow, requests, numba, scikit-learn==1.9.1, scipy;
 scikit-learn is pinned to the version the frozen xG checkpoint was pickled with, and the ingest
 refuses a mismatch)
-runs four steps and logs to `data/raw/lineup_snapshots/launchd_nightly.log` (launchd
+runs five steps and logs to `data/raw/lineup_snapshots/launchd_nightly.log` (launchd
 redirects there; run any other way, the output is also appended). It exits nonzero if any step
 failed; a lock directory (`data/raw/lineup_snapshots/.nightly.lock`, with the holder's pid; a
 stale lock is removed) stops two runs overlapping.
@@ -71,8 +71,50 @@ stale lock is removed) stops two runs overlapping.
    every season; rows of earlier seasons depend only on earlier games, so they do not change
    when 2027 is added (checked in the sandbox), unless an earlier-season input has been rebuilt
    since the last run.
-4. Once `results_2027.csv` has a completed game: `neurhl/site/build_site.py`, then
-   `publish.sh` with the results file, the scorecard and `docs/`.
+4. `git fetch origin main`, then `neurhl/eval/score_live_g_2027.py`: the NeurHL-G live
+   scorecard, `neurhl/output/live/scorecard_g_2027.json` (below). If the fetch fails the
+   scorer is skipped, because forecasts committed by the publishing clone would look
+   uncommitted and be scored MISSED; the last scorecard stands.
+5. Once `results_2027.csv` has a completed game: `neurhl/site/build_site.py`, then
+   `publish.sh` with the results file, both scorecards and `docs/` (the NeurHL-G scorecard
+   only once it exists, since `publish.sh` refuses a missing path).
+
+**NeurHL-G live scorecard (`score_live_g_2027.py`, PLAN_NeurHL4 LIVE).** Under `neurhl/output`
+it writes only `scorecard_g_2027.json`. A forecast file counts only if the commit that first
+added it to this repo's history (HEAD, plus `origin/main` once fetched) is dated before the
+game's scheduled start. The start is the NHL API's `startTimeUTC`, fetched for each completed
+game date and cached in `neurhl/data/tensors/_live_g_2027/api_starts_2027.csv`; with no API
+start (offline, nothing cached) it is the file's `start_utc`. The file is scored as first
+committed, so a later edit or deletion changes nothing. A morning row for a game that had
+already started is invalid for that game only. A file that is not in the history does not
+count, and that includes the untracked copy `forecast.py` leaves in this repo; `run_nightly.sh`
+therefore fetches `origin/main` first and skips the scorer if the fetch fails. When `gh` works, the GitHub
+Actions stamp time of each counted commit is looked up through `deadline.py` and cached;
+stamps are never required.
+
+**Pairing and metrics.** Pregame is primary and morning secondary. A completed game without a
+valid forecast of a kind is MISSED for every model in that analysis. There is no backfill: a
+morning forecast never stands in for a pregame one. NeurHL-G, NeurHL-H, in-season Elo and the
+frozen 1.0 probability (descriptive) are scored on the same games. NeurHL-H can be missing, so
+G - H and H - Elo pair only the games that have it. Per model: log loss and Brier. For G - Elo,
+G - H and H - Elo: the mean paired difference and a week-block bootstrap 95% interval (ISO
+weeks of the ET game date, 9,999 draws, seed 711; from 31 games). Also recorded: a breakdown by
+lineup source (the less certain side of each game), the MISSED game ids with reasons (late,
+none, uncommitted, incomplete), late and uncommitted files, and API-vs-file start mismatches.
+The scorecard is interim and descriptive until the season ends (2027-04-10, all 1,344 games).
+Inference is made once, after that.
+
+**Stat sheet (descriptive).** MAE of team regulation goals (A1-scaled and raw, against the
+results), SOG and xGF (`tgx_2027`), and skater TOI, SOG, goals, assists and points
+(`player_games_2027`), plus `goal_mult` by date. The tables are read only if present, and games
+the ingest flagged as degraded are left out. The scorer runs after the ingest, so the stat
+sheet covers the same games as the results.
+
+CLI: `python neurhl/eval/score_live_g_2027.py [--offline] [--as-of YYYY-MM-DD] [--root DIR]`.
+`--as-of` scores the games dated before that day (default today, ET). `--root` reads another
+repository's forecasts, results and tables, and writes the scorecard there. Tests:
+`python neurhl/eval/test_score_live_g.py` builds scratch git repositories with dated commits
+in a temporary directory. It never writes to `neurhl/output`.
 
 `ingest_2027.py` builds, for season S = 2027 (`--season`), the same tables the historical
 pipeline built for 2008-2026, by calling the builders' own functions:

@@ -5,7 +5,11 @@
 #   2. neurhl/live/ingest_2027.py       new completed games -> the *_2027 tables in neurhl/data/tensors/
 #   3. neurhl/data/build_g_state.py     pre-game state (gst_*), only when a *_2027 input table is newer
 #                                       than gst_tm_2027.parquet (or that file is missing)
-#   4. neurhl/site/build_site.py, then neurhl/live/publish.sh: results, scorecard and site, once
+#   4. git fetch origin main, then neurhl/eval/score_live_g_2027.py: the NeurHL-G live scorecard
+#                                       (PLAN_NeurHL4 LIVE). Forecasts are committed by the publishing
+#                                       clone, so the fetch brings their commits into origin/main here;
+#                                       if it fails the scorer is skipped and the last scorecard stands
+#   5. neurhl/site/build_site.py, then neurhl/live/publish.sh: results, scorecards and site, once
 #                                       2026-27 games have been played
 # Log: data/raw/lineup_snapshots/launchd_nightly.log (launchd redirects stdout/stderr there; run any
 # other way, the output is also appended to it). Exit status is nonzero if any step failed.
@@ -79,13 +83,23 @@ else
   echo "[run_nightly $(ts)] build_g_state: skipped (ingest failed)"
 fi
 
-# 4. publish results, scorecard and site once 2026-27 games have been played
+# 4. NeurHL-G scorecard, after the ingest so its stat-sheet actuals are current
+if step "fetch" git -C "$REPO" fetch --quiet origin main; then
+  step "score_live_g_2027" "${UV[@]}" neurhl/eval/score_live_g_2027.py || status=1
+else
+  status=1
+  echo "[run_nightly $(ts)] score_live_g_2027: skipped (fetch failed; a stale origin/main would mark forecasts MISSED)"
+fi
+
+# 5. publish results, scorecards and site once 2026-27 games have been played
 RES="$REPO/neurhl/output/live/results_2027.csv"
 if [ -f "$RES" ] && [ "$(wc -l < "$RES")" -gt 1 ]; then
   if step "build_site" "${UV[@]}" neurhl/site/build_site.py; then
+    PUB=(neurhl/output/live/results_2027.csv neurhl/output/live/scorecard_2027.json)
+    # publish.sh refuses a missing path, so the NeurHL-G scorecard goes only once it exists
+    [ -f neurhl/output/live/scorecard_g_2027.json ] && PUB+=(neurhl/output/live/scorecard_g_2027.json)
     PUBLISH_MSG="live: results and scorecard through $(date -v-1d '+%Y-%m-%d')" \
-      step "publish" bash neurhl/live/publish.sh - neurhl/output/live/results_2027.csv \
-      neurhl/output/live/scorecard_2027.json docs || status=1
+      step "publish" bash neurhl/live/publish.sh - "${PUB[@]}" docs || status=1
   else
     status=1
   fi

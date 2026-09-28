@@ -1,0 +1,240 @@
+{
+ "as_of": "2026-09-27",
+ "status": "interim",
+ "note": "interim: descriptive only; inference is made once, after the last regular-season game (2027-04-10)",
+ "primary": "pregame",
+ "games_completed": 0,
+ "counts": {
+  "games_completed": 0,
+  "valid": {
+   "pregame": 0,
+   "morning": 0
+  },
+  "missed": {
+   "pregame": 0,
+   "morning": 0
+  },
+  "missed_by_reason": {
+   "pregame": {},
+   "morning": {}
+  },
+  "neurhl_h_missing": {
+   "pregame": 0,
+   "morning": 0
+  },
+  "lineup_source": {
+   "pregame": {
+    "games": {},
+    "sides": {}
+   },
+   "morning": {
+    "games": {},
+    "sides": {}
+   }
+  },
+  "forecast_files": {
+   "committed": 0,
+   "uncommitted": 0,
+   "edited_after_add": 0,
+   "deleted_after_add": 0
+  }
+ },
+ "missed_game_ids": {
+  "pregame": [],
+  "morning": []
+ },
+ "pregame": {
+  "forecast": "pregame",
+  "role": "primary",
+  "n_games": 0,
+  "home_win_rate": null,
+  "models": {
+   "neurhl_g": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null
+   },
+   "neurhl_h": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null,
+    "missing_game_ids": []
+   },
+   "elo": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null
+   },
+   "neurhl_1p0": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null,
+    "missing_game_ids": []
+   }
+  },
+  "paired": {
+   "g_minus_elo": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null,
+    "weeks": 0,
+    "ci95": null,
+    "ci95_brier": null
+   },
+   "g_minus_h": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null,
+    "weeks": 0,
+    "ci95": null,
+    "ci95_brier": null
+   },
+   "h_minus_elo": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null,
+    "weeks": 0,
+    "ci95": null,
+    "ci95_brier": null
+   }
+  },
+  "by_lineup_source": {},
+  "stat_sheet": {
+   "goals_reg": {
+    "n_team_games": 0,
+    "mae": null,
+    "mean_pred": null,
+    "mean_actual": null,
+    "mae_raw": null,
+    "mean_pred_raw": null
+   },
+   "sog": {
+    "available": false
+   },
+   "xgf": {
+    "available": false
+   },
+   "players": {
+    "available": false
+   },
+   "goal_mult": {
+    "n": 0,
+    "min": null,
+    "max": null,
+    "latest": null,
+    "by_date": {}
+   }
+  },
+  "start_sources": {},
+  "stamps": {
+   "with_stamp": 0,
+   "stamp_before_start": 0,
+   "stamp_late_game_ids": [],
+   "without_stamp": 0
+  }
+ },
+ "morning": {
+  "forecast": "morning",
+  "role": "secondary",
+  "n_games": 0,
+  "home_win_rate": null,
+  "models": {
+   "neurhl_g": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null
+   },
+   "neurhl_h": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null,
+    "missing_game_ids": []
+   },
+   "elo": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null
+   },
+   "neurhl_1p0": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null,
+    "missing_game_ids": []
+   }
+  },
+  "paired": {
+   "g_minus_elo": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null,
+    "weeks": 0,
+    "ci95": null,
+    "ci95_brier": null
+   },
+   "g_minus_h": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null,
+    "weeks": 0,
+    "ci95": null,
+    "ci95_brier": null
+   },
+   "h_minus_elo": {
+    "n": 0,
+    "log_loss": null,
+    "brier": null,
+    "weeks": 0,
+    "ci95": null,
+    "ci95_brier": null
+   }
+  },
+  "by_lineup_source": {},
+  "stat_sheet": {
+   "goals_reg": {
+    "n_team_games": 0,
+    "mae": null,
+    "mean_pred": null,
+    "mean_actual": null,
+    "mae_raw": null,
+    "mean_pred_raw": null
+   },
+   "sog": {
+    "available": false
+   },
+   "xgf": {
+    "available": false
+   },
+   "players": {
+    "available": false
+   },
+   "goal_mult": {
+    "n": 0,
+    "min": null,
+    "max": null,
+    "latest": null,
+    "by_date": {}
+   }
+  },
+  "start_sources": {},
+  "stamps": {
+   "with_stamp": 0,
+   "stamp_before_start": 0,
+   "stamp_late_game_ids": [],
+   "without_stamp": 0
+  }
+ },
+ "late_forecasts": [],
+ "start_check": {
+  "rows_by_source": {},
+  "mismatches": []
+ },
+ "stamps": {
+  "status": "offline: cached stamps only",
+  "cached": 0
+ },
+ "files": {
+  "uncommitted": [],
+  "edited_after_add": [],
+  "deleted_after_add": []
+ }
+}
