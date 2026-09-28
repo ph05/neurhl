@@ -123,8 +123,8 @@ html{scroll-padding-top:70px}
 body{margin:0;background:var(--paper);color:var(--ink);font:19px/1.6 var(--serif);
   font-variant-numeric:lining-nums;-webkit-font-smoothing:antialiased}
 a{color:var(--blue)}
-.bar{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);
-  padding-top:env(safe-area-inset-top,0px)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);
+  border-bottom:1px solid var(--line)}
 .bar .in{max-width:1080px;margin:0 auto;padding-inline:20px;display:flex;align-items:center;
   gap:18px;min-height:54px;flex-wrap:wrap}
 .mark{font:700 24px/1 var(--display);color:var(--ink);text-decoration:none}
