@@ -16,7 +16,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO" || exit 1
 export PATH="/opt/homebrew/bin:$HOME/.local/bin:$PATH"
 UV=(uv run -q --no-project --python 3.12 --with numpy --with "pandas<3" --with pyarrow
-    --with numba --with torch --with scipy --with scikit-learn --with requests --with openpyxl)
+    --with numba --with torch --with scipy --with scikit-learn==1.9.1 --with requests --with openpyxl)
 DATE=2026-09-28
 log() { echo "[freeze_opening $(date '+%H:%M:%S')] $*"; }
 
@@ -37,7 +37,8 @@ log "4. goal-level calibration m0"
 log "5. NeurHL 1.0: unified season projection, consistency check, freeze record"
 U1D=neurhl/output/neurhl_1_0
 rm -f "$U1D"/games_2027.csv "$U1D"/teams_2027.csv "$U1D"/skaters_2027.csv "$U1D"/goalies_2027.csv \
-      "$U1D"/player_games_2027.csv.gz "$U1D"/consistency_2027.json "$U1D"/checks_2027.json "$U1D"/run_2027.json
+      "$U1D"/player_games_2027.csv.gz "$U1D"/consistency_2027.json "$U1D"/checks_2027.json "$U1D"/run_2027.json \
+      "$U1D"/team_points_quantiles_2027.csv
 "${UV[@]}" python neurhl/data/build_player_rates.py --validate || exit 1
 "${UV[@]}" python neurhl/sim/availability_2027.py --rosters-date "$DATE" --summary > /dev/null || exit 1
 "${UV[@]}" python neurhl/sim/unified_2027.py --rosters-date "$DATE" --draws 64 --sims 20000 || exit 1
@@ -50,11 +51,14 @@ log "7. site, batteries, commit"
 for t in review_tests_neurhl3 review_tests_neurhl4; do
   "${UV[@]}" python "neurhl/tests/$t.py" | tail -1
 done
-git add data/raw/rosters/"$DATE" neurhl/output/*_20260928.csv PLAN_NeurHL_LIVE_U1_20260928.md \
-        neurhl/configs/playoff_tiebreak_check_20260928.json neurhl/configs/live_goal_calibration.json \
-        neurhl/output/live/2027 docs neurhl/configs/acceptance_neurhl3.json \
-        neurhl/configs/acceptance_neurhl4.json neurhl/output/live/scorecard_2027.json \
-        "$U1D" PLAN_NeurHL_1_0.md README.md EVIDENCE.md 2>/dev/null
+# one path at a time: a single missing path must not leave the commit empty
+for p in data/raw/rosters/"$DATE" neurhl/output/*_20260928.csv PLAN_NeurHL_LIVE_U1_20260928.md \
+         neurhl/configs/playoff_tiebreak_check_20260928.json neurhl/configs/live_goal_calibration.json \
+         neurhl/output/live/2027 docs neurhl/configs/acceptance_neurhl3.json \
+         neurhl/configs/acceptance_neurhl4.json neurhl/output/live/scorecard_2027.json \
+         "$U1D" PLAN_NeurHL_1_0.md README.md EVIDENCE.md; do
+  if [ -e "$p" ]; then git add -- "$p"; else log "not found, not staged: $p"; fi
+done
 git commit -q -m "Opening-night freeze: NeurHL 1.0 predictions for 2026-27 on the post-deadline rosters, dated update U1, goal calibration m0, preview forecasts" \
   && log "committed $(git rev-parse --short HEAD)"
 log "8. push"
