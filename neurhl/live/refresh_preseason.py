@@ -1,13 +1,13 @@
-"""Post-deadline refresh of the 1.0 preseason projections (PLAN_NeurHL4 D).
+"""Post-deadline refresh of the 2026-09-25 preseason projections (PLAN_NeurHL4 D).
 
 Run after the NHL roster deadline (2026-09-28, 17:00 ET):
   1. dated roster snapshot (neurhl/live/fetch_rosters.py) unless it exists;
-  2. the 1.0 team and player projections rerun on it with the frozen code and
-     models (sim/project_2027.py and sim/project_players.py --roster-dir); status
+  2. the 2026-09-25 team and player projections rerun on it with the frozen code
+     and models (sim/project_2027.py and sim/project_players.py --roster-dir); status
      entries (data/manual/player_status_2027.csv) remove unavailable players;
   3. PLAN_NeurHL_LIVE_U1_<tag>.md: the dated update notice with SHA-256 hashes
      of the new files, the roster snapshot and the status file.
-The frozen 1.0 files and PLAN_NeurHL_LIVE.md are never modified; the originals
+The frozen 2026-09-25 files and PLAN_NeurHL_LIVE.md are never modified; the originals
 stay primary and the dated files are scored alongside
 (eval/score_live_2027.py --variant <tag>).
 
@@ -66,9 +66,10 @@ Only the inputs: the rosters teams filed at the deadline (snapshot
 `data/raw/rosters/{a.date}/`, with its moves file against the previous
 snapshot) and the availability entries in `data/manual/player_status_2027.csv`
 (sha256 `{sha(status)}`), which remove players who cannot dress (for example
-Connor Hellebuyck, whose suspension Winnipeg announced on 2026-09-16). The 1.0 models,
-code paths and random seeds are the frozen ones; the 1.0 team model has no
-goalie term, so a goalie's absence moves it only through the roster's skaters.
+Connor Hellebuyck, whose suspension Winnipeg announced on 2026-09-16). The models,
+code paths and random seeds are those of the 2026-09-25 freeze; its team model has
+no goalie term, so a goalie's absence moves it only through the roster's skaters.
+NeurHL 1.0's own predictions are frozen separately (PLAN_NeurHL_1_0.md).
 
 ## Files
 

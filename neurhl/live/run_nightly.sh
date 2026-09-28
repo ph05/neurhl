@@ -1,7 +1,8 @@
 #!/bin/bash
 # NeurHL LIVE: nightly job (launchd com.neurhl.nightly, 04:30 ET).
 #   1. neurhl/eval/score_live_2027.py   completed 2026-27 results -> neurhl/output/live/results_2027.csv
-#                                       (+ interim scorecard)
+#                                       (+ interim scorecard of the 2026-09-25 freeze), then
+#      neurhl/eval/score_neurhl_1_0.py  the interim scorecard of the NeurHL 1.0 freeze
 #   2. neurhl/live/ingest_2027.py       new completed games -> the *_2027 tables in neurhl/data/tensors/
 #   3. neurhl/data/build_g_state.py     pre-game state (gst_*), only when a *_2027 input table is newer
 #                                       than gst_tm_2027.parquet (or that file is missing)
@@ -61,6 +62,7 @@ step() {  # step NAME CMD...
 echo "[run_nightly $(ts)] start ($REPO)"
 
 step "score_live_2027" "${UV[@]}" neurhl/eval/score_live_2027.py || status=1
+step "score_neurhl_1_0" "${UV[@]}" neurhl/eval/score_neurhl_1_0.py || status=1
 
 if step "ingest_2027" "${UV[@]}" neurhl/live/ingest_2027.py; then
   need=0
@@ -98,6 +100,7 @@ if [ -f "$RES" ] && [ "$(wc -l < "$RES")" -gt 1 ]; then
     PUB=(neurhl/output/live/results_2027.csv neurhl/output/live/scorecard_2027.json)
     # publish.sh refuses a missing path, so the NeurHL-G scorecard goes only once it exists
     [ -f neurhl/output/live/scorecard_g_2027.json ] && PUB+=(neurhl/output/live/scorecard_g_2027.json)
+    [ -f neurhl/output/live/scorecard_1_0_2027.json ] && PUB+=(neurhl/output/live/scorecard_1_0_2027.json)
     PUBLISH_MSG="live: results and scorecard through $(date -v-1d '+%Y-%m-%d')" \
       step "publish" bash neurhl/live/publish.sh - "${PUB[@]}" docs || status=1
   else

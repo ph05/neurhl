@@ -18,8 +18,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common import CONFIGS, NOUT, PROJ  # noqa: E402
 
 DOCS = PROJ / "docs"
+UNI = NOUT / "neurhl_1_0"          # NeurHL 1.0, the unified model (PLAN_NeurHL_1_0.md)
 FROZEN = ["neurhl/output/games_2027.csv", "neurhl/output/projection_2027.csv",
           "neurhl/output/player_proj_2027.csv"]
+FROZEN_1_0 = ["neurhl/output/neurhl_1_0/games_2027.csv", "neurhl/output/neurhl_1_0/teams_2027.csv",
+              "neurhl/output/neurhl_1_0/skaters_2027.csv"]
 
 
 def rd(p):
@@ -76,15 +79,25 @@ def tonight() -> dict:
 def main():
     howe = pd.read_csv(PROJ / "output" / "projections_2026_27_howe.csv")
     meta = howe.set_index("Abbr")[["Team", "Division", "xPts"]]
-    t = pd.read_csv(NOUT / "projection_2027.csv")
-    teams = [{"ab": r.team, "name": meta.loc[r.team, "Team"],
-              "div": meta.loc[r.team, "Division"], "conf": r.conf,
-              "pts": round(r.proj_points, 1), "p10": int(r.p10), "p90": int(r.p90),
-              "wins": round(r.proj_wins, 1), "po": round(r.playoff_pct, 1),
-              "howe": round(float(meta.loc[r.team, "xPts"]), 1)}
-             for r in t.itertuples()]
+    unified = (UNI / "teams_2027.csv").exists()
+    if unified:     # NeurHL 1.0: one model for players, games and the season
+        t = pd.read_csv(UNI / "teams_2027.csv")
+        teams = [{"ab": r.team, "name": meta.loc[r.team, "Team"],
+                  "div": meta.loc[r.team, "Division"], "conf": r.conf,
+                  "pts": round(r.points, 1), "p10": int(round(r.points_p10)), "p90": int(round(r.points_p90)),
+                  "wins": round(r.w, 1), "po": round(r.playoff_pct, 1), "cup": round(r.cup_pct, 1),
+                  "howe": round(float(meta.loc[r.team, "xPts"]), 1)}
+                 for r in t.itertuples()]
+    else:
+        t = pd.read_csv(NOUT / "projection_2027.csv")
+        teams = [{"ab": r.team, "name": meta.loc[r.team, "Team"],
+                  "div": meta.loc[r.team, "Division"], "conf": r.conf,
+                  "pts": round(r.proj_points, 1), "p10": int(r.p10), "p90": int(r.p90),
+                  "wins": round(r.proj_wins, 1), "po": round(r.playoff_pct, 1),
+                  "howe": round(float(meta.loc[r.team, "xPts"]), 1)}
+                 for r in t.itertuples()]
 
-    g = pd.read_csv(NOUT / "games_2027.csv")
+    g = pd.read_csv((UNI if unified else NOUT) / "games_2027.csv")
     res_p = NOUT / "live" / "results_2027.csv"
     res = pd.read_csv(res_p).set_index("game_id") if res_p.exists() else pd.DataFrame()
     games = []
@@ -96,12 +109,21 @@ def main():
             row.append([int(x.away_g), int(x.home_g), str(x.last_period)])
         games.append(row)
 
-    p = pd.read_csv(NOUT / "player_proj_2027.csv")
-    players = [[r.name, r.team, "D" if r.pos_group == 1 else "F",
-                round(r.exp_gp, 1), round(r.toi_per_gp_min, 1),
-                round(r.proj_g, 1), round(r.proj_a, 1), round(r.proj_p, 1),
-                round(r.proj_p_path_a, 1), round(r.proj_p_path_b, 1)]
-               for r in p.itertuples()]
+    if unified:
+        p = pd.read_csv(UNI / "skaters_2027.csv")
+        p = p[p.gp >= 1].sort_values("points", ascending=False)
+        players = [[r.name if isinstance(r.name, str) else str(r.player_id), r.team, r.pos,
+                    round(r.gp, 1), round(r.toi_per_gp, 1),
+                    round(r.goals, 1), round(r.assists, 1), round(r.points, 1),
+                    round(r.points_p10, 1), round(r.points_p90, 1)]
+                   for r in p.itertuples()]
+    else:
+        p = pd.read_csv(NOUT / "player_proj_2027.csv")
+        players = [[r.name, r.team, "D" if r.pos_group == 1 else "F",
+                    round(r.exp_gp, 1), round(r.toi_per_gp_min, 1),
+                    round(r.proj_g, 1), round(r.proj_a, 1), round(r.proj_p, 1),
+                    round(r.proj_p_path_a, 1), round(r.proj_p_path_b, 1)]
+                   for r in p.itertuples()]
 
     c1 = rd(NOUT / "hier_restatement.json")
     pg = rd(CONFIGS / "player_game_twoway_2018_2020.json")
@@ -137,8 +159,13 @@ def main():
                          "pg": {h: v["rel_diff"] for h, v in gg["PG"]["heads"].items()},
                          "sstop": ss["pass"]}
     card = rd(NOUT / "live" / "scorecard_2027.json") or {}
-    sha = {f: hashlib.sha256((PROJ / f).read_bytes()).hexdigest() for f in FROZEN}
-    data = {"frozen": "2026-09-25", "sha256": sha, "live": card, "tonight": tonight(),
+    files = FROZEN_1_0 if unified else FROZEN
+    sha = {f: hashlib.sha256((PROJ / f).read_bytes()).hexdigest() for f in files}
+    frozen = "2026-09-25"
+    if unified:
+        frozen = json.loads((UNI / "run_2027.json").read_text())["created_utc"][:10]
+    data = {"frozen": frozen, "sha256": sha, "game_sha": sha[files[0]], "unified": unified,
+            "live": card, "tonight": tonight(),
             "teams": teams, "games": games, "players": players,
             "evidence": evidence}
     DOCS.mkdir(exist_ok=True)
