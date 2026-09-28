@@ -1,0 +1,1049 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NeurHL Paper</title>
+<meta name="description" content="NeurHL: a preregistered study of neural forecasting in the National Hockey League.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --paper:#F7F8F6; --card:#FFFFFF; --ink:#16202B; --ink2:#3E4A57; --mut:#6B7682;
+  --line:#D9DEE3; --rule:#C9D0D7; --blue:#1F4FB8; --tint:#EEF2F7;
+  --serif:"Alegreya", Georgia, "Times New Roman", serif;
+  --display:"Barlow Condensed", "Arial Narrow", sans-serif;
+  --mono:"Spline Sans Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#0E141B; --card:#141C26; --ink:#E4EAF0; --ink2:#B3BFCB; --mut:#8793A0;
+    --line:#26323F; --rule:#33414F; --blue:#7EA6FF; --tint:#18222E;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#0E141B; --card:#141C26; --ink:#E4EAF0; --ink2:#B3BFCB; --mut:#8793A0;
+  --line:#26323F; --rule:#33414F; --blue:#7EA6FF; --tint:#18222E;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:70px}
+body{margin:0;background:var(--paper);color:var(--ink);font:19px/1.6 var(--serif);
+  font-variant-numeric:lining-nums;-webkit-font-smoothing:antialiased}
+a{color:var(--blue)}
+.bar{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);
+  padding-top:env(safe-area-inset-top,0px)}
+.bar .in{max-width:1080px;margin:0 auto;padding-inline:20px;display:flex;align-items:center;
+  gap:18px;min-height:54px;flex-wrap:wrap}
+.mark{font:700 24px/1 var(--display);color:var(--ink);text-decoration:none}
+.mark b{color:var(--blue)}
+.bar nav{margin-left:auto;display:flex;gap:18px;flex-wrap:wrap}
+.bar nav a{font:600 15px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink2);text-decoration:none;padding-block:8px}
+.bar nav a:hover{color:var(--ink)}
+main{max-width:760px;margin:0 auto;padding-inline:20px;padding-block:40px 80px}
+header.title h1{font:700 clamp(30px,5vw,44px)/1.08 var(--display);letter-spacing:.005em;
+  margin:0 0 16px;text-wrap:balance}
+header.title .by{font:500 15px/1.5 var(--mono);color:var(--mut)}
+header.title .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+header.title .links a{font:600 14px/1 var(--display);letter-spacing:.07em;text-transform:uppercase;
+  text-decoration:none;border:1px solid var(--rule);border-radius:4px;padding:8px 12px;color:var(--ink)}
+header.title .links a:hover{border-color:var(--blue);color:var(--blue)}
+.abstract{margin:32px 0 8px;padding:20px 22px;background:var(--card);border:1px solid var(--line);
+  border-radius:6px}
+.abstract h2{font:600 14px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--mut);margin:0 0 10px}
+.abstract p{margin:0;font-size:18px}
+nav.toc{margin:28px 0 0;font:500 15px/1.5 var(--serif)}
+nav.toc h2{font:600 14px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:0 0 8px}
+nav.toc ol{margin:0;padding:0;list-style:none;columns:2;column-gap:28px}
+nav.toc li{break-inside:avoid;padding-block:1px}
+nav.toc a{color:var(--ink2);text-decoration:none}
+nav.toc a:hover{color:var(--blue)}
+article h2{font:700 30px/1.15 var(--display);margin:56px 0 12px;letter-spacing:.005em;text-wrap:balance}
+article h3{font:600 23px/1.2 var(--display);margin:34px 0 8px;letter-spacing:.01em}
+article h4,article h5,article h6{font:700 19px/1.4 var(--serif);margin:22px 0 4px;display:inline}
+article h4 + p,article h5 + p,article h6 + p{display:inline}
+article h4::after,article h5::after,article h6::after{content:" "}
+article p{margin:0 0 14px}
+article dl dt{font-weight:700;margin-top:10px}
+article dl dd{margin:0 0 6px 0}
+figure{margin:28px 0;padding:0}
+figure img{display:block;width:100%;height:auto;background:#fff;border-radius:4px;padding:6px}
+figcaption{font-size:16px;line-height:1.5;color:var(--ink2);margin-top:8px}
+.tbl{overflow-x:auto;margin:22px 0}
+table{border-collapse:collapse;width:100%;font-size:16px;line-height:1.4}
+caption{caption-side:top;text-align:left;font-size:16px;color:var(--ink2);padding-bottom:8px}
+thead th{border-bottom:1.5px solid var(--ink2);text-align:left;font-weight:700;padding:6px 8px}
+tbody td{padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:1.5px solid var(--ink2)}
+td,th{font-variant-numeric:tabular-nums}
+mjx-container{font-size:100% !important}
+mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden;margin:14px 0 !important}
+#refs{font-size:16px;line-height:1.5}
+#refs .csl-entry{padding-left:1.6em;text-indent:-1.6em;margin-bottom:6px}
+footer{max-width:760px;margin:0 auto;padding:24px 20px 60px;border-top:1px solid var(--line);
+  font:500 14px/1.5 var(--mono);color:var(--mut)}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"]]},svg:{fontCache:"global"}};</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+</head>
+<body>
+<div class="bar"><div class="in">
+  <a class="mark" href="../">Neur<b>HL</b></a>
+  <nav><a href="../">Projections</a><a href="neurhl-paper.pdf">PDF</a><a href="https://github.com/ph05/neurhl">Code</a></nav>
+</div></div>
+<main>
+<header class="title">
+  <h1>NeurHL: A Preregistered Study of Neural Forecasting in the National Hockey League</h1>
+  <div class="by">ph05 &middot; September 2026</div>
+  <div class="links"><a href="neurhl-paper.pdf">Download PDF</a><a href="https://github.com/ph05/neurhl">Code and data</a><a href="../">Live projections</a></div>
+</header>
+<section class="abstract"><h2>Abstract</h2><p>Forecasting single NHL games is a problem of small margins. The log-loss gap between a constant home-win rate and a well-tuned rating system is about 0.02 nats, and genuine improvements on such a system are measured in thousandths. Improvements of that size are easily manufactured by evaluating on data that shaped the model. We describe NeurHL, a forecasting system for NHL games, skaters and seasons developed under a preregistration protocol: evaluation windows fixed by season before modelling, data loaders that refuse sealed seasons, causality audits, capped search ledgers, and one-shot confirmatory tests committed before their data were scored. Two results were confirmed. A neural player-level model aggregated over each game’s dressed lineup and combined with Elo in a thin logistic head (NeurHL-H) beat a tuned Elo system on 10,184 held-out games from 2017–18 to 2025–26: log loss 0.66495 against 0.66973, a difference of <span class="math inline">\(-0.00478\)</span> (95% CI <span class="math inline">\(-0.00650\)</span> to <span class="math inline">\(-0.00306\)</span>), better in all eight seasons, with the gain coming from resolution rather than calibration. A chained gradient-boosted model of ice time, shots, goals and assists beat each skater’s own recent average on all four targets over 130,092 held-out skater-games. A third model, NeurHL-G, simulates a full box score for each game from the two lineups under exact ice-time conservation and a score-and-time hazard. On its gate seasons it beat Elo by 0.0056 but was level with NeurHL-H, so its preregistered pre-gate failed and its sealed test was not spent. We report the null results in full: neural event embeddings that encode a player’s type but not his team’s strength, two information leaks that passed every realism gate, a drift in how shot locations are recorded, and an error in our own gate implementation found while writing this paper. Every 2026–27 forecast is committed before its game and will be scored once, at the end of the season.</p>
+</section>
+<nav class="toc"><h2>Contents</h2><ol><li><a href="#sec:intro">1 Introduction</a></li><li><a href="#sec:related">2 Related work</a></li><li><a href="#sec:data">3 Data</a></li><li><a href="#sec:protocol">4 Evaluation protocol</a></li><li><a href="#sec:models">5 Models</a></li><li><a href="#sec:results">6 Results</a></li><li><a href="#sec:failures">7 Failures and corrections</a></li><li><a href="#sec:live">8 The 2026–27 prospective test</a></li><li><a href="#sec:discussion">9 Discussion</a></li><li><a href="#sec:conclusion">10 Conclusion</a></li><li><a href="#references">References</a></li><li><a href="#app:timeline">Appendix A. Preregistration timeline</a></li><li><a href="#app:config">Appendix B. NeurHL-G configuration</a></li><li><a href="#app:defs">Appendix C. Definitions</a></li><li><a href="#app:repro">Appendix D. Reproducibility</a></li></ol></nav>
+<article>
+<h2 class="unnumbered" id="sec:intro">1 Introduction</h2>
+<p>Ice hockey is among the least predictable of the major professional sports. Goals are rare, around three per team per game, and a single deflection can decide a result, so even a large difference in team quality translates into a modest difference in win probability <span class="citation" data-cites="bennaim2006parity lopez2018often">(<a href="#ref-bennaim2006parity" role="doc-biblioref">Ben-Naim et al. 2006</a>; <a href="#ref-lopez2018often" role="doc-biblioref">Lopez et al. 2018</a>)</span>. For the National Hockey League (NHL) the consequence is a narrow band of achievable skill. On our tuning seasons a constant home-win rate scores a log loss of 0.6887 per game and a tuned Elo system <span class="citation" data-cites="elo1978rating hvattum2010using">(<a href="#ref-elo1978rating" role="doc-biblioref">Elo 1978</a>; <a href="#ref-hvattum2010using" role="doc-biblioref">Hvattum and Arntzen 2010</a>)</span> scores 0.6759. Betting markets, the usual reference for the best achievable forecast <span class="citation" data-cites="strumbelj2014determining">(<a href="#ref-strumbelj2014determining" role="doc-biblioref">Štrumbelj 2014</a>)</span>, are better still; our plans worked with a rough closing-line figure of 0.66, which we could not verify because the project uses no market data. The competition between forecasting methods therefore takes place inside a few hundredths of a nat, and a genuine improvement over a good rating system is a few thousandths.</p>
+<p>Effects that small are fragile. Repeatedly trying configurations against the same held-out seasons will eventually produce one that looks better by chance <span class="citation" data-cites="simmons2011false gelman2014statistical">(<a href="#ref-simmons2011false" role="doc-biblioref">Simmons et al. 2011</a>; <a href="#ref-gelman2014statistical" role="doc-biblioref">Gelman and Loken 2014</a>)</span>, and information that leaks from the future into features produces gains that vanish in use <span class="citation" data-cites="kaufman2012leakage kapoor2023leakage">(<a href="#ref-kaufman2012leakage" role="doc-biblioref">Kaufman et al. 2012</a>; <a href="#ref-kapoor2023leakage" role="doc-biblioref">Kapoor and Narayanan 2023</a>)</span>. A model with no skill at all would clear a 0.002-nat improvement bar on our tuning window by chance about 23% of the time (Section <a href="#sec:protocol">4</a>). Preregistration, the practice of committing hypotheses, analyses and decision rules before the data that test them exist, is now standard in parts of the experimental sciences <span class="citation" data-cites="nosek2018preregistration">(<a href="#ref-nosek2018preregistration" role="doc-biblioref">Nosek et al. 2018</a>)</span>, and templates for preregistering predictive models have been proposed <span class="citation" data-cites="hofman2023preregistration">(<a href="#ref-hofman2023preregistration" role="doc-biblioref">Hofman et al. 2023</a>)</span>, but it remains rare in the predictive modelling of sport.</p>
+<p>This paper reports NeurHL, a system that forecasts NHL games, skaters and seasons, built across four successive preregistrations. Each plan was committed to the project’s repository before any number that tested it was computed, and the repository, with its full history, is public. Seasons were assigned to development, tuning, confirmation and live roles before any model was fitted, and the code refuses to score across those boundaries. Every configuration searched was logged against a declared cap. Each confirmatory test was run once, after a freeze commit, by a script that refuses a second run. The record of what failed is kept as carefully as the record of what worked.</p>
+<p>Our contributions are:</p>
+<ol>
+<li><p><strong>A preregistration protocol for sports forecasting</strong> with season windows, guarded data loaders, causality audits that corrupt the future and require the past to be bit-identical, capped search ledgers, one-shot tests, and a live scoring rule under which a forecast counts only if it is publicly committed before its game starts (Section <a href="#sec:protocol">4</a>).</p></li>
+<li><p><strong>A confirmed game-level improvement over Elo.</strong> NeurHL-H conditions on the dressed lineup through a neural player-level model and combines the result with Elo in a four-feature logistic head. On 10,184 held-out games it improves log loss by 0.00478 (95% CI 0.00306 to 0.00650), in all eight seasons, and increases Elo’s skill over the home-win base rate by about a quarter (Section <a href="#sec:res-h">6.2</a>).</p></li>
+<li><p><strong>A confirmed player-game model</strong> of ice time, shots, goals and assists that beats each skater’s own recent average on all four targets (Section <a href="#sec:res-pg">6.1</a>).</p></li>
+<li><p><strong>NeurHL-G, a single-game simulation engine</strong> that produces a full box score from the two lineups. Ice time is conserved exactly by construction, player outputs sum to team totals, and the outcome comes from a differentiable integration of a score-and-time hazard over the goal differential. It beats Elo on its gate seasons but adds no demonstrable win-probability information beyond NeurHL-H, so its sealed test was not spent (Section <a href="#sec:res-g">6.3</a>).</p></li>
+<li><p><strong>A record of null results and failure modes</strong> (Sections <a href="#sec:res-nulls">6.5</a> and <a href="#sec:failures">7</a>): pooled neural event embeddings that carry no team-strength signal; tree ensembles and wide networks that do not beat Elo; two leaks that passed every realism gate; a recording drift that changed what a shot location means; and implementation errors in our own gates, one of them found while writing this paper.</p></li>
+</ol>
+<p>Section <a href="#sec:related">2</a> places the work in context, Section <a href="#sec:data">3</a> describes the data, Section <a href="#sec:protocol">4</a> the protocol and Section <a href="#sec:models">5</a> the models. Section <a href="#sec:results">6</a> reports results, Section <a href="#sec:failures">7</a> the failures and corrections, Section <a href="#sec:live">8</a> the prospective test running during the 2026–27 season, and Section <a href="#sec:discussion">9</a> what we take from all of it. We name seasons by the year in which they end, so 2018 is the 2017–18 season.</p>
+<h2 class="unnumbered" id="sec:related">2 Related work</h2>
+<h5 id="rating-systems-and-game-forecasting.">Rating systems and game forecasting.</h5>
+<p>Elo’s rating system <span class="citation" data-cites="elo1978rating">(<a href="#ref-elo1978rating" role="doc-biblioref">Elo 1978</a>)</span> updates a scalar strength after each result in proportion to the surprise. In association football it has been shown to be a strong basis for match forecasts <span class="citation" data-cites="hvattum2010using">(<a href="#ref-hvattum2010using" role="doc-biblioref">Hvattum and Arntzen 2010</a>)</span>, and variants with margin-of-victory multipliers and between-season regression are widely used for the NHL; <span class="citation" data-cites="whelan2021bradley">Whelan and Klein (<a href="#ref-whelan2021bradley" role="doc-biblioref">2021</a>)</span> generalise the related Bradley–Terry model to hockey’s regulation, overtime and shootout outcomes. Goal-based models descend from the independent Poisson model of <span class="citation" data-cites="maher1982modelling">Maher (<a href="#ref-maher1982modelling" role="doc-biblioref">1982</a>)</span> and its dependence correction by <span class="citation" data-cites="dixon1997modelling">Dixon and Coles (<a href="#ref-dixon1997modelling" role="doc-biblioref">1997</a>)</span>, and <span class="citation" data-cites="kaplan2014markov">Kaplan et al. (<a href="#ref-kaplan2014markov" role="doc-biblioref">2014</a>)</span> derive in-game win probabilities from a Markov model of goal and manpower differentials. For NHL games, <span class="citation" data-cites="weissbock2013use">Weissbock et al. (<a href="#ref-weissbock2013use" role="doc-biblioref">2013</a>)</span> classified winners from traditional and possession statistics and reached about 59% accuracy, well below what similar methods achieve in other sports, and <span class="citation" data-cites="gu2019game">Gu et al. (<a href="#ref-gu2019game" role="doc-biblioref">2019</a>)</span> combined player and team data in ensemble learners. Both findings fit analyses that place hockey among the most random of the major sports <span class="citation" data-cites="bennaim2006parity lopez2018often">(<a href="#ref-bennaim2006parity" role="doc-biblioref">Ben-Naim et al. 2006</a>; <a href="#ref-lopez2018often" role="doc-biblioref">Lopez et al. 2018</a>)</span>. Betting markets are the usual reference for the best achievable forecast <span class="citation" data-cites="strumbelj2014determining wunderlich2021forecasting">(<a href="#ref-strumbelj2014determining" role="doc-biblioref">Štrumbelj 2014</a>; <a href="#ref-wunderlich2021forecasting" role="doc-biblioref">Wunderlich and Memmert 2021</a>)</span>; our protocol excludes market data from every modelling step, so we do not report market comparisons for historical seasons.</p>
+<h5 id="player-evaluation-in-hockey.">Player evaluation in hockey.</h5>
+<p>Adjusted plus-minus separates a player’s contribution from his teammates’ and opponents’ by regression on shift-level data. <span class="citation" data-cites="macdonald2011regression">Macdonald (<a href="#ref-macdonald2011regression" role="doc-biblioref">2011</a>)</span> introduced a regression-based adjusted plus-minus for NHL players and <span class="citation" data-cites="macdonald2012adjusted">Macdonald (<a href="#ref-macdonald2012adjusted" role="doc-biblioref">2012a</a>)</span> a ridge-regularised version <span class="citation" data-cites="hoerl1970ridge">(<a href="#ref-hoerl1970ridge" role="doc-biblioref">Hoerl and Kennard 1970</a>)</span> with shot-based outcomes, while <span class="citation" data-cites="gramacy2013estimating">Gramacy et al. (<a href="#ref-gramacy2013estimating" role="doc-biblioref">2013</a>)</span> estimated player contributions to goals with regularised logistic regression and found most players indistinguishable from average. <span class="citation" data-cites="thomas2013competing">Thomas et al. (<a href="#ref-thomas2013competing" role="doc-biblioref">2013</a>)</span> modelled the scoring process itself, with player effects entering competing hazard functions, the structure our event simulator and NeurHL-G build on; they also found that both teams score at higher rates when either leads than when the score is tied, a score effect our hazard table represents. Shot-level models that give each shot a scoring probability from its location and context go back at least to <span class="citation" data-cites="krzywicki2005shot">Krzywicki (<a href="#ref-krzywicki2005shot" role="doc-biblioref">2005</a>)</span>, and <span class="citation" data-cites="macdonald2012expected">Macdonald (<a href="#ref-macdonald2012expected" role="doc-biblioref">2012b</a>)</span> used an expected-goals measure built from event counts as a target for adjusted plus-minus. The public shot data we use are recorded by the league and redistributed by MoneyPuck, whose own model outputs we exclude.</p>
+<h5 id="neural-models-of-events-and-tabular-data.">Neural models of events and tabular data.</h5>
+<p>Neural temporal point processes <span class="citation" data-cites="mei2017neural zuo2020transformer">(<a href="#ref-mei2017neural" role="doc-biblioref">Mei and Eisner 2017</a>; <a href="#ref-zuo2020transformer" role="doc-biblioref">Zuo et al. 2020</a>)</span> generalise the self-exciting process of <span class="citation" data-cites="hawkes1971spectra">Hawkes (<a href="#ref-hawkes1971spectra" role="doc-biblioref">1971</a>)</span> and are a natural model for a stream of game events. On tabular problems, tree ensembles <span class="citation" data-cites="friedman2001greedy chen2016xgboost ke2017lightgbm">(<a href="#ref-friedman2001greedy" role="doc-biblioref">Friedman 2001</a>; <a href="#ref-chen2016xgboost" role="doc-biblioref">Chen and Guestrin 2016</a>; <a href="#ref-ke2017lightgbm" role="doc-biblioref">Ke et al. 2017</a>)</span> remain difficult for deep networks to beat <span class="citation" data-cites="grinsztajn2022tree shwartzziv2022tabular">(<a href="#ref-grinsztajn2022tree" role="doc-biblioref">Grinsztajn et al. 2022</a>; <a href="#ref-shwartzziv2022tabular" role="doc-biblioref">Shwartz-Ziv and Armon 2022</a>)</span>, which is why our model ladders always include a gradient-boosted rung. Surveys of machine learning for sport outcome prediction <span class="citation" data-cites="bunker2019machine horvat2020use">(<a href="#ref-bunker2019machine" role="doc-biblioref">Bunker and Thabtah 2019</a>; <a href="#ref-horvat2020use" role="doc-biblioref">Horvat and Job 2020</a>)</span> review a wide range of models, features and evaluation designs; our contribution is less a new model class than a stricter evaluation discipline applied to several. Stacking <span class="citation" data-cites="wolpert1992stacked breiman1996stacked">(<a href="#ref-wolpert1992stacked" role="doc-biblioref">Wolpert 1992</a>; <a href="#ref-breiman1996stacked" role="doc-biblioref">Breiman 1996</a>)</span> combines forecasts through a second-level model; we use it to combine NeurHL-G, NeurHL-H and Elo.</p>
+<h5 id="forecast-evaluation-and-research-integrity.">Forecast evaluation and research integrity.</h5>
+<p>We evaluate probabilities with proper scoring rules <span class="citation" data-cites="brier1950verification gneiting2007strictly">(<a href="#ref-brier1950verification" role="doc-biblioref">Brier 1950</a>; <a href="#ref-gneiting2007strictly" role="doc-biblioref">Gneiting and Raftery 2007</a>)</span>, decompose the Brier score into reliability and resolution <span class="citation" data-cites="murphy1973new">(<a href="#ref-murphy1973new" role="doc-biblioref">Murphy 1973</a>)</span>, and assess calibration and sharpness in the prequential sense <span class="citation" data-cites="dawid1984present gneiting2007probabilistic">(<a href="#ref-dawid1984present" role="doc-biblioref">Dawid 1984</a>; <a href="#ref-gneiting2007probabilistic" role="doc-biblioref">Gneiting et al. 2007</a>)</span>, using the randomised probability integral transform for count outcomes, as reviewed by <span class="citation" data-cites="czado2009predictive">Czado et al. (<a href="#ref-czado2009predictive" role="doc-biblioref">2009</a>)</span>, and the continuous ranked probability score <span class="citation" data-cites="matheson1976scoring">(<a href="#ref-matheson1976scoring" role="doc-biblioref">Matheson and Winkler 1976</a>)</span>. Paired forecast comparisons follow <span class="citation" data-cites="diebold1995comparing">Diebold and Mariano (<a href="#ref-diebold1995comparing" role="doc-biblioref">1995</a>)</span>. Inference accounts for clustering by player and game <span class="citation" data-cites="cameron2011robust">(<a href="#ref-cameron2011robust" role="doc-biblioref">Cameron et al. 2011</a>)</span>, for multiplicity <span class="citation" data-cites="holm1979simple">(<a href="#ref-holm1979simple" role="doc-biblioref">Holm 1979</a>)</span>, and for serial dependence through the moving-block bootstrap <span class="citation" data-cites="kunsch1989jackknife">(<a href="#ref-kunsch1989jackknife" role="doc-biblioref">Künsch 1989</a>)</span>. Our protocol draws on the preregistration literature <span class="citation" data-cites="nosek2018preregistration">(<a href="#ref-nosek2018preregistration" role="doc-biblioref">Nosek et al. 2018</a>)</span>, on the analyses of researcher degrees of freedom by <span class="citation" data-cites="simmons2011false">Simmons et al. (<a href="#ref-simmons2011false" role="doc-biblioref">2011</a>)</span> and <span class="citation" data-cites="gelman2014statistical">Gelman and Loken (<a href="#ref-gelman2014statistical" role="doc-biblioref">2014</a>)</span>, and on the taxonomy of leakage in <span class="citation" data-cites="kaufman2012leakage">Kaufman et al. (<a href="#ref-kaufman2012leakage" role="doc-biblioref">2012</a>)</span> and <span class="citation" data-cites="kapoor2023leakage">Kapoor and Narayanan (<a href="#ref-kapoor2023leakage" role="doc-biblioref">2023</a>)</span>.</p>
+<h2 class="unnumbered" id="sec:data">3 Data</h2>
+<h5 id="sources.">Sources.</h5>
+<p>Play-by-play events, shift charts, rosters, schedules, box scores and game reports come from the NHL’s public web services. For 2008–2011, which predate the league’s structured feeds, events and shifts are parsed from the league’s HTML game reports. Shot records come from MoneyPuck, from which we admit only raw recorded fields (coordinates, shot type, timing and players) and never the site’s fitted quantities such as expected goals or arena-adjusted coordinates, which were estimated on full-sample data and would leak the future. Team season tables from Natural Stat Trick and Hockey-Reference serve as cross-checks. No betting-market data enter any feature, target, calibration or selection step.</p>
+<h5 id="coverage.">Coverage.</h5>
+<p>The corpus spans 19 seasons, 2008 through 2026: 22,837 regular-season games (24,187 including playoffs), about 7.56 million play-by-play events, 18.9 million shifts reduced to 7.1 million on-ice stints, 2.08 million shot records, and about 0.96 million player-game rows. Career records cover all 6,096 players who dressed. Table <a href="#tab:data">1</a> gives the per-season counts and the role each season plays.</p>
+<h5 id="integrity.">Integrity.</h5>
+<p>Every source had to reconcile with official totals before use. The HTML-era backfill was checked against the structured feed on 2012, the one season both cover: per-game counts agreed for all nine core event types, all 6,545 goals matched to the second with the same scorer, and 97.2% of on-ice sets agreed exactly. Four problems surfaced and were fixed at source rather than masked. The HTML parser had dropped every assist in 2008–2011 because assist entries lack a team prefix; it was repaired and verified against the 2012 overlap. Phantom shifts inflated ice time in some HTML-era games. Fifty-seven 2025 games were missing shift charts and were recovered from the HTML reports. Playoff games had contaminated one training table. One degenerate game (2012020660, under 200 plays) is excluded throughout.</p>
+<h5 id="anomalous-seasons.">Anomalous seasons.</h5>
+<p>Two seasons are structurally unlike the rest: 2013, the lockout season (48 games per team, conference-only scheduling, no preseason), and 2021 (56 games, division-only scheduling, mostly empty arenas). Both are used for training but never scored. The criterion is schedule structure, fixed by history rather than by any observed result. Section <a href="#sec:failures">7</a> records how this rule itself was changed during development and how that change was later reclassified.</p>
+<h5 id="a-change-in-what-the-data-measure.">A change in what the data measure.</h5>
+<p>Shot locations are recorded by scorers in each arena, and their recording changed from 2023. The share of shots recorded within 10 feet of the net was stable at 7.3–8.7% from 2010 to 2021, then rose to 11.9, 12.8, 12.5 and 14.5% in 2023–2026, while the conversion rate of those same close shots fell from 0.166–0.179 to 0.132. The rebound share rose from about 5% to 8.1%, and the rush flag nearly disappeared (0.19% to 0.06%). The sport did not change this quickly; the measurement did. Any model fitted on the old regime reads a recorded 8-foot shot as the old 8-foot shot and over-predicts goals. Figure <a href="#fig:drift">1</a> shows the consequence for league-level expected goals, counting all situations except shootouts: goals per team-game held near 3.0 (3.08, 3.01 and 3.08 in 2024–2026) while measured expected goals rose from 2.89 to 3.32, so the ratio of goals to expected goals fell from 1.067 to 0.927. We return to this drift in Sections <a href="#sec:m-xg">5.2</a>, <a href="#sec:failures">7</a> and <a href="#sec:live">8</a>.</p>
+<div class="tbl"><table id="tab:data">
+<caption><strong>Table 1.</strong> Regular-season games by season and the role of each season in the NeurHL 1.0 protocol and in the NeurHL-G protocol. Seasons are named by the year they end. “Train” seasons are used for fitting only.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Seasons</th>
+<th style="text-align: right;">Games</th>
+<th style="text-align: left;">NeurHL 1.0 role</th>
+<th style="text-align: left;">NeurHL-G role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">2008</td>
+<td style="text-align: right;">1,229</td>
+<td style="text-align: left;">training</td>
+<td style="text-align: left;">burn-in</td>
+</tr>
+<tr>
+<td style="text-align: left;">2009–2011</td>
+<td style="text-align: right;">3,686</td>
+<td style="text-align: left;">development</td>
+<td style="text-align: left;">burn-in</td>
+</tr>
+<tr>
+<td style="text-align: left;">2012</td>
+<td style="text-align: right;">1,230</td>
+<td style="text-align: left;">tune</td>
+<td style="text-align: left;">iteration</td>
+</tr>
+<tr>
+<td style="text-align: left;">2013</td>
+<td style="text-align: right;">720</td>
+<td style="text-align: left;">train only (lockout)</td>
+<td style="text-align: left;">train only</td>
+</tr>
+<tr>
+<td style="text-align: left;">2014–2017</td>
+<td style="text-align: right;">4,920</td>
+<td style="text-align: left;">tune</td>
+<td style="text-align: left;">iteration</td>
+</tr>
+<tr>
+<td style="text-align: left;">2018</td>
+<td style="text-align: right;">1,271</td>
+<td style="text-align: left;">confirmation</td>
+<td style="text-align: left;">iteration</td>
+</tr>
+<tr>
+<td style="text-align: left;">2019–2020</td>
+<td style="text-align: right;">2,353</td>
+<td style="text-align: left;">confirmation</td>
+<td style="text-align: left;">gate</td>
+</tr>
+<tr>
+<td style="text-align: left;">2021</td>
+<td style="text-align: right;">868</td>
+<td style="text-align: left;">train only (COVID)</td>
+<td style="text-align: left;">train only</td>
+</tr>
+<tr>
+<td style="text-align: left;">2022–2024</td>
+<td style="text-align: right;">3,936</td>
+<td style="text-align: left;">confirmation</td>
+<td style="text-align: left;">gate</td>
+</tr>
+<tr>
+<td style="text-align: left;">2025–2026</td>
+<td style="text-align: right;">2,624</td>
+<td style="text-align: left;">confirmation</td>
+<td style="text-align: left;">sealed</td>
+</tr>
+<tr>
+<td style="text-align: left;">2027</td>
+<td style="text-align: right;">1,344</td>
+<td style="text-align: left;">live</td>
+<td style="text-align: left;">live</td>
+</tr>
+</tbody>
+</table></div>
+<figure id="fig:drift" data-latex-placement="t">
+<img src="figures/fig_xg_drift.png" />
+<figcaption><strong>Figure 1.</strong> League goals and house expected goals per team-game by season, all situations except shootouts, with 95% bands (a), and their ratio (b). The house expected goals are walk-forward: each season’s shots are scored by a model fitted on earlier seasons with an in-season calibrator that uses only games already played. The rise in measured expected goals from 2024 to 2026, with goals flat, follows the change in how shot locations are recorded.</figcaption>
+</figure>
+<h2 class="unnumbered" id="sec:protocol">4 Evaluation protocol</h2>
+<h3 class="unnumbered" id="standing-rules">4.1 Standing rules</h3>
+<p>Five rules applied to every model in the project.</p>
+<div class="description">
+<p>Anything used to predict a game in season <span class="math inline">\(V\)</span> is computed from seasons before <span class="math inline">\(V\)</span> and from games of season <span class="math inline">\(V\)</span> played strictly before it: scalers, calibration maps, embeddings, priors and coordinate normalisers included. The dressed lineup and the announced starting goalie are admissible, because both are public about an hour before the game.</p>
+<p>No odds or market prices in any feature, target, calibration or selection step.</p>
+<p>Quantities fitted by third parties on full-sample data are excluded; only raw recorded fields are admitted.</p>
+<p>Era enters through walk-forward covariates (league scoring to date, overtime format, shootout and loser-point flags, a scaled season index), never through season indicators or full-sample normalisation.</p>
+<p>Seeds are fixed and recorded. Neural training runs on Apple MPS, which is not bit-deterministic, so each trained checkpoint is identified by its SHA-256, every reported number comes from CPU inference over a saved checkpoint, and committed per-game predictions must re-derive within <span class="math inline">\(10^{-6}\)</span>.</p>
+</div>
+<h3 class="unnumbered" id="windows">4.2 Windows</h3>
+<p>Seasons were assigned to roles before any model was fitted (Table <a href="#tab:data">1</a>, Figure <a href="#fig:windows">2</a>). For NeurHL 1.0 the windows are development (2009–2011), tune (2012–2017) and confirmation (2018–2026, touched once per layer), followed by the live 2027 season. Player-level layers use their own split: development on 2011–2012, tuning on 2014–2017, a declared evaluation window of 2022–2026 and a one-shot confirmation on 2018–2020. NeurHL-G, built after the 1.0 confirmation had spent 2018–2026 at game level, uses a fresh split of the same history: iteration on 2012 and 2014–2018 (7,421 games), gates on 2019, 2020 and 2022–2024 (6,289 games), and a sealed test on 2025–2026 (2,624 games). Those seasons had already been scored at game level by NeurHL-H, so the NeurHL-G seal protects against adaptive NeurHL-G choices; it is procedurally sealed, not unseen, and we treat the 2026–27 live season as the only clean test of NeurHL-G.</p>
+<p>The windows are enforced in code. A scoring guard refuses to score an anomalous season or to cross a window boundary. For NeurHL-G, a single guarded loader is the only route by which model, training and evaluation code may read the data; it drops the sealed seasons unless an unseal function has been called, and that function refuses every caller except the seal script. A syntax-tree test fails any NeurHL-G module that reads the tensor directory directly, and the 37 sealed input files are pinned by hash.</p>
+<figure id="fig:windows" data-latex-placement="t">
+<img src="figures/fig_windows.png" />
+<figcaption><strong>Figure 2.</strong> Season roles in the two protocols. NeurHL 1.0 spent its confirmation window, 2018–2026, once per layer. NeurHL-G reuses the same history under a new split whose sealed seasons, 2025–2026, remain unspent. Lockout (2013) and COVID (2021) seasons train but are never scored.</figcaption>
+</figure>
+<h3 class="unnumbered" id="commit-before-results">4.3 Commit before results</h3>
+<p>Every plan, amendment and candidate declaration was committed before the numbers that tested it existed, and every freeze before the confirmatory run it governs. Amendments are appended, never edited. The repository was not public before 26 September 2026, so for the plans written before then the ordering rests on the commit times recorded in its history, which a reader has to take on trust. From publication on, each push to the public repository is dated independently of the author: the NeurHL-G plan and its candidate declaration were both on the public branch before any NeurHL-G gate number existed, and every live forecast must be there before its game starts. Each plan fixes its gates with numbers, its search budget and the consequence of every outcome. Searches are logged row by row in ledgers with hard caps: 40 configurations for the first neural game model, 12 for the game-level work of the second and third plans, 10, 4, 4 and 4 for the player-game, player-season, goalie and expected-goals layers, and for NeurHL-G at most 14 full runs on the iteration window and at most two on the gate window, the second only as one declared change after a failure. Exceeding a cap voids the version.</p>
+<p>Confirmatory tests are one-shot. Each has its own script that refuses to run before its freeze commit is on the public branch, refuses to run twice, and writes its result in a single step. A pre-gate on non-confirmatory seasons decides whether a confirmatory window is spent at all, so a weak candidate cannot consume it.</p>
+<h3 class="unnumbered" id="causality-audits">4.4 Causality audits</h3>
+<p>Gates that score a model on the inputs it was trained with cannot detect an illegitimate input: a leaked feature improves in-sample realism along with everything else (Section <a href="#sec:failures">7</a>). Every data builder therefore passes a causality audit before any gated number is reported from its output. The audit corrupts every row after a cut date, rebuilds the features, and requires every value before the cut to be bit-identical. For the event simulator the same test runs at the level of individual model inputs, together with a target-identity check (no input may agree with any target above 98%) and an empirical check that exempted inputs carry no lift on the next event. The NeurHL-G state builders are audited the same way, with cuts in mid-season 2016 and at the boundary between the last gate season and the first sealed one; all 100 skater-state, 23 goalie-state and 53 team-state features are bit-identical before each cut.</p>
+<h3 class="unnumbered" id="statistics">4.5 Statistics</h3>
+<p>The primary metric for win probabilities is per-game log loss, compared between models as a mean paired difference over the same games. We report a normal-approximation test on the per-game differences, a season-clustered <span class="math inline">\(t\)</span> test, a wild cluster bootstrap on seasons that enumerates all <span class="math inline">\(2^S\)</span> Rademacher sign patterns exactly, a moving-block bootstrap over date-ordered games (blocks of 100 games, 9,999 draws, seed 711), a sign test across seasons, and the Murphy decomposition of the Brier score into reliability, resolution and uncertainty. A log-loss gain with no gain in resolution is reported as recalibration, not information. Player-level differences use standard errors clustered two ways, by player and by game <span class="citation" data-cites="cameron2011robust">(<a href="#ref-cameron2011robust" role="doc-biblioref">Cameron et al. 2011</a>)</span>, and families of tests are Holm-corrected. Count predictions are assessed with Poisson deviance, the continuous ranked probability score and randomised probability integral transforms.</p>
+<p>Power is stated before each test. On the tune window, one standard error of a paired log-loss difference against Elo is 0.00268 nats. A gate of the form “beat Elo by 0.002” is therefore a 0.75-standard-error bar, which a model with no skill clears by chance 23% of the time. The first plan’s second amendment made a significance test the headline criterion for exactly this reason, and every later plan kept it.</p>
+<h2 class="unnumbered" id="sec:models">5 Models</h2>
+<p>Figure <a href="#fig:overview">3</a> shows how the components fit together. All of them are walk-forward: the model that predicts season <span class="math inline">\(T\)</span> is fitted on seasons before <span class="math inline">\(T\)</span> only.</p>
+<figure id="fig:overview" data-latex-placement="t">
+<img src="figures/diagram_overview.svg" />
+<figcaption><strong>Figure 3.</strong> Components of NeurHL, each fitted walk-forward. RAPM and expected goals feed the season simulator and NeurHL-G’s priors and rates; the event model’s player embeddings feed NeurHL-H; the player-game layer gives NeurHL-G its baselines and, summed over the schedule, the player season projections. NeurHL-G’s final win probability stacks its own output with NeurHL-H and Elo.</figcaption>
+</figure>
+<h3 class="unnumbered" id="sec:m-elo">5.1 Baselines</h3>
+<p>The primary comparator is the house Elo system (“v1”), tuned on 2006–2017 before any NeurHL work began. Before each game with ratings <span class="math inline">\(r_h\)</span> and <span class="math inline">\(r_a\)</span> and home advantage <span class="math inline">\(H\)</span>, the expected home score is <span class="math display">\[\begin{equation}
+E_h = \bigl(1 + 10^{-(r_h + H - r_a)/400}\bigr)^{-1}.
+\end{equation}\]</span> After the game both ratings move by <span class="math inline">\(\pm K M (y - E_h)\)</span>, where <span class="math inline">\(y\)</span> is the home result and <span class="math inline">\(M = \ln(|\Delta g| + 1)\cdot 2.2 / (2.2 + 0.001\,d_w)\)</span> is a margin-of-victory multiplier that shrinks with the winner’s rating advantage <span class="math inline">\(d_w\)</span>. Between seasons each rating regresses toward the mean, <span class="math inline">\(r \leftarrow \mu + \phi (r - \mu)\)</span>. The frozen parameters are <span class="math inline">\(K = 6\)</span>, <span class="math inline">\(H = 35\)</span> and <span class="math inline">\(\phi = 0.7\)</span>. Game probabilities come from walk-forward logistic models of the rating difference: the probability of reaching overtime, the regulation winner, and the overtime or shootout winner. We also report a constant home-win rate, and “Tier-0”, the stronger of a standardised logistic regression and an early-stopped gradient-boosted model <span class="citation" data-cites="chen2016xgboost">(<a href="#ref-chen2016xgboost" role="doc-biblioref">Chen and Guestrin 2016</a>)</span> on 23 engineered game features (Elo difference, rest, travel, goalie form, roster aggregates, era), which scored 0.67692 on 2014–2017 against Elo’s 0.67548.</p>
+<h3 class="unnumbered" id="sec:m-xg">5.2 Shot quality</h3>
+<p>The expected-goals model is a histogram gradient-boosted classifier <span class="citation" data-cites="friedman2001greedy ke2017lightgbm">(<a href="#ref-friedman2001greedy" role="doc-biblioref">Friedman 2001</a>; <a href="#ref-ke2017lightgbm" role="doc-biblioref">Ke et al. 2017</a>)</span> (400 iterations, learning rate 0.06, 31 leaves, at least 200 shots per leaf, L2 penalty 1.0, early stopping) on 33 features: distance and angles, rebound and rush indicators, the previous event’s type, distance, angle and elapsed time, speed from the previous event, strength state and empty nets, score difference, period, shooter handedness and position, shot type, and walk-forward era and rink covariates. For vantage <span class="math inline">\(V\)</span> the model is fitted on seasons before <span class="math inline">\(V-1\)</span>. Its calibration map is isotonic, refitted every 25 league games on the most recent 120,000 out-of-sample shots strictly before the game being scored, so it follows the recording drift with the data in which the drift occurs. The model beats a distance-and-angle logistic regression in all 18 vantages (gate X1), and team expected-goal differential predicts future goal share better than shot-attempt (Corsi) differential across 554 team-seasons, <span class="math inline">\(r = 0.423\)</span> against <span class="math inline">\(0.395\)</span> (gate X2). It fails its calibration gate X3, a maximum deviation of 0.005 per decile, at 0.0065 after three declared correction ladders; the residual is concentrated in the top decile in the seasons of the recording change.</p>
+<h3 class="unnumbered" id="sec:m-rapm">5.3 Adjusted plus-minus</h3>
+<p>RAPM is a stint-level ridge regression <span class="citation" data-cites="hoerl1970ridge">(<a href="#ref-hoerl1970ridge" role="doc-biblioref">Hoerl and Kennard 1970</a>)</span> of on-ice shot rates on indicator columns for the players on the ice, with an intercept, a home term and unpenalised team-season fixed effects, so that player coefficients measure performance relative to the player’s own team. The penalty, <span class="math inline">\(\lambda = 51{,}200\)</span>, is chosen to maximise how well a prior rating predicts a player’s realised on-ice results after he changes team. RAPM priors are computed as of each season and feed the season simulator and NeurHL-G.</p>
+<h3 class="unnumbered" id="sec:m-events">5.4 Event simulator</h3>
+<p>The event simulator is a Transformer-Hawkes marked temporal point process <span class="citation" data-cites="zuo2020transformer">(<a href="#ref-zuo2020transformer" role="doc-biblioref">Zuo et al. 2020</a>)</span> over the unified event and line-change stream, with heads for the time to the next event, its type and team, location, zone and actor, and player effects entering as zero-initialised modulations of the hazard anchored on RAPM, in the spirit of <span class="citation" data-cites="thomas2013competing">Thomas et al. (<a href="#ref-thomas2013competing" role="doc-biblioref">2013</a>)</span>. It has 5.3 million parameters and is trained as a five-seed ensemble. After the two leaks described in Section <a href="#sec:failures">7</a> were removed it reproduces goals, shots, penalties and faceoffs per game and per period within 10% of observed rates, and its score effects match observed ones with a gradient ratio of 0.979. Its score-effect curve initialises the NeurHL-G hazard table.</p>
+<h3 class="unnumbered" id="sec:m-pg">5.5 Player-game layer</h3>
+<p>The player-game layer predicts, for every dressed skater, his share of team ice time, his shots on goal, and the probabilities of scoring at least one goal and recording at least one assist. It chains four histogram gradient-boosted models in the order opportunity, volume, conversion: predicted usage feeds the shot model, and both feed the two binary models. Declared feature blocks cover the player’s own recent form (the baseline’s inputs, nested), usage structure by strength, line rank and power-play unit, opportunity created by absent teammates, opponent and schedule context, and line and coaching patterns. Binary heads are calibrated isotonically on the previous season’s out-of-sample predictions, and ice-time shares are renormalised within each team-game so they sum to one exactly.</p>
+<h3 class="unnumbered" id="sec:m-season">5.6 Season simulator and player seasons</h3>
+<p>The season simulator integrates team scoring rates, roster RAPM and score effects over each game of the real schedule and simulates 20,000 seasons, drawing each team’s strength once per simulated season (<span class="math inline">\(\sigma = 0.07\)</span>) so that uncertainty about how good a team is persists through the season. Player season projections blend a gradient-boosted season model with the player-game layer summed over the schedule under an availability hazard, 50/50, the combination a declared rule selected.</p>
+<h3 class="unnumbered" id="sec:m-h">5.7 NeurHL-H</h3>
+<p>NeurHL-H has three layers. Layer 1 predicts what each player will do in a game: his on-ice shot attempts for and against per 60 minutes, close-range attempts for and against, and his ice time. It is residual on the player’s own exponentially weighted history: a two-hidden-layer network (128 units, GELU, dropout 0.1) maps a 64-dimensional player embedding from the event model, 13 static features (position, age and age squared, career games, games with the current team, a recent-move flag, home, rest, team game number, games played this season, a late-season flag) and six history features to multiplicative corrections bounded by <span class="math inline">\(\pm 0.7\)</span> in log space, with a zero-initialised output layer so that training starts at the baseline. It is trained walk-forward on about 750,000 player-games. Layer 2 aggregates the predictions over the players actually dressed, weighted by predicted ice time, into team projections: projected attempt share and close-range share. Layer 3 is a thin head, a standardised logistic regression on four inputs, the Elo logit, the projected attempt-share difference, the projected close-range difference and the rest difference, refitted for each season on all earlier seasons. Its regularisation constant is selected on training loss, a known weakness that favours weak regularisation; it was kept verbatim for the confirmation because changing it would have tested a different model.</p>
+<h3 class="unnumbered" id="sec:m-g">5.8 NeurHL-G</h3>
+<p>NeurHL-G predicts one game from the two dressed lineups and simulates its box score. Figure <a href="#fig:g-arch">4</a> summarises the architecture.</p>
+<h5 id="state.">State.</h5>
+<p>After every game each skater’s state is updated by discounted sums of his per-game statistics with per-game decays 0.98, 0.95, 0.85 and 0.60. Rates are ratios of discounted sums, reported with their effective sample sizes, beside season-to-date and career totals and as-of priors (the RAPM prior and the event-model embedding fitted on earlier seasons only). The 114 skater features cover ice time by strength, individual shots, attempts and expected goals, goals, assists, on-ice expected goals for and against, and penalties. Goalie state (23 features) includes shrunk save percentage, goals saved above expected per expected goal, and workload. Team state (57 features) holds discounted team rates, and context (10 features) holds the Elo logit, rest, travel, time-zone change and era covariates. A game late in a season therefore sees every earlier game of that season as well as all earlier seasons.</p>
+<h5 id="network.">Network.</h5>
+<p>Shared encoders map each skater (114 features plus position, <span class="math inline">\(\to 128 \to 64\)</span>), each team (<span class="math inline">\(57 \to 64 \to 32\)</span>), each goalie (<span class="math inline">\(23 \to 32 \to 16\)</span>) and the context (<span class="math inline">\(10 \to 32 \to 16\)</span>), each a linear layer, GELU, layer normalisation, dropout 0.2 and a linear layer. Heads produce residual corrections with zero-initialised output layers: 12 per skater (ice time by strength, shot, attempt and expected-goal propensities, finishing, playmaking, offensive and defensive on-ice effects, penalties drawn and taken), six per team and one per goalie. The untrained network therefore reproduces shrunk-history baselines exactly. The model has 48,810 parameters.</p>
+<h5 id="team-layer.">Team layer.</h5>
+<p>The team layer is deterministic and conserves ice time. With <span class="math inline">\(o\)</span> the opponent of side <span class="math inline">\(s\)</span>, power-play opportunities have mean <span class="math inline">\(\lambda^{pp}_s = \mathrm{log5}(\text{drawn}_s, \text{taken}_o)\,e^{\delta_s}\)</span>, where <span class="math inline">\(\mathrm{log5}(a, b) = ab/L\)</span> for league rate <span class="math inline">\(L\)</span> <span class="citation" data-cites="hammond2015james">(<a href="#ref-hammond2015james" role="doc-biblioref">Hammond et al. 2015</a>)</span>, and <span class="math inline">\(\delta_s\)</span> collects the skaters’ penalty terms. Power-play time is <span class="math inline">\(T^{pp}_s = \tau \lambda^{pp}_s\)</span>, short-handed time is the opponent’s power-play time, and even-strength time is <span class="math inline">\(T^{ev} = 60 - T^{pp}_s - T^{pp}_o\)</span> minutes. Player <span class="math inline">\(i\)</span>’s ice time at strength <span class="math inline">\(k\)</span> is <span class="math display">\[\begin{equation}
+\mathrm{TOI}_{ik} = n_k\, T^{k}\, \mathrm{softmax}_{j \in \mathcal{P}(i)}\bigl(b_{jk} + \delta_{jk}\bigr)_i,
+\end{equation}\]</span> a softmax over the player’s position group <span class="math inline">\(\mathcal{P}(i)\)</span> with <span class="math inline">\(n_k\)</span> players on the ice (three forwards and two defence at even strength, five skaters on the power play, four short-handed), so team ice time is exact by construction. Team scoring rates are log-linear: <span class="math display">\[\begin{equation}
+\log r^{ev}_s = \log \mathrm{log5}\bigl(\mathrm{xGF60}_s, \mathrm{xGA60}_o\bigr)
+  + \sum_{i \in s} w_i\, \mathrm{off}_i - \sum_{j \in o} w_j\, \mathrm{def}_j + \delta^{tm}_s,
+\end{equation}\]</span> where <span class="math inline">\(w\)</span> are ice-time weights and the team rates are shrunk toward league values by their effective sample sizes. Player shots, attempts, expected goals, goals, assists and on-ice expected goals are softmax allocations of team totals, so they sum exactly, and team goals are expected goals times a finishing term less the opposing goalie’s effect.</p>
+<h5 id="outcome.">Outcome.</h5>
+<p>Win probabilities come from a differentiable integration over the goal differential, a Markov chain in the spirit of <span class="citation" data-cites="kaplan2014markov">Kaplan et al. (<a href="#ref-kaplan2014markov" role="doc-biblioref">2014</a>)</span>. Let <span class="math inline">\(\lambda_h, \lambda_a\)</span> be the two regulation scoring rates. The distribution of the differential <span class="math inline">\(d \in \{-8, \dots, 8\}\)</span> evolves over 30 steps of two minutes. In each step side <span class="math inline">\(s\)</span> scores with probability <span class="math inline">\(q_s = 1 - \exp\{-\lambda_s e^{u}\,\Delta t\, e^{\eta(\ell_s, \pi)}\}\)</span>, where <span class="math inline">\(\ell_s \in \{-3, \dots, 3\}\)</span> is the side’s own lead (clamped), <span class="math inline">\(\pi\)</span> indexes five game phases (minutes 0–40, 40–50, 50–56, 56–58, 58–60), and <span class="math inline">\(\eta\)</span> is a learned <span class="math inline">\(7 \times 5\)</span> hazard table initialised from the event simulator’s score effects <span class="citation" data-cites="thomas2013competing">(compare <a href="#ref-thomas2013competing" role="doc-biblioref">Thomas et al. 2013</a>)</span>. Trailing teams push, leaders sit back, tied teams turn cautious late, and the last minutes capture pulled goalies. The pace shock <span class="math inline">\(u = \sqrt{2}\,\sigma x - \sigma^2/2\)</span> is shared by both teams and integrated with five-node Gauss–Hermite quadrature <span class="citation" data-cites="abramowitz1964handbook">(<a href="#ref-abramowitz1964handbook" role="doc-biblioref">Abramowitz and Stegun 1964</a>)</span>, which supplies the tie mass by mechanism rather than through an ad hoc scalar. The probability of a regulation tie is the mass at <span class="math inline">\(d = 0\)</span>, and the overtime or shootout winner is a logistic function of <span class="math inline">\(\log(\lambda_h/\lambda_a)\)</span>. The output is the four-way outcome: home or away win, in regulation or after it.</p>
+<h5 id="training.">Training.</h5>
+<p>Snapshot <span class="math inline">\(T\)</span> is trained on seasons 2009 through <span class="math inline">\(T-1\)</span>. Phase 1 minimises Huber losses on ice time by strength and on power-play minutes, Poisson deviances on skater and team counts, and the four-way outcome negative log likelihood with weight 0.3 (AdamW <span class="citation" data-cites="loshchilov2019decoupled">(<a href="#ref-loshchilov2019decoupled" role="doc-biblioref">Loshchilov and Hutter 2019</a>)</span>, learning rate <span class="math inline">\(2\times10^{-3}\)</span>, weight decay 0.01, one-cycle schedule, batches of 256 games, 10 epochs). Phase 2 raises the outcome weight to 1 and trains four more epochs at learning rate <span class="math inline">\(3\times10^{-4}\)</span>, with an L2-SP penalty <span class="citation" data-cites="li2018explicit">(<a href="#ref-li2018explicit" role="doc-biblioref">Li et al. 2018</a>)</span> of <span class="math inline">\(10^{-3}\)</span> toward the phase-1 weights. The ensemble averages five seeds.</p>
+<h5 id="final-probability.">Final probability.</h5>
+<p>For each season <span class="math inline">\(T\)</span> a logistic stack <span class="citation" data-cites="wolpert1992stacked">(<a href="#ref-wolpert1992stacked" role="doc-biblioref">Wolpert 1992</a>)</span> over the Elo logit, the NeurHL-G logit and the NeurHL-H logit is fitted on out-of-sample predictions from earlier seasons. The column subset, which always includes Elo, is chosen by leave-one-season-out cross-validation on the training seasons, with a fallback to Elo and NeurHL-G where NeurHL-H is unavailable.</p>
+<h5 id="stat-sheet.">Stat sheet.</h5>
+<p>Box scores are simulated 10,000 times per game and are consistent with the win probability by construction. Each draw samples the outcome category from the stacked four-way probabilities, then a regulation score conditional on it, then team shots (negative binomial around the model mean, <span class="math inline">\(r = 40\)</span>, floored at goals), team expected goals (gamma), power-play opportunities (Poisson), player shots and goals (multinomial splits by the model’s shares), assists (zero, one or two per goal in the league’s typical mix, split by assist shares), individual expected goals (Dirichlet split) and goalie saves.</p>
+<figure id="fig:g-arch" data-latex-placement="t">
+<img src="figures/diagram_garch.svg" />
+<figcaption><strong>Figure 4.</strong> NeurHL-G. Encoders and residual heads adjust shrunk-history baselines; a deterministic team layer conserves ice time and makes player outputs sum to team totals; a hazard integration over the goal differential gives the four-way outcome, which is stacked with Elo and NeurHL-H; box scores are simulated conditional on the stacked outcome.</figcaption>
+</figure>
+<h2 class="unnumbered" id="sec:results">6 Results</h2>
+<p>We report confirmed results first, then the NeurHL-G gate evidence, then the development-only season results and the null results. A result is <em>confirmed</em> only if it came from a window no decision had used, scored once after the model was frozen. Results from windows that were consulted during development are <em>exploratory</em>.</p>
+<h3 class="unnumbered" id="sec:res-pg">6.1 Confirmed: the player-game layer</h3>
+<p>The player-game layer was frozen after development and scored once on the player confirmation window, 2018–2020: 130,092 skater-games by 1,152 players in 3,624 games. The comparator is each skater’s own recent history: an exponentially weighted average (<span class="math inline">\(\alpha = 0.1\)</span>) for ice-time share and shots, renormalised over the dressed skaters, and for the two binary targets a walk-forward shrunk average <span class="math inline">\(\hat p = (n\,\bar x + k\,p_0)/(n + k)\)</span> <span class="citation" data-cites="efron1975data">(<a href="#ref-efron1975data" role="doc-biblioref">Efron and Morris 1975</a>)</span> with <span class="math inline">\(k\)</span> chosen on the previous season. This is a demanding baseline: in the first plan a neural player-rate model had lost to it on ice time and shots (Table <a href="#tab:nulls">7</a>). Table <a href="#tab:pg">2</a> shows the result. The layer is better on all four targets, in every season, with two-way clustered <span class="math inline">\(z\)</span> statistics between <span class="math inline">\(-8.1\)</span> and <span class="math inline">\(-23.9\)</span> and Holm-adjusted <span class="math inline">\(p &lt; 10^{-5}\)</span>.</p>
+<div class="tbl"><table id="tab:pg">
+<caption><strong>Table 2.</strong> Player-game layer against each skater’s own recent history on the one-shot player confirmation, 2018–2020 (130,092 skater-games). Relative difference in the stated loss; negative is better. <span class="math inline">\(z\)</span> uses standard errors clustered by player and by game.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Target</th>
+<th style="text-align: left;">Loss</th>
+<th style="text-align: right;">Relative difference</th>
+<th style="text-align: right;"><span class="math inline">\(z\)</span> (two-way)</th>
+<th style="text-align: center;">Seasons better</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Ice-time share</td>
+<td style="text-align: left;">MAE</td>
+<td style="text-align: right;"><span class="math inline">\(-4.1\%\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-23.9\)</span></td>
+<td style="text-align: center;">3/3</td>
+</tr>
+<tr>
+<td style="text-align: left;">Shots on goal</td>
+<td style="text-align: left;">Poisson deviance</td>
+<td style="text-align: right;"><span class="math inline">\(-10.2\%\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-13.7\)</span></td>
+<td style="text-align: center;">3/3</td>
+</tr>
+<tr>
+<td style="text-align: left;">P(goal <span class="math inline">\(\geq 1\)</span>)</td>
+<td style="text-align: left;">log loss</td>
+<td style="text-align: right;"><span class="math inline">\(-2.8\%\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-8.1\)</span></td>
+<td style="text-align: center;">3/3</td>
+</tr>
+<tr>
+<td style="text-align: left;">P(assist <span class="math inline">\(\geq 1\)</span>)</td>
+<td style="text-align: left;">log loss</td>
+<td style="text-align: right;"><span class="math inline">\(-2.6\%\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-15.9\)</span></td>
+<td style="text-align: center;">3/3</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="unnumbered" id="sec:res-h">6.2 Confirmed: NeurHL-H against Elo</h3>
+<p>NeurHL-H was frozen exactly as it had been evaluated on the tune window, the freeze and the test were committed in an amendment before any 2018–2026 game was scored by any NeurHL-H artifact, and the test ran once. The primary set is the eight structurally normal seasons of 2018–2026 (<span class="math inline">\(n = 10{,}184\)</span> games; 2021 excluded). Table <a href="#tab:c1">3</a> and Figure <a href="#fig:c1">5</a> give the results.</p>
+<div class="tbl"><table id="tab:c1">
+<caption><strong>Table 3.</strong> One-shot confirmation of NeurHL-H against Elo, regular-season games of 2018–2026 excluding 2021 (<span class="math inline">\(n = 10{,}184\)</span>). Differences are NeurHL-H minus Elo in per-game log loss; negative favours NeurHL-H.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Quantity</th>
+<th style="text-align: right;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Log loss, NeurHL-H / Elo</td>
+<td style="text-align: right;">0.66495 / 0.66973</td>
+</tr>
+<tr>
+<td style="text-align: left;">Mean paired difference (SE)</td>
+<td style="text-align: right;"><span class="math inline">\(-0.00478\)</span> (0.00088)</td>
+</tr>
+<tr>
+<td style="text-align: left;">95% CI, normal / moving-block bootstrap</td>
+<td style="text-align: right;">[<span class="math inline">\(-0.00650\)</span>, <span class="math inline">\(-0.00306\)</span>] / [<span class="math inline">\(-0.00660\)</span>, <span class="math inline">\(-0.00293\)</span>]</td>
+</tr>
+<tr>
+<td style="text-align: left;">Per-game test</td>
+<td style="text-align: right;"><span class="math inline">\(z = -5.46\)</span>, <span class="math inline">\(p &lt; 10^{-6}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;">Season-clustered <span class="math inline">\(t\)</span> (7 df)</td>
+<td style="text-align: right;"><span class="math inline">\(t = -5.71\)</span>, <span class="math inline">\(p = 0.0007\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;">Wild cluster bootstrap, exact (<span class="math inline">\(2^8\)</span> patterns)</td>
+<td style="text-align: right;"><span class="math inline">\(p = 0.0078\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;">Seasons better; sign test</td>
+<td style="text-align: right;">8 of 8; <span class="math inline">\(p = 0.0078\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;">Including 2021 (<span class="math inline">\(n = 11{,}052\)</span>)</td>
+<td style="text-align: right;"><span class="math inline">\(-0.00459\)</span> [<span class="math inline">\(-0.00622\)</span>, <span class="math inline">\(-0.00295\)</span>], 9 of 9</td>
+</tr>
+<tr>
+<td style="text-align: left;">Brier score, NeurHL-H / Elo</td>
+<td style="text-align: right;">0.23630 / 0.23857</td>
+</tr>
+<tr>
+<td style="text-align: left;">Reliability, NeurHL-H / Elo</td>
+<td style="text-align: right;">0.00021 / 0.00025</td>
+</tr>
+<tr>
+<td style="text-align: left;">Resolution, NeurHL-H / Elo</td>
+<td style="text-align: right;">0.01218 / 0.00982</td>
+</tr>
+<tr>
+<td style="text-align: left;">Uncertainty</td>
+<td style="text-align: right;">0.24840</td>
+</tr>
+</tbody>
+</table></div>
+<figure id="fig:c1" data-latex-placement="t">
+<img src="figures/fig_c1_seasons.png" />
+<figcaption><strong>Figure 5.</strong> NeurHL-H minus Elo, per-game log loss by season on the one-shot confirmation, with 95% intervals; negative favours NeurHL-H. Numbers under the season labels are games. 2021 (hollow) is excluded from the primary test by the declared rule and shown for completeness. The band and filled diamond are the pooled primary estimate; the hollow diamond pools all nine seasons.</figcaption>
+</figure>
+<p>The effect is <span class="math inline">\(-0.00478\)</span> nats per game (95% CI <span class="math inline">\(-0.00650\)</span> to <span class="math inline">\(-0.00306\)</span>), and it holds in every season. It is also the size the tune window had suggested (<span class="math inline">\(-0.00283\)</span>), somewhat larger rather than smaller, and the amendment’s power table had put the chance of detecting an effect of the tune-window size at about 0.93. Measured against a constant equal to the window’s home-win rate (0.540, log loss 0.68995), Elo’s skill is 0.0202 nats and NeurHL-H’s is 0.0250, an increase of about 24%. The Murphy decomposition locates the gain: reliability is essentially unchanged and already small for both models, while resolution rises from 0.0098 to 0.0122. NeurHL-H is not a recalibrated Elo; it separates games that Elo treats alike. Figure <a href="#fig:reliability">6</a> shows that both models are well calibrated across the probability range.</p>
+<p>The gain is conditional on information Elo does not use. NeurHL-H reads which skaters dressed for each game, which is public about an hour before puck drop, and its Layer 1 translates those players’ histories and career context into projected shot shares. The confirmation therefore establishes that lineup-level player information improves on a strong team-level rating system, not that a network discovers team strength that Elo misses.</p>
+<h5 id="where-the-gain-comes-from-exploratory.">Where the gain comes from (exploratory).</h5>
+<p>To test whether the lineup is what NeurHL-H adds, we split the confirmation games after the fact by how lopsided the two teams’ absences were: the recent ice time of regulars who did not dress, home minus away, in minutes. The window is spent, so this analysis is exploratory. Its script stated two expectations before it ran: that the gain would grow with the imbalance, and that it would be largest early in the season, when rosters have changed and Elo has not yet seen them play. The first held and the second did not (Table <a href="#tab:gain">4</a>). Where neither team was missing regular ice time the difference is <span class="math inline">\(-0.0003\)</span> (SE 0.0045); it grows to <span class="math inline">\(-0.0087\)</span> when the imbalance exceeds 40 minutes, a slope of <span class="math inline">\(-0.0010\)</span> per 10 minutes (SE 0.0004). By month the gain is smallest in October and November and largest from December on. NeurHL-H does not move further from Elo when absences are lopsided (the mean absolute difference between the two probabilities is 0.034 to 0.036 in every bin); its adjustments are simply more accurate there.</p>
+<div class="tbl"><table id="tab:gain">
+<caption><strong>Table 4.</strong> NeurHL-H minus Elo, per-game log loss on the confirmation games, split after the fact by the imbalance in absent regulars’ recent ice time between the two teams, and by month. Exploratory: the window had been spent.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Absence imbalance</th>
+<th style="text-align: right;">Games</th>
+<th style="text-align: right;">Difference (SE)</th>
+<th style="text-align: left;">Month</th>
+<th style="text-align: right;">Games</th>
+<th style="text-align: right;">Difference (SE)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">none</td>
+<td style="text-align: right;">367</td>
+<td style="text-align: right;"><span class="math inline">\(-0.0003\)</span> (0.0045)</td>
+<td style="text-align: left;">October</td>
+<td style="text-align: right;">1,316</td>
+<td style="text-align: right;"><span class="math inline">\(-0.0017\)</span> (0.0023)</td>
+</tr>
+<tr>
+<td style="text-align: left;">0–20 min</td>
+<td style="text-align: right;">4,747</td>
+<td style="text-align: right;"><span class="math inline">\(-0.0029\)</span> (0.0013)</td>
+<td style="text-align: left;">November</td>
+<td style="text-align: right;">1,726</td>
+<td style="text-align: right;"><span class="math inline">\(-0.0022\)</span> (0.0021)</td>
+</tr>
+<tr>
+<td style="text-align: left;">20–40 min</td>
+<td style="text-align: right;">2,928</td>
+<td style="text-align: right;"><span class="math inline">\(-0.0055\)</span> (0.0016)</td>
+<td style="text-align: left;">December</td>
+<td style="text-align: right;">1,674</td>
+<td style="text-align: right;"><span class="math inline">\(-0.0078\)</span> (0.0021)</td>
+</tr>
+<tr>
+<td style="text-align: left;">over 40 min</td>
+<td style="text-align: right;">2,142</td>
+<td style="text-align: right;"><span class="math inline">\(-0.0087\)</span> (0.0020)</td>
+<td style="text-align: left;">January</td>
+<td style="text-align: right;">1,600</td>
+<td style="text-align: right;"><span class="math inline">\(-0.0057\)</span> (0.0023)</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: left;">February</td>
+<td style="text-align: right;">1,318</td>
+<td style="text-align: right;"><span class="math inline">\(-0.0061\)</span> (0.0024)</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: left;">March</td>
+<td style="text-align: right;">1,712</td>
+<td style="text-align: right;"><span class="math inline">\(-0.0042\)</span> (0.0022)</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: left;">April</td>
+<td style="text-align: right;">837</td>
+<td style="text-align: right;"><span class="math inline">\(-0.0061\)</span> (0.0032)</td>
+</tr>
+</tbody>
+</table></div>
+<figure id="fig:reliability" data-latex-placement="t">
+<img src="figures/fig_reliability.png" />
+<figcaption><strong>Figure 6.</strong> Reliability of NeurHL-H and Elo on the 10,184 confirmation games: ten equal-count bins per model with 95% Wilson intervals, the diagonal of perfect calibration and the observed home-win rate (dashed); below, the distribution of predicted home-win probabilities. NeurHL-H spreads its forecasts more widely while staying on the diagonal.</figcaption>
+</figure>
+<h3 class="unnumbered" id="sec:res-g">6.3 NeurHL-G: iteration, gates and the pre-gate</h3>
+<h5 id="iteration.">Iteration.</h5>
+<p>Table <a href="#tab:ladder">5</a> and Figure <a href="#fig:ladder">7</a> give the ladder on the iteration window, every run of which is in the search ledger. The non-neural engine (player-game sums through the integration and the stack) and the tree-based rung did no better than Elo. The network with official power-play targets (R6) improved on Elo by 0.0023 but did not reach NeurHL-H. None of four additions earned its place under the declared adoption rule (a gain of at least 0.0003 without losing in four or more of six seasons): an Elo anchor on the scoring rates, lineup-versus-usual multipliers, NeurHL-H’s projections as team inputs, and attention across the two rosters. Stacking R6 with NeurHL-H (R11) gave the best stack, 0.67258, still 0.00014 behind NeurHL-H alone. The paired standard error of each rung’s difference from NeurHL-H is 0.0007 to 0.0009, larger than most gaps between rungs, so the ladder shows the absence of a large gain rather than a reliable ordering. The candidate declared for the gate, g1, is R11 with the five-seed ensemble. The candidate commit recorded, before the gate ran, the expectation that the pre-gate would fail.</p>
+<div class="tbl"><table id="tab:ladder">
+<caption><strong>Table 5.</strong> NeurHL-G iteration ladder on 2012 and 2014–2018 (7,421 games): pooled log loss of each rung’s final probability, from the search ledger. R4 was run on the quick protocol (two seasons, 2,501 games), so its value is on a different set of games. R6e and R6L were run before the master tensor was rebuilt on official power-play opportunities; their parent on the earlier tensor scored 0.67299, against which R6e is <span class="math inline">\(+0.00031\)</span> and R6L <span class="math inline">\(-0.000004\)</span>, so neither decision depends on the version.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Rung</th>
+<th style="text-align: left;">Change</th>
+<th style="text-align: right;">Log loss</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">R1</td>
+<td style="text-align: left;">Elo</td>
+<td style="text-align: right;">0.67528</td>
+</tr>
+<tr>
+<td style="text-align: left;">R2</td>
+<td style="text-align: left;">NeurHL-H</td>
+<td style="text-align: right;">0.67244</td>
+</tr>
+<tr>
+<td style="text-align: left;">R3</td>
+<td style="text-align: left;">gradient-boosted trees / logistic on game features, Elo-stacked</td>
+<td style="text-align: right;">0.67611 / 0.69699</td>
+</tr>
+<tr>
+<td style="text-align: left;">R4</td>
+<td style="text-align: left;">non-neural engine (quick protocol)</td>
+<td style="text-align: right;">0.67581</td>
+</tr>
+<tr>
+<td style="text-align: left;">R6</td>
+<td style="text-align: left;">network, official power-play targets</td>
+<td style="text-align: right;">0.67301</td>
+</tr>
+<tr>
+<td style="text-align: left;">R6e</td>
+<td style="text-align: left;">+ Elo anchor on scoring rates</td>
+<td style="text-align: right;">0.67330</td>
+</tr>
+<tr>
+<td style="text-align: left;">R6L</td>
+<td style="text-align: left;">+ lineup-versus-usual multipliers</td>
+<td style="text-align: right;">0.67299</td>
+</tr>
+<tr>
+<td style="text-align: left;">R6c</td>
+<td style="text-align: left;">+ NeurHL-H projections as team inputs</td>
+<td style="text-align: right;">0.67344</td>
+</tr>
+<tr>
+<td style="text-align: left;">R13</td>
+<td style="text-align: left;">R6c + direct NeurHL-H terms</td>
+<td style="text-align: right;">0.67344</td>
+</tr>
+<tr>
+<td style="text-align: left;">R9</td>
+<td style="text-align: left;">R6c + attention across rosters</td>
+<td style="text-align: right;">0.67366</td>
+</tr>
+<tr>
+<td style="text-align: left;">R11</td>
+<td style="text-align: left;">R6 stacked with NeurHL-H (candidate structure)</td>
+<td style="text-align: right;">0.67258</td>
+</tr>
+</tbody>
+</table></div>
+<figure id="fig:ladder" data-latex-placement="t">
+<img src="figures/fig_g_ladder.png" />
+<figcaption><strong>Figure 7.</strong> NeurHL-G iteration ladder: pooled log loss of each full-run rung on the iteration window (7,421 games), with Elo and NeurHL-H on the same games. Open circles were rejected under the adoption rule; the filled diamond, R11, was carried forward as the candidate.</figcaption>
+</figure>
+<h5 id="gates.">Gates.</h5>
+<p>The candidate was scored once on the gate window (6,289 games). Table <a href="#tab:gates">6</a> summarises the gates and Figure <a href="#fig:gate">8</a> the per-season differences. The final probability beats Elo by 0.00559 nats (SE 0.00131), in all five seasons, a margin comparable to NeurHL-H’s confirmed one. It beats NeurHL-H by only 0.00049 (SE 0.00060), in three of five seasons. The pre-gate required both a gain of at least 0.0045 over Elo and a gain of at least 0.0010 over NeurHL-H, each in at least four of five seasons. The first condition holds and the second does not, so the pre-gate failed and, as the plan declared, the sealed seasons were not spent. At the sealed test’s size the minimum detectable effect at 80% power would have been 0.0057 against Elo and 0.0026 against NeurHL-H.</p>
+<div class="tbl"><table id="tab:gates">
+<caption><strong>Table 6.</strong> NeurHL-G (candidate g1) on the gate window, 2019, 2020 and 2022–2024 (6,289 games; 225,752 skater-games). The calibration row reflects the correction in Section <a href="#sec:failures">7</a>.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Gate</th>
+<th style="text-align: left;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Final probability vs Elo</td>
+<td style="text-align: left;"><span class="math inline">\(-0.00559\)</span> (SE 0.00131), 5 of 5 seasons</td>
+</tr>
+<tr>
+<td style="text-align: left;">Final probability vs NeurHL-H</td>
+<td style="text-align: left;"><span class="math inline">\(-0.00049\)</span> (SE 0.00060), 3 of 5 seasons</td>
+</tr>
+<tr>
+<td style="text-align: left;">Pre-gate (S-STOP)</td>
+<td style="text-align: left;"><strong>fail</strong>: the NeurHL-H condition is not met</td>
+</tr>
+<tr>
+<td style="text-align: left;">PG: player heads vs the player-game layer</td>
+<td style="text-align: left;">pass: ice-time share <span class="math inline">\(-0.59\%\)</span>, shots <span class="math inline">\(-0.45\%\)</span> (Poisson log loss), P(goal) <span class="math inline">\(-0.45\%\)</span>, P(assist) <span class="math inline">\(-0.36\%\)</span>; every upper 95% bound below zero (two-way clustered)</td>
+</tr>
+<tr>
+<td style="text-align: left;">T: team box score</td>
+<td style="text-align: left;">pass: shots, expected goals, goals and power-play opportunities beat log5 team history; shots and goals also beat the summed player-game layer, on deviance and CRPS</td>
+</tr>
+<tr>
+<td style="text-align: left;">C: calibration</td>
+<td style="text-align: left;"><strong>fail</strong>: slope 0.968 and overtime share (0.224 predicted, 0.220 observed) pass; randomised-PIT 80% coverage passes for team goals (0.803) and skater shots (0.783) but not for team shots (0.860)</td>
+</tr>
+</tbody>
+</table></div>
+<figure id="fig:gate" data-latex-placement="t">
+<img src="figures/fig_g_gate_seasons.png" />
+<figcaption><strong>Figure 8.</strong> NeurHL-G on the gate window: per-season differences in per-game log loss of the final probability against Elo (filled) and against NeurHL-H (open), with 95% intervals, and the pooled estimates over 6,289 games. Dotted segments mark the pre-gate thresholds, <span class="math inline">\(-0.0045\)</span> against Elo and <span class="math inline">\(-0.0010\)</span> against NeurHL-H.</figcaption>
+</figure>
+<h5 id="the-stat-sheet.">The stat sheet.</h5>
+<p>The engine’s player heads improve on the confirmed player-game layer on all four shared targets (Figure <a href="#fig:heads">9</a>). The gains are small, between 0.36% and 0.59%, but every upper confidence bound is below zero. Its team box scores beat both declared baselines. Binned predictions track outcomes closely for shots; for expected goals and goals they are somewhat too spread at the extremes, so that the decile with the highest predicted regulation goals (4.2 per team-game) averaged 3.7 (Figure <a href="#fig:teambox">10</a>). The win-probability slope is 0.968, and the hazard integration reproduces the share of games that go past regulation without a tie scalar (22.4% predicted against 22.0% observed; Figure <a href="#fig:otcal">11</a>). One calibration check fails: the negative-binomial dispersion used for team shots makes those intervals too wide, covering 86% of outcomes at a nominal 80%.</p>
+<figure id="fig:heads" data-latex-placement="t">
+<img src="figures/fig_player_heads.png" />
+<figcaption><strong>Figure 9.</strong> Relative change in loss of player-level predictions, with 95% intervals clustered by skater and game; negative is better, and the panels have different scales. (a) The player-game layer against each skater’s own history on the one-shot confirmation, 2018–2020 (130,092 skater-games); shots on true Poisson deviance. (b) NeurHL-G’s player heads against the player-game layer on the NeurHL-G gate window (225,752 skater-games); shots on Poisson log loss. The dotted line is the gate’s non-inferiority margin of <span class="math inline">\(+1\%\)</span>.</figcaption>
+</figure>
+<figure id="fig:teambox" data-latex-placement="t">
+<img src="figures/fig_team_box.png" />
+<figcaption><strong>Figure 10.</strong> NeurHL-G team box-score predictions on the gate window (12,536 to 12,578 team-games): mean outcome by decile of prediction, with 95% intervals, for team shots on goal, expected goals and regulation goals, against the identity line.</figcaption>
+</figure>
+<figure id="fig:otcal" data-latex-placement="t">
+<img src="figures/fig_outcome_calib.png" />
+<figcaption><strong>Figure 11.</strong> NeurHL-G outcome calibration on the gate window. (a) Reliability of the final home-win probability in equal-count bins, with the calibration slope and its 95% interval. (b) Predicted and observed share of games tied after regulation, by season and pooled; the prediction comes from the hazard integration, with no tie scalar.</figcaption>
+</figure>
+<h5 id="reading.">Reading.</h5>
+<p>Two independently built models that both condition on the dressed lineup, one a small residual network over player histories feeding a four-feature logistic head, the other a conservation-constrained engine that models every skater’s deployment and every team’s scoring process, arrive at nearly the same win-probability skill. On the iteration window the engine adds nothing beyond NeurHL-H, and on the gate window it adds an amount indistinguishable from zero. We read this as evidence that the binding constraint is the information available before the game, not the capacity or structure of the model; the engine’s value is that it produces a coherent box score at that same level of skill.</p>
+<h3 class="unnumbered" id="sec:res-season">6.4 Development only: seasons and player seasons</h3>
+<p>The season simulator’s 80% intervals cover 0.794 of team-seasons, with a standings error of 9.61 points (MAE) and a CRPS of 6.93, pooled over the development and tune seasons. Its interval width was tuned on the same seasons, so these are development numbers. On the five seasons that both its record and the Elo baseline’s share, the Elo baseline is more accurate: 9.17 against 9.99 points MAE and a CRPS of 6.43 against 7.17, ahead in four of five seasons (<span class="math inline">\(p = 0.19\)</span>). An earlier claim that the season layer beat the house benchmarks compared different seasons and is withdrawn (Section <a href="#sec:failures">7</a>). For player seasons, the declared 50/50 blend of a gradient-boosted season model and the summed player-game layer had the lowest points error over 11 vantages (9.07 points per 82 games, against 9.41 and 9.77 for the two paths alone).</p>
+<h3 class="unnumbered" id="sec:res-nulls">6.5 Documented nulls</h3>
+<p>Table <a href="#tab:nulls">7</a> lists the hypotheses that failed. Two deserve comment. The first neural game model, a 1.2-million-parameter roster network over player embeddings from an event language model, finished level with a constant home-win rate. A regularised logistic regression on the same mean-pooled embeddings did no better (0.6888 against 0.6898), while two team-form features alone scored 0.6780, and adding the embeddings to form made it worse. A linear model cannot be accused of failing to optimise, so the signal was absent from the representation. The embeddings did learn something: position is linearly decodable from them with 95% accuracy, and linear probes recover <span class="math inline">\(R^2 = 0.54\)</span> of points per 60 minutes and <span class="math inline">\(0.59\)</span> of ice time per game, although neither was ever a training target. They encode what kind of player someone is, not how good his team is, and every roster carries a similar mix of roles. The second is the game-level reattempt of the third plan: four blocks of new information (absence-based replacement value, goalie quality, schedule density, schedule strength), each added to NeurHL-H’s head in a declared order, each made the pooled log loss worse, so no candidate reached the pre-gate.</p>
+<div class="tbl"><table id="tab:nulls">
+<caption><strong>Table 7.</strong> Documented null results. Each hypothesis was declared before its test and failed on the stated evidence.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Hypothesis</th>
+<th style="text-align: left;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">A neural game network over event-model player embeddings beats Elo</td>
+<td style="text-align: left;">Five configurations; best 0.6966 against Elo 0.67585 and a constant 0.6898 (tune window)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Pooled player embeddings carry team strength</td>
+<td style="text-align: left;">Logistic probe 0.6888, level with the constant; embeddings added to team form make it worse</td>
+</tr>
+<tr>
+<td style="text-align: left;">A career encoder can place rookies</td>
+<td style="text-align: left;">Validation error 0.99–1.00 of predicting the mean at every vantage</td>
+</tr>
+<tr>
+<td style="text-align: left;">Neural player-rate heads beat a player’s own average</td>
+<td style="text-align: left;">Worse on ice time (MAE 0.00934 against 0.00619) and shots; level with a shrunk average on goals</td>
+</tr>
+<tr>
+<td style="text-align: left;">The event simulator’s rates beat Elo per game</td>
+<td style="text-align: left;">Blend 0.67763 against Elo 0.67668; its pre-gate stopped the confirmation</td>
+</tr>
+<tr>
+<td style="text-align: left;">Absences, goalie quality, schedule density or strength improve the game head</td>
+<td style="text-align: left;">Each block adds log loss (+0.00024 to +0.00541)</td>
+</tr>
+<tr>
+<td style="text-align: left;">A starter model beats simple heuristics</td>
+<td style="text-align: left;">Season start share wins (log loss 0.66–0.68 against 0.71–0.77)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Goals saved above expected predicts next season better than shrunk save percentage</td>
+<td style="text-align: left;"><span class="math inline">\(r = 0.159\)</span> against <span class="math inline">\(0.218\)</span>; Steiger <span class="math inline">\(p = 0.007\)</span> in favour of save percentage</td>
+</tr>
+<tr>
+<td style="text-align: left;">RAPM transfers to a new team better than team-demeaned raw rates</td>
+<td style="text-align: left;">Indistinguishable (movers <span class="math inline">\(r = 0.387\)</span> against <span class="math inline">\(0.371\)</span>, <span class="math inline">\(p = 0.60\)</span>)</td>
+</tr>
+<tr>
+<td style="text-align: left;">The shot-quality model is calibrated to 0.005 per decile</td>
+<td style="text-align: left;">Best 0.0065 after three declared correction ladders</td>
+</tr>
+<tr>
+<td style="text-align: left;">NeurHL-G adds win-probability information beyond NeurHL-H</td>
+<td style="text-align: left;"><span class="math inline">\(-0.00049\)</span> (SE 0.00060) on the gate window; the pre-gate failed</td>
+</tr>
+</tbody>
+</table></div>
+<h2 class="unnumbered" id="sec:failures">7 Failures and corrections</h2>
+<p>The protocol did not prevent mistakes. It made them visible, and it fixed in advance what each one would cost. This section records the ones that changed a result or a claim.</p>
+<h3 class="unnumbered" id="leaks-that-realism-gates-could-not-see">7.1 Leaks that realism gates could not see</h3>
+<p>The event simulator passed its preregistered realism gates, per-period event rates and score effects, with two leaks present. The first was an orientation flag equal to the team that owned the <em>next</em> event, which is the team component of the prediction target; it agreed with the target’s team in every held-out step. The second was worse. The model conditioned on the on-ice players at the next event, and because line changes happen at stoppages, a change in on-ice personnel announces the faceoff that caused it: when the next event’s on-ice set lost one skater, the next event was a faceoff with probability 0.986 against a base rate of 0.199. About 3,000 of 62,094 held-out steps were given a near-deterministic answer.</p>
+<p>Neither gate could catch either leak, because both scored the model on the inputs it had been trained with, and a leaked input improves realism along with everything else. The first leak surfaced only when a downstream consumer had to supply the flag itself and produced a home scoring rate of 0.39 goals per 60 minutes against 3.30 for the away side; the second surfaced in the audit that followed. The fix conditions on the current on-ice set and fixes the orientation, which lowers the actor head’s ceiling honestly: the next actor is on the ice for 59.6% of steps, against the 82.7% the leaked version enjoyed. All earlier results for the simulator were voided and every seed was retrained. The lesson generalised into the standing causality audit of Section <a href="#sec:protocol">4</a>: leakage needs either a consumer that must supply every input itself or a direct test of causality; realism is not evidence of legitimacy.</p>
+<h3 class="unnumbered" id="a-measurement-drift">7.2 A measurement drift</h3>
+<p>The shot-quality model’s calibration gate failed three times, and each failure was diagnosed on training-side seasons before the next correction was declared. First, the calibrator had been fitted on cross-validation folds and applied to a model trained on all the data, which was better calibrated than the folds, so calibration made it worse (maximum decile deviation 0.0088 against 0.0061 uncalibrated on a development vantage). Second, the recording change of Section <a href="#sec:data">3</a> moved the meaning of a shot location from 2023 on; a calibrator frozen at the end of the previous season is exactly one season behind a moving target. The declared remedy refits the isotonic map within the season on trailing out-of-sample shots. Third, per-rink recording offsets were added as walk-forward covariates. The pooled maximum decile deviation fell from 0.0222 to 0.0124 and then to between 0.0060 and 0.0074 across the later declared stages, but never reached the 0.005 bar. The failure is recorded against the transition itself, which no walk-forward method can see before it happens.</p>
+<p>The same drift reached NeurHL-G. Trained through 2024, it learned the older ratio of goals to expected goals and reads 2025–26-era expected goals as inputs, so a dry run on opening night projected 3.36 regulation goals per team-game against a league level near 3.0. Because the win-probability stack is fitted on the engine’s unscaled outputs and the box-score simulation conditions every score on the stacked outcome, the win probabilities are unaffected; only the stat sheet’s scoring level is. A declared amendment, committed before any 2026–27 game, scales the stat sheet’s goal means by a factor fixed before the season and updated walk-forward (Section <a href="#sec:live">8</a>).</p>
+<h3 class="unnumbered" id="protocol-corrections">7.3 Protocol corrections</h3>
+<h5 id="a-rule-changed-with-the-result-in-view.">A rule changed with the result in view.</h5>
+<p>The first plan’s fourth amendment required every headline result to be reported both with and without the anomalous seasons. A later plan replaced that rule with a simpler one, train but never score 2013 and 2021, and called the replacement a verbatim carry-over. It was not: the replacement was written after tune-window results were visible, and the commit that introduced it also recorded NeurHL-H’s tune-window pass (<span class="math inline">\(p = 0.0075\)</span>). Between the committed tune failure (<span class="math inline">\(p = 0.120\)</span>) and that pass, three defensible things had changed on the same window: the scored seasons, two corrections to Layer 1, and the scoring rule. Together they were decisions taken with the result in view. A later amendment reclassified the tune-window result as exploratory, required it to be reported under every scored set (<span class="math inline">\(p\)</span> from 0.0075 to 0.019), and declared the one-shot confirmation reported in Section <a href="#sec:res-h">6.2</a>.</p>
+<h5 id="a-comparison-across-different-seasons.">A comparison across different seasons.</h5>
+<p>An early summary stated that the season layer beat both house benchmarks. The benchmark figure came from 2018–2026 and the NeurHL figure from 2011–2017. On matched seasons the Elo baseline is better (Section <a href="#sec:res-season">6.4</a>); the claim is withdrawn.</p>
+<h5 id="reliability-is-not-validity.">Reliability is not validity.</h5>
+<p>The first RAPM gate required split-half reliability above that of raw on-ice shot share, and RAPM failed it (offence 0.656 against 0.789). The gate was wrong: raw on-ice rates are more repeatable because they are contaminated, as a player keeps the same linemates, zone starts and competition in both halves, and RAPM removes exactly those terms. Ranking rating systems by reliability rewards confounding. The gate was retired and replaced by predictive transfer to a new team, on which RAPM tied a one-line team-demeaned baseline.</p>
+<h5 id="gates-implemented-short-of-their-declaration.">Gates implemented short of their declaration.</h5>
+<p>While writing this paper we found that the script implementing NeurHL-G’s gates had omitted three declared components: the randomised-PIT coverage criterion of the calibration gate, the comparison against the summed player-game layer, and CRPS. The calibration gate had been judged on its slope and overtime share alone and recorded as a pass. Computed afterwards from the same saved predictions, with nothing refitted, the team-box-score comparisons pass but the coverage for team shots is 0.860 against a nominal 0.80 and a tolerance of 0.03, so the calibration gate fails as declared. The correction was appended to the plan as a dated amendment. It changes no decision, because the pre-gate had already failed on its NeurHL-H condition, but it changes a public claim, and Table <a href="#tab:gates">6</a> reports the corrected record.</p>
+<h2 class="unnumbered" id="sec:live">8 The 2026–27 prospective test</h2>
+<p>Every season through 2026 has now been used at game level by some part of NeurHL, so the 2026–27 season, which begins on 29 September 2026, is the only data on which all the models can be tested cleanly. Two sets of predictions are scored.</p>
+<h5 id="frozen-preseason-predictions.">Frozen preseason predictions.</h5>
+<p>On 25 September 2026, four days before opening night, NeurHL 1.0 committed static predictions with their SHA-256 hashes: a home-win probability for each of the 1,344 regular-season games, team points with 80% intervals and playoff probabilities from 20,000 simulated seasons, and goals, assists and points for 711 skaters. The scoring plan fixes the statistics in advance (per-game log loss against the preseason Elo reference; standings error and interval coverage against a house benchmark; skater points error for the shipped blend and its two components), states the expected outcomes, including that Elo is expected to win the per-game comparison because the season engine behind these probabilities scored worse than Elo on the tune window, and allows one inference only, after the last regular-season game. After the NHL roster deadline on 28 September a dated update re-runs the same frozen models on the final rosters, with availability entries such as a goaltender suspended by his club removed. It is hashed and scored beside the originals, which remain primary.</p>
+<h5 id="game-day-forecasts.">Game-day forecasts.</h5>
+<p>NeurHL-G is live as an exploratory model and NeurHL-H as the primary win-probability model. The live engine is the candidate trained through 2024. Its stack, fitted on out-of-sample predictions for 14,940 games of 2011–2024, puts coefficients of 0.21, 0.29 and 0.58 on the Elo, NeurHL-G and NeurHL-H logits (0.63 and 0.46 on Elo and NeurHL-G when NeurHL-H is unavailable). Each game day produces a morning forecast at about 11:00 Eastern time with projected lineups and a pregame forecast 45 to 75 minutes before the scheduled start with the latest lineups and starting goalies. Each forecast records where its lineup came from: the league’s own game data, confirmed lines, projected lines, or a fallback built from the team’s last dressed roster minus unavailable players. A forecast counts only if the commit that adds it is on the public repository’s main branch before the scheduled start, checked against the remote and dated independently by a hosted continuous-integration run. A game without a valid forecast is counted as missed for every model, so that missing data cannot favour one of them, and nothing is backfilled. The pregame forecast is primary and the morning forecast secondary. In-season Elo and NeurHL-H, fed the same lineups, are scored on the same games, and the frozen 1.0 probabilities are reported descriptively. Inference is made once, after the last regular-season game, with a bootstrap over weeks of play. With about 1,300 games the standard error of a paired difference is about 0.0024, so only gaps of about 0.007 or more are likely to be resolved within the season.</p>
+<h5 id="the-stat-sheets-scoring-level.">The stat sheet’s scoring level.</h5>
+<p>Because of the recording drift, NeurHL-G’s stat sheet is scaled by a declared factor <span class="math inline">\(m\)</span> that multiplies regulation goal means (and so assists) and leaves win probabilities unchanged. Before the season, <span class="math inline">\(m_0 = L / M\)</span>, where <span class="math inline">\(L\)</span> is the previous season’s league regulation goals per team-game computed from the era inputs the model already receives and <span class="math inline">\(M\)</span> is the engine’s own mean projected regulation goals over every game in the first 14 days, computed from roster fallback lineups. In season, <span class="math display">\[\begin{equation}
+m = \frac{A + kL}{P + kM}, \qquad k = 300 \text{ team-games},
+\end{equation}\]</span> where <span class="math inline">\(A\)</span> and <span class="math inline">\(P\)</span> are the actual and unscaled predicted regulation goals over completed 2026–27 games that have a primary forecast, so the factor moves from <span class="math inline">\(m_0\)</span> toward the observed ratio as games accumulate and a forecast only ever uses games already finished. On rosters from the day before the deadline the factor was 0.922; it is fixed on the final rosters before the first game.</p>
+<h5 id="what-the-season-can-show.">What the season can show.</h5>
+<p>A single season cannot confirm effects of the size reported in Section <a href="#sec:results">6</a>. Its purpose is prospective accountability: every forecast is public before the event it forecasts, the scoring rules are fixed, and the results will be published whatever they show. We will report them in a revision of this paper after the regular season ends on 10 April 2027.</p>
+<h2 class="unnumbered" id="sec:discussion">9 Discussion</h2>
+<h5 id="information-not-capacity.">Information, not capacity.</h5>
+<p>The same pattern recurs at every level of the project. A 1.2-million-parameter roster network over event embeddings finished level with a constant; a linear probe on the same embeddings did no better; two team-form features beat both. Tree ensembles on engineered game features did not beat Elo. A small residual network that reads the dressed lineup did beat Elo, confirmed on eight seasons, and a far more structured engine that models every skater’s deployment and every team’s scoring process reached the same skill and no more. What moved the result was information that Elo does not use, namely who is dressed and what those players have done, rather than any particular architecture. The exploratory split in Section <a href="#sec:res-h">6.2</a> points the same way: NeurHL-H’s gain is near zero when neither team is missing regulars and largest when one team is missing far more than the other. We expect further gains to come from new information available before a game, such as tracking data, line deployment and injury reports with dates, rather than from larger models of the information already used.</p>
+<h5 id="what-preregistration-changed.">What preregistration changed.</h5>
+<p>The protocol altered this project’s conclusions in concrete ways. It turned an apparently significant tune-window result into an exploratory one and forced a one-shot confirmation, which then passed. It withdrew a season-level claim that rested on mismatched seasons. It retired a gate that would have selected the more confounded rating system. It kept two confirmatory windows unspent when pre-gates failed, including NeurHL-G’s sealed seasons, which remain available to a better candidate. It recorded, before the gate ran, that NeurHL-G was expected to fail its pre-gate, so the failure cannot be explained away afterwards. None of these outcomes flatter the models; all of them make the confirmed results more credible.</p>
+<h5 id="audits-over-gates.">Audits over gates.</h5>
+<p>Both leaks in the event simulator passed every realism gate, and the gate implementation errors in Section <a href="#sec:failures">7</a> passed our own review until the results were written up in full. Gates check what a model does with its inputs; they do not check the inputs or the checkers. The two mechanisms that caught these problems were a consumer that had to supply every input itself and a direct causality test, and the act of restating every gate against its declaration for publication.</p>
+<h5 id="limitations.">Limitations.</h5>
+<p>The NeurHL-G gate seasons had been scored at game level by NeurHL-H before NeurHL-G existed, so the gate result is evidence, not confirmation. The evaluation covers one league and seasons 2008–2026, whose most recent years include a change in how shots are recorded. Market data were excluded by design and no historical odds exist in the repository, so we cannot say how close the models come to the market. NeurHL-H’s head selects its regularisation on training loss, a weakness kept for the confirmation. Several claims about the season layer and player seasons rest on development evidence only. Neural training is not bit-reproducible on the hardware used, which we address by hashing checkpoints and reporting CPU inference, but a retrained model will differ slightly from the published one. Finally, in-season expected goals for 2026–27 depend on a third-party shot file being published on time.</p>
+<h5 id="future-work.">Future work.</h5>
+<p>The live season will provide the first clean test of NeurHL-G and a second, prospective test of NeurHL-H. The sealed seasons 2025–2026 remain available for a single confirmatory test of a future NeurHL-G candidate under a new plan, which could spend it with one declared change after the failed pre-gate, as the current plan allows, or with a new model that brings new information. Candidate information sources include player tracking data, available from 2022 but absent from most of the history, deployment models that predict line combinations, and injury and scratch reports with reliable timestamps.</p>
+<h2 class="unnumbered" id="sec:conclusion">10 Conclusion</h2>
+<p>Under a protocol that fixed windows, gates and consequences in advance, a neural player-level model conditioned on the dressed lineup beat a tuned Elo system on eight held-out NHL seasons by 0.0048 nats per game, with a confidence interval that excludes zero comfortably and a gain that comes from resolution. A chained player-game model beat each skater’s own history on all four of its targets. A single-game simulation engine reached the same win-probability skill as the confirmed model while producing a coherent box score, but did not exceed it, so its sealed test was kept for a future version. Most of what we tried did not work, and the record of those failures, including our own errors, is part of the result. All forecasts for the 2026–27 season are public before their games and will be scored once, at the end of the season.</p>
+<h5 id="code-and-data-availability.">Code and data availability.</h5>
+<p>Code, preregistrations, search ledgers, committed predictions and the acceptance tests that re-derive them are at <a href="https://github.com/ph05/neurhl" class="uri">https://github.com/ph05/neurhl</a>. Raw play-by-play, shift and tensor files are not redistributed; the repository’s fetchers rebuild them from the public sources named in Section <a href="#sec:data">3</a>.</p>
+<h2 id="references">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-abramowitz1964handbook" class="csl-entry" role="listitem">
+Abramowitz, Milton, and Irene A. Stegun, eds. 1964. <em>Handbook of Mathematical Functions with Formulas, Graphs, and Mathematical Tables</em>. National Bureau of Standards Applied Mathematics Series 55. U.S. Government Printing Office. <a href="https://www.nist.gov/mathematics-statistics/handbook-mathematical-functions-abramowitz-and-stegun">https://www.nist.gov/mathematics-statistics/handbook-mathematical-functions-abramowitz-and-stegun</a>.
+</div>
+<div id="ref-bennaim2006parity" class="csl-entry" role="listitem">
+Ben-Naim, Eli, Federico Vazquez, and Sidney Redner. 2006. <span>“Parity and Predictability of Competitions.”</span> <em>Journal of Quantitative Analysis in Sports</em> 2 (4). <a href="https://doi.org/10.2202/1559-0410.1034">https://doi.org/10.2202/1559-0410.1034</a>.
+</div>
+<div id="ref-breiman1996stacked" class="csl-entry" role="listitem">
+Breiman, Leo. 1996. <span>“Stacked Regressions.”</span> <em>Machine Learning</em> 24 (1): 49–64. <a href="https://doi.org/10.1007/BF00117832">https://doi.org/10.1007/BF00117832</a>.
+</div>
+<div id="ref-brier1950verification" class="csl-entry" role="listitem">
+Brier, Glenn W. 1950. <span>“Verification of Forecasts Expressed in Terms of Probability.”</span> <em>Monthly Weather Review</em> 78 (1): 1–3. <a href="https://doi.org/10.1175/1520-0493(1950)078&lt;0001:VOFEIT&gt;2.0.CO;2">https://doi.org/10.1175/1520-0493(1950)078&lt;0001:VOFEIT&gt;2.0.CO;2</a>.
+</div>
+<div id="ref-bunker2019machine" class="csl-entry" role="listitem">
+Bunker, Rory P., and Fadi Thabtah. 2019. <span>“A Machine Learning Framework for Sport Result Prediction.”</span> <em>Applied Computing and Informatics</em> 15 (1): 27–33. <a href="https://doi.org/10.1016/j.aci.2017.09.005">https://doi.org/10.1016/j.aci.2017.09.005</a>.
+</div>
+<div id="ref-cameron2011robust" class="csl-entry" role="listitem">
+Cameron, A. Colin, Jonah B. Gelbach, and Douglas L. Miller. 2011. <span>“Robust Inference with Multiway Clustering.”</span> <em>Journal of Business &amp; Economic Statistics</em> 29 (2): 238–49. <a href="https://doi.org/10.1198/jbes.2010.07136">https://doi.org/10.1198/jbes.2010.07136</a>.
+</div>
+<div id="ref-chen2016xgboost" class="csl-entry" role="listitem">
+Chen, Tianqi, and Carlos Guestrin. 2016. <span>“<span>XGBoost</span>: A Scalable Tree Boosting System.”</span> <em>Proceedings of the 22nd <span>ACM</span> <span>SIGKDD</span> International Conference on Knowledge Discovery and Data Mining</em>, 785–94. <a href="https://doi.org/10.1145/2939672.2939785">https://doi.org/10.1145/2939672.2939785</a>.
+</div>
+<div id="ref-czado2009predictive" class="csl-entry" role="listitem">
+Czado, Claudia, Tilmann Gneiting, and Leonhard Held. 2009. <span>“Predictive Model Assessment for Count Data.”</span> <em>Biometrics</em> 65 (4): 1254–61. <a href="https://doi.org/10.1111/j.1541-0420.2009.01191.x">https://doi.org/10.1111/j.1541-0420.2009.01191.x</a>.
+</div>
+<div id="ref-dawid1984present" class="csl-entry" role="listitem">
+Dawid, A. P. 1984. <span>“Present Position and Potential Developments: Some Personal Views: Statistical Theory: The Prequential Approach.”</span> <em>Journal of the Royal Statistical Society. Series A (General)</em> 147 (2): 278–92. <a href="https://doi.org/10.2307/2981683">https://doi.org/10.2307/2981683</a>.
+</div>
+<div id="ref-diebold1995comparing" class="csl-entry" role="listitem">
+Diebold, Francis X., and Roberto S. Mariano. 1995. <span>“Comparing Predictive Accuracy.”</span> <em>Journal of Business &amp; Economic Statistics</em> 13 (3): 253–63. <a href="https://doi.org/10.1080/07350015.1995.10524599">https://doi.org/10.1080/07350015.1995.10524599</a>.
+</div>
+<div id="ref-dixon1997modelling" class="csl-entry" role="listitem">
+Dixon, Mark J., and Stuart G. Coles. 1997. <span>“Modelling Association Football Scores and Inefficiencies in the Football Betting Market.”</span> <em>Journal of the Royal Statistical Society: Series C (Applied Statistics)</em> 46 (2): 265–80. <a href="https://doi.org/10.1111/1467-9876.00065">https://doi.org/10.1111/1467-9876.00065</a>.
+</div>
+<div id="ref-efron1975data" class="csl-entry" role="listitem">
+Efron, Bradley, and Carl Morris. 1975. <span>“Data Analysis Using <span>S</span>tein’s Estimator and Its Generalizations.”</span> <em>Journal of the American Statistical Association</em> 70 (350): 311–19. <a href="https://doi.org/10.1080/01621459.1975.10479864">https://doi.org/10.1080/01621459.1975.10479864</a>.
+</div>
+<div id="ref-elo1978rating" class="csl-entry" role="listitem">
+Elo, Arpad E. 1978. <em>The Rating of Chessplayers, Past and Present</em>. Arco Publishing.
+</div>
+<div id="ref-friedman2001greedy" class="csl-entry" role="listitem">
+Friedman, Jerome H. 2001. <span>“Greedy Function Approximation: A Gradient Boosting Machine.”</span> <em>The Annals of Statistics</em> 29 (5): 1189–232. <a href="https://doi.org/10.1214/aos/1013203451">https://doi.org/10.1214/aos/1013203451</a>.
+</div>
+<div id="ref-gelman2014statistical" class="csl-entry" role="listitem">
+Gelman, Andrew, and Eric Loken. 2014. <span>“The Statistical Crisis in Science.”</span> <em>American Scientist</em> 102 (6): 460–65. <a href="https://doi.org/10.1511/2014.111.460">https://doi.org/10.1511/2014.111.460</a>.
+</div>
+<div id="ref-gneiting2007probabilistic" class="csl-entry" role="listitem">
+Gneiting, Tilmann, Fadoua Balabdaoui, and Adrian E. Raftery. 2007. <span>“Probabilistic Forecasts, Calibration and Sharpness.”</span> <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em> 69 (2): 243–68. <a href="https://doi.org/10.1111/j.1467-9868.2007.00587.x">https://doi.org/10.1111/j.1467-9868.2007.00587.x</a>.
+</div>
+<div id="ref-gneiting2007strictly" class="csl-entry" role="listitem">
+Gneiting, Tilmann, and Adrian E. Raftery. 2007. <span>“Strictly Proper Scoring Rules, Prediction, and Estimation.”</span> <em>Journal of the American Statistical Association</em> 102 (477): 359–78. <a href="https://doi.org/10.1198/016214506000001437">https://doi.org/10.1198/016214506000001437</a>.
+</div>
+<div id="ref-gramacy2013estimating" class="csl-entry" role="listitem">
+Gramacy, Robert B., Shane T. Jensen, and Matt Taddy. 2013. <span>“Estimating Player Contribution in Hockey with Regularized Logistic Regression.”</span> <em>Journal of Quantitative Analysis in Sports</em> 9 (1): 97–111. <a href="https://doi.org/10.1515/jqas-2012-0001">https://doi.org/10.1515/jqas-2012-0001</a>.
+</div>
+<div id="ref-grinsztajn2022tree" class="csl-entry" role="listitem">
+Grinsztajn, Léo, Edouard Oyallon, and Gaël Varoquaux. 2022. <span>“Why Do Tree-Based Models Still Outperform Deep Learning on Typical Tabular Data?”</span> In <em>Advances in Neural Information Processing Systems</em>, edited by S. Koyejo, S. Mohamed, A. Agarwal, D. Belgrave, K. Cho, and A. Oh, vol. 35. Curran Associates, Inc. <a href="https://doi.org/10.52202/068431-0037">https://doi.org/10.52202/068431-0037</a>.
+</div>
+<div id="ref-gu2019game" class="csl-entry" role="listitem">
+Gu, Wei, Krista Foster, Jennifer Shang, and Lirong Wei. 2019. <span>“A Game-Predicting Expert System Using Big Data and Machine Learning.”</span> <em>Expert Systems with Applications</em> 130: 293–305. <a href="https://doi.org/10.1016/j.eswa.2019.04.025">https://doi.org/10.1016/j.eswa.2019.04.025</a>.
+</div>
+<div id="ref-hammond2015james" class="csl-entry" role="listitem">
+Hammond, Christopher N. B., Warren P. Johnson, and Steven J. Miller. 2015. <span>“The <span>J</span>ames Function.”</span> <em>Mathematics Magazine</em> 88 (1): 54–71. <a href="https://doi.org/10.4169/math.mag.88.1.54">https://doi.org/10.4169/math.mag.88.1.54</a>.
+</div>
+<div id="ref-hawkes1971spectra" class="csl-entry" role="listitem">
+Hawkes, Alan G. 1971. <span>“Spectra of Some Self-Exciting and Mutually Exciting Point Processes.”</span> <em>Biometrika</em> 58 (1): 83–90. <a href="https://doi.org/10.1093/biomet/58.1.83">https://doi.org/10.1093/biomet/58.1.83</a>.
+</div>
+<div id="ref-hoerl1970ridge" class="csl-entry" role="listitem">
+Hoerl, Arthur E., and Robert W. Kennard. 1970. <span>“Ridge Regression: Biased Estimation for Nonorthogonal Problems.”</span> <em>Technometrics</em> 12 (1): 55–67. <a href="https://doi.org/10.1080/00401706.1970.10488634">https://doi.org/10.1080/00401706.1970.10488634</a>.
+</div>
+<div id="ref-hofman2023preregistration" class="csl-entry" role="listitem">
+Hofman, Jake M., Angelos Chatzimparmpas, Amit Sharma, Duncan J. Watts, and Jessica Hullman. 2023. <em>Pre-Registration for Predictive Modeling</em>. <a href="https://doi.org/10.48550/arXiv.2311.18807">https://doi.org/10.48550/arXiv.2311.18807</a>.
+</div>
+<div id="ref-holm1979simple" class="csl-entry" role="listitem">
+Holm, Sture. 1979. <span>“A Simple Sequentially Rejective Multiple Test Procedure.”</span> <em>Scandinavian Journal of Statistics</em> 6 (2): 65–70. <a href="https://www.jstor.org/stable/4615733">https://www.jstor.org/stable/4615733</a>.
+</div>
+<div id="ref-horvat2020use" class="csl-entry" role="listitem">
+Horvat, Tomislav, and Josip Job. 2020. <span>“The Use of Machine Learning in Sport Outcome Prediction: A Review.”</span> <em>WIREs Data Mining and Knowledge Discovery</em> 10 (5): e1380. <a href="https://doi.org/10.1002/widm.1380">https://doi.org/10.1002/widm.1380</a>.
+</div>
+<div id="ref-hvattum2010using" class="csl-entry" role="listitem">
+Hvattum, Lars Magnus, and Halvard Arntzen. 2010. <span>“Using <span>ELO</span> Ratings for Match Result Prediction in Association Football.”</span> <em>International Journal of Forecasting</em> 26 (3): 460–70. <a href="https://doi.org/10.1016/j.ijforecast.2009.10.002">https://doi.org/10.1016/j.ijforecast.2009.10.002</a>.
+</div>
+<div id="ref-kaplan2014markov" class="csl-entry" role="listitem">
+Kaplan, Edward H., Kevin Mongeon, and John T. Ryan. 2014. <span>“A <span>M</span>arkov Model for Hockey: Manpower Differential and Win Probability Added.”</span> <em>INFOR: Information Systems and Operational Research</em> 52 (2): 39–50. <a href="https://doi.org/10.3138/infor.52.2.39">https://doi.org/10.3138/infor.52.2.39</a>.
+</div>
+<div id="ref-kapoor2023leakage" class="csl-entry" role="listitem">
+Kapoor, Sayash, and Arvind Narayanan. 2023. <span>“Leakage and the Reproducibility Crisis in Machine-Learning-Based Science.”</span> <em>Patterns</em> 4 (9): 100804. <a href="https://doi.org/10.1016/j.patter.2023.100804">https://doi.org/10.1016/j.patter.2023.100804</a>.
+</div>
+<div id="ref-kaufman2012leakage" class="csl-entry" role="listitem">
+Kaufman, Shachar, Saharon Rosset, Claudia Perlich, and Ori Stitelman. 2012. <span>“Leakage in Data Mining: Formulation, Detection, and Avoidance.”</span> <em><span>ACM</span> Transactions on Knowledge Discovery from Data</em> 6 (4): 1–21. <a href="https://doi.org/10.1145/2382577.2382579">https://doi.org/10.1145/2382577.2382579</a>.
+</div>
+<div id="ref-ke2017lightgbm" class="csl-entry" role="listitem">
+Ke, Guolin, Qi Meng, Thomas Finley, et al. 2017. <span>“<span>LightGBM</span>: A Highly Efficient Gradient Boosting Decision Tree.”</span> In <em>Advances in Neural Information Processing Systems</em>, edited by I. Guyon, U. von Luxburg, S. Bengio, et al., vol. 30. Curran Associates, Inc. <a href="https://proceedings.neurips.cc/paper/2017/hash/6449f44a102fde848669bdd9eb6b76fa-Abstract.html">https://proceedings.neurips.cc/paper/2017/hash/6449f44a102fde848669bdd9eb6b76fa-Abstract.html</a>.
+</div>
+<div id="ref-krzywicki2005shot" class="csl-entry" role="listitem">
+Krzywicki, Ken. 2005. <em>Shot Quality Model: A Logistic Regression Approach to Assessing <span>NHL</span> Shots on Goal</em>. Unpublished manuscript, hockeyanalytics.com. <a href="http://www.hockeyanalytics.com/Research_files/Shot_Quality_Krzywicki.pdf">http://www.hockeyanalytics.com/Research_files/Shot_Quality_Krzywicki.pdf</a>.
+</div>
+<div id="ref-kunsch1989jackknife" class="csl-entry" role="listitem">
+Künsch, Hans R. 1989. <span>“The Jackknife and the Bootstrap for General Stationary Observations.”</span> <em>The Annals of Statistics</em> 17 (3): 1217–41. <a href="https://doi.org/10.1214/aos/1176347265">https://doi.org/10.1214/aos/1176347265</a>.
+</div>
+<div id="ref-li2018explicit" class="csl-entry" role="listitem">
+Li, Xuhong, Yves Grandvalet, and Franck Davoine. 2018. <span>“Explicit Inductive Bias for Transfer Learning with Convolutional Networks.”</span> In <em>Proceedings of the 35th International Conference on Machine Learning</em>, edited by Jennifer Dy and Andreas Krause, vol. 80. Proceedings of Machine Learning Research. PMLR. <a href="https://proceedings.mlr.press/v80/li18a.html">https://proceedings.mlr.press/v80/li18a.html</a>.
+</div>
+<div id="ref-lopez2018often" class="csl-entry" role="listitem">
+Lopez, Michael J., Gregory J. Matthews, and Benjamin S. Baumer. 2018. <span>“How Often Does the Best Team Win? <span>A</span> Unified Approach to Understanding Randomness in <span>North American</span> Sport.”</span> <em>The Annals of Applied Statistics</em> 12 (4): 2483–516. <a href="https://doi.org/10.1214/18-AOAS1165">https://doi.org/10.1214/18-AOAS1165</a>.
+</div>
+<div id="ref-loshchilov2019decoupled" class="csl-entry" role="listitem">
+Loshchilov, Ilya, and Frank Hutter. 2019. <span>“Decoupled Weight Decay Regularization.”</span> <em>International Conference on Learning Representations (<span>ICLR</span>)</em>. <a href="https://openreview.net/forum?id=Bkg6RiCqY7">https://openreview.net/forum?id=Bkg6RiCqY7</a>.
+</div>
+<div id="ref-macdonald2011regression" class="csl-entry" role="listitem">
+Macdonald, Brian. 2011. <span>“A Regression-Based Adjusted Plus-Minus Statistic for <span>NHL</span> Players.”</span> <em>Journal of Quantitative Analysis in Sports</em> 7 (3). <a href="https://doi.org/10.2202/1559-0410.1284">https://doi.org/10.2202/1559-0410.1284</a>.
+</div>
+<div id="ref-macdonald2012adjusted" class="csl-entry" role="listitem">
+Macdonald, Brian. 2012a. <span>“Adjusted Plus-Minus for <span>NHL</span> Players Using Ridge Regression with Goals, Shots, <span>F</span>enwick, and <span>C</span>orsi.”</span> <em>Journal of Quantitative Analysis in Sports</em> 8 (3). <a href="https://doi.org/10.1515/1559-0410.1447">https://doi.org/10.1515/1559-0410.1447</a>.
+</div>
+<div id="ref-macdonald2012expected" class="csl-entry" role="listitem">
+Macdonald, Brian. 2012b. <span>“An Expected Goals Model for Evaluating <span>NHL</span> Teams and Players.”</span> <em><span>MIT</span> <span>S</span>loan Sports Analytics Conference</em> (Boston, MA), March. <a href="https://hockeyanalytics.com/Research_files/NHL-Expected-Goals-Brian-Macdonald.pdf">https://hockeyanalytics.com/Research_files/NHL-Expected-Goals-Brian-Macdonald.pdf</a>.
+</div>
+<div id="ref-maher1982modelling" class="csl-entry" role="listitem">
+Maher, M. J. 1982. <span>“Modelling Association Football Scores.”</span> <em>Statistica Neerlandica</em> 36 (3): 109–18. <a href="https://doi.org/10.1111/j.1467-9574.1982.tb00782.x">https://doi.org/10.1111/j.1467-9574.1982.tb00782.x</a>.
+</div>
+<div id="ref-matheson1976scoring" class="csl-entry" role="listitem">
+Matheson, James E., and Robert L. Winkler. 1976. <span>“Scoring Rules for Continuous Probability Distributions.”</span> <em>Management Science</em> 22 (10): 1087–96. <a href="https://doi.org/10.1287/mnsc.22.10.1087">https://doi.org/10.1287/mnsc.22.10.1087</a>.
+</div>
+<div id="ref-mei2017neural" class="csl-entry" role="listitem">
+Mei, Hongyuan, and Jason M. Eisner. 2017. <span>“The Neural <span>H</span>awkes Process: A Neurally Self-Modulating Multivariate Point Process.”</span> In <em>Advances in Neural Information Processing Systems</em>, edited by I. Guyon, U. von Luxburg, S. Bengio, et al., vol. 30. Curran Associates, Inc. <a href="https://proceedings.neurips.cc/paper/2017/hash/6463c88460bd63bbe256e495c63aa40b-Abstract.html">https://proceedings.neurips.cc/paper/2017/hash/6463c88460bd63bbe256e495c63aa40b-Abstract.html</a>.
+</div>
+<div id="ref-murphy1973new" class="csl-entry" role="listitem">
+Murphy, Allan H. 1973. <span>“A New Vector Partition of the Probability Score.”</span> <em>Journal of Applied Meteorology</em> 12 (4): 595–600. <a href="https://doi.org/10.1175/1520-0450(1973)012&lt;0595:ANVPOT&gt;2.0.CO;2">https://doi.org/10.1175/1520-0450(1973)012&lt;0595:ANVPOT&gt;2.0.CO;2</a>.
+</div>
+<div id="ref-nosek2018preregistration" class="csl-entry" role="listitem">
+Nosek, Brian A., Charles R. Ebersole, Alexander C. DeHaven, and David T. Mellor. 2018. <span>“The Preregistration Revolution.”</span> <em>Proceedings of the National Academy of Sciences</em> 115 (11): 2600–2606. <a href="https://doi.org/10.1073/pnas.1708274114">https://doi.org/10.1073/pnas.1708274114</a>.
+</div>
+<div id="ref-shwartzziv2022tabular" class="csl-entry" role="listitem">
+Shwartz-Ziv, Ravid, and Amitai Armon. 2022. <span>“Tabular Data: Deep Learning Is Not All You Need.”</span> <em>Information Fusion</em> 81: 84–90. <a href="https://doi.org/10.1016/j.inffus.2021.11.011">https://doi.org/10.1016/j.inffus.2021.11.011</a>.
+</div>
+<div id="ref-simmons2011false" class="csl-entry" role="listitem">
+Simmons, Joseph P., Leif D. Nelson, and Uri Simonsohn. 2011. <span>“False-Positive Psychology: Undisclosed Flexibility in Data Collection and Analysis Allows Presenting Anything as Significant.”</span> <em>Psychological Science</em> 22 (11): 1359–66. <a href="https://doi.org/10.1177/0956797611417632">https://doi.org/10.1177/0956797611417632</a>.
+</div>
+<div id="ref-strumbelj2014determining" class="csl-entry" role="listitem">
+Štrumbelj, Erik. 2014. <span>“On Determining Probability Forecasts from Betting Odds.”</span> <em>International Journal of Forecasting</em> 30 (4): 934–43. <a href="https://doi.org/10.1016/j.ijforecast.2014.02.008">https://doi.org/10.1016/j.ijforecast.2014.02.008</a>.
+</div>
+<div id="ref-thomas2013competing" class="csl-entry" role="listitem">
+Thomas, A. C., Samuel L. Ventura, Shane T. Jensen, and Stephen Ma. 2013. <span>“Competing Process Hazard Function Models for Player Ratings in Ice Hockey.”</span> <em>The Annals of Applied Statistics</em> 7 (3): 1497–524. <a href="https://doi.org/10.1214/13-AOAS646">https://doi.org/10.1214/13-AOAS646</a>.
+</div>
+<div id="ref-weissbock2013use" class="csl-entry" role="listitem">
+Weissbock, Joshua, Herna Viktor, and Diana Inkpen. 2013. <span>“Use of Performance Metrics to Forecast Success in the <span>National Hockey League</span>.”</span> In <em>Proceedings of the 1st Workshop on Machine Learning and Data Mining for Sports Analytics (<span>MLSA</span> 2013), Co-Located with <span>ECML PKDD</span> 2013</em>, edited by Jesse Davis, Jan Van Haaren, and Albrecht Zimmermann, vol. 1969. CEUR Workshop Proceedings. Prague, Czech Republic. <a href="https://ceur-ws.org/Vol-1969/paper-06.pdf">https://ceur-ws.org/Vol-1969/paper-06.pdf</a>.
+</div>
+<div id="ref-whelan2021bradley" class="csl-entry" role="listitem">
+Whelan, John T., and Jacob E. Klein. 2021. <span>“<span>B</span>radley–<span>T</span>erry Modeling with Multiple Game Outcomes with Applications to <span>C</span>ollege <span>H</span>ockey.”</span> <em>Mathematics for Applications</em> 10 (2): 157–77. <a href="https://doi.org/10.13164/ma.2021.13">https://doi.org/10.13164/ma.2021.13</a>.
+</div>
+<div id="ref-wolpert1992stacked" class="csl-entry" role="listitem">
+Wolpert, David H. 1992. <span>“Stacked Generalization.”</span> <em>Neural Networks</em> 5 (2): 241–59. <a href="https://doi.org/10.1016/S0893-6080(05)80023-1">https://doi.org/10.1016/S0893-6080(05)80023-1</a>.
+</div>
+<div id="ref-wunderlich2021forecasting" class="csl-entry" role="listitem">
+Wunderlich, Fabian, and Daniel Memmert. 2021. <span>“Forecasting the Outcomes of Sports Events: A Review.”</span> <em>European Journal of Sport Science</em> 21 (7): 944–57. <a href="https://doi.org/10.1080/17461391.2020.1793002">https://doi.org/10.1080/17461391.2020.1793002</a>.
+</div>
+<div id="ref-zuo2020transformer" class="csl-entry" role="listitem">
+Zuo, Simiao, Haoming Jiang, Zichong Li, Tuo Zhao, and Hongyuan Zha. 2020. <span>“<span>T</span>ransformer <span>H</span>awkes Process.”</span> In <em>Proceedings of the 37th International Conference on Machine Learning</em>, edited by Hal Daumé III and Aarti Singh, vol. 119. Proceedings of Machine Learning Research. PMLR. <a href="https://proceedings.mlr.press/v119/zuo20a.html">https://proceedings.mlr.press/v119/zuo20a.html</a>.
+</div>
+</div>
+
+<h2 class="unnumbered" id="app:timeline">Appendix A. Preregistration timeline</h2>
+<p>Table <a href="#tab:timeline">8</a> lists the commits that fixed each plan, amendment, candidate and freeze, with their commit times (Eastern time). The repository became public on 26 September 2026; earlier times are as recorded in its history, and later commits are also dated by their push to the public branch. Commit identifiers quoted inside the plan documents predate publication and are mapped to the public history in <code>neurhl/configs/commit_map.csv</code>.</p>
+<div class="tbl"><table id="tab:timeline">
+<caption><strong>Table 8.</strong> Commit times of the preregistration record, 2026.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Date</th>
+<th style="text-align: left;">Time</th>
+<th style="text-align: left;">Commit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">20 Aug</td>
+<td style="text-align: left;">10:38</td>
+<td style="text-align: left;">First plan locked with tune-window baselines, before any gate ran</td>
+</tr>
+<tr>
+<td style="text-align: left;">20–21 Aug</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Amendments 1–4 (team form; significance test S1; shot-based form; lockout season), each before its run</td>
+</tr>
+<tr>
+<td style="text-align: left;">21 Aug</td>
+<td style="text-align: left;">13:32</td>
+<td style="text-align: left;">Second plan (event simulator, season layer), before any of its numbers</td>
+</tr>
+<tr>
+<td style="text-align: left;">21 Aug</td>
+<td style="text-align: left;">23:17</td>
+<td style="text-align: left;">Amendment 8: two simulator leaks recorded; earlier simulator results voided</td>
+</tr>
+<tr>
+<td style="text-align: left;">24 Aug</td>
+<td style="text-align: left;">14:48</td>
+<td style="text-align: left;">Third plan (player, goalie and game layers) and the rink ladder</td>
+</tr>
+<tr>
+<td style="text-align: left;">25 Sep</td>
+<td style="text-align: left;">14:46</td>
+<td style="text-align: left;">First plan, Amendment 5: record correction and the frozen one-shot confirmation of NeurHL-H</td>
+</tr>
+<tr>
+<td style="text-align: left;">25 Sep</td>
+<td style="text-align: left;">15:06</td>
+<td style="text-align: left;">Live plan: 2026–27 predictions frozen with hashes</td>
+</tr>
+<tr>
+<td style="text-align: left;">27 Sep</td>
+<td style="text-align: left;">12:33</td>
+<td style="text-align: left;">Fourth plan (NeurHL-G), before any NeurHL-G number</td>
+</tr>
+<tr>
+<td style="text-align: left;">27 Sep</td>
+<td style="text-align: left;">16:07</td>
+<td style="text-align: left;">NeurHL-G candidate declared, before any gate number</td>
+</tr>
+<tr>
+<td style="text-align: left;">27 Sep</td>
+<td style="text-align: left;">17:24</td>
+<td style="text-align: left;">NeurHL-G freeze: gate results, pre-gate failed, seal unspent</td>
+</tr>
+<tr>
+<td style="text-align: left;">27 Sep</td>
+<td style="text-align: left;">17:55</td>
+<td style="text-align: left;">Stat-sheet goal-level amendment, before any 2026–27 game</td>
+</tr>
+<tr>
+<td style="text-align: left;">27 Sep</td>
+<td style="text-align: left;">22:56</td>
+<td style="text-align: left;">Gate record correction (Section <a href="#sec:failures">7</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 class="unnumbered" id="app:config">Appendix B. NeurHL-G configuration</h2>
+<div class="tbl"><table id="tab:config">
+<caption><strong>Table 9.</strong> NeurHL-G candidate g1. The configuration file’s SHA-256 begins <code>587746c6</code>; the master tensor’s begins <code>325390c3</code>.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Setting</th>
+<th style="text-align: left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Skater, goalie, team, context features</td>
+<td style="text-align: left;">114, 23, 57, 10 per game side</td>
+</tr>
+<tr>
+<td style="text-align: left;">State decays (per game)</td>
+<td style="text-align: left;">0.98, 0.95, 0.85, 0.60</td>
+</tr>
+<tr>
+<td style="text-align: left;">Encoders</td>
+<td style="text-align: left;">skater 116–128–64; team 57–64–32; goalie 23–32–16; context 10–32–16</td>
+</tr>
+<tr>
+<td style="text-align: left;">Heads (zero-initialised output)</td>
+<td style="text-align: left;">skater 112–64–12; team 112–64–6; goalie 32–32–1</td>
+</tr>
+<tr>
+<td style="text-align: left;">Activation, normalisation, dropout</td>
+<td style="text-align: left;">GELU, layer norm, 0.2</td>
+</tr>
+<tr>
+<td style="text-align: left;">Parameters</td>
+<td style="text-align: left;">48,810</td>
+</tr>
+<tr>
+<td style="text-align: left;">Hazard table</td>
+<td style="text-align: left;">7 leads <span class="math inline">\(\times\)</span> 5 phases, initialised from the event simulator</td>
+</tr>
+<tr>
+<td style="text-align: left;">Integration</td>
+<td style="text-align: left;">goal differential <span class="math inline">\(-8\)</span> to 8; 30 steps of 2 minutes; 5 Gauss–Hermite nodes</td>
+</tr>
+<tr>
+<td style="text-align: left;">Phase 1</td>
+<td style="text-align: left;">10 epochs, AdamW, learning rate <span class="math inline">\(2\times10^{-3}\)</span>, weight decay 0.01, outcome weight 0.3</td>
+</tr>
+<tr>
+<td style="text-align: left;">Phase 2</td>
+<td style="text-align: left;">4 epochs, learning rate <span class="math inline">\(3\times10^{-4}\)</span>, outcome weight 1, L2-SP <span class="math inline">\(10^{-3}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;">Batch, schedule, gradient clip</td>
+<td style="text-align: left;">256 games, one-cycle, 5.0</td>
+</tr>
+<tr>
+<td style="text-align: left;">Training seasons for snapshot <span class="math inline">\(T\)</span></td>
+<td style="text-align: left;">2009 to <span class="math inline">\(T-1\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;">Ensemble</td>
+<td style="text-align: left;">5 seeds</td>
+</tr>
+<tr>
+<td style="text-align: left;">Final probability</td>
+<td style="text-align: left;">logistic stack over Elo, NeurHL-G and NeurHL-H logits; subset by leave-one-season-out cross-validation</td>
+</tr>
+<tr>
+<td style="text-align: left;">Stat sheet</td>
+<td style="text-align: left;">10,000 draws per game; team shots negative binomial, <span class="math inline">\(r = 40\)</span></td>
+</tr>
+</tbody>
+</table></div>
+<h2 class="unnumbered" id="app:defs">Appendix C. Definitions</h2>
+<h5 id="log-loss-and-paired-differences.">Log loss and paired differences.</h5>
+<p>For a home-win indicator <span class="math inline">\(y_g\)</span> and forecast <span class="math inline">\(p_g\)</span>, the per-game log loss is <span class="math inline">\(\ell_g = -y_g \log p_g - (1 - y_g)\log(1 - p_g)\)</span>. Model comparisons use <span class="math inline">\(\bar d = n^{-1}\sum_g (\ell^{A}_g - \ell^{B}_g)\)</span> over the same <span class="math inline">\(n\)</span> games.</p>
+<h5 id="murphy-decomposition.">Murphy decomposition.</h5>
+<p>With forecasts grouped into bins <span class="math inline">\(k\)</span> of size <span class="math inline">\(n_k\)</span>, mean forecast <span class="math inline">\(\bar p_k\)</span> and observed frequency <span class="math inline">\(\bar y_k\)</span>, and overall frequency <span class="math inline">\(\bar y\)</span>, the Brier score is reliability minus resolution plus uncertainty: <span class="math inline">\(n^{-1}\sum_k n_k(\bar p_k - \bar y_k)^2 - n^{-1}\sum_k n_k(\bar y_k - \bar y)^2
++ \bar y(1 - \bar y)\)</span>.</p>
+<h5 id="randomised-pit.">Randomised PIT.</h5>
+<p>For a count <span class="math inline">\(y\)</span> with predictive distribution function <span class="math inline">\(F\)</span>, the randomised probability integral transform is <span class="math inline">\(u = F(y-1) + v\,[F(y) - F(y-1)]\)</span> with <span class="math inline">\(v \sim \mathrm{U}(0, 1)\)</span>, as reviewed by <span class="citation" data-cites="czado2009predictive">Czado et al. (<a href="#ref-czado2009predictive" role="doc-biblioref">2009</a>)</span>. Under a calibrated forecast <span class="math inline">\(u\)</span> is uniform, so the share of <span class="math inline">\(u\)</span> in <span class="math inline">\([0.1, 0.9]\)</span> estimates the coverage of a central 80% interval without the over-coverage of discrete intervals.</p>
+<h5 id="wild-cluster-bootstrap.">Wild cluster bootstrap.</h5>
+<p>With <span class="math inline">\(S\)</span> season-level mean differences <span class="math inline">\(\bar d_s\)</span>, the statistic is recomputed under every one of the <span class="math inline">\(2^S\)</span> sign patterns <span class="math inline">\(\epsilon \in \{-1, 1\}^S\)</span> applied to the season means, which gives an exact sign-flip <span class="math inline">\(p\)</span>-value; with eight seasons the smallest attainable two-sided value is <span class="math inline">\(2/256 = 0.0078\)</span>.</p>
+<h5 id="log5.">log5.</h5>
+<p>For a team rate <span class="math inline">\(a\)</span> and an opponent’s allowed rate <span class="math inline">\(b\)</span> in a league with mean rate <span class="math inline">\(L\)</span>, <span class="math inline">\(\mathrm{log5}(a, b) = ab/L\)</span>.</p>
+<h2 class="unnumbered" id="app:repro">Appendix D. Reproducibility</h2>
+<p>The repository needs Python 3.12 and <code>uv</code>; there is no environment to install. Four acceptance batteries re-assert every recorded gate decision against its declared rule, re-derive committed predictions on CPU within <span class="math inline">\(10^{-6}\)</span>, check ledger caps and window guards, and confirm that each one-shot window was spent at most once. At the time of writing they pass 25 of 25, 40 of 40, 25 of 25 and 10 of 10 checks. The frozen 2026–27 files and their SHA-256 prefixes are the game probabilities (<code>85565efd</code>), the team projections (<code>4c60f50f</code>), the skater projections (<code>cc4cc26d</code>) and the house benchmark (<code>a4a693f4</code>). Per-game predictions for the NeurHL-H confirmation and for the NeurHL-G iteration and gate windows are committed under <code>neurhl/output/preds/</code>, and every figure in this paper is regenerated from committed files by <code>paper/figures/make_figures.py</code>.</p>
+
+</article>
+</main>
+<footer>NeurHL &middot; github.com/ph05/neurhl &middot; web edition built from the paper's LaTeX source</footer>
+</body>
+</html>

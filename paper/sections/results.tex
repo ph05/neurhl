@@ -1,0 +1,386 @@
+\section{Results}
+\label{sec:results}
+
+We report confirmed results first, then the \neurhlG{} gate evidence, then the
+development-only season results and the null results. A result is
+\emph{confirmed} only if it came from a window no decision had used, scored
+once after the model was frozen. Results from windows that were consulted
+during development are \emph{exploratory}.
+
+\subsection{Confirmed: the player-game layer}
+\label{sec:res-pg}
+
+The player-game layer was frozen after development and scored once on the
+player confirmation window, 2018--2020: 130,092 skater-games by 1,152 players in
+3,624 games. The comparator is each skater's own recent history: an
+exponentially weighted average ($\alpha = 0.1$) for ice-time share and shots,
+renormalised over the dressed skaters, and for the two binary targets a
+walk-forward shrunk average $\hat p = (n\,\bar x + k\,p_0)/(n + k)$ \citep{efron1975data}
+with $k$ chosen on the previous season. This is a demanding baseline: in the first plan a neural
+player-rate model had lost to it on ice time and shots (Table~\ref{tab:nulls}).
+Table~\ref{tab:pg} shows the result. The layer is better on all four targets,
+in every season, with two-way clustered $z$ statistics between $-8.1$ and
+$-23.9$ and Holm-adjusted $p < 10^{-5}$.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Player-game layer against each skater's own recent history on the
+one-shot player confirmation, 2018--2020 (130,092 skater-games). Relative
+difference in the stated loss; negative is better. $z$ uses standard errors
+clustered by player and by game.}
+\label{tab:pg}
+\begin{tabular}{llrrc}
+\toprule
+Target & Loss & Relative difference & $z$ (two-way) & Seasons better \\
+\midrule
+Ice-time share & MAE & $-4.1\%$ & $-23.9$ & 3/3 \\
+Shots on goal & Poisson deviance & $-10.2\%$ & $-13.7$ & 3/3 \\
+P(goal $\geq 1$) & log loss & $-2.8\%$ & $-8.1$ & 3/3 \\
+P(assist $\geq 1$) & log loss & $-2.6\%$ & $-15.9$ & 3/3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Confirmed: \neurhlH{} against Elo}
+\label{sec:res-h}
+
+\neurhlH{} was frozen exactly as it had been evaluated on the tune window, the
+freeze and the test were committed in an amendment before any 2018--2026 game
+was scored by any \neurhlH{} artifact, and the test ran once. The primary set is
+the eight structurally normal seasons of 2018--2026 ($n = 10{,}184$ games; 2021
+excluded). Table~\ref{tab:c1} and Figure~\ref{fig:c1} give the results.
+
+\begin{table}[t]
+\centering
+\small
+\caption{One-shot confirmation of \neurhlH{} against Elo, regular-season games of
+2018--2026 excluding 2021 ($n = 10{,}184$). Differences are \neurhlH{} minus Elo in
+per-game log loss; negative favours \neurhlH{}.}
+\label{tab:c1}
+\begin{tabular}{lr}
+\toprule
+Quantity & Value \\
+\midrule
+Log loss, \neurhlH{} / Elo & 0.66495 / 0.66973 \\
+Mean paired difference (SE) & $-0.00478$ (0.00088) \\
+95\% CI, normal / moving-block bootstrap & \ci{-0.00650}{-0.00306} / \ci{-0.00660}{-0.00293} \\
+Per-game test & $z = -5.46$, $p < 10^{-6}$ \\
+Season-clustered $t$ (7 df) & $t = -5.71$, $p = 0.0007$ \\
+Wild cluster bootstrap, exact ($2^8$ patterns) & $p = 0.0078$ \\
+Seasons better; sign test & 8 of 8; $p = 0.0078$ \\
+Including 2021 ($n = 11{,}052$) & $-0.00459$ \ci{-0.00622}{-0.00295}, 9 of 9 \\
+\midrule
+Brier score, \neurhlH{} / Elo & 0.23630 / 0.23857 \\
+Reliability, \neurhlH{} / Elo & 0.00021 / 0.00025 \\
+Resolution, \neurhlH{} / Elo & 0.01218 / 0.00982 \\
+Uncertainty & 0.24840 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_c1_seasons}
+\caption{\neurhlH{} minus Elo, per-game log loss by season on the one-shot
+confirmation, with 95\% intervals; negative favours \neurhlH{}. Numbers under
+the season labels are games. 2021 (hollow) is excluded from the primary test by
+the declared rule and shown for completeness. The band and filled diamond are
+the pooled primary estimate; the hollow diamond pools all nine seasons.}
+\label{fig:c1}
+\end{figure}
+
+The effect is $-0.00478$ nats per game (95\% CI $-0.00650$ to $-0.00306$), and it
+holds in every season. It is also the size the tune window had suggested
+($-0.00283$), somewhat larger rather than smaller, and the amendment's power
+table had put the chance of detecting an effect of the tune-window size at
+about 0.93. Measured against a constant equal to the window's home-win rate
+(0.540, log loss 0.68995), Elo's skill is 0.0202 nats and \neurhlH{}'s is 0.0250, an
+increase of about 24\%. The Murphy decomposition locates the gain: reliability
+is essentially unchanged and already small for both models, while resolution
+rises from 0.0098 to 0.0122. \neurhlH{} is not a recalibrated Elo; it separates
+games that Elo treats alike. Figure~\ref{fig:reliability} shows that both
+models are well calibrated across the probability range.
+
+The gain is conditional on information Elo does not use. \neurhlH{} reads which
+skaters dressed for each game, which is public about an hour before puck drop,
+and its Layer~1 translates those players' histories and career context into
+projected shot shares. The confirmation therefore establishes that lineup-level
+player information improves on a strong team-level rating system, not that a
+network discovers team strength that Elo misses.
+
+\paragraph{Where the gain comes from (exploratory).}
+To test whether the lineup is what \neurhlH{} adds, we split the confirmation
+games after the fact by how lopsided the two teams' absences were: the recent
+ice time of regulars who did not dress, home minus away, in minutes. The window
+is spent, so this analysis is exploratory. Its script stated two expectations
+before it ran: that the gain would grow with the imbalance, and that it would
+be largest early in the season, when rosters have changed and Elo has not yet
+seen them play. The first held and the second did not (Table~\ref{tab:gain}).
+Where neither team was missing regular ice time the difference is $-0.0003$
+(SE 0.0045); it grows to $-0.0087$ when the imbalance exceeds 40 minutes, a
+slope of $-0.0010$ per 10 minutes (SE 0.0004). By month the gain is smallest
+in October and November and largest from December on. \neurhlH{} does not move
+further from Elo when absences are lopsided (the mean absolute difference
+between the two probabilities is 0.034 to 0.036 in every bin); its adjustments
+are simply more accurate there.
+
+\begin{table}[t]
+\centering
+\small
+\caption{\neurhlH{} minus Elo, per-game log loss on the confirmation games,
+split after the fact by the imbalance in absent regulars' recent ice time
+between the two teams, and by month. Exploratory: the window had been spent.}
+\label{tab:gain}
+\begin{tabular}{lrr@{\hspace{2.5em}}lrr}
+\toprule
+Absence imbalance & Games & Difference (SE) & Month & Games & Difference (SE) \\
+\midrule
+none & 367 & $-0.0003$ (0.0045) & October & 1,316 & $-0.0017$ (0.0023) \\
+0--20 min & 4,747 & $-0.0029$ (0.0013) & November & 1,726 & $-0.0022$ (0.0021) \\
+20--40 min & 2,928 & $-0.0055$ (0.0016) & December & 1,674 & $-0.0078$ (0.0021) \\
+over 40 min & 2,142 & $-0.0087$ (0.0020) & January & 1,600 & $-0.0057$ (0.0023) \\
+ & & & February & 1,318 & $-0.0061$ (0.0024) \\
+ & & & March & 1,712 & $-0.0042$ (0.0022) \\
+ & & & April & 837 & $-0.0061$ (0.0032) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\textwidth]{fig_reliability}
+\caption{Reliability of \neurhlH{} and Elo on the 10,184 confirmation games: ten
+equal-count bins per model with 95\% Wilson intervals, the diagonal of perfect
+calibration and the observed home-win rate (dashed); below, the distribution of
+predicted home-win probabilities. \neurhlH{} spreads its forecasts more widely
+while staying on the diagonal.}
+\label{fig:reliability}
+\end{figure}
+
+\subsection{\neurhlG{}: iteration, gates and the pre-gate}
+\label{sec:res-g}
+
+\paragraph{Iteration.}
+Table~\ref{tab:ladder} and Figure~\ref{fig:ladder} give the ladder on the
+iteration window, every run of which is in the search ledger. The non-neural
+engine (player-game sums through the integration and the stack) and the
+tree-based rung did no better than Elo. The network with official power-play
+targets (R6) improved on Elo by 0.0023 but did not reach \neurhlH{}. None of four
+additions earned its place under the declared adoption rule (a gain of at
+least 0.0003 without losing in four or more of six seasons): an Elo anchor on
+the scoring rates, lineup-versus-usual multipliers, \neurhlH{}'s projections as
+team inputs, and attention across the two rosters. Stacking R6 with \neurhlH{}
+(R11) gave the best stack, 0.67258, still 0.00014 behind \neurhlH{} alone. The
+paired standard error of each rung's difference from \neurhlH{} is 0.0007 to
+0.0009, larger than most gaps between rungs, so the ladder shows the absence of
+a large gain rather than a reliable ordering. The candidate declared for the
+gate, g1, is R11 with the five-seed ensemble. The
+candidate commit recorded, before the gate ran, the expectation that the
+pre-gate would fail.
+
+\begin{table}[t]
+\centering
+\small
+\caption{\neurhlG{} iteration ladder on 2012 and 2014--2018 (7,421 games): pooled
+log loss of each rung's final probability, from the search ledger. R4 was run
+on the quick protocol (two seasons, 2,501 games), so its value is on a
+different set of games. R6e and R6L were run before the master tensor was
+rebuilt on official power-play opportunities; their parent on the earlier
+tensor scored 0.67299, against which R6e is $+0.00031$ and R6L $-0.000004$, so
+neither decision depends on the version.}
+\label{tab:ladder}
+\begin{tabular}{llr}
+\toprule
+Rung & Change & Log loss \\
+\midrule
+R1 & Elo & 0.67528 \\
+R2 & \neurhlH{} & 0.67244 \\
+R3 & gradient-boosted trees / logistic on game features, Elo-stacked & 0.67611 / 0.69699 \\
+R4 & non-neural engine (quick protocol) & 0.67581 \\
+R6 & network, official power-play targets & 0.67301 \\
+R6e & + Elo anchor on scoring rates & 0.67330 \\
+R6L & + lineup-versus-usual multipliers & 0.67299 \\
+R6c & + \neurhlH{} projections as team inputs & 0.67344 \\
+R13 & R6c + direct \neurhlH{} terms & 0.67344 \\
+R9 & R6c + attention across rosters & 0.67366 \\
+R11 & R6 stacked with \neurhlH{} (candidate structure) & 0.67258 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_g_ladder}
+\caption{\neurhlG{} iteration ladder: pooled log loss of each full-run rung on the
+iteration window (7,421 games), with Elo and \neurhlH{} on the same games. Open
+circles were rejected under the adoption rule; the filled diamond, R11, was
+carried forward as the candidate.}
+\label{fig:ladder}
+\end{figure}
+
+\paragraph{Gates.}
+The candidate was scored once on the gate window (6,289 games).
+Table~\ref{tab:gates} summarises the gates and Figure~\ref{fig:gate} the
+per-season differences. The final probability beats Elo by 0.00559 nats (SE
+0.00131), in all five seasons, a margin comparable to \neurhlH{}'s confirmed one. It
+beats \neurhlH{} by only 0.00049 (SE 0.00060), in three of five seasons. The
+pre-gate required both a gain of at least 0.0045 over Elo and a gain of at
+least 0.0010 over \neurhlH{}, each in at least four of five seasons. The first
+condition holds and the second does not, so the pre-gate failed and, as the
+plan declared, the sealed seasons were not spent. At the sealed test's size the
+minimum detectable effect at 80\% power would have been 0.0057 against Elo and
+0.0026 against \neurhlH{}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{\neurhlG{} (candidate g1) on the gate window, 2019, 2020 and 2022--2024
+(6,289 games; 225,752 skater-games). The calibration row reflects the
+correction in Section~\ref{sec:failures}.}
+\label{tab:gates}
+\begin{tabular}{p{0.34\textwidth}p{0.56\textwidth}}
+\toprule
+Gate & Result \\
+\midrule
+Final probability vs Elo & $-0.00559$ (SE 0.00131), 5 of 5 seasons \\
+Final probability vs \neurhlH{} & $-0.00049$ (SE 0.00060), 3 of 5 seasons \\
+Pre-gate (S-STOP) & \textbf{fail}: the \neurhlH{} condition is not met \\
+\midrule
+PG: player heads vs the player-game layer & pass: ice-time share $-0.59\%$, shots $-0.45\%$ (Poisson log loss), P(goal) $-0.45\%$, P(assist) $-0.36\%$; every upper 95\% bound below zero (two-way clustered) \\
+T: team box score & pass: shots, expected goals, goals and power-play opportunities beat log5 team history; shots and goals also beat the summed player-game layer, on deviance and CRPS \\
+C: calibration & \textbf{fail}: slope 0.968 and overtime share (0.224 predicted, 0.220 observed) pass; randomised-PIT 80\% coverage passes for team goals (0.803) and skater shots (0.783) but not for team shots (0.860) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_g_gate_seasons}
+\caption{\neurhlG{} on the gate window: per-season differences in per-game log loss
+of the final probability against Elo (filled) and against \neurhlH{} (open), with
+95\% intervals, and the pooled estimates over 6,289 games. Dotted segments mark
+the pre-gate thresholds, $-0.0045$ against Elo and $-0.0010$ against \neurhlH{}.}
+\label{fig:gate}
+\end{figure}
+
+\paragraph{The stat sheet.}
+The engine's player heads improve on the confirmed player-game layer on all
+four shared targets (Figure~\ref{fig:heads}). The gains are small, between
+0.36\% and 0.59\%, but every upper confidence bound is below zero. Its team box
+scores beat both declared baselines. Binned predictions track outcomes closely
+for shots; for expected goals and goals they are somewhat too spread at the
+extremes, so that the decile with the highest predicted regulation goals (4.2
+per team-game) averaged 3.7 (Figure~\ref{fig:teambox}). The
+win-probability slope is 0.968, and the hazard integration reproduces the
+share of games that go past regulation without a tie scalar (22.4\% predicted
+against 22.0\% observed; Figure~\ref{fig:otcal}). One calibration check fails:
+the negative-binomial dispersion used for team shots makes those intervals too
+wide, covering 86\% of outcomes at a nominal 80\%.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_player_heads}
+\caption{Relative change in loss of player-level predictions, with 95\%
+intervals clustered by skater and game; negative is better, and the panels have
+different scales. (a) The player-game layer against each skater's own history on
+the one-shot confirmation, 2018--2020 (130,092 skater-games); shots on true
+Poisson deviance. (b) \neurhlG{}'s player heads against the player-game layer on
+the \neurhlG{} gate window (225,752 skater-games); shots on Poisson log loss. The
+dotted line is the gate's non-inferiority margin of $+1\%$.}
+\label{fig:heads}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_team_box}
+\caption{\neurhlG{} team box-score predictions on the gate window (12,536 to
+12,578 team-games): mean outcome by decile of prediction, with 95\% intervals, for
+team shots on goal, expected goals and regulation goals, against the identity
+line.}
+\label{fig:teambox}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_outcome_calib}
+\caption{\neurhlG{} outcome calibration on the gate window. (a) Reliability of
+the final home-win probability in equal-count bins, with the calibration slope
+and its 95\% interval. (b) Predicted and observed share of games tied after
+regulation, by season and pooled; the prediction comes from the hazard
+integration, with no tie scalar.}
+\label{fig:otcal}
+\end{figure}
+
+\paragraph{Reading.}
+Two independently built models that both condition on the dressed lineup, one
+a small residual network over player histories feeding a four-feature logistic
+head, the other a conservation-constrained engine that models every skater's
+deployment and every team's scoring process, arrive at nearly the same
+win-probability skill. On the iteration window the engine adds nothing beyond
+\neurhlH{}, and on the gate window it adds an amount indistinguishable from zero.
+We read this as evidence that the binding constraint is the information
+available before the game, not the capacity or structure of the model; the
+engine's value is that it produces a coherent box score at that same level of
+skill.
+
+\subsection{Development only: seasons and player seasons}
+\label{sec:res-season}
+
+The season simulator's 80\% intervals cover 0.794 of team-seasons, with a
+standings error of 9.61 points (MAE) and a CRPS of 6.93, pooled over the
+development and tune seasons. Its interval width was tuned on the same
+seasons, so these are development numbers. On the five seasons that both its
+record and the Elo baseline's share, the Elo baseline is more accurate: 9.17
+against 9.99 points MAE and a CRPS of 6.43 against 7.17, ahead in four of five
+seasons ($p = 0.19$). An earlier claim that the season layer beat the house
+benchmarks compared different seasons and is withdrawn
+(Section~\ref{sec:failures}). For player seasons, the declared 50/50 blend of a
+gradient-boosted season model and the summed player-game layer had the lowest
+points error over 11 vantages (9.07 points per 82 games, against 9.41 and 9.77
+for the two paths alone).
+
+\subsection{Documented nulls}
+\label{sec:res-nulls}
+
+Table~\ref{tab:nulls} lists the hypotheses that failed. Two deserve comment.
+The first neural game model, a 1.2-million-parameter roster network over
+player embeddings from an event language model, finished level with a constant
+home-win rate. A regularised logistic regression on the same mean-pooled
+embeddings did no better (0.6888 against 0.6898), while two team-form features
+alone scored 0.6780, and adding the embeddings to form made it worse. A linear
+model cannot be accused of failing to optimise, so the signal was absent from
+the representation. The embeddings did learn something: position is linearly
+decodable from them with 95\% accuracy, and linear probes recover
+$R^2 = 0.54$ of points per 60 minutes and $0.59$ of ice time per game, although
+neither was ever a training target. They encode what kind of player someone is, not how good his
+team is, and every roster carries a similar mix of roles. The second is the
+game-level reattempt of the third plan: four blocks of new information
+(absence-based replacement value, goalie quality, schedule density, schedule
+strength), each added to \neurhlH{}'s head in a declared order, each made the pooled
+log loss worse, so no candidate reached the pre-gate.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Documented null results. Each hypothesis was declared before its test
+and failed on the stated evidence.}
+\label{tab:nulls}
+\begin{tabular}{p{0.44\textwidth}p{0.48\textwidth}}
+\toprule
+Hypothesis & Result \\
+\midrule
+A neural game network over event-model player embeddings beats Elo & Five configurations; best 0.6966 against Elo 0.67585 and a constant 0.6898 (tune window) \\
+Pooled player embeddings carry team strength & Logistic probe 0.6888, level with the constant; embeddings added to team form make it worse \\
+A career encoder can place rookies & Validation error 0.99--1.00 of predicting the mean at every vantage \\
+Neural player-rate heads beat a player's own average & Worse on ice time (MAE 0.00934 against 0.00619) and shots; level with a shrunk average on goals \\
+The event simulator's rates beat Elo per game & Blend 0.67763 against Elo 0.67668; its pre-gate stopped the confirmation \\
+Absences, goalie quality, schedule density or strength improve the game head & Each block adds log loss (+0.00024 to +0.00541) \\
+A starter model beats simple heuristics & Season start share wins (log loss 0.66--0.68 against 0.71--0.77) \\
+Goals saved above expected predicts next season better than shrunk save percentage & $r = 0.159$ against $0.218$; Steiger $p = 0.007$ in favour of save percentage \\
+RAPM transfers to a new team better than team-demeaned raw rates & Indistinguishable (movers $r = 0.387$ against $0.371$, $p = 0.60$) \\
+The shot-quality model is calibrated to 0.005 per decile & Best 0.0065 after three declared correction ladders \\
+\neurhlG{} adds win-probability information beyond \neurhlH{} & $-0.00049$ (SE 0.00060) on the gate window; the pre-gate failed \\
+\bottomrule
+\end{tabular}
+\end{table}

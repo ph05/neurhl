@@ -1,0 +1,251 @@
+\section{Models}
+\label{sec:models}
+
+Figure~\ref{fig:overview} shows how the components fit together. All of them
+are walk-forward: the model that predicts season $T$ is fitted on seasons
+before $T$ only.
+
+\begin{figure}[t]
+\centering
+\input{figures/diagram_overview}
+\caption{Components of \neurhl{}, each fitted walk-forward. RAPM and expected
+goals feed the season simulator and \neurhlG{}'s priors and rates; the event
+model's player embeddings feed \neurhlH{}; the player-game layer gives
+\neurhlG{} its baselines and, summed over the schedule, the player season
+projections. \neurhlG{}'s final win probability stacks its own output with
+\neurhlH{} and Elo.}
+\label{fig:overview}
+\end{figure}
+
+\subsection{Baselines}
+\label{sec:m-elo}
+
+The primary comparator is the house Elo system (``v1''), tuned on 2006--2017
+before any \neurhl{} work began. Before each game with ratings $r_h$ and $r_a$
+and home advantage $H$, the expected home score is
+\begin{equation}
+E_h = \bigl(1 + 10^{-(r_h + H - r_a)/400}\bigr)^{-1}.
+\end{equation}
+After the game both ratings move by $\pm K M (y - E_h)$, where $y$ is the home
+result and $M = \ln(|\Delta g| + 1)\cdot 2.2 / (2.2 + 0.001\,d_w)$ is a
+margin-of-victory multiplier that shrinks with the winner's rating advantage
+$d_w$. Between seasons each rating regresses toward the mean,
+$r \leftarrow \mu + \phi (r - \mu)$. The frozen parameters are $K = 6$,
+$H = 35$ and $\phi = 0.7$. Game probabilities come from walk-forward logistic
+models of the rating difference: the probability of reaching overtime, the
+regulation winner, and the overtime or shootout winner. We also report a
+constant home-win rate, and ``Tier-0'', the stronger of a standardised
+logistic regression and an early-stopped gradient-boosted model
+\citep{chen2016xgboost} on 23
+engineered game features (Elo difference, rest, travel, goalie form, roster
+aggregates, era), which scored 0.67692 on 2014--2017 against Elo's 0.67548.
+
+\subsection{Shot quality}
+\label{sec:m-xg}
+
+The expected-goals model is a histogram gradient-boosted classifier
+\citep{friedman2001greedy,ke2017lightgbm} (400
+iterations, learning rate 0.06, 31 leaves, at least 200 shots per leaf, L2
+penalty 1.0, early stopping) on 33 features: distance and angles, rebound and
+rush indicators, the previous event's type, distance, angle and elapsed time,
+speed from the previous event, strength state and empty nets, score
+difference, period, shooter handedness and position, shot type, and
+walk-forward era and rink covariates. For vantage $V$ the model is fitted on
+seasons before $V-1$. Its calibration map is isotonic, refitted every 25 league
+games on the most recent 120,000 out-of-sample shots strictly before the game
+being scored, so it follows the recording drift with the data in which the
+drift occurs. The model beats a distance-and-angle logistic regression in all
+18 vantages (gate X1), and team expected-goal differential predicts future goal
+share better than shot-attempt (Corsi) differential across 554 team-seasons,
+$r = 0.423$ against $0.395$ (gate X2). It fails its calibration gate X3, a
+maximum deviation of 0.005 per decile, at 0.0065 after three declared
+correction ladders; the residual is concentrated in the top decile in the
+seasons of the recording change.
+
+\subsection{Adjusted plus-minus}
+\label{sec:m-rapm}
+
+RAPM is a stint-level ridge regression \citep{hoerl1970ridge} of on-ice shot rates on indicator
+columns for the players on the ice, with an intercept, a home term and
+unpenalised team-season fixed effects, so that player coefficients measure
+performance relative to the player's own team. The penalty, $\lambda = 51{,}200$,
+is chosen to maximise how well a prior rating predicts a player's realised
+on-ice results after he changes team. RAPM priors are computed as of each
+season and feed the season simulator and \neurhlG{}.
+
+\subsection{Event simulator}
+\label{sec:m-events}
+
+The event simulator is a Transformer-Hawkes marked temporal point process
+\citep{zuo2020transformer} over the unified event and line-change stream, with
+heads for the time to the next event, its type and team, location, zone and
+actor, and player effects entering as zero-initialised modulations of the
+hazard anchored on RAPM, in the spirit of \citet{thomas2013competing}. It has
+5.3 million parameters and is trained as a five-seed ensemble. After the two
+leaks described in Section~\ref{sec:failures} were removed it reproduces goals,
+shots, penalties and faceoffs per game and per period within 10\% of observed
+rates, and its score effects match observed ones with a gradient ratio of
+0.979. Its score-effect curve initialises the \neurhlG{} hazard table.
+
+\subsection{Player-game layer}
+\label{sec:m-pg}
+
+The player-game layer predicts, for every dressed skater, his share of team
+ice time, his shots on goal, and the probabilities of scoring at least one goal
+and recording at least one assist. It chains four histogram gradient-boosted
+models in the order opportunity, volume, conversion: predicted usage feeds the
+shot model, and both feed the two binary models. Declared feature blocks cover
+the player's own recent form (the baseline's inputs, nested), usage structure
+by strength, line rank and power-play unit, opportunity created by absent
+teammates, opponent and schedule context, and line and coaching patterns.
+Binary heads are calibrated isotonically on the previous season's
+out-of-sample predictions, and ice-time shares are renormalised within each
+team-game so they sum to one exactly.
+
+\subsection{Season simulator and player seasons}
+\label{sec:m-season}
+
+The season simulator integrates team scoring rates, roster RAPM and score
+effects over each game of the real schedule and simulates 20,000 seasons,
+drawing each team's strength once per simulated season ($\sigma = 0.07$) so that
+uncertainty about how good a team is persists through the season. Player
+season projections blend a gradient-boosted season model with the
+player-game layer summed over the schedule under an availability hazard,
+50/50, the combination a declared rule selected.
+
+\subsection{\neurhlH{}}
+\label{sec:m-h}
+
+\neurhlH{} has three layers. Layer~1 predicts what each player will do in a game:
+his on-ice shot attempts for and against per 60 minutes, close-range attempts
+for and against, and his ice time. It is residual on the player's own
+exponentially weighted history: a two-hidden-layer network (128 units, GELU,
+dropout 0.1) maps a 64-dimensional player embedding from the event model, 13
+static features (position, age and age squared, career games, games with the
+current team, a recent-move flag, home, rest, team game number, games played
+this season, a late-season flag) and six history features to multiplicative
+corrections bounded by $\pm 0.7$ in log space, with a zero-initialised output
+layer so that training starts at the baseline. It is trained walk-forward on
+about 750,000 player-games. Layer~2 aggregates the predictions over the
+players actually dressed, weighted by predicted ice time, into team
+projections: projected attempt share and close-range share. Layer~3 is a thin
+head, a standardised logistic regression on four inputs, the Elo logit, the
+projected attempt-share difference, the projected close-range difference and
+the rest difference, refitted for each season on all earlier seasons. Its
+regularisation constant is selected on training loss, a known weakness that
+favours weak regularisation; it was kept verbatim for the confirmation because
+changing it would have tested a different model.
+
+\subsection{\neurhlG{}}
+\label{sec:m-g}
+
+\neurhlG{} predicts one game from the two dressed lineups and simulates its box
+score. Figure~\ref{fig:g-arch} summarises the architecture.
+
+\paragraph{State.}
+After every game each skater's state is updated by discounted sums of his
+per-game statistics with per-game decays 0.98, 0.95, 0.85 and 0.60. Rates are
+ratios of discounted sums, reported with their effective sample sizes, beside
+season-to-date and career totals and as-of priors (the RAPM prior and the
+event-model embedding fitted on earlier seasons only). The 114 skater features
+cover ice time by strength, individual shots, attempts and expected goals,
+goals, assists, on-ice expected goals for and against, and penalties. Goalie
+state (23 features) includes shrunk save percentage, goals saved above
+expected per expected goal, and workload. Team state (57 features) holds
+discounted team rates, and context (10 features) holds the Elo logit, rest,
+travel, time-zone change and era covariates. A game late in a season therefore
+sees every earlier game of that season as well as all earlier seasons.
+
+\paragraph{Network.}
+Shared encoders map each skater (114 features plus position, $\to 128 \to 64$),
+each team ($57 \to 64 \to 32$), each goalie ($23 \to 32 \to 16$) and the context
+($10 \to 32 \to 16$), each a linear layer, GELU, layer normalisation, dropout
+0.2 and a linear layer. Heads produce residual corrections with
+zero-initialised output layers: 12 per skater (ice time by strength, shot,
+attempt and expected-goal propensities, finishing, playmaking, offensive and
+defensive on-ice effects, penalties drawn and taken), six per team and one per
+goalie. The untrained network therefore reproduces shrunk-history baselines
+exactly. The model has 48,810 parameters.
+
+\paragraph{Team layer.}
+The team layer is deterministic and conserves ice time. With $o$ the opponent
+of side $s$, power-play opportunities have mean
+$\lambda^{pp}_s = \mathrm{log5}(\text{drawn}_s, \text{taken}_o)\,e^{\delta_s}$,
+where $\mathrm{log5}(a, b) = ab/L$ for league rate $L$ \citep{hammond2015james}, and $\delta_s$ collects
+the skaters' penalty terms. Power-play time is $T^{pp}_s = \tau \lambda^{pp}_s$,
+short-handed time is the opponent's power-play time, and even-strength time is
+$T^{ev} = 60 - T^{pp}_s - T^{pp}_o$ minutes. Player $i$'s ice time at strength
+$k$ is
+\begin{equation}
+\mathrm{TOI}_{ik} = n_k\, T^{k}\, \mathrm{softmax}_{j \in \mathcal{P}(i)}\bigl(b_{jk} + \delta_{jk}\bigr)_i,
+\end{equation}
+a softmax over the player's position group $\mathcal{P}(i)$ with $n_k$ players on
+the ice (three forwards and two defence at even strength, five skaters on the
+power play, four short-handed), so team ice time is exact by construction.
+Team scoring rates are log-linear:
+\begin{equation}
+\log r^{ev}_s = \log \mathrm{log5}\bigl(\mathrm{xGF60}_s, \mathrm{xGA60}_o\bigr)
+  + \sum_{i \in s} w_i\, \mathrm{off}_i - \sum_{j \in o} w_j\, \mathrm{def}_j + \delta^{tm}_s,
+\end{equation}
+where $w$ are ice-time weights and the team rates are shrunk toward league
+values by their effective sample sizes. Player shots, attempts, expected goals,
+goals, assists and on-ice expected goals are softmax allocations of team
+totals, so they sum exactly, and team goals are expected goals times a
+finishing term less the opposing goalie's effect.
+
+\paragraph{Outcome.}
+Win probabilities come from a differentiable integration over the goal
+differential, a Markov chain in the spirit of \citet{kaplan2014markov}. Let $\lambda_h, \lambda_a$ be the two regulation scoring rates. The
+distribution of the differential $d \in \{-8, \dots, 8\}$ evolves over 30 steps of
+two minutes. In each step side $s$ scores with probability
+$q_s = 1 - \exp\{-\lambda_s e^{u}\,\Delta t\, e^{\eta(\ell_s, \pi)}\}$, where
+$\ell_s \in \{-3, \dots, 3\}$ is the side's own lead (clamped), $\pi$ indexes five
+game phases (minutes 0--40, 40--50, 50--56, 56--58, 58--60), and $\eta$ is a
+learned $7 \times 5$ hazard table initialised from the event simulator's score
+effects \citep[compare][]{thomas2013competing}. Trailing teams push, leaders
+sit back, tied teams turn cautious late, and the last minutes capture pulled
+goalies. The pace shock
+$u = \sqrt{2}\,\sigma x - \sigma^2/2$ is shared by both teams and integrated with
+five-node Gauss--Hermite quadrature \citep{abramowitz1964handbook}, which supplies the tie mass by mechanism
+rather than through an ad hoc scalar. The probability of a regulation tie is
+the mass at $d = 0$, and the overtime or shootout winner is a logistic function
+of $\log(\lambda_h/\lambda_a)$. The output is the four-way outcome: home or away
+win, in regulation or after it.
+
+\paragraph{Training.}
+Snapshot $T$ is trained on seasons 2009 through $T-1$. Phase~1 minimises
+Huber losses on ice time by strength and on power-play minutes, Poisson
+deviances on skater and team counts, and the four-way outcome negative log
+likelihood with weight 0.3 (AdamW \citep{loshchilov2019decoupled}, learning rate $2\times10^{-3}$, weight decay
+0.01, one-cycle schedule, batches of 256 games, 10 epochs). Phase~2 raises
+the outcome weight to 1 and trains four more epochs at learning rate
+$3\times10^{-4}$, with an L2-SP penalty \citep{li2018explicit} of $10^{-3}$
+toward the phase-1 weights. The ensemble averages five seeds.
+
+\paragraph{Final probability.}
+For each season $T$ a logistic stack \citep{wolpert1992stacked} over the Elo logit, the \neurhlG{} logit and
+the \neurhlH{} logit is fitted on out-of-sample predictions from earlier seasons.
+The column subset, which always includes Elo, is chosen by leave-one-season-out
+cross-validation on the training seasons, with a fallback to Elo and \neurhlG{}
+where \neurhlH{} is unavailable.
+
+\paragraph{Stat sheet.}
+Box scores are simulated 10,000 times per game and are consistent with the
+win probability by construction. Each draw samples the outcome category from
+the stacked four-way probabilities, then a regulation score conditional on it,
+then team shots (negative binomial around the model mean, $r = 40$, floored at
+goals), team expected goals (gamma), power-play opportunities (Poisson),
+player shots and goals (multinomial splits by the model's shares), assists
+(zero, one or two per goal in the league's typical mix, split by assist
+shares), individual expected goals (Dirichlet split) and goalie saves.
+
+\begin{figure}[t]
+\centering
+\input{figures/diagram_garch}
+\caption{\neurhlG{}. Encoders and residual heads adjust shrunk-history baselines; a
+deterministic team layer conserves ice time and makes player outputs sum to
+team totals; a hazard integration over the goal differential gives the
+four-way outcome, which is stacked with Elo and \neurhlH{}; box scores are
+simulated conditional on the stacked outcome.}
+\label{fig:g-arch}
+\end{figure}

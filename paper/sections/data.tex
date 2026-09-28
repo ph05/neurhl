@@ -1,0 +1,98 @@
+\section{Data}
+\label{sec:data}
+
+\paragraph{Sources.}
+Play-by-play events, shift charts, rosters, schedules, box scores and game
+reports come from the NHL's public web services. For 2008--2011, which predate
+the league's structured feeds, events and shifts are parsed from the league's
+HTML game reports. Shot records come from MoneyPuck, from which we admit only
+raw recorded fields (coordinates, shot type, timing and players) and never the
+site's fitted quantities such as expected goals or arena-adjusted
+coordinates, which were estimated on full-sample data and would leak the
+future. Team season tables from Natural Stat Trick and Hockey-Reference serve
+as cross-checks. No betting-market data enter any feature, target,
+calibration or selection step.
+
+\paragraph{Coverage.}
+The corpus spans 19 seasons, 2008 through 2026: 22,837 regular-season games
+(24,187 including playoffs), about 7.56 million play-by-play events, 18.9
+million shifts reduced to 7.1 million on-ice stints, 2.08 million shot
+records, and about 0.96 million player-game rows. Career records cover all
+6,096 players who dressed. Table~\ref{tab:data} gives the per-season counts
+and the role each season plays.
+
+\paragraph{Integrity.}
+Every source had to reconcile with official totals before use. The HTML-era
+backfill was checked against the structured feed on 2012, the one season both
+cover: per-game counts agreed for all nine core event types, all 6,545 goals
+matched to the second with the same scorer, and 97.2\% of on-ice sets agreed
+exactly. Four problems surfaced and were fixed at source rather than masked.
+The HTML parser had dropped every assist in 2008--2011 because assist entries
+lack a team prefix; it was repaired and verified against the 2012 overlap.
+Phantom shifts inflated ice time in some HTML-era games. Fifty-seven 2025
+games were missing shift charts and were recovered from the HTML reports.
+Playoff games had contaminated one training table. One degenerate game
+(2012020660, under 200 plays) is excluded throughout.
+
+\paragraph{Anomalous seasons.}
+Two seasons are structurally unlike the rest: 2013, the lockout season (48
+games per team, conference-only scheduling, no preseason), and 2021 (56 games,
+division-only scheduling, mostly empty arenas). Both are used for training but
+never scored. The criterion is schedule structure, fixed by history rather
+than by any observed result. Section~\ref{sec:failures} records how this rule
+itself was changed during development and how that change was later
+reclassified.
+
+\paragraph{A change in what the data measure.}
+Shot locations are recorded by scorers in each arena, and their recording
+changed from 2023. The share of shots recorded within 10 feet of the net was
+stable at 7.3--8.7\% from 2010 to 2021, then rose to 11.9, 12.8, 12.5 and 14.5\%
+in 2023--2026, while the conversion rate of those same close shots fell from
+0.166--0.179 to 0.132. The rebound share rose from about 5\% to 8.1\%, and the
+rush flag nearly disappeared (0.19\% to 0.06\%). The sport did not change this
+quickly; the measurement did. Any model fitted on the old regime reads a
+recorded 8-foot shot as the old 8-foot shot and over-predicts goals.
+Figure~\ref{fig:drift} shows the consequence for league-level expected goals,
+counting all situations except shootouts: goals per team-game held near 3.0
+(3.08, 3.01 and 3.08 in 2024--2026) while measured expected goals rose from 2.89
+to 3.32, so the ratio of goals to expected goals fell from 1.067 to 0.927. We
+return to this drift in Sections~\ref{sec:m-xg}, \ref{sec:failures}
+and~\ref{sec:live}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Regular-season games by season and the role of each season in the
+\neurhl{} 1.0 protocol and in the \neurhlG{} protocol. Seasons are named by the
+year they end. ``Train'' seasons are used for fitting only.}
+\label{tab:data}
+\begin{tabular}{lrll}
+\toprule
+Seasons & Games & \neurhl{} 1.0 role & \neurhlG{} role \\
+\midrule
+2008 & 1,229 & training & burn-in \\
+2009--2011 & 3,686 & development & burn-in \\
+2012 & 1,230 & tune & iteration \\
+2013 & 720 & train only (lockout) & train only \\
+2014--2017 & 4,920 & tune & iteration \\
+2018 & 1,271 & confirmation & iteration \\
+2019--2020 & 2,353 & confirmation & gate \\
+2021 & 868 & train only (COVID) & train only \\
+2022--2024 & 3,936 & confirmation & gate \\
+2025--2026 & 2,624 & confirmation & sealed \\
+2027 & 1,344 & live & live \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_xg_drift}
+\caption{League goals and house expected goals per team-game by season,
+all situations except shootouts, with 95\% bands (a), and their ratio (b). The
+house expected goals are walk-forward: each season's shots are scored by a model
+fitted on earlier seasons with an in-season calibrator that uses only games
+already played. The rise in measured expected goals from 2024 to 2026, with
+goals flat, follows the change in how shot locations are recorded.}
+\label{fig:drift}
+\end{figure}

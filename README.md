@@ -7,6 +7,10 @@ and are scored in public as the season is played.
 
 **Browse the projections: [ph05.github.io/neurhl](https://ph05.github.io/neurhl/)**
 
+**Read the paper:** [NeurHL: A Preregistered Study of Neural Forecasting in the
+National Hockey League](https://ph05.github.io/neurhl/paper/)
+([PDF](docs/paper/neurhl-paper.pdf), LaTeX source in [`paper/`](paper/))
+
 NeurHL was built under preregistration. Every model, gate and decision rule
 was committed before the numbers that tested it existed, and the final tests
 ran once on seasons no decision had touched. The record of what worked and
