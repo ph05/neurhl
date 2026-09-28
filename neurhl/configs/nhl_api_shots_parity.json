@@ -1,0 +1,592 @@
+{
+ "season": 2026,
+ "checkpoint": "xg_live_v2027.pkl",
+ "gate": {
+  "corr_min": 0.98,
+  "abs_rel_bias_max": 0.02,
+  "checked": {
+   "opening_team_game": {
+    "corr": 0.988884,
+    "rel_bias": -0.002532
+   },
+   "live_tgx_xgf_all": {
+    "corr": 0.984862,
+    "rel_bias": 0.007567
+   }
+  },
+  "pass": true
+ },
+ "counts": {
+  "games": 1312,
+  "rows_api": 112091,
+  "rows_mp": 112011,
+  "rows_matched": 111409,
+  "matched_share_of_mp": 0.994626,
+  "matched_share_of_api": 0.993916,
+  "games_equal_count": 0.772866,
+  "per_game_diff_api_minus_mp": {
+   "mean": 0.060976,
+   "mean_abs": 0.297256,
+   "min": -5,
+   "max": 9
+  },
+  "min_game_ratio_api_over_mp": 0.935065,
+  "unmatched": {
+   "api_only": 682,
+   "mp_only": 602,
+   "same_shot_other_event_type": 197,
+   "same_shooter_event_within_5s": 45
+  }
+ },
+ "fields": {
+  "xCord": {
+   "exact": 0.998734,
+   "corr": 0.999402,
+   "mae": 0.068352
+  },
+  "yCord": {
+   "exact": 0.998806,
+   "corr": 0.999533,
+   "mae": 0.015501
+  },
+  "shotDistance": {
+   "exact": 0.998716,
+   "corr": 0.995157,
+   "mae": 0.059345
+  },
+  "shotAngle": {
+   "exact": 0.99877,
+   "corr": 0.999519,
+   "mae": 0.033905
+  },
+  "shotAngleAdjusted": {
+   "exact": 0.99877,
+   "corr": 0.998352,
+   "mae": 0.033862
+  },
+  "shotAnglePlusRebound": {
+   "exact": 0.997585,
+   "corr": 0.995404,
+   "mae": 0.090308
+  },
+  "shotAngleReboundRoyalRoad": {
+   "exact": 0.999237,
+   "corr": 0.995692,
+   "mae": 0.000763
+  },
+  "homeSkatersOnIce": {
+   "exact": 0.998698,
+   "corr": 0.995661,
+   "mae": 0.001319
+  },
+  "awaySkatersOnIce": {
+   "exact": 0.998986,
+   "corr": 0.996576,
+   "mae": 0.00105
+  },
+  "homeTeamGoals": {
+   "exact": 1.0,
+   "corr": 1.0,
+   "mae": 0.0
+  },
+  "awayTeamGoals": {
+   "exact": 1.0,
+   "corr": 1.0,
+   "mae": 0.0
+  },
+  "homeEmptyNet": {
+   "exact": 0.999479,
+   "corr": 0.983368,
+   "mae": 0.000521
+  },
+  "awayEmptyNet": {
+   "exact": 0.999641,
+   "corr": 0.988474,
+   "mae": 0.000359
+  },
+  "isHomeTeam": {
+   "exact": 1.0,
+   "corr": 1.0,
+   "mae": 0.0
+  },
+  "goal": {
+   "exact": 1.0,
+   "corr": 1.0,
+   "mae": 0.0
+  },
+  "shooterTimeOnIce": {
+   "exact": 0.998896,
+   "corr": 0.999332,
+   "mae": 0.019157
+  },
+  "shotRush": {
+   "exact": 0.999874,
+   "corr": 0.8949,
+   "mae": 0.000126
+  },
+  "shotRebound": {
+   "exact": 0.999641,
+   "corr": 0.997567,
+   "mae": 0.000359
+  },
+  "timeSinceLastEvent": {
+   "exact": 0.997541,
+   "corr": 0.997737,
+   "mae": 0.034297
+  },
+  "timeSinceFaceoff": {
+   "exact": 0.999964,
+   "corr": 1.0,
+   "mae": 7.2e-05
+  },
+  "speedFromLastEvent": {
+   "exact": 0.995144,
+   "corr": 0.993625,
+   "mae": 0.033625
+  },
+  "distanceFromLastEvent": {
+   "exact": 0.995288,
+   "corr": 0.997444,
+   "mae": 0.156393
+  },
+  "lastEventShotAngle": {
+   "exact": 0.998205,
+   "corr": 0.995455,
+   "mae": 0.063242
+  },
+  "lastEventShotDistance": {
+   "exact": 0.998106,
+   "corr": 0.993154,
+   "mae": 0.065451
+  },
+  "offWing": {
+   "exact": 0.995045,
+   "corr": 0.989848,
+   "mae": 0.004955
+  },
+  "goalieIdForShot": {
+   "exact": 0.999497,
+   "corr": 0.97057,
+   "mae": 4261.6153
+  },
+  "shotOnEmptyNet": {
+   "exact": 0.999497,
+   "corr": 0.970564,
+   "mae": 0.000503
+  },
+  "shotWasOnGoal": {
+   "exact": 1.0,
+   "corr": 1.0,
+   "mae": 0.0
+  },
+  "shotType": {
+   "exact": 0.998968,
+   "mp_missing": 1115,
+   "api_missing": 1027
+  },
+  "shooterLeftRight": {
+   "exact": 0.987954,
+   "mp_missing": 1342,
+   "api_missing": 0
+  },
+  "lastEventCategory": {
+   "exact": 0.996894,
+   "mp_missing": 0,
+   "api_missing": 0
+  },
+  "playerPositionThatDidEvent": {
+   "exact": 0.993771,
+   "mp_missing": 694,
+   "api_missing": 0
+  },
+  "teamCode": {
+   "exact": 1.0,
+   "mp_missing": 0,
+   "api_missing": 0
+  }
+ },
+ "not_reproduced": [
+  "averageRestDifference",
+  "awayPenalty1Length",
+  "awayPenalty1TimeLeft",
+  "defendingTeamAverageTimeOnIce",
+  "defendingTeamAverageTimeOnIceOfDefencemen",
+  "defendingTeamAverageTimeOnIceOfDefencemenSinceFaceoff",
+  "defendingTeamAverageTimeOnIceOfForwards",
+  "defendingTeamAverageTimeOnIceOfForwardsSinceFaceoff",
+  "defendingTeamAverageTimeOnIceSinceFaceoff",
+  "defendingTeamDefencemenOnIce",
+  "defendingTeamForwardsOnIce",
+  "defendingTeamMaxTimeOnIce",
+  "defendingTeamMaxTimeOnIceOfDefencemen",
+  "defendingTeamMaxTimeOnIceOfDefencemenSinceFaceoff",
+  "defendingTeamMaxTimeOnIceOfForwards",
+  "defendingTeamMaxTimeOnIceOfForwardsSinceFaceoff",
+  "defendingTeamMaxTimeOnIceSinceFaceoff",
+  "defendingTeamMinTimeOnIce",
+  "defendingTeamMinTimeOnIceOfDefencemen",
+  "defendingTeamMinTimeOnIceOfDefencemenSinceFaceoff",
+  "defendingTeamMinTimeOnIceOfForwards",
+  "defendingTeamMinTimeOnIceOfForwardsSinceFaceoff",
+  "defendingTeamMinTimeOnIceSinceFaceoff",
+  "homePenalty1Length",
+  "homePenalty1TimeLeft",
+  "shootingTeamAverageTimeOnIce",
+  "shootingTeamAverageTimeOnIceOfDefencemen",
+  "shootingTeamAverageTimeOnIceOfDefencemenSinceFaceoff",
+  "shootingTeamAverageTimeOnIceOfForwards",
+  "shootingTeamAverageTimeOnIceOfForwardsSinceFaceoff",
+  "shootingTeamAverageTimeOnIceSinceFaceoff",
+  "shootingTeamDefencemenOnIce",
+  "shootingTeamForwardsOnIce",
+  "shootingTeamMaxTimeOnIce",
+  "shootingTeamMaxTimeOnIceOfDefencemen",
+  "shootingTeamMaxTimeOnIceOfDefencemenSinceFaceoff",
+  "shootingTeamMaxTimeOnIceOfForwards",
+  "shootingTeamMaxTimeOnIceOfForwardsSinceFaceoff",
+  "shootingTeamMaxTimeOnIceSinceFaceoff",
+  "shootingTeamMinTimeOnIce",
+  "shootingTeamMinTimeOnIceOfDefencemen",
+  "shootingTeamMinTimeOnIceOfDefencemenSinceFaceoff",
+  "shootingTeamMinTimeOnIceOfForwards",
+  "shootingTeamMinTimeOnIceOfForwardsSinceFaceoff",
+  "shootingTeamMinTimeOnIceSinceFaceoff",
+  "shotGeneratedRebound",
+  "shotGoalieFroze",
+  "shotPlayContinuedInZone",
+  "shotPlayContinuedOutsideZone",
+  "shotPlayStopped",
+  "timeDifferenceSinceChange"
+ ],
+ "features_exact": {
+  "shotDistance": 0.998716,
+  "shotAngleAbs": 0.99877,
+  "shotAngleAdjusted": 0.99877,
+  "shotAnglePlusRebound": 0.997585,
+  "shotAngleReboundRoyalRoad": 0.999237,
+  "skaters_for": 0.999219,
+  "skaters_against": 0.998465,
+  "skater_diff": 0.998088,
+  "score_diff": 1.0,
+  "empty_net_target": 0.999497,
+  "own_net_empty": 0.999623,
+  "period": 1.0,
+  "is_home": 1.0,
+  "shooter_toi": 0.998896,
+  "shotRush": 0.999874,
+  "shotRebound": 0.999641,
+  "timeSinceLastEvent": 0.997541,
+  "timeSinceFaceoff": 0.999964,
+  "speedFromLastEvent": 0.995144,
+  "distanceFromLastEvent": 0.995288,
+  "lastEventShotAngle": 0.998205,
+  "lastEventShotDistance": 0.998106,
+  "offWing": 0.995045,
+  "era_close_share": 1.0,
+  "era_rebound_share": 1.0,
+  "rink_dist_offset": 1.0,
+  "rink_disagree": 1.0,
+  "era_rush_share": 1.0,
+  "era_close_conv": 1.0,
+  "shotType": 0.998968,
+  "shooterLeftRight": 0.987954,
+  "lastEventCategory": 0.996894,
+  "shooterPos": 0.993771
+ },
+ "xg_opening_calibrator": {
+  "per_shot_matched": {
+   "n": 111409,
+   "corr": 0.985718,
+   "mae": 0.000889,
+   "bias": -0.000297,
+   "rel_bias": -0.004116,
+   "mean_mp": 0.07208,
+   "sd_mp": 0.083662,
+   "raw_gbm_corr": 0.98763,
+   "share_absdiff_gt_0.01": 0.010286,
+   "share_absdiff_gt_0.05": 0.004703,
+   "max_absdiff": 0.81741
+  },
+  "team_game": {
+   "n": 2624,
+   "corr": 0.988884,
+   "mae": 0.042389,
+   "bias": -0.007796,
+   "rel_bias": -0.002532,
+   "mean_mp": 3.078887,
+   "sd_mp": 0.921037
+  },
+  "player_game_ixg": {
+   "n": 40034,
+   "corr": 0.989659,
+   "mae": 0.004036,
+   "bias": -0.000511,
+   "rel_bias": -0.002532,
+   "mean_mp": 0.201803,
+   "sd_mp": 0.218178
+  },
+  "season_total": {
+   "api": 8058.542066,
+   "mp": 8079.0,
+   "goals_api": 8086,
+   "goals_mp": 8079
+  }
+ },
+ "xg_diff_attribution": {
+  "playerPositionThatDidEvent": {
+   "rows": 694,
+   "sum_abs_dxg": 65.201162,
+   "net_dxg": -35.224238
+  },
+  "speedFromLastEvent": {
+   "rows": 541,
+   "sum_abs_dxg": 24.964977,
+   "net_dxg": -0.112085
+  },
+  "distanceFromLastEvent": {
+   "rows": 525,
+   "sum_abs_dxg": 24.601631,
+   "net_dxg": 0.215453
+  },
+  "homeSkatersOnIce": {
+   "rows": 145,
+   "sum_abs_dxg": 18.584788,
+   "net_dxg": 3.292889
+  },
+  "homeEmptyNet": {
+   "rows": 58,
+   "sum_abs_dxg": 15.916302,
+   "net_dxg": 5.309822
+  },
+  "awaySkatersOnIce": {
+   "rows": 113,
+   "sum_abs_dxg": 13.821414,
+   "net_dxg": 2.543842
+  },
+  "timeSinceLastEvent": {
+   "rows": 274,
+   "sum_abs_dxg": 12.90303,
+   "net_dxg": -1.869216
+  },
+  "lastEventCategory": {
+   "rows": 346,
+   "sum_abs_dxg": 12.316906,
+   "net_dxg": -1.800052
+  },
+  "shotAnglePlusRebound": {
+   "rows": 269,
+   "sum_abs_dxg": 12.294838,
+   "net_dxg": 0.529367
+  },
+  "awayEmptyNet": {
+   "rows": 40,
+   "sum_abs_dxg": 11.019217,
+   "net_dxg": 4.539482
+  },
+  "lastEventShotDistance": {
+   "rows": 211,
+   "sum_abs_dxg": 10.418239,
+   "net_dxg": 0.318586
+  },
+  "lastEventShotAngle": {
+   "rows": 200,
+   "sum_abs_dxg": 9.915481,
+   "net_dxg": 0.451113
+  },
+  "shotDistance": {
+   "rows": 143,
+   "sum_abs_dxg": 9.11767,
+   "net_dxg": 1.618822
+  },
+  "shotAngle": {
+   "rows": 137,
+   "sum_abs_dxg": 8.709563,
+   "net_dxg": 1.992941
+  },
+  "shotAngleAdjusted": {
+   "rows": 137,
+   "sum_abs_dxg": 8.709563,
+   "net_dxg": 1.992941
+  },
+  "offWing": {
+   "rows": 552,
+   "sum_abs_dxg": 8.115031,
+   "net_dxg": 1.346776
+  },
+  "shooterLeftRight": {
+   "rows": 1342,
+   "sum_abs_dxg": 6.805029,
+   "net_dxg": -0.145912
+  },
+  "shotAngleReboundRoyalRoad": {
+   "rows": 85,
+   "sum_abs_dxg": 4.888773,
+   "net_dxg": 1.138819
+  },
+  "shotRebound": {
+   "rows": 40,
+   "sum_abs_dxg": 4.239561,
+   "net_dxg": 0.204325
+  },
+  "shotType": {
+   "rows": 115,
+   "sum_abs_dxg": 3.921593,
+   "net_dxg": 0.071098
+  },
+  "shooterTimeOnIce": {
+   "rows": 123,
+   "sum_abs_dxg": 2.322801,
+   "net_dxg": -1.039092
+  },
+  "shotRush": {
+   "rows": 14,
+   "sum_abs_dxg": 0.272254,
+   "net_dxg": 0.272254
+  },
+  "timeSinceFaceoff": {
+   "rows": 4,
+   "sum_abs_dxg": 0.001621,
+   "net_dxg": -0.001621
+  },
+  "homeTeamGoals": {
+   "rows": 0,
+   "sum_abs_dxg": 0.0,
+   "net_dxg": 0.0
+  },
+  "awayTeamGoals": {
+   "rows": 0,
+   "sum_abs_dxg": 0.0,
+   "net_dxg": 0.0
+  },
+  "isHomeTeam": {
+   "rows": 0,
+   "sum_abs_dxg": 0.0,
+   "net_dxg": 0.0
+  }
+ },
+ "xg_diff_totals": {
+  "matched_sum_abs_dxg": 99.069358,
+  "matched_net_dxg": -33.052685,
+  "api_only_xg": 61.249527,
+  "mp_only_xg": 48.654776
+ },
+ "arbiter_shift_charts": {
+  "homeEmptyNet": {
+   "disagreements": 58,
+   "shifts_side_with_api": 58,
+   "shifts_side_with_mp": 0
+  },
+  "awayEmptyNet": {
+   "disagreements": 40,
+   "shifts_side_with_api": 39,
+   "shifts_side_with_mp": 1
+  },
+  "homeSkatersOnIce": {
+   "disagreements": 145,
+   "shifts_side_with_api": 136,
+   "shifts_side_with_mp": 7
+  },
+  "awaySkatersOnIce": {
+   "disagreements": 113,
+   "shifts_side_with_api": 104,
+   "shifts_side_with_mp": 7
+  }
+ },
+ "xg_live_path": {
+  "tgx_xgf_all": {
+   "n": 2624,
+   "corr": 0.984862,
+   "mae": 0.07681,
+   "bias": 0.023264,
+   "rel_bias": 0.007567,
+   "mean_mp": 3.074226,
+   "sd_mp": 0.919868
+  },
+  "tgx_xgf_ev": {
+   "n": 2624,
+   "corr": 0.98584,
+   "mae": 0.050872,
+   "bias": 0.003508,
+   "rel_bias": 0.001674,
+   "mean_mp": 2.096003,
+   "sd_mp": 0.687676
+  },
+  "tgx_xgf_pp": {
+   "n": 2624,
+   "corr": 0.994774,
+   "mae": 0.017927,
+   "bias": 0.006163,
+   "rel_bias": 0.009743,
+   "mean_mp": 0.632502,
+   "sd_mp": 0.467103
+  },
+  "tgx_xgf_sh": {
+   "n": 2624,
+   "corr": 0.994118,
+   "mae": 0.002837,
+   "bias": 8.6e-05,
+   "rel_bias": 0.0011,
+   "mean_mp": 0.078499,
+   "sd_mp": 0.127959
+  },
+  "pgx_ixg_all": {
+   "n": 47231,
+   "corr": 0.990265,
+   "mae": 0.006597,
+   "bias": 0.001283,
+   "rel_bias": 0.007516,
+   "mean_mp": 0.170667,
+   "sd_mp": 0.21387
+  },
+  "pgx_ixg_ev": {
+   "n": 47231,
+   "corr": 0.991407,
+   "mae": 0.004323,
+   "bias": 0.000195,
+   "rel_bias": 0.001673,
+   "mean_mp": 0.116434,
+   "sd_mp": 0.148274
+  },
+  "pgx_ixg_pp": {
+   "n": 47231,
+   "corr": 0.995084,
+   "mae": 0.00127,
+   "bias": 0.000342,
+   "rel_bias": 0.009743,
+   "mean_mp": 0.03514,
+   "sd_mp": 0.092269
+  },
+  "pgx_oi_xgf_ev": {
+   "n": 47231,
+   "corr": 0.99194,
+   "mae": 0.016876,
+   "bias": 0.001034,
+   "rel_bias": 0.001805,
+   "mean_mp": 0.572694,
+   "sd_mp": 0.376689
+  },
+  "pgx_oi_xga_ev": {
+   "n": 47231,
+   "corr": 0.991149,
+   "mae": 0.016829,
+   "bias": 0.001033,
+   "rel_bias": 0.001805,
+   "mean_mp": 0.572596,
+   "sd_mp": 0.359657
+  },
+  "goalie_xg_faced": {
+   "n": 2765,
+   "corr": 0.988765,
+   "mae": 0.065422,
+   "bias": 0.013051,
+   "rel_bias": 0.004762,
+   "mean_mp": 2.740983,
+   "sd_mp": 0.93107
+  },
+  "stream_shots_with_xg": {
+   "api": 1.0,
+   "mp": 0.995727
+  }
+ },
+ "runtime_s": 26
+}

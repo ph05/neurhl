@@ -17,10 +17,16 @@ tables are never touched. Raw files are read from data/raw/ (read only).
            compared with the real gst_*_2026 rows of those games.
   dryrun   the real 2027 path with an empty results file: must print
            "no completed 2027 games" and exit 0.
+  fallback 2026 as the live season with MoneyPuck's file hidden (the 404
+           case): --no-api-fallback defers, then degrades without xG; the
+           default ingests the same games from the NHL play-by-play
+           (nhl_api_shots); when the file appears they are re-ingested from
+           MoneyPuck and every table equals the real one.
 
 Usage: uv run --no-project --python 3.12 --with numpy --with "pandas<3" \
          --with pyarrow --with requests --with numba --with scikit-learn \
-         --with scipy python neurhl/live/test_ingest_parity.py {dryrun|parity|parity2013|live|deferral|all}
+         --with scipy python neurhl/live/test_ingest_parity.py \
+         {dryrun|parity|parity2013|live|deferral|fallback|all}
 """
 import json
 import shutil
@@ -186,7 +192,7 @@ def crash_recovery() -> None:
     st.write_text(json.dumps(js))
     before = pd.read_parquet(d / "pgx_2026.parquet")
     rc, out, _ = run_driver(["--season", "2026", "--tensors", str(d), "--no-fetch",
-                             "--no-right-rail", "--xg-ckpt", str(XG_CKPT), "--today",
+                             "--xg-ckpt", str(XG_CKPT), "--today",
                              "2026-09-27", "--results", str(live_results(30))])
     assert rc == 0 and "did not finish: redoing 1 games" in out
     assert pd.read_parquet(d / "pgx_2026.parquet").equals(before)
@@ -210,7 +216,9 @@ def live_results(days: int) -> Path:
 
 def live() -> list:
     d = make_sandbox("live2026", 2026)
-    base = ["--season", "2026", "--tensors", str(d), "--no-fetch", "--no-right-rail",
+    # right rail on (files on disk, read only): tgx_2025 carries the official PP
+    # counts, so the real tgx_2026 does too
+    base = ["--season", "2026", "--tensors", str(d), "--no-fetch",
             "--xg-ckpt", str(XG_CKPT), "--today", "2026-09-27"]
     timings = {}
     for days in (15, 30, 30):
@@ -266,8 +274,9 @@ def deferral() -> None:
     raw = SANDBOX / "defer2026_raw"
     if raw.exists():
         shutil.rmtree(raw)
-    (raw / "pbp").mkdir(parents=True)
-    (raw / "pbp" / "2026").symlink_to(RAW / "pbp" / "2026")
+    for sub in ("pbp", "right_rail"):     # right rail: tgx_2025 carries official PP counts
+        (raw / sub).mkdir(parents=True)
+        (raw / sub / "2026").symlink_to(RAW / sub / "2026")
     (raw / "mp_shots").symlink_to(RAW / "mp_shots")
     res = live_results(5)
     r = pd.read_csv(res)
@@ -279,7 +288,7 @@ def deferral() -> None:
                 RAW / "shifts" / "2026" / f"{g}.json.gz")
     day = lambda k: (pd.Timestamp(dx) + pd.Timedelta(days=k)).strftime("%Y-%m-%d")  # noqa
     base = ["--season", "2026", "--tensors", str(d), "--raw", str(raw), "--no-fetch",
-            "--no-right-rail", "--xg-ckpt", str(XG_CKPT), "--results", str(res)]
+            "--xg-ckpt", str(XG_CKPT), "--results", str(res)]
     rc, out, _ = run_driver(base + ["--today", day(1)])
     assert rc == 0 and f"deferred {gx}" in out
     assert gx not in set(pd.read_parquet(d / "games_ctx_2026.parquet").game_id)
@@ -301,6 +310,91 @@ def deferral() -> None:
             bad.append(fam)
     assert not bad, bad
     print(f"deferral OK (game {gx}: deferred, degraded, re-ingested; 14 tables match)")
+
+
+SHOT_FREE = ["events", "shifts", "stints", "games_ctx", "player_games", "usage",
+             "onice_rates", "absences"]
+
+
+def fallback() -> None:
+    """MoneyPuck's in-season file missing for the first 7 days of 2026. The old
+    rule (--no-api-fallback) defers the last two days and degrades the rest
+    without xG. The fallback ingests every game with shot rows from the
+    play-by-play: the tables that do not read shots equal the real ones, the xG
+    tables track them (team-game and skater-game xG, goalie xG faced). When the
+    file appears every game is re-ingested from MoneyPuck and all 14 tables equal
+    the real ones; then a re-run is a no-op."""
+    from common import RAW
+    d = make_sandbox("fallback2026", 2026)
+    raw = SANDBOX / "fallback2026_raw"
+    if raw.exists():
+        shutil.rmtree(raw)
+    for sub in ("pbp", "shifts", "right_rail"):     # no mp_shots: the file is "404"
+        (raw / sub).mkdir(parents=True)
+        (raw / sub / "2026").symlink_to(RAW / sub / "2026")
+    res = live_results(7)
+    gids = set(pd.read_csv(res).game_id)
+    last = str(pd.read_csv(res).date.max())
+    today = (pd.Timestamp(last) + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+    base = ["--season", "2026", "--tensors", str(d), "--raw", str(raw), "--no-fetch",
+            "--xg-ckpt", str(XG_CKPT), "--results", str(res), "--today", today]
+    st = d / "_ingest_2026" / "state.json"
+
+    def real(fam):
+        t = pd.read_parquet(TENSORS / f"{fam}_2026.parquet")
+        return t[t.game_id.isin(list(gids))]
+
+    # 1. old rule: the last two days deferred, older games degraded without xG
+    rc, out, _ = run_driver(base + ["--no-api-fallback"])
+    js = json.loads(st.read_text())
+    assert rc == 0 and "pending:mp" in out and "WARNING degraded ingest" in out
+    assert js["degraded"] and set(js["degraded"].values()) == {"mp"}
+    assert not js["xg_source"] and not len(pd.read_parquet(d / "xg_shots_2026.parquet"))
+    n_old = len(pd.read_parquet(d / "games_ctx_2026.parquet"))
+
+    # 2. fallback: every game in, shot rows from the play-by-play
+    rc, out, _ = run_driver(base)
+    js = json.loads(st.read_text())
+    assert rc == 0 and "NHL API shots for" in out and "0 degraded" in out
+    assert set(js["xg_source"]) == {str(g) for g in gids}
+    assert set(js["xg_source"].values()) == {"nhl_api"} and not js["pending"]
+    assert len(pd.read_parquet(d / "games_ctx_2026.parquet")) == len(gids) > n_old
+    bad = [f for f in SHOT_FREE if not compare(f, real(f),
+                                               pd.read_parquet(d / f"{f}_2026.parquet"))["match"]]
+    assert not bad, bad
+    sb = pd.read_parquet(d / "stream_2026.parquet")
+    shots = sb[(sb.game_type == 2) & sb.event_type.isin([7, 9, 14])]
+    cov = float(shots.has_xg.mean())
+    stats = {}
+    for fam, key, col in (("tgx", ["game_id", "is_home"], "xgf_all"),
+                          ("tgx", ["game_id", "is_home"], "xgf_ev"),
+                          ("pgx", ["game_id", "player_id"], "ixg_all"),
+                          ("goalie_games", ["game_id", "player_id"], "xgf")):
+        j = real(fam)[key + [col]].merge(pd.read_parquet(d / f"{fam}_2026.parquet")[key + [col]],
+                                         on=key, suffixes=("_r", "_a"))
+        stats[f"{fam}.{col}"] = (float(np.corrcoef(j[col + "_r"], j[col + "_a"])[0, 1]),
+                                 float(j[col + "_a"].sum() / j[col + "_r"].sum() - 1))
+    print(f"fallback vs real ({len(gids)} games): shots with xG {cov:.2%}; "
+          + ", ".join(f"{k} corr {c:.4f} bias {b:+.2%}" for k, (c, b) in stats.items()))
+    assert cov > 0.999
+    assert all(c >= 0.97 and abs(b) <= 0.03 for c, b in stats.values()), stats
+
+    # 3. MoneyPuck's file appears: re-ingested from it, tables equal the real ones
+    (raw / "mp_shots").symlink_to(RAW / "mp_shots")
+    rc, out, _ = run_driver(base)
+    js = json.loads(st.read_text())
+    assert rc == 0 and out.count("from MoneyPuck (was NHL API)") == len(gids)
+    assert set(js["xg_source"].values()) == {"moneypuck"} and not js["degraded"]
+    bad = [f for f in ORDER if not compare(f, real(f),
+                                           pd.read_parquet(d / f"{f}_2026.parquet"))["match"]]
+    assert not bad, bad
+
+    # 4. nothing changed: no-op
+    rc, out, _ = run_driver(base)
+    assert rc == 0 and "no new 2026 games" in out
+    print(f"fallback OK ({len(gids)} games: old rule deferred/degraded; NHL API rows, "
+          f"{len(SHOT_FREE)} shot-free tables equal; re-ingested from MoneyPuck, "
+          f"{len(ORDER)} tables equal; no-op re-run)")
 
 
 def dryrun() -> None:
@@ -328,3 +422,5 @@ if __name__ == "__main__":
         crash_recovery()
     if what in ("deferral", "all"):
         deferral()
+    if what in ("fallback", "all"):
+        fallback()

@@ -13,8 +13,10 @@ Run everything from the repo root with
 | `publish.sh` | Publishes files through the bot clone (default `/Users/ph/Development/nhl-2026-2027-models-live`): `git pull --rebase`, copies the given repo-relative files/dirs, stages only `neurhl/output/live/`, `data/manual/`, `data/raw/rosters/`, `docs/`, commits with a plain message (`PUBLISH_MSG`; trailers/attribution are refused, and undone if a hook adds one), pushes to main with 3 retries, then checks with `git ls-remote` that the commit is on origin/main. Last stdout line is the sha; nonzero exit on any failure (2 bad path, 3 clone/pull, 4 commit, 5 push, 6 not on origin). | `neurhl/live/publish.sh [BOT_CLONE] FILE...` |
 | `deadline.py` | `check(start_utc, sha)` via `gh api`: committer date (`.commit.committer.date`) before the start, commit on main (compare API), and the earliest `stamp.yml` run for the sha (server-side time). `precedes(start, sha)` is the plain committer-date test. For the acceptance tests. | `python neurhl/live/deadline.py --sha SHA (--start ISO \| --game GID) [--require-stamp]` (exit 0/1/2) |
 | `forecast.py` | Morning, pregame and preview forecasts: resolves lineups, builds the NeurHL-G inputs (`sim/g_live.py`), runs NeurHL-G, the NeurHL-H comparator and in-season Elo, simulates the stat sheets, writes `neurhl/output/live/2027/<date>/`, rebuilds the site and publishes through `publish.sh`. | `python neurhl/live/forecast.py --mode {morning,pregame,preview} [--date D] [--now ISO] [--dry-run]` |
-| `ingest_2027.py` | Nightly ingest of completed 2026-27 regular-season games into the `*_2027` tables that `data/build_g_state.py` and `sim/g_live.py` read (see "Nightly ingest" below). | `python neurhl/live/ingest_2027.py [--no-fetch] [--force] [--through D]` |
-| `test_ingest_parity.py` | Sandbox parity and dry-run tests for the ingest (see below). Never writes to the real tables. | `python neurhl/live/test_ingest_parity.py {dryrun\|parity\|parity2013\|live\|all}` |
+| `ingest_2027.py` | Nightly ingest of completed 2026-27 regular-season games into the `*_2027` tables that `data/build_g_state.py` and `sim/g_live.py` read (see "Nightly ingest" below). | `python neurhl/live/ingest_2027.py [--no-fetch] [--force] [--through D] [--no-api-fallback]` |
+| `nhl_api_shots.py` | MoneyPuck-shaped shot rows (the `mp_shots_S` columns) from the NHL play-by-play and shift chart, for games MoneyPuck does not cover yet (see "NHL API shots" below). | `python neurhl/live/nhl_api_shots.py --season S [--games GID ...] [--out FILE]` |
+| `test_ingest_parity.py` | Sandbox parity and dry-run tests for the ingest (see below). Never writes to the real tables. | `python neurhl/live/test_ingest_parity.py {dryrun\|parity\|parity2013\|live\|deferral\|fallback\|all}` |
+| `test_nhl_api_shots.py` | `nhl_api_shots.py` against MoneyPuck on 2025-26: fields, frozen-model xG, the live path. Writes `neurhl/configs/nhl_api_shots_parity.json`; exit 1 if the fallback gate fails. Needs scikit-learn==1.9.1, scipy. | `python neurhl/live/test_nhl_api_shots.py` |
 | `run_forecast.sh`, `run_nightly.sh` | launchd wrappers. `run_forecast.sh MODE` runs `forecast.py --mode MODE` with every dependency the forecast needs (torch, numba, scikit-learn==1.9.1, scipy); nightly runs `score_live_2027.py`, `ingest_2027.py`, `build_g_state.py`, a fetch and `score_live_g_2027.py`, then publishes results, scorecards and site (see below). | |
 
 Intraday snapshots: `python neurhl/data/fetch/snapshot_lineups.py --intraday` writes
@@ -124,12 +126,12 @@ pipeline built for 2008-2026, by calling the builders' own functions:
 | `events_S` | `tensorize_events.tensorize_game` |
 | `shifts_S`, `stints_S` | `build_shifts._json_game` (goalies from the game's `rosterSpots`), `build_stints._game` |
 | `games_ctx_S`, `player_games_S` | `tensorize_games.roster_toi_one` + its `main()` body. Labels (goals, OT/SO) come from the final play-by-play, rest/travel from `sim/schedule_context.build` over the completed regular-season games (build_travel's rules), and the era vector from `tensorize_games.era_table` (the prior-season construction for a season not yet in games.csv) |
-| `mp_shots_S` | `parse_mp_shots.parse_season` on MoneyPuck `shots_{S-1}.zip` (re-downloaded nightly, ingested games only) |
+| `mp_shots_S` | `parse_mp_shots.parse_season` on MoneyPuck `shots_{S-1}.zip` (re-downloaded nightly, ingested games only). Games MoneyPuck does not cover: `nhl_api_shots.build` (below), whole games, merged in game order |
 | `xg_shots_S` | frozen GBM + `train_xg.seq_calibrate` (below) |
 | `goalie_games_S` | `build_goalie_games.build`, with the walk-forward carry replayed over 2008..S-1 |
 | `stream_S`, `pgx_S`, `tgx_S` | `build_stream.build_season`, `build_xg_games.build_player/build_team` |
 | `usage_S`, `onice_rates_S`, `absences_S` | `build_usage.build`, `build_onice_rates.main()` body, `build_absences.build` |
-| `rr_S` | `build_right_rail.parse` over `data/raw/right_rail/S/` (fetched for each ingested game). `tgx_S.pp_opps` becomes the official count (as `build_right_rail.py` does) only if `tgx_{S-1}` carries `pp_opps_stint`, so `pp_opps` keeps one definition across seasons. Today `tgx_2026` does not |
+| `rr_S` | `build_right_rail.parse` over `data/raw/right_rail/S/` (fetched for each ingested game). `tgx_S.pp_opps` becomes the official count (as `build_right_rail.py` does) only if `tgx_{S-1}` carries `pp_opps_stint`, so `pp_opps` keeps one definition across seasons. `tgx_2012`-`tgx_2026` carry it (rebuilt 2026-09-27), so `tgx_2027` gets the official count |
 
 **Walk-forward xG (A9).** The GBM for V = 2027 is fit once on seasons <= 2025 (train_xg's
 `GBM` settings), with the isotonic seed from its 2026 predictions, and saved to
@@ -145,20 +147,68 @@ table, so its covariates depend on where the table ends. Pre-season the table en
 exactly as in `train_xg.main`.
 
 **Readiness, deferral, idempotence.** The completed games are the rows of `results_2027.csv`.
-A game is ingested once (a) its play-by-play has `gameState` OFF/FINAL, (b) its shift chart
-covers >= 5.4 player-equivalents per side (2026 minimum: 5.68), and (c) MoneyPuck has >= 90% of
-its pbp unblocked attempts (2026 minimum: 97%). An unmet condition defers the game for
-`--max-defer-days` (2) after its date. After that it is ingested degraded with a WARNING line,
-recorded in `neurhl/data/tensors/_ingest_2027/state.json`, and the missing source is re-checked
-(shift charts re-fetched) on every later run. Raw files go to `data/raw/{pbp,shifts,right_rail}/2027/`
+A game is ingested once (a) its play-by-play has `gameState` OFF/FINAL and (b) its shift chart
+covers >= 5.4 player-equivalents per side (2026 minimum: 5.68). An unmet condition defers the
+game for `--max-defer-days` (2) after its date. After that it is ingested degraded with a
+WARNING line, recorded in `neurhl/data/tensors/_ingest_2027/state.json`, and the missing source
+is re-checked (shift charts re-fetched) on every later run. MoneyPuck coverage (>= 90% of the
+game's pbp unblocked attempts; 2026 regular-season minimum 90.3%, one game below 96%) is not a
+readiness condition: a game MoneyPuck does not cover takes its shot rows from the NHL
+play-by-play (`xg_source` "nhl_api" in state.json, one line "NHL API shots for ..." in the log),
+and is re-checked on every later run. Once MoneyPuck covers it, it is re-ingested from MoneyPuck
+("re-ingest ... from MoneyPuck (was NHL API)", `xg_source` "moneypuck"). `--no-api-fallback`
+restores the old rule: MoneyPuck coverage is a condition like (a) and (b), so the game is
+deferred, then ingested degraded (`mp`) without xG. Raw files go to `data/raw/{pbp,shifts,right_rail}/2027/`
 and `data/raw/mp_shots/shots_2026.zip`; nothing older is written. Per-game work runs only for
 new or re-checked games and is merged into the season files. The season-level tables are then
 rebuilt from those files (about 40 s at season end), so walk-forward quantities are always
-recomputed in date order. With no new game and an unchanged MoneyPuck zip the run is a no-op
-("no new 2027 games"). With no completed game at all it prints "no completed 2027 games" and
-exits 0. If a run dies partway through, the next run redoes its games and the season tables
+recomputed in date order; when a game changes source, the xG of later games can move slightly
+(the calibrator's trailing pool and the era covariates include it). With no new game, an
+unchanged MoneyPuck zip and no change of source the run is a no-op ("no new 2027 games").
+With no completed game at all it prints "no completed 2027 games" and exits 0. If a run dies
+partway through, the next run redoes its games and the season tables
 (`dirty`/`inflight` in state.json). In the real tensors directory the driver refuses to write
 any season <= 2026 and any symlink.
+
+**NHL API shots (`nhl_api_shots.py`).** Builds the `mp_shots_S` columns for a game from its
+play-by-play and shift chart, with MoneyPuck's definitions as measured on 2025-26 (both sources
+exist for all 1,312 games). Distance and angle are to the nearest net (dx = 89 - |x|, 1 at
+|x| = 89; the angle takes the sign of y, flipped when x < 0), so a shot from a team's own half is
+measured to its own net, as MoneyPuck does; missing coordinates are 0, 0. The last event is the
+previous play, skipping stoppages other than coach's challenges. For the rebound, rush and
+angle-change fields MoneyPuck credits a blocked shot to the blocking team. Rebound: a SHOT/MISS
+by the same team within 3 s. Rush: a SHOT/MISS/BLOCK of the same team within 4 s, outside the
+offensive zone of the shot's net. Skaters and empty nets come from the play's `situationCode`
+(the shift chart if it has none), shooter time on ice from the shift chart, position from
+`rosterSpots`, handedness from MoneyPuck 2008..S-1, the player landing files and the roster
+snapshots (no network). Not reproduced (NaN; none is read by the xG model or a live builder):
+penalty clocks, forward/defence counts, team rest and time-on-ice aggregates, and the post-shot
+outcome flags. `shotID` is synthetic (game number * 1000 + index).
+
+Parity on 2025-26 (`test_nhl_api_shots.py`, written to `neurhl/configs/nhl_api_shots_parity.json`):
+99.5% of MoneyPuck's 112,011 regular-season rows match a play-by-play row on (game, period,
+time, shooter, event). Most of the rest are the same shot with SHOT/MISS swapped or its time
+moved, feed revisions between the two downloads. On matched rows every model input agrees
+exactly on at least 99.5% of rows, except handedness (98.8%) and position (99.4%), which
+MoneyPuck is missing on 1,342 and 694 rows. Where the empty-net flag or a skater count
+disagrees, the shift charts side with the play-by-play in 337 of 356 rows. Frozen GBM
+(`xg_live_v2027.pkl`) with its opening calibrator and the same covariates: per-shot correlation
+0.986 (MAE 0.0009), team-game xG correlation 0.989 with bias -0.25%, skater-game ixG 0.990.
+Through the live path (covariates from each source, `seq_calibrate`, stream, `tgx`, `pgx`):
+team-game xGF correlation 0.985, bias +0.76% (every play-by-play shot joins the event stream,
+0.4% of MoneyPuck's do not), skater-game ixG 0.990 (+0.75%), goalie xG faced 0.989 (+0.48%).
+The fallback requires team-game correlation >= 0.98 and |bias| <= 2%; the test exits 1 otherwise.
+
+**Games without xG.** With `--no-api-fallback`, a game ingested without MoneyPuck enters the
+state as ZERO xG, not as missing: `build_stream` marks its shots `has_xg = 0`, `build_xg_games`
+sums them as 0 (the `pgx`/`tgx` rows exist, with TOI, shots and goals), `build_g_state` keeps
+the game in every discounted sum (numerator 0, ice time counted), and `goalie_games.xgf` is 0.
+So team, skater and goalie xG rates fall. In a sandbox (2025-26's first week with no MoneyPuck
+file), by day 7 the median team `tm_xgf_ev60_d95` and `tm_xga_ev60_d95` were 13-14% low (d85:
+35-37%), skater `ixg_ev60_d95` 12% and goalie `gk_xga60_d95` 14%. The NeurHL-G forecasts of
+those days had team xG 5% low over the week (8-9% on days 6-7), goals 2% low (4% on day 6),
+and win probabilities moved 0.9 points on average, up to 4.7 (Elo + NeurHL-G stack; with
+NeurHL-H in the stack about 0.6 times that). Opening-night forecasts are unaffected.
 
 **Tests** (`test_ingest_parity.py`, sandboxes under `neurhl/data/tensors/_sandbox_ingest/`,
 symlinks to the real history, driver refuses to write through them):
@@ -169,7 +219,16 @@ excluded game 2012020660. `live` treats 2026 as the live season: 15 days, then 3
 incrementally, then a no-op run. It compares the 30-day tables with the real 2026 rows of
 those games (all equal, xG included), runs build_g_state in the sandbox, and checks the
 `gst_*_2026` rows against the real ones. It also checks recovery from a crashed run. `dryrun`
-checks the real 2027 path with an empty results file.
+checks the real 2027 path with an empty results file. `deferral` withholds one game's shift
+chart: deferred, then degraded, then re-ingested when the chart appears (14 tables equal).
+`fallback` hides the MoneyPuck file for 2026's first 7 days (48 games). With
+`--no-api-fallback` the last two days are deferred and the rest degraded without xG. By default
+all 48 are ingested from the play-by-play: the 8 tables that do not read shots equal the real
+ones, and team-game xGF, skater ixG and goalie xG faced track the real ones (correlation >= 0.97
+and |bias| <= 3% required; measured 0.9998-1.0000 and at most 0.1%). When the file appears all
+48 are re-ingested from MoneyPuck and all 14 tables equal the real ones; a re-run is a no-op.
+The sandbox runs read the right-rail files on disk (`--no-fetch`), as the real `tgx` tables
+carry the official PP counts.
 
 ## Gotchas
 
@@ -202,7 +261,10 @@ which the operator provides (decided 2026-09-27):
 
 Known data risk: 2026-27 shot xG needs MoneyPuck's season shot file
 (`shots_2026.zip`), which returns 404 until MoneyPuck publishes it (usually
-within days of opening night). Until then the ingest defers each game up to
-2 days, then ingests it without xG and flags it degraded; it is re-ingested
-once the file appears. Forecasts are unaffected on opening night (state comes
-from completed seasons).
+within days of opening night). Until then each game takes its shot rows from
+the NHL play-by-play (`nhl_api_shots.py`), scored by the same frozen xG model,
+and is re-ingested from MoneyPuck once the file covers it (see "NHL API shots").
+Forecasts are unaffected on opening night (state comes from completed seasons).
+`--no-api-fallback` restores the old rule (defer up to 2 days, then ingest
+without xG, flagged degraded); those games then count as zero xG in the state
+(see "Games without xG").

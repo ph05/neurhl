@@ -51,7 +51,10 @@ layer and player seasons rest on development evidence only. Neural training
 is not bit-reproducible on the hardware used, which we address by hashing
 checkpoints and reporting CPU inference, but a retrained model will differ
 slightly from the published one. Finally, in-season expected goals for
-2026--27 depend on a third-party shot file being published on time.
+2026--27 come from a third-party shot file. Where it lags, shot records are now
+rebuilt from the league's play-by-play, a declared change that reproduces the
+file's model inputs closely (team-game expected goals correlate 0.985 to 0.989
+with the file's on 2025--26) but not exactly.
 
 \paragraph{Future work.}
 The live season will provide the first clean test of \neurhlG{} and a second,

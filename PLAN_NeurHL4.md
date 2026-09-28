@@ -348,3 +348,38 @@ dispersion stays frozen for 2026-27 and is recorded as a known limitation.
    model code. The next commit made the anchor optional and added
    `"elo_anchor": true` to `r6e.json` to keep the same behaviour, which is why
    the committed file's hash differs from the ledger.
+
+## A4 (2026-09-28, before any 2026-27 game): in-season shot records when MoneyPuck lags
+
+**Finding (inputs only, before any live game).** The nightly ingest takes
+2026-27 shot records from MoneyPuck's season file, which returns 404 until
+MoneyPuck publishes it. A game without MoneyPuck coverage was deferred for up
+to two days and then ingested degraded. A sandbox replay of the first eight
+days of 2025-26 without the file showed that degraded games enter player,
+goalie and team state with zero expected goals, not as missing values. After a
+week:
+- team expected-goal rates (d95) were 13-14% low;
+- skater individual expected goals were 12% low;
+- NeurHL-G's win probabilities (Elo and NeurHL-G stack) moved 0.9 points on
+  average, and up to 4.7.
+
+**Rule.** A game MoneyPuck does not cover takes its shot records from the
+league's own play-by-play and shift chart, built by
+`neurhl/live/nhl_api_shots.py` with MoneyPuck's definitions for every field the
+frozen xG model reads. The game is re-ingested from MoneyPuck once MoneyPuck
+covers it, and the source of each game is recorded in the ingest state.
+`--no-api-fallback` restores the previous rule. If both sources fail for a
+game, it is still ingested degraded, as before, and logged.
+
+**Validation on 2025-26, before the season**
+(`neurhl/configs/nhl_api_shots_parity.json`), against an adoption threshold set
+before the study ran (team-game correlation at least 0.98, bias within 2%):
+- 99.5% of MoneyPuck's regular-season shots match a play-by-play shot.
+- Every model input agrees exactly on at least 98.8% of matched rows.
+- With the frozen xG model, team-game expected goals correlate 0.989 (bias
+  -0.3%) on the same covariates, and 0.985 (bias +0.8%) through the full live
+  path.
+
+**Unchanged.** The xG model, NeurHL-G's weights and stack, and the way every
+win probability is computed. Only the source of shot records for games
+MoneyPuck has not yet covered changes.

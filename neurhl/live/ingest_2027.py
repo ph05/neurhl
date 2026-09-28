@@ -8,7 +8,9 @@ and neurhl/sim/g_live.py see 2026-27 games as history:
   events_S, shifts_S, stints_S            per-game rows (tensorize_events, build_shifts, build_stints)
   games_ctx_S, player_games_S             tensorize_games, with labels from the play-by-play itself
                                           and rest/travel from sim/schedule_context (build_travel rules)
-  mp_shots_S                              parse_mp_shots (MoneyPuck in-season zip)
+  mp_shots_S                              parse_mp_shots (MoneyPuck in-season zip); games MoneyPuck
+                                          does not cover yet: live/nhl_api_shots (same columns, from
+                                          the play-by-play and shift chart), until it does
   xg_shots_S                              walk-forward xG: GBM FROZEN before the season (fit on
                                           seasons <= S-2, isotonic seed on S-1) + the A9 sequential
                                           in-season calibrator (train_xg.seq_calibrate)
@@ -29,10 +31,14 @@ Incremental and idempotent: raw files are fetched only for games not on disk,
 per-game work (events, rosters, shifts, stints) is done only for new games and
 merged into the season files, and the cheap season-level tables are rebuilt
 from those files so walk-forward quantities are always recomputed in order.
-A game is ingested only when its play-by-play is final, its shift chart is
-complete and MoneyPuck has its shots; missing sources defer the game for up to
---max-defer-days after its date, after which it is ingested degraded (logged,
-and re-ingested automatically once the source appears).
+A game is ingested only when its play-by-play is final and its shift chart is
+complete; a missing source defers the game for up to --max-defer-days after
+its date, after which it is ingested degraded (logged, and re-ingested
+automatically once the source appears). A game MoneyPuck does not cover takes
+its shot rows from the NHL play-by-play (xg_source "nhl_api" in state.json)
+and is re-ingested from MoneyPuck once MoneyPuck covers it. --no-api-fallback
+restores the old rule: MoneyPuck coverage is a source like the others
+(deferred, then degraded without xG).
 
 Writes only files for season S. In the real tensors directory it refuses to
 write any season <= 2026 and any symlink.
@@ -42,7 +48,7 @@ Usage (repo root):
      --with requests --with scikit-learn==1.9.1 --with scipy python neurhl/live/ingest_2027.py
   options: --season S  --tensors DIR  --raw DIR  --results CSV  --no-fetch  --through D
            --include-playoffs  --force  --no-right-rail  --max-defer-days N  --workers N
-           --freeze-xg-only
+           --freeze-xg-only  --no-api-fallback
 Exit status: 0 success (including "no completed 2027 games" / "no new games"), 1 failure.
 """
 import argparse
@@ -77,6 +83,13 @@ import data.build_xg_games as XGG  # noqa: E402
 import data.build_right_rail as BRR  # noqa: E402
 import data.parse_mp_shots as PMS  # noqa: E402
 import models.xg as XG  # noqa: E402
+# sibling: relative when imported as neurhl.live.ingest_2027; plain when run as a script.
+# (Never `import live.*`: common.py puts src/ first on sys.path and src/live.py shadows it.)
+try:
+    from . import nhl_api_shots as NAS
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import nhl_api_shots as NAS  # noqa: E402
 
 REAL_TENSORS = common.TENSORS.resolve()
 LIVE_SEASON = 2027
@@ -790,15 +803,26 @@ def official_pp(t: pd.DataFrame, rr: pd.DataFrame) -> pd.DataFrame:
     return t.drop(columns=["o"])
 
 
-def season_tables(ctx: Ctx, known: pd.DataFrame, mp: pd.DataFrame, a) -> dict:
+def season_tables(ctx: Ctx, known: pd.DataFrame, mp: pd.DataFrame, a,
+                  api: pd.DataFrame = None) -> dict:
     t0 = time.time()
     gc, pg = build_games_tables(ctx, known)
     ingested = set(gc.game_id.astype(int))
-    # MoneyPuck shots of ingested games only (parse_mp_shots allowlist)
+    # MoneyPuck shots of ingested games only (parse_mp_shots allowlist); the games
+    # in `api` (MoneyPuck coverage unmet) take the NHL play-by-play rows instead,
+    # whole games only, merged in game order
     mps = mp[mp.game_id.isin(list(ingested))] if len(mp) else mp
+    n_api = 0
+    if api is not None and len(api):
+        api = api[api.game_id.isin(list(ingested))]
+        n_api = int(api.game_id.nunique())
+        keep = mps[~mps.game_id.isin(list(set(api.game_id)))] if len(mps) else mps
+        mps = pd.concat([x for x in (keep, api) if len(x)], ignore_index=True) \
+            .sort_values("game_id", kind="stable")
     if len(mps):
         zp = ctx.raw / "mp_shots" / f"shots_{ctx.S - 1}.zip"
-        ctx.write(mps.reset_index(drop=True), "mp_shots", [zp], PMS.CFG)
+        cfg = dict(PMS.CFG, nhl_api_games=n_api) if n_api else PMS.CFG
+        ctx.write(mps.reset_index(drop=True), "mp_shots", [zp], cfg)
     else:
         log("WARNING: no MoneyPuck shots for any ingested game; xG tables will be empty")
     t1 = time.time()
@@ -835,7 +859,7 @@ def season_tables(ctx: Ctx, known: pd.DataFrame, mp: pd.DataFrame, a) -> dict:
     return {"games_s": round(t1 - t0, 1), "xg_s": round(t2 - t1, 1),
             "goalies_s": round(t3 - t2, 1), "rest_s": round(t4 - t3, 1),
             "n_games": len(gc), "n_reg": int((gc.game_type == 2).sum()),
-            "xg_shots": len(xg), "rr": 0 if rr is None else len(rr)}
+            "xg_shots": len(xg), "nhl_api_games": n_api, "rr": 0 if rr is None else len(rr)}
 
 
 # ------------------------------------------------------------------- main
@@ -861,6 +885,9 @@ def main(argv=None) -> int:
                     help="(tests) allow freezing the xG GBM after season-S shots exist")
     ap.add_argument("--freeze-xg-only", action="store_true",
                     help="fit and save the frozen xG GBM for the season, then exit")
+    ap.add_argument("--no-api-fallback", dest="api_fallback", action="store_false",
+                    help="no NHL play-by-play shot rows: a game MoneyPuck does not cover is "
+                         "deferred, then ingested degraded without xG")
     a = ap.parse_args(argv)
     t_start = time.time()
     ctx = Ctx(a)
@@ -888,11 +915,14 @@ def main(argv=None) -> int:
         ingested_before = set(pd.read_parquet(ctx.cache / "games.parquet",
                                               columns=["game_id"]).game_id.astype(int))
     degraded_before = {int(k): v for k, v in state.get("degraded", {}).items()}
+    source_before = {int(k): v for k, v in state.get("xg_source", {}).items()}
+    api_before = {g for g, s in source_before.items() if s == "nhl_api"}
     inflight = {int(g) for g in state.get("inflight", [])} if state.get("dirty") else set()
     todo = games[~games.game_id.isin(list(ingested_before - set(degraded_before)
-                                          - inflight))]
+                                          - api_before - inflight))]
     log(f"{len(games)} completed games; {len(ingested_before)} already ingested; "
-        f"{len(todo)} to check ({len(degraded_before)} degraded re-checks)")
+        f"{len(todo)} to check ({len(degraded_before)} degraded re-checks, "
+        f"{len(api_before)} NHL API re-checks)")
 
     status = fetch_raw(ctx, todo, a, state)
     # MoneyPuck: one season zip; readiness per game by shot count vs pbp
@@ -901,22 +931,38 @@ def main(argv=None) -> int:
     mp = load_mp(ctx, zp)
     mp_n = (mp[mp.period <= 4].groupby("game_id").size() if len(mp)
             else pd.Series(dtype=int))
+    facts = state.get("facts", {})
+
+    def mp_covers(g: int) -> bool:
+        n = facts.get(str(g), {}).get("n_unblocked", 0)
+        return not n or mp_n.get(g, 0) >= MP_MIN_RATIO * n
+
     today = dt.date.fromisoformat(a.today) if a.today else dt.date.today()
     date_of = dict(zip(games.game_id.astype(int), games.date.astype(str)))
     for gid, stt in list(status.items()):
-        if stt.startswith("pending"):
+        if stt.startswith("pending") or mp_covers(gid):
             continue
-        f = state["facts"][str(gid)]
-        if f["n_unblocked"] and mp_n.get(gid, 0) < MP_MIN_RATIO * f["n_unblocked"]:
-            overdue = (today - dt.date.fromisoformat(date_of[gid][:10])).days > a.max_defer_days
-            if not a.fetch and not a.results:   # sandbox without MoneyPuck: no deferral
-                overdue = True
-            miss = [] if stt == "ready" else stt.split(":")[1].split(",")
-            miss.append("mp")
-            status[gid] = ("degraded:" if overdue else "pending:") + ",".join(miss)
+        if a.api_fallback:          # shot rows from the play-by-play until MoneyPuck has it
+            continue
+        overdue = (today - dt.date.fromisoformat(date_of[gid][:10])).days > a.max_defer_days
+        if not a.fetch and not a.results:   # sandbox without MoneyPuck: no deferral
+            overdue = True
+        overdue = overdue or gid in ingested_before     # never un-ingest a game
+        miss = [] if stt == "ready" else stt.split(":")[1].split(",")
+        miss.append("mp")
+        status[gid] = ("degraded:" if overdue else "pending:") + ",".join(miss)
     ready = sorted(g for g, s in status.items() if not s.startswith("pending"))
+    # xG source of every game in the season tables after this run: MoneyPuck when
+    # it covers the game, else (fallback on) the NHL play-by-play rows
+    source = {}
+    for g in sorted(ingested_before | set(ready)):
+        if mp_covers(g):
+            source[g] = "moneypuck"
+        elif a.api_fallback:
+            source[g] = "nhl_api"
     newly = [g for g in ready if g not in ingested_before or
-             degraded_before.get(g) != status[g].partition(":")[2]]
+             degraded_before.get(g) != status[g].partition(":")[2]
+             or source.get(g) != source_before.get(g)]
     # per-game rework: new games, plus games ingested without a complete shift
     # chart (their chart may have been re-fetched this run)
     per_game = sorted(set(g for g in ready if g not in ingested_before)
@@ -927,6 +973,12 @@ def main(argv=None) -> int:
     for g in ready:
         if status[g].startswith("degraded"):
             log(f"WARNING degraded ingest {g} ({date_of[g]}): {status[g]}")
+    for g, s in source.items():
+        if s == "nhl_api" and source_before.get(g) != s:
+            log(f"NHL API shots for {g} ({date_of.get(g, '?')}): MoneyPuck has "
+                f"{mp_n.get(g, 0)} of {facts[str(g)]['n_unblocked']} unblocked attempts")
+        elif s == "moneypuck" and source_before.get(g) == "nhl_api":
+            log(f"re-ingest {g} ({date_of.get(g, '?')}) from MoneyPuck (was NHL API)")
     # a run that died mid-write leaves state["dirty"]: redo its games and the
     # season stage, whatever else happened since
     dirty = bool(state.get("dirty"))
@@ -935,7 +987,9 @@ def main(argv=None) -> int:
         per_game = sorted(set(per_game) | redo)
         log(f"previous run did not finish: redoing {len(redo)} games and the season tables")
     mp_changed = zip_sha != state.get("mp_zip_sha256", "")
-    if not newly and not mp_changed and not dirty and not a.force and ctx.path("tgx").exists():
+    src_changed = source != source_before
+    if not newly and not mp_changed and not src_changed and not dirty and not a.force \
+            and ctx.path("tgx").exists():
         log(f"no new {S} games (pending {len(pend)}); tables unchanged")
         state["last_run"] = dt.datetime.now().isoformat(timespec="seconds")
         state_p.write_text(json.dumps(state, indent=1))
@@ -949,20 +1003,37 @@ def main(argv=None) -> int:
     t0 = time.time()
     counts = ingest_games(ctx, per_game, a) if per_game else {"games": 0}
     log(f"per-game stage: {counts} in {time.time() - t0:.0f}s")
-    info = season_tables(ctx, games, mp, a)
+    api_games = sorted(g for g, s in source.items() if s == "nhl_api")
+    api, api_failed = None, []
+    if api_games:
+        try:
+            api = NAS.build(api_games, S, ctx.raw, NAS.handedness(S, ctx.out, ctx.raw))
+            log(f"NHL API shot rows: {len(api):,} for {len(api_games)} games (shooter "
+                f"handedness unknown for {api.shooterLeftRight.isna().mean():.1%})")
+        except Exception as e:  # noqa: BLE001  the fallback never blocks the ingest
+            log(f"WARNING: NHL API shot rows failed ({type(e).__name__}: {e}); "
+                f"{len(api_games)} games ingested without xG, flagged degraded:mp")
+            api, api_failed = None, api_games
+            for g in api_failed:
+                del source[g]
+    info = season_tables(ctx, games, mp, a, api)
     log(f"season tables: {info}")
     deg = {str(g): status[g].partition(":")[2] for g in ready
            if status[g].startswith("degraded")}
     for g, v in degraded_before.items():      # still degraded and not re-checked
         if g not in status:
             deg[str(g)] = v
+    for g in api_failed:                      # re-checked (and retried) next run
+        deg[str(g)] = ",".join(x for x in (deg.get(str(g), ""), "mp") if x)
     state.update({"degraded": deg, "pending": {str(g): s for g, s in pend.items()},
+                  "xg_source": {str(g): s for g, s in source.items()},
                   "mp_zip_sha256": zip_sha,
                   "last_run": dt.datetime.now().isoformat(timespec="seconds"),
                   "n_ingested": info["n_games"], "dirty": False, "inflight": []})
     state_p.write_text(json.dumps(state, indent=1))
     log(f"done: {info['n_games']} games in {S} tables ({len(per_game)} new this run, "
-        f"{len(pend)} deferred, {len(deg)} degraded) in {time.time() - t_start:.0f}s")
+        f"{len(pend)} deferred, {len(deg)} degraded, {len(api_games) - len(api_failed)} "
+        f"with NHL API shots) in {time.time() - t_start:.0f}s")
     return 0
 
 
