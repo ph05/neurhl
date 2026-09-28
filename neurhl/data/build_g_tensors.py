@@ -77,7 +77,9 @@ def position_priors(sk: pd.DataFrame) -> dict:
 
 def shrink(sk: pd.DataFrame, pri: dict) -> pd.DataFrame:
     out = {}
-    pos = sk.pos_group.clip(0, 1).to_numpy()
+    # integer positions even when a player without a career record turns the
+    # column into floats (a new signing dressing in a live game)
+    pos = sk.pos_group.fillna(0).clip(0, 1).astype(int).to_numpy()
     for name, (col, _, k) in SK_BASE.items():
         tag = col.rsplit("_", 1)[1]
         n = sk[f"neff_{tag}"].to_numpy()
