@@ -27,8 +27,10 @@ opportunities, the score and the result, including overtime and shootouts.
 - **Against NeurHL-H:** level (0.6601 vs 0.6606, not significant). The engine
   has not been shown to add win-probability information beyond NeurHL-H, so
   NeurHL-H stays the primary win-probability model and NeurHL-G is live as
-  exploratory. Its stat sheets pass every quality gate: its player projections
-  beat the confirmed player-game layer on all four targets.
+  exploratory. Its player projections beat the confirmed player-game layer on
+  all four targets and its team box scores beat both declared baselines; one
+  declared calibration check fails (its team shots-on-goal intervals are too
+  wide).
 - **Live:** every 2026-27 game gets a morning forecast and a pregame forecast
   about an hour before puck drop, committed here before the game, with lineup
   provenance, win probabilities from NeurHL-G, NeurHL-H and Elo, and full

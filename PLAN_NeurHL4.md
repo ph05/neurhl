@@ -284,3 +284,47 @@ assists) by m:
   primary forecast. Walk-forward: a forecast uses only games already finished.
 NeurHL-G's weights, stack and win probabilities are untouched, and no 2025 or
 2026 game is scored or used to fit anything; the seal stays intact.
+
+## A2 (2026-09-28): gate record correction
+
+While the gates were being written up for publication, three declared
+components of section G were found missing from `eval/gate_g.py`:
+
+1. **C, coverage.** The rule declares randomised PIT and 80% coverage within
+   3 points of nominal. The script computed coverage of discrete 80%
+   intervals, which over-cover by construction, reported it, and judged C on
+   slope and overtime share alone.
+2. **T(b).** The comparison against the player-game-layer sum over dressed
+   skaters was not computed.
+3. **T, CRPS.** Only deviance was computed.
+
+The PG rule also names ixG, which has no counterpart in the player-game layer
+and so has no baseline to beat.
+
+`eval/gate_g_record.py` computes items 1-3 from the same saved G_GATE
+predictions, with the predictive distributions the gate script already used
+for its intervals (Poisson; negative binomial with r = 40 for team SOG).
+Nothing is refitted. Record: `neurhl/output/g_gates_record.json`.
+
+| Component | Result |
+|---|---|
+| C coverage, team regulation goals (Poisson) | 0.803, within 3 points |
+| C coverage, team SOG (negative binomial, r = 40) | **0.860, outside 3 points: intervals too wide** |
+| C coverage, skater SOG (Poisson) | 0.783, within 3 points |
+| T(b) team SOG vs player-game-layer sum, Poisson deviance | better: -0.0248 (SE 0.0038) |
+| T(b) team goals vs player-game-layer sum, Poisson deviance | better: -0.0055 (SE 0.0026) |
+| T, CRPS, team SOG, vs history and vs layer sum | better: -0.029 (SE 0.006) and -0.059 (SE 0.010) |
+| T, CRPS, team goals, vs history and vs layer sum | better: -0.018 (SE 0.003) and -0.007 (SE 0.003) |
+
+The team goals comparison uses the Poisson mean implied by each skater's
+P(goal >= 1).
+
+**Correction.** Gate C, as declared, **fails** on team-SOG coverage, which
+supersedes "C: PASS" in the FREEZE table. The slope (0.968) and overtime share
+(0.224 predicted vs 0.220 observed) still pass. Gate T passes on every
+declared comparison. No decision changes: S-STOP failed on its NeurHL-H
+condition, the seal stays unspent, and NeurHL-G v1 stays live as exploratory.
+
+The stat-sheet simulator draws team SOG from the same negative binomial
+(r = 40), so its team-SOG spread is too wide. Team means are unaffected. The
+dispersion stays frozen for 2026-27 and is recorded as a known limitation.

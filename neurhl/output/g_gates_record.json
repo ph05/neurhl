@@ -1,0 +1,118 @@
+{
+ "config": "g1",
+ "n_games": 6289,
+ "seed": 711,
+ "C_declared": {
+  "team_goals": {
+   "n": 12536,
+   "coverage80": 0.8030472239948947,
+   "pass": true
+  },
+  "team_sog": {
+   "n": 12578,
+   "coverage80": 0.8601526474797265,
+   "pass": false
+  },
+  "skater_sog": {
+   "n": 225752,
+   "coverage80": 0.7826641624437436,
+   "pass": true
+  },
+  "pass": false
+ },
+ "pit_histograms": {
+  "team_goals": [
+   1249,
+   1279,
+   1255,
+   1295,
+   1297,
+   1171,
+   1249,
+   1204,
+   1317,
+   1220
+  ],
+  "team_sog": [
+   880,
+   1214,
+   1369,
+   1430,
+   1443,
+   1423,
+   1395,
+   1382,
+   1163,
+   879
+  ],
+  "skater_sog": [
+   24228,
+   23794,
+   22853,
+   22243,
+   21758,
+   21507,
+   21382,
+   21277,
+   21874,
+   24836
+  ]
+ },
+ "T_b_declared": {
+  "sogf": {
+   "n_team_games": 12578,
+   "vs_pg_layer_sum": {
+    "mean_diff": -0.024815068322548713,
+    "se": 0.003775612813068821,
+    "p": 4.949032152423857e-11,
+    "better": true
+   }
+  },
+  "goals": {
+   "n_team_games": 12536,
+   "vs_pg_layer_sum": {
+    "mean_diff": -0.005470489793470881,
+    "se": 0.002606508803570215,
+    "p": 0.03583625648423228,
+    "better": true
+   }
+  }
+ },
+ "CRPS_declared": {
+  "sogf": {
+   "neurhl_g": 3.6303703091856865,
+   "log5_history": 3.658909108505847,
+   "pg_layer_sum": 3.6891899723575454,
+   "vs_history": {
+    "mean_diff": -0.02853879932016105,
+    "se": 0.0056582957420819495,
+    "p": 4.565926191471063e-07,
+    "better": true
+   },
+   "vs_pg_layer_sum": {
+    "mean_diff": -0.0588196631718593,
+    "se": 0.009660299234979948,
+    "p": 1.1375768251216213e-09,
+    "better": true
+   }
+  },
+  "goals": {
+   "neurhl_g": 0.9414818731504383,
+   "log5_history": 0.9596254185852031,
+   "pg_layer_sum": 0.9480242550432237,
+   "vs_history": {
+    "mean_diff": -0.018143545434765006,
+    "se": 0.0025190907220936742,
+    "p": 5.915383276449939e-13,
+    "better": true
+   },
+   "vs_pg_layer_sum": {
+    "mean_diff": -0.006542381892785523,
+    "se": 0.003152586676638449,
+    "p": 0.03796406448165814,
+    "better": true
+   }
+  }
+ },
+ "note": "Computed after the FREEZE from the same saved predictions; PLAN_NeurHL4 A2 records the correction. No decision changes."
+}
