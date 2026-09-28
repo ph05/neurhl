@@ -164,7 +164,9 @@ def main():
     frozen = "2026-09-25"
     if unified:
         frozen = json.loads((UNI / "run_2027.json").read_text())["created_utc"][:10]
+    checks = rd(UNI / "checks_2027.json") if unified else None
     data = {"frozen": frozen, "sha256": sha, "game_sha": sha[files[0]], "unified": unified,
+            "checks": {k: checks[k] for k in ("pass", "passed", "n")} if checks else None,
             "live": card, "tonight": tonight(),
             "teams": teams, "games": games, "players": players,
             "evidence": evidence}
