@@ -745,3 +745,17 @@ predictions.
 
 The sealed seasons are spent, so there is no confirmatory test. The live
 2026-27 season scores it.
+
+## A17 (2026-09-29): g1rk on the iteration window meets the A16 rule
+
+Iteration window 2012 and 2014-2018, five seeds each, the same games for g1
+and g1rk:
+
+| Measure | g1 | g1rk | Difference (SE) | Seasons better |
+|---|---|---|---|---|
+| Rookie goals, Poisson loss (32,328 rookie skater-games) | 0.34274 | 0.34234 | -0.00040 (0.00017) | 4 of 6 |
+| Rookie assists, Poisson loss | 0.47973 | 0.47944 | -0.00029 (0.00017) | 5 of 6 |
+| Final-probability log loss | 0.67260 | 0.67272 | +0.00011 | |
+
+The last row is within the +0.0003 allowance. So, as A16 declares, one
+G_GATE run follows under the same rule.
