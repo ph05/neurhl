@@ -15,7 +15,7 @@ exactly the games PLAN_NeurHL4 LIVE counts are counted here (primary: pregame).
 Primary tests, one Holm family of two, run once after the last regular-season
 game: mean paired log-score difference per team-game (calibrated minus
 frozen, higher is better), week-block bootstrap 95% interval (9,999 draws,
-seed 711). Also reported: randomised-PIT 80% coverage for SOG, goal deciles,
+seed 711). Also reported: randomised-PIT 80% coverage for SOG, goal quintiles,
 and a team-clustered sensitivity. Interim scorecards are descriptive.
 
 Writes neurhl/output/live/scorecard_1_1_2027.json.
@@ -76,9 +76,13 @@ def boot_p(d, weeks, draws=L.DRAWS, seed=L.SEED):
 
 
 def team_cluster_se(d, teams):
-    s = pd.Series(np.asarray(d, float)).groupby(np.asarray(teams)).sum()
+    d = np.asarray(d, float)
     n = len(d)
-    return float(np.sqrt((s ** 2).sum()) / n) if n else None
+    if not n:
+        return None
+    s = pd.Series(d - d.mean()).groupby(np.asarray(teams)).sum()   # centred
+    G = len(s)
+    return float(np.sqrt((s ** 2).sum() * G / max(G - 1, 1)) / n)
 
 
 def compare(new, old, weeks, teams, final):
@@ -203,7 +207,8 @@ def main(argv=None) -> int:
         cald = root / "neurhl/configs/calibration_1_1d.json"
         if cald.exists() and kx.any():
             cd = json.loads(cald.read_text())
-            Mx = float(mx[kx].mean())
+            fm = np.isfinite(mx) & (mx > 0)
+            Mx = float(mx[fm].mean())                  # forecasts only, never outcomes
             m2 = Mx * (mx[kx] / Mx) ** cd["b_x"]
             xd = compare(gl_(yx[kx], m2, cd["k_x"]), gl_(yx[kx], mx[kx], 9.0), weeks[kx], teams[kx], final)
             u2 = stats.gamma.cdf(yx[kx], cd["k_x"], scale=m2 / cd["k_x"])
@@ -220,6 +225,8 @@ def main(argv=None) -> int:
     j = skater_rows(g, tabs, root, first, prefix) if calc.exists() else None
     if j is not None and len(j) and "sog_p10" in j:
         r_s = json.loads(calc.read_text())["r_s"]
+        j = j[np.isfinite(j.sog_mean) & (j.sog_mean > 0) & np.isfinite(j.sog)
+              & np.isfinite(j.sog_p10) & np.isfinite(j.sog_p90)]
         mu, ys = j.sog_mean.to_numpy(float), j.sog.to_numpy(float)
         lo_c = stats.nbinom.ppf(0.1, r_s, r_s / (r_s + mu))
         hi_c = stats.nbinom.ppf(0.9, r_s, r_s / (r_s + mu))

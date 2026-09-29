@@ -566,3 +566,29 @@ single season-end inference as C1, in a separate Holm family of one.
   distance 0.033, time since the last event 0.026. Conversion inside 10 ft
   fell from 16.6% to 14.5%. The xG model's close-shot-conversion era
   feature already targets this. Diagnostic only.
+
+## A11 (2026-09-29, before the first 2026-27 game): corrections from a code review
+
+These corrections change no declared test. All were made before any game.
+
+- **The live standings (A9) could not have run.** The nightly environment has
+  no torch, and the runner imported `sim/unified_2027.py`, which imports it.
+  It now carries its own logit and division helpers. Checked in the nightly
+  environment.
+- **The season-end comparator for the live standings is now the frozen 1.0
+  layer (0.07, 0, 1),** as A9 declares. The code had used the update's own
+  drift (0.02), which widens the comparator's intervals by 16-20%.
+- **The team-clustered standard error in the C1 scorer is now centred.** It
+  had omitted subtracting the mean, which inflated it about threefold. It is
+  reported only, never decisive.
+- **C1d's centre M is the mean frozen xG forecast over every scored game.**
+  It no longer depends on which games have ingested xG actuals: forecasts
+  only, as A10 says.
+- **C1c skips skater rows with missing values.** Before, one NaN turned the
+  whole comparison into NaN.
+- **Guards.** `live/freeze_opening.sh` now stops before any step once the
+  FREEZE section exists. `goal_calibration.py --freeze` refuses too, because
+  its M is a C1 input.
+- **Unchanged, noted.** Skater goals MAE for the calibrated set is reported
+  only if the season-end skater file carries goals. The final branches need
+  all 1,344 results; a game postponed beyond 2027-04-10 would delay them.

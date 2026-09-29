@@ -27,13 +27,24 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-import sim.unified_2027 as U  # noqa: E402
 from sim.live_standings_1_1 import posterior, project  # noqa: E402
 
 LIVE = ROOT / "output" / "live"
 UNI = ROOT / "output" / "neurhl_1_0"
 PARAMS = ROOT / "configs" / "live_standings_1_1.json"
 SIMS, SEED = 20000, 711
+
+
+def logit(p):
+    p = np.clip(np.asarray(p, float), 1e-6, 1 - 1e-6)
+    return np.log(p / (1 - p))
+
+
+def divisions():
+    """As sim/unified_2027.divisions (imported here without torch)."""
+    h = pd.read_csv(ROOT.parent / "output" / "projections_2026_27_howe.csv")
+    div = dict(zip(h.Abbr, h.Division))
+    return div, {t: ("E" if d in ("Atlantic", "Metropolitan") else "W") for t, d in div.items()}
 
 
 def main():
@@ -47,7 +58,7 @@ def main():
     ti = {t: i for i, t in enumerate(teams)}
     T = len(teams)
     hi, ai = g.home.map(ti).to_numpy(), g.away.map(ti).to_numpy()
-    z = U.logit(g.p_home_win.to_numpy())
+    z = logit(g.p_home_win.to_numpy())
     k = g.rate_sensitivity.to_numpy()
     o4 = g[["p_home_reg", "p_away_reg", "p_home_ot", "p_away_ot"]].to_numpy()
     wk = ((pd.to_datetime(g.date) - pd.to_datetime(g.date).min()).dt.days // 7).to_numpy()
@@ -62,7 +73,7 @@ def main():
     now = int(wk[played].max()) + 1 if played.any() else 0
     rem = ~played
     sim = project(z[rem], k[rem], hi[rem], ai[rem], o4[rem], wk[rem], now, pts, m, C, sw, SIMS, SEED)
-    div, conf = U.divisions()
+    div, conf = divisions()
     key = sim + np.random.default_rng(SEED + 7).random(sim.shape)
     po = np.zeros(T)
     for cf in ("E", "W"):

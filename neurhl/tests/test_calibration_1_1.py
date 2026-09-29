@@ -113,7 +113,7 @@ def main():
         check("xG (C1b): paired log-score difference, degraded G3 left out",
               card["xg"]["n_team_games"] == 2 and abs(card["xg"]["diff"] - dx) < 1e-9,
               f"{card['xg'].get('diff', float('nan')):.6f} vs {dx:.6f}")
-        Mx = mx.mean()
+        Mx = np.mean([3.2, 2.5, 2.8, 3.0])            # centre: every scored game's frozen forecast (G1, G3)
         m2 = Mx * (mx / Mx) ** 0.8
         dd = float(np.mean(gx(yx, m2, 12.0) - gx(yx, mx, 9.0)))
         check("xG slope (C1d): paired log-score difference", abs(card["xg_slope"]["diff"] - dd) < 1e-9,

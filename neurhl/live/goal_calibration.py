@@ -31,6 +31,8 @@ K = 300.0
 
 
 def freeze(first_days: int = 14):
+    from common import refuse_if_frozen_1_0
+    refuse_if_frozen_1_0(STATE.name + " (m0 and M are frozen inputs of NeurHL 1.0 and 1.1)")
     import importlib.util
     import sim.g_live as GL
     from sim.g_forecast_core import raw_outputs, sha

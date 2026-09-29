@@ -20,6 +20,13 @@ UV=(uv run -q --no-project --python 3.12 --with numpy --with "pandas<3" --with p
     --with numba --with torch --with scipy --with scikit-learn==1.9.1 --with requests --with openpyxl)
 DATE=${FREEZE_DATE:-2026-09-28}
 DRY=${DRY_RUN:-0}          # 1: rehearsal, restores the plan and stages, commits and pushes nothing
+# the freeze is one-shot: once PLAN_NeurHL_1_0.md has its FREEZE section, stop before any
+# step deletes or rewrites a hashed file (corrections are new dated file sets)
+if grep -q "^## FREEZE" "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/PLAN_NeurHL_1_0.md" \
+   && [ "${NEURHL_ALLOW_REFREEZE:-0}" != 1 ]; then
+  echo "[freeze_opening] PLAN_NeurHL_1_0.md already has its FREEZE section; refusing to run"
+  exit 1
+fi
 log() { echo "[freeze_opening $(date '+%H:%M:%S')] $*"; }
 
 log "1. roster snapshot $DATE"

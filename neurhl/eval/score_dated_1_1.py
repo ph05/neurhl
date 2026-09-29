@@ -132,7 +132,7 @@ def live_standings(res):
         np.add.at(pts, ai[played], np.where(~hw, 2, np.where(extra, 1, 0)))
         rem = ~played
         sim = project(z[rem], k[rem], hi[rem], ai[rem], o4[rem], wk[rem], 0, pts, np.zeros(T),
-                      np.eye(T) * prm["sigma0"] ** 2, prm["sw"], 20000, 711)
+                      np.eye(T) * 0.07 ** 2, 0.0, 20000, 711)   # the frozen 1.0 layer (0.07, 0, 1)
         qn = np.percentile(sim, np.arange(1, 100), axis=0).T
         y = final.reindex(teams).to_numpy(float)
         cl = np.array([crps_from_quantiles(live.loc[t, qcols].to_numpy(float), y[i]) for i, t in enumerate(teams)])
