@@ -130,6 +130,13 @@ def build(games: pd.DataFrame, lineups: dict, results: pd.DataFrame = None,
         sk["rk_pred_a"] = sk.player_id.map(_rk.pred_a)
         sk["rk_flag"] = sk.player_id.isin(_rk.index).astype(float)
         Fs = _bn
+    if "px_g" in _bn:                                  # candidate g1x (A19): non-NHL records, all players
+        _px = pd.read_parquet(ROOT / "data" / "tensors" / "prior_features.parquet")
+        _px = _px[_px.season_end == SEASON].set_index("player_id")
+        sk["px_g"] = sk.player_id.map(_px.px_g)
+        sk["px_a"] = sk.player_id.map(_px.px_a)
+        sk["px_gp"] = sk.player_id.map(_px.px_gp).fillna(0.0)
+        Fs = _bn
     SK = np.full((N, 2, NS, len(Fs)), np.nan, np.float32)
     SKB = np.full((N, 2, NS, len(Fb)), np.nan, np.float32)
     SKM = np.zeros((N, 2, NS), np.float32)
