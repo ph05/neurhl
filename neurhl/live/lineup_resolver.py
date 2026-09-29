@@ -376,6 +376,30 @@ def _df_injured(ctx: _Ctx, team: str, notes: list) -> set[int]:
         return set()
 
 
+MP_OUT_STATUSES = {"IR", "IR-NR", "IR-LT", "O"}
+
+
+def _mp_injured(ctx: _Ctx, team: str, notes: list) -> set[int]:
+    """NHL ids MoneyPuck lists as out for this game (PLAN_NeurHL_1_1 A15): injured reserve or
+    out, with a real return date after the game date, from the latest snapshot before the
+    cutoff. Day-to-day players and placeholder dates are left to the other sources."""
+    try:
+        d, _ = latest_snapshot("mp_injuries.csv.gz", ctx.cutoff, ctx.date, ctx.snapshot_dir)
+        if d is None:
+            return set()
+        m = pd.read_csv(Path(d) / "mp_injuries.csv.gz")
+        ret = m.dateOfReturn.astype(str).str[:10]
+        out = m[(m.teamCode == team) & m.playerInjuryStatus.isin(MP_OUT_STATUSES)
+                & (ret > ctx.date) & (ret <= "2027-06-30")]
+        ids = set(int(x) for x in out.playerId)
+        if ids:
+            notes.append(f"MoneyPuck injured excluded: {', '.join(out.playerName)}")
+        return ids
+    except Exception as e:  # noqa: BLE001
+        notes.append(f"MoneyPuck injury list unavailable ({type(e).__name__}: {e})")
+        return set()
+
+
 def _top_up(ctx: _Ctx, team: str, F: list, D: list, exclude: set, notes: list) -> tuple[list, list]:
     toi = prior_toi()
     r = ctx.roster_team(team)
@@ -546,6 +570,7 @@ def _side(ctx: _Ctx, team: str, side: str) -> dict:
     exclude = set(ctx.unavail)
     if out["lineup_source"] != "NHL_API" or out["goalie"] is None:
         exclude |= _df_injured(ctx, team, notes)
+        exclude |= _mp_injured(ctx, team, notes)
 
     g_cands: list[int] = []
     # (b) DailyFaceoff lines
