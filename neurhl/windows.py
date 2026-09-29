@@ -130,7 +130,11 @@ def unseal(caller: str) -> None:
 
 
 def is_unsealed() -> bool:
-    return _UNSEALED
+    """True inside the seal script, and for good once the seal has been spent: its one-shot
+    result (output/g_seal_result.json, PLAN_NeurHL4 A5/A6) exists, so 2025 and 2026 are no
+    longer held out from anything."""
+    from pathlib import Path
+    return _UNSEALED or (Path(__file__).resolve().parent / "output" / "g_seal_result.json").exists()
 
 
 def assert_scorable_g(seasons, window: str) -> None:
