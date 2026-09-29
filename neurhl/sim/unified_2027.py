@@ -617,8 +617,24 @@ def main():
     pq.insert(0, "team", teams)
 
     # ---- skaters
+    # names: the rosters snapshot first, then the availability and rates tables
+    # (injured-reserve players and call-ups are not on the NHL roster), then every
+    # earlier snapshot
+    name = {}
+    snaps = sorted((PROJ / "data" / "raw" / "rosters").glob("*/rosters.csv"))
+    for f in snaps[::-1]:
+        r_ = pd.read_csv(f)
+        for pid, nm in zip(r_.player_id, r_["first"].astype(str) + " " + r_["last"].astype(str)):
+            name.setdefault(int(pid), nm)
+    for f in (OUT / "player_rates_2027.csv", OUT / "availability_2027.csv"):
+        if f.exists():
+            r_ = pd.read_csv(f)
+            if "name" in r_:
+                for pid, nm in zip(r_.player_id, r_.name):
+                    if isinstance(nm, str) and nm.strip():
+                        name[int(pid)] = nm
     rost = pd.read_csv(PROJ / "data" / "raw" / "rosters" / a.rosters_date / "rosters.csv")
-    name = dict(zip(rost.player_id, (rost["first"] + " " + rost["last"])))
+    name.update({int(pid): nm for pid, nm in zip(rost.player_id, rost["first"] + " " + rost["last"])})
     agg_cols = SK_STATS + ["dress", "toi"] + extra
     sk = pg.groupby(["player_id", "team"], as_index=False)[agg_cols].sum()
     sk = sk.rename(columns={"dress": "gp"})

@@ -16,6 +16,8 @@ and re-derives, independently of the simulator's code:
               skater goals equal the game file's team goals; ice time inside
               the physical budget; faceoffs balanced between the two teams;
               season totals equal the sums of the player-game rows
+  across paths  when the opening-night preview exists, the season model's
+              opening-night probabilities agree with the game-day path
 Writes output/neurhl_1_0/checks_2027.json; exits 1 if any check fails.
 """
 import json
@@ -91,6 +93,9 @@ def main():
     d = (gl.groupby("team").wins.sum() - t.exp_wins_from_games).abs().max()
     check("goalie wins sum to the team's expected wins", d < tol, f"max |diff| {d:.4f}")
 
+    unnamed = int((sk.name.isna() & (sk.gp >= 1)).sum() + (gl.name.isna() & (gl.starts >= 1)).sum())
+    check("every skater with a game and every goalie with a start has a name", unnamed == 0, f"{unnamed} unnamed")
+
     print("\nPLAYER-GAMES")
     tg = pg.groupby(["game_id", "side"])
     dress = tg.dress.sum()
@@ -111,6 +116,14 @@ def main():
         src = {"goals": "g", "assists": "a", "gp": "dress"}.get(c, c)
         d = (pg.groupby("player_id")[src].sum() - sk.groupby("player_id")[c].sum()).abs().max()
         check(f"season {c} = sum of the player-game rows", d < 1e-2, f"max |diff| {d:.1e}")
+
+    prev = ROOT / "output" / "live" / "2027" / "2026-09-29" / "preview.csv"
+    if prev.exists():
+        print("\nACROSS PATHS")
+        pv = pd.read_csv(prev).set_index("game_id")
+        d = (gi.loc[pv.index, "p_home_win"] - pv.p_home_win_neurhl_g).abs()
+        check("opening night agrees with the game-day preview within 0.06", d.max() < 0.06,
+              f"max |diff| {d.max():.3f} over {len(d)} games")
 
     ok = all(r["pass"] for r in RES)
     (OUT / "checks_2027.json").write_text(json.dumps({"pass": ok, "n": len(RES),
