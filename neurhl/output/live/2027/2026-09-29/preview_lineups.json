@@ -3,8 +3,8 @@
   "game_id": 2026020001,
   "date": "2026-09-29",
   "start_utc": "2026-09-29T21:00:00+00:00",
-  "as_of": "2026-09-28T18:25:58.442361+00:00",
-  "roster_snapshot": "2026-09-27",
+  "as_of": "2026-09-29T03:23:58.535429+00:00",
+  "roster_snapshot": "2026-09-28",
   "notes": [],
   "home": {
    "team": "CAR",
@@ -119,8 +119,8 @@
   "game_id": 2026020002,
   "date": "2026-09-29",
   "start_utc": "2026-09-29T23:00:00+00:00",
-  "as_of": "2026-09-28T18:25:58.442361+00:00",
-  "roster_snapshot": "2026-09-27",
+  "as_of": "2026-09-29T03:23:58.535429+00:00",
+  "roster_snapshot": "2026-09-28",
   "notes": [],
   "home": {
    "team": "TOR",
@@ -235,8 +235,8 @@
   "game_id": 2026020003,
   "date": "2026-09-29",
   "start_utc": "2026-09-30T00:00:00+00:00",
-  "as_of": "2026-09-28T18:25:58.442361+00:00",
-  "roster_snapshot": "2026-09-27",
+  "as_of": "2026-09-29T03:23:58.535429+00:00",
+  "roster_snapshot": "2026-09-28",
   "notes": [],
   "home": {
    "team": "BOS",
@@ -351,8 +351,8 @@
   "game_id": 2026020004,
   "date": "2026-09-29",
   "start_utc": "2026-09-30T02:00:00+00:00",
-  "as_of": "2026-09-28T18:25:58.442361+00:00",
-  "roster_snapshot": "2026-09-27",
+  "as_of": "2026-09-29T03:23:58.535429+00:00",
+  "roster_snapshot": "2026-09-28",
   "notes": [],
   "home": {
    "team": "EDM",
@@ -459,7 +459,7 @@
     "boxscore lineup not published",
     "DF dropped unavailable/injured: Jake DeBrusk",
     "DF lines 2026-09-28 'Brendan Batchelor' updated 09-28 18:14Z",
-    "topped up 1 F / 0 D from roster 2026-09-27 by prior TOI"
+    "topped up 1 F / 0 D from roster 2026-09-28 by prior TOI"
    ],
    "n_f": 12,
    "n_d": 6
@@ -469,8 +469,8 @@
   "game_id": 2026020005,
   "date": "2026-09-29",
   "start_utc": "2026-09-30T02:30:00+00:00",
-  "as_of": "2026-09-28T18:25:58.442361+00:00",
-  "roster_snapshot": "2026-09-27",
+  "as_of": "2026-09-29T03:23:58.535429+00:00",
+  "roster_snapshot": "2026-09-28",
   "notes": [],
   "home": {
    "team": "VGK",
@@ -576,7 +576,7 @@
    "notes": [
     "boxscore lineup not published",
     "DF lines stale (updated 2026-09-28 11:49Z, snapshot 2026-09-28)",
-    "base: roster 2026-09-27 skaters ranked by 2025-26 TOI",
+    "base: roster 2026-09-28 skaters ranked by 2025-26 TOI",
     "goalie by 2025-26 starts (55)"
    ],
    "n_f": 12,

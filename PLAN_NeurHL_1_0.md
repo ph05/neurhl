@@ -214,3 +214,29 @@ Highest projected points: CAR 114.0, COL 111.7, TBL 106.1, VGK 105.3, DAL 102.2.
 
 These files are never edited. A correction is issued as a new, dated file set
 beside them, and both are scored.
+
+## A2 (2026-09-29 03:30 UTC, after the freeze, before any 2026-27 game): freeze record notes
+
+The FREEZE above is unchanged, and so are the hashed files. Two points of record:
+
+1. **Code.** The freeze run used code with changes not yet committed. They
+   are committed as `f956cbe`, on top of the freeze commit: the player-name
+   fallback in `sim/unified_2027.py`, the names and cross-path checks in
+   `tests/check_neurhl_1_0.py`, `tests/test_unified_canonical.py`, and the
+   dry-run mode of `live/freeze_opening.sh`. "Code at commit `9c78a40`"
+   should be read as `9c78a40` plus those changes. Rerunning at `f956cbe`
+   reproduces the hashed prediction files.
+2. **Opening-night preview.** The freeze script skips the preview if one
+   already exists. It found the 2026-09-28 14:26 ET rehearsal preview, which
+   had been built on the 2026-09-27 rosters, and committed it. That file is
+   replaced by a preview regenerated on the 2026-09-28 rosters. The lineups
+   and win probabilities are identical; only the goal multiplier differs
+   (0.9218 in the rehearsal, 0.9229 frozen), which moves each goal mean by
+   0.12%.
+   - The cross-path check recorded in `checks_2027.json` compared the season
+     model with the rehearsal preview (max difference 0.015).
+   - Against the regenerated preview, the five opening-night differences
+     are 0.0018, 0.0017, 0.0147, 0.0015 and 0.0046 (max 0.0147, within the
+     0.06 tolerance).
+   - The preview is not scored and not hashed. Morning and pregame forecasts
+     are.
