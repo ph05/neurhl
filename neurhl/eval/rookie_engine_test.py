@@ -32,7 +32,7 @@ from finetune_g_c4 import SNAP, build  # noqa: E402
 from train.train_neurhl_g import DEFAULT, Data, predict  # noqa: E402
 
 SEASONS = [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2022, 2023, 2024]
-MODE = "relative" if "--relative" in sys.argv else "absolute"
+MODE = "finishing" if "--finishing" in sys.argv else "relative" if "--relative" in sys.argv else "absolute"
 OUT = ROOT / "output" / "neurhl_1_1" / f"rookie_engine_test_{MODE}.json"
 
 
@@ -80,7 +80,11 @@ def main():
             r = pr.loc[pid]
             p = int(r.pos)
             # the prior's per-60 rates, at the position's baseline ice time
-            if MODE == "relative":      # keep the trained level: multiply the position prior by the
+            if MODE == "finishing":     # shots stay at the prior; goals enter through finishing
+                scale_g = float(np.clip(r.pred_g / mean_pred[(p, "g")], 0.5, 2.0))
+                scale_a = float(np.clip(r.pred_a / mean_pred[(p, "a")], 0.5, 2.0))
+                new_p = {"g_per_sog": pri["g_per_sog"][p] * scale_g, "a60": pri["a60"][p] * scale_a}
+            elif MODE == "relative":      # keep the trained level: multiply the position prior by the
                 # rookie's prior relative to the average earlier rookie of his position
                 scale_g = r.pred_g / mean_pred[(p, "g")]
                 scale_a = r.pred_a / mean_pred[(p, "a")]
