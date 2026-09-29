@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NeurHL 2026-27 NHL Projections</title>
-<meta name="description" content="NeurHL: preregistered NHL projections for 2026-27. Standings, playoff odds, team and player projections, game probabilities and scoring.">
+<meta name="description" content="NeurHL: NHL projections for 2026-27. Standings, playoff odds, team and player projections, game probabilities and model accuracy.">
 <style>
   :root { --fg:#111; --muted:#555; --rule:#ccc; --head:#e8e8e8; --alt:#f6f6f6; --link:#0645ad; --bg:#fff; --hi:#fff6d5; }
   html { background: var(--bg); }
@@ -41,12 +41,12 @@
 <nav>
   <a href="#standings">Standings</a><a href="#odds">Playoff odds</a><a href="#teamstats">Team stats</a>
   <a href="#today">Today</a><a href="#games">Games</a><a href="#skaters">Skaters</a><a href="#goalies">Goalies</a>
-  <a href="#scoring">Scoring</a><a href="#method">Methodology</a><a href="#files">Files</a>
+  <a href="#scoring">Accuracy</a><a href="#method">Methodology</a><a href="#files">Files</a>
   <a href="https://github.com/ph05/neurhl">Repository</a>
 </nav>
 
 <h2 id="standings">Projected standings</h2>
-<p class="note">Mean of 20,000 simulated seasons. P10/P50/P90 are percentiles of season points. HOWE is an independent house projection shown for reference.</p>
+<p class="note">Mean of 20,000 simulated seasons. P10/P50/P90 are percentiles of season points. HOWE is a reference projection (an Elo and ridge-regression blend) shown for comparison.</p>
 <div class="grid4" id="divs"></div>
 
 <h2 id="odds">Playoff odds (%)</h2>
@@ -82,7 +82,7 @@
 <h2 id="goalies">Goalie projections</h2>
 <div class="wrap"><table id="t_gl"></table></div>
 
-<h2 id="scoring">Scoring and evidence</h2>
+<h2 id="scoring">Model accuracy</h2>
 <div id="scoring_live"></div>
 <div class="wrap"><table id="t_ev"></table></div>
 
@@ -93,15 +93,15 @@
 <dt>Game engine</dt>
 <dd>For every game the engine takes the two dressed lineups and each skater's and goalie's state (exponentially weighted rates, career totals, adjusted plus-minus priors). Neural heads adjust shrunk-history baselines for each skater; a deterministic team layer allocates ice time by strength, builds team scoring rates from the players on the ice, and splits team totals back to players so that player and team numbers add up exactly. Win probabilities come from integrating a score-and-time-dependent goal hazard over the game. Rookies and players with little NHL history also receive their records from other leagues, translated to NHL terms with league factors estimated from past moves.</dd>
 <dt>Final probability</dt>
-<dd>A logistic stack over the engine, the neural player layer (NeurHL-H) and Elo, fitted on out-of-sample predictions of earlier seasons.</dd>
+<dd>A logistic regression combining the game model, a neural player-level model and Elo, fitted on out-of-sample predictions from earlier seasons.</dd>
 <dt>Lineups and availability</dt>
 <dd>For the season projection, each team's roster is sampled game by game: a model of each skater's probability of dressing, injured players out until their return date, call-ups filling gaps, and goalie start shares with a back-to-back adjustment. Game-day forecasts use the posted or projected lineup instead.</dd>
 <dt>Season simulation</dt>
 <dd>Each simulated season draws one strength shock per team (standard deviation 0.07 on the log goal rate), plays every game from its probabilities, and applies the NHL's standings, tiebreakers and playoff format. A walk-forward backtest on 2019-2024 found this setting calibrated: 80% intervals covered 82% of team point totals.</dd>
 <dt>Stat-sheet distributions</dt>
 <dd>Box scores are simulated from the model means. The dispersion of team shots, expected goals and power-play opportunities, and the slope of goal and expected-goal means, were fitted by maximum likelihood on out-of-sample seasons and are scored against the unfitted versions at the end of the season.</dd>
-<dt>Preregistration and scoring</dt>
-<dd>Every model version, test and decision rule is committed to the repository before the games it is judged on, with SHA-256 hashes of the prediction files. Forecasts are committed before puck drop. Inference is made once, after the last regular-season game; interim numbers on this page are descriptive.</dd>
+<dt>Evaluation</dt>
+<dd>Model versions and evaluation rules are fixed before the games they are evaluated on, and season prediction files are identified by SHA-256 hashes. Game forecasts are committed to the repository before puck drop. Season accuracy is evaluated once, after the last regular-season game; figures during the season are provisional.</dd>
 </dl>
 
 <h2 id="files">Files</h2>
@@ -146,10 +146,9 @@
   const M = D.meta || {};
   const ck = D.checks ? `${D.checks.passed}/${D.checks.n}` : "n/a";
   $("meta").innerHTML = [
-    `<b>${esc(M.release || "NeurHL")}</b>`, `engine <b>${esc(M.engine || "")}</b>`,
-    `rosters <b>${esc(M.rosters || "")}</b>`, `${M.draws || ""} lineup draws, ${(M.sims || 0).toLocaleString()} simulated seasons`,
-    `consistency checks <b>${ck}</b>`, `season set <code>${esc(M.season_set || "")}</code>`,
-    `live results through <b>${esc((D.live && D.live.as_of) || "")}</b> (${(D.live && D.live.games_played) || 0} games)`
+    `<b>${esc(M.release || "NeurHL")}</b>`, `rosters as of <b>${esc(M.rosters || "")}</b>`,
+    `${M.draws || ""} lineup draws, ${(M.sims || 0).toLocaleString()} simulated seasons`, `consistency checks <b>${ck}</b>`,
+    `results through <b>${esc((D.live && D.live.as_of) || "")}</b> (${(D.live && D.live.games_played) || 0} games)`
   ].join(" &middot; ");
 
   // ---- teams
@@ -186,7 +185,7 @@
   table($("t_today"), [
     { k: "start", h: "Start (ET)", l: 1, f: s => s ? new Date(s).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }) : "" },
     { k: "away", h: "Away", l: 1 }, { k: "home", h: "Home", l: 1 }, { k: "g", h: "P(home)", f: pc },
-    { k: "h", h: "NeurHL-H", f: pc }, { k: "elo", h: "Elo", f: pc }, { k: "ot", h: "P(OT)", f: pc },
+    { k: "h", h: "Player model", f: pc }, { k: "elo", h: "Elo", f: pc }, { k: "ot", h: "P(OT)", f: pc },
     { k: "score", h: "Goals A-H", f: s => s ? `${Number(s[1]).toFixed(2)}-${Number(s[0]).toFixed(2)}` : "" },
     { k: "xg", h: "xG A-H", f: s => s ? `${Number(s[1]).toFixed(2)}-${Number(s[0]).toFixed(2)}` : "" },
     { k: "sog", h: "SOG A-H", f: s => s ? `${Number(s[1]).toFixed(1)}-${Number(s[0]).toFixed(1)}` : "" },
@@ -234,18 +233,20 @@
 
   // ---- scoring and evidence
   const L = D.live || {};
-  $("scoring_live").innerHTML = `<p>${(L.games_played || 0)} regular-season games scored so far. Interim numbers are descriptive; the preregistered comparison is made once, after the last regular-season game (2027-04-10).</p>`;
+  $("scoring_live").innerHTML = `<p>${(L.games_played || 0)} regular-season games played so far. Season accuracy is evaluated once, after the last regular-season game (2027-04-10); figures during the season are provisional. The table lists earlier out-of-sample results: seasons held out from model development and scored once.</p>`;
   const E = D.evidence || {}, rows = [];
   const fx = (x, d) => x == null ? "" : Number(x).toFixed(d == null ? 4 : d);
-  if (E.c1) rows.push({ c: "NeurHL-H vs Elo, per-game log loss (confirmatory, one shot)", w: "2018-2026 excl. 2021", n: E.c1.n_games, d: fx(E.c1.diff), ci: `${fx(E.c1.ci95[0])} to ${fx(E.c1.ci95[1])}`, p: E.c1.p_two_sided < 1e-4 ? "<0.0001" : fx(E.c1.p_two_sided, 4) });
-  if (M.seal) {
-    rows.push({ c: "Engine stack vs Elo, per-game log loss (descriptive seal)", w: "2025-2026", n: M.seal.n, d: fx(M.seal.d_elo), ci: `${fx(M.seal.d_elo - 1.96 * M.seal.se_elo)} to ${fx(M.seal.d_elo + 1.96 * M.seal.se_elo)}`, p: fx(M.seal.p_elo, 4) });
-    rows.push({ c: "Engine stack vs NeurHL-H, per-game log loss (descriptive seal)", w: "2025-2026", n: M.seal.n, d: fx(M.seal.d_h), ci: `${fx(M.seal.d_h - 1.96 * M.seal.se_h)} to ${fx(M.seal.d_h + 1.96 * M.seal.se_h)}`, p: fx(M.seal.p_h, 4) });
+  if (E.c1) rows.push({ c: "Player model vs Elo, log loss per game", w: "2017-18 to 2025-26 (excl. 2020-21)", n: E.c1.n_games, d: fx(E.c1.diff), ci: `${fx(E.c1.ci95[0])} to ${fx(E.c1.ci95[1])}`, p: E.c1.p_two_sided < 1e-4 ? "<0.0001" : fx(E.c1.p_two_sided, 4) });
+  if (M.holdout) {
+    rows.push({ c: "Game model vs Elo, log loss per game *", w: "2024-25 to 2025-26", n: M.holdout.n, d: fx(M.holdout.d_elo), ci: `${fx(M.holdout.d_elo - 1.96 * M.holdout.se_elo)} to ${fx(M.holdout.d_elo + 1.96 * M.holdout.se_elo)}`, p: fx(M.holdout.p_elo, 4) });
+    rows.push({ c: "Game model vs player model, log loss per game *", w: "2024-25 to 2025-26", n: M.holdout.n, d: fx(M.holdout.d_h), ci: `${fx(M.holdout.d_h - 1.96 * M.holdout.se_h)} to ${fx(M.holdout.d_h + 1.96 * M.holdout.se_h)}`, p: fx(M.holdout.p_h, 4) });
   }
-  if (E.g) rows.push({ c: "Engine stack vs Elo, per-game log loss (gate)", w: "2019-2024 excl. 2021", n: E.g.n, d: fx(E.g.d_elo), ci: `${fx(E.g.d_elo - 1.96 * E.g.se_elo)} to ${fx(E.g.d_elo + 1.96 * E.g.se_elo)}`, p: "" });
-  if (E.pg) Object.entries(E.pg).filter(([k]) => k !== "n").forEach(([k, v]) => rows.push({ c: `Player-game layer vs own history: ${k} (confirmatory)`, w: "2018-2020", n: E.pg.n, d: `${(100 * v.rel).toFixed(1)}%`, ci: "", p: `z ${Number(v.z2).toFixed(1)}` }));
+  if (E.g) rows.push({ c: "Game model vs Elo, log loss per game (validation)", w: "2018-19 to 2023-24 (excl. 2020-21)", n: E.g.n, d: fx(E.g.d_elo), ci: `${fx(E.g.d_elo - 1.96 * E.g.se_elo)} to ${fx(E.g.d_elo + 1.96 * E.g.se_elo)}`, p: "" });
+  const head = { toi_share: "ice-time share", shots: "shots on goal", goal1: "P(goal)", assist1: "P(assist)" };
+  if (E.pg) Object.entries(E.pg).filter(([k]) => k !== "n").forEach(([k, v]) => rows.push({ c: `Player-game model vs player's own average: ${head[k] || k}`, w: "2017-18 to 2019-20", n: E.pg.n, d: `${(100 * v.rel).toFixed(1)}%`, ci: "", p: `z ${Number(v.z2).toFixed(1)}` }));
   table($("t_ev"), [{ k: "c", h: "Comparison", l: 1 }, { k: "w", h: "Seasons", l: 1 }, { k: "n", h: "N" }, { k: "d", h: "Difference" },
     { k: "ci", h: "95% CI", l: 1 }, { k: "p", h: "p" }], rows);
+  $("t_ev").insertAdjacentHTML("afterend", '<p class="note">Negative log-loss differences favour the first model. * The precondition set for this test before it ran was not met, so the result is reported as descriptive rather than confirmatory.</p>');
 
   // ---- files
   const sha = D.sha256 || {};

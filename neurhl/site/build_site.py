@@ -200,16 +200,12 @@ def main():
     seal = rd(NOUT / "g_seal_result.json")
     lm = rd(CONFIGS / "live_models.json") or {}
     run = rd(UNI / "run_2027.json") or {}
-    calib = {k: rd(CONFIGS / f"calibration_1_1{k}.json") for k in ("", "b", "c", "d", "e")}
-    meta_x = {"engine": lm.get("neurhl_g"), "release": lm.get("release", "NeurHL 1.0"),
-              "season_set": str(UNI.relative_to(PROJ)), "rosters": run.get("rosters_date"),
+    meta_x = {"release": lm.get("release", "NeurHL 1.0"), "rosters": run.get("rosters_date"),
               "m0": run.get("goal_mult_m0"), "draws": run.get("draws"), "sims": run.get("sims"),
-              "seal": None if not seal else {"n": seal["n"], "mode": seal.get("mode"),
+              "holdout": None if not seal else {"n": seal["n"],
                                             "d_elo": seal["S1"]["diff"], "se_elo": seal["S1"]["se"],
                                             "p_elo": seal["S1"]["p"], "d_h": seal["S2"].get("diff"),
-                                            "se_h": seal["S2"].get("se"), "p_h": seal["S2"].get("p")},
-              "calib": {k or "a": ({kk: vv for kk, vv in v.items() if isinstance(vv, (int, float, str))}
-                                   if v else None) for k, v in calib.items()}}
+                                            "se_h": seal["S2"].get("se"), "p_h": seal["S2"].get("p")}}
     card = rd(NOUT / "live" / "scorecard_2027.json") or {}
     files = FROZEN_1_0 if unified else FROZEN
     sha = {f: hashlib.sha256((PROJ / f).read_bytes()).hexdigest() for f in files}
