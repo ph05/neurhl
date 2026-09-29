@@ -431,3 +431,61 @@ settings.
 - That set becomes the primary 2026-27 season forecast.
 - The frozen `g2027_v1` files (PLAN_NeurHL_1_0 FREEZE) stay unchanged and are
   scored beside it as the earlier freeze.
+
+## A6 (2026-09-29, before the first 2026-27 game): A5 carried out
+
+**1. Descriptive seal.** `output/g_seal_result.json`, 2,624 games of 2025 and
+2026, mode descriptive:
+
+| Comparison | Log-loss difference (SE) | Other |
+|---|---|---|
+| S1: NeurHL-G - Elo | -0.00691 (0.00189) | p = 0.0003; 2025 -0.00778, 2026 -0.00603 |
+| S2: NeurHL-G - NeurHL-H | -0.00214 (0.00088) | p = 0.015 |
+
+- All nine secondary tests favour NeurHL-G after Holm correction: team shots,
+  xG and goals; skater TOI, shots, ixG, goals and assists.
+- Under the SEAL rules this would read PASS. It stays descriptive, because
+  S-STOP failed on the gate window and was waived.
+
+**2. Refit.** `g2027_v2`: configuration g1, seasons <= 2026, five seeds.
+- bundle.json sha256 `cdac2d4e81275e2a553a785cd31a9186ce030e3edab3fdef365650a6af25d7c7`.
+- Stack: Elo 0.128, NeurHL-G 0.349, NeurHL-H 0.544 (fallback Elo 0.531,
+  G 0.512).
+
+**3. Replacement.** `configs/live_models.json` points to `g2027_v2` from
+2026-09-29 18:50 UTC. Every forecast after that uses it.
+
+**4. Goal level.** A1's procedure run with `g2027_v2`:
+
+| Engine | m0 | Mean raw projection M |
+|---|---|---|
+| `g2027_v2` | 0.9722 | 3.0884 |
+| `g2027_v1` | 0.9229 | 3.2534 |
+
+The refit on the newer seasons removes most of the drift A1 corrected. The
+state for `g2027_v1` is kept as `configs/live_goal_calibration_g2027_v1.json`.
+
+**5. Season forecast.** `output/neurhl_1_0/v2_20260929/` is the primary 2026-27
+season forecast. It passes all 41 consistency checks; the cross-path check
+is skipped because the opening preview came from `g2027_v1`.
+
+It differs from A5 in three declared ways (PLAN_NeurHL_1_1 A15):
+- the 2026-09-29 roster snapshot, which includes the Marchenko-Knies trade
+  that the 2026-09-28 snapshot missed;
+- MoneyPuck's injury list, with researched statuses for undated entries;
+- rookies' goals and assists from their translated pre-NHL records.
+
+Its team points correlate 0.988 with the frozen `g2027_v1` files. Those
+files stay unchanged and are scored beside it.
+
+| File | SHA-256 |
+|---|---|
+| `neurhl/output/neurhl_1_0/v2_20260929/games_2027.csv` | `953203ba129ddac89cbd5d53d8dcc0df86c84fdf0b9a06191fc28f268fc3a1f6` |
+| `neurhl/output/neurhl_1_0/v2_20260929/teams_2027.csv` | `76318fc6afa61240aedcfdcc32615c95d3872bd63175f13f8c7a7b1c7dafa613` |
+| `neurhl/output/neurhl_1_0/v2_20260929/team_points_quantiles_2027.csv` | `532c38d9941d145eef2e522978b46c84dc2c6ebbfb089ee916554040eaa95fc4` |
+| `neurhl/output/neurhl_1_0/v2_20260929/skaters_2027.csv` | `d5ece29ac9da07151a5752806b6fd842369b81674c0a7f78e07ec8e05ff671f2` |
+| `neurhl/output/neurhl_1_0/v2_20260929/goalies_2027.csv` | `552022c16ba5a2aec383b571c54a997b15073ce9d916236a44486c8743f0dc0c` |
+| `neurhl/output/neurhl_1_0/v2_20260929/player_games_2027.csv.gz` | `50b570e355e37c4fa8ae2fd8606c24b4da5e0595123a2fa30535fb1a609c627f` |
+| `neurhl/output/neurhl_1_0/v2_20260929/consistency_2027.json` | `c57172be9209cfce9f77ccf579be71f3e0cf631346b1099b3e953f4483b8d7ce` |
+| `neurhl/output/neurhl_1_0/v2_20260929/checks_2027.json` | `15fe41a29dc0a59e5b16a97a4668a1b67ba97a766f8d6441b15c9ba6beb66406` |
+| `neurhl/output/neurhl_1_0/v2_20260929/run_2027.json` | `1f2dfbe891ae182a936a061355c8ab1c2ebfcfcee856fe5e4f5036c512de969b` |
