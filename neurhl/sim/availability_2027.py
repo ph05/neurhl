@@ -709,18 +709,31 @@ def mp_injuries(on_or_before: str | None = None) -> tuple[pd.DataFrame, str | No
     return d, days[-1]
 
 
+def _injury_overrides() -> dict:
+    """Researched games out that replace MoneyPuck's placeholder dates
+    (configs/injury_overrides_2027.csv; 0 = not injured)."""
+    p = NOUT.parent / "configs" / "injury_overrides_2027.csv"
+    if not p.exists():
+        return {}
+    d = pd.read_csv(p)
+    return dict(zip(d.player_id.astype(int), d.games_out.astype(int)))
+
+
 def _mp_return(r, team: str, from_date: str, sched: pd.DataFrame) -> tuple[int | None, str | None]:
     """Return (season game number, date) from a MoneyPuck row: its date of return when real;
     otherwise injured reserve -> IR_RETURN_GAMES games, day-to-day -> MP_DTD_GAMES."""
     tg = sched[(sched["home"] == team) | (sched["away"] == team)].sort_values(["date", "game_id"])
     tg = tg.reset_index(drop=True)
     ret = str(r.dateOfReturn)[:10] if isinstance(r.dateOfReturn, str) else ""
-    if ret and ret <= MP_PLACEHOLDER_AFTER:
+    if ret and ret <= MP_PLACEHOLDER_AFTER and int(r.name) not in _injury_overrides():
         after = tg[tg["date"].astype(str) >= ret]
         if not len(after):
             return None, None
         return int(after.index[0]) + 1, str(after.iloc[0]["date"])[:10]
     k = MP_DTD_GAMES if str(r.playerInjuryStatus) in ("DTD", "DD") else IR_RETURN_GAMES
+    ov = _injury_overrides()
+    if int(r.name) in ov:                      # researched games out (configs/injury_overrides_2027.csv)
+        k = int(ov[int(r.name)])
     after = tg[tg["date"].astype(str) >= from_date]
     if len(after) <= k:
         return None, None
@@ -812,6 +825,25 @@ def load(rosters_date: str, *, reserves: bool = True, model: AvailModel | None =
             pos = {0: "C", 1: "D", 2: "G"}.get(int(pg_), "C") if pg_ is not None else "C"
         rows.append({"team": r.team_abbrev, "player_id": pid, "name": r.name, "pos": pos,
                      "birthdate": ref["birthdate"].get(pid), "status": "injured"})
+    # MoneyPuck-listed injured players off the active roster (injured reserve removes them from
+    # the NHL listing): added as injured when MoneyPuck gives a real return date or the research
+    # table gives games out (PLAN_NeurHL_1_1 A15); undated non-roster entries stay out
+    mp_all, _ = mp_injuries() if USE_MP_INJURIES else (pd.DataFrame(), None)
+    if len(mp_all):
+        ov = _injury_overrides()
+        have = on_any | set(int(r["player_id"]) for r in rows) | unavail
+        for r in mp_all.drop_duplicates("playerId").itertuples():
+            pid = int(r.playerId)
+            ret = str(r.dateOfReturn)[:10] if isinstance(r.dateOfReturn, str) else ""
+            dated = bool(ret) and ret <= MP_PLACEHOLDER_AFTER
+            if pid in have or r.teamCode not in teams or not (dated or ov.get(pid, 0) > 0):
+                continue
+            pos = ref["pos"].get(pid)
+            if pos is None or (isinstance(pos, float) and np.isnan(pos)):
+                pos = {"D": "D", "G": "G"}.get(str(r.position), "C")
+            rows.append({"team": r.teamCode, "player_id": pid, "name": r.playerName, "pos": pos,
+                         "birthdate": ref["birthdate"].get(pid), "status": "injured"})
+            notes.setdefault(r.teamCode, []).append(f"injured off roster (MoneyPuck): {r.playerName}")
     # reserves: previous snapshot, on no current roster, not listed injured, old enough
     pday = None
     if reserves:
@@ -842,6 +874,8 @@ def load(rosters_date: str, *, reserves: bool = True, model: AvailModel | None =
         for i in A.index[A["tier"].eq(0) & A["player_id"].isin(mp.index)]:
             r = mp.loc[int(A.at[i, "player_id"])]
             if str(r.teamCode) != A.at[i, "team"]:
+                continue
+            if _injury_overrides().get(int(A.at[i, "player_id"])) == 0:     # researched: healthy
                 continue
             A.at[i, "status"] = "injured"
             mp_rows[i] = r
