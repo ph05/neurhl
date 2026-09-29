@@ -421,6 +421,8 @@ def main():
     ap.add_argument("--draws", type=int, default=32)
     ap.add_argument("--sims", type=int, default=20000)
     ap.add_argument("--seed", type=int, default=711)
+    ap.add_argument("--rookie-priors", help="rookies' goals and assists per game from this table "
+                                            "(configs/rookie_priors_2027.csv; PLAN_NeurHL_1_1 A15)")
     ap.add_argument("--out-dir", help="write the season files here instead of output/neurhl_1_0 "
                                       "(a dated file set, e.g. output/neurhl_1_0/v2_20260929)")
     a = ap.parse_args()
@@ -509,6 +511,22 @@ def main():
     pg["team"] = np.where(pg.side == 0, pg.game_id.map(gsz.home), pg.game_id.map(gsz.away))
     pg["date"] = pg.game_id.map(gsz.date)
     pg["toi"] = pg.toi_ev + pg.toi_pp + pg.toi_sh
+    if a.rookie_priors:
+        # A15: a rookie's goals and assists per game come from his translated pre-NHL record
+        # (times his chance of dressing); his teammates in the same team-game are rescaled so
+        # the team's totals stay the engine's
+        rp = pd.read_csv(a.rookie_priors).drop_duplicates("player_id").set_index("player_id")
+        isr = pg.player_id.isin(rp.index).to_numpy()
+        keys = [pg.game_id, pg.side]
+        for st, col in (("g", "pred_g"), ("a", "pred_a")):
+            new = pg[st].to_numpy().copy()
+            new[isr] = pg.loc[isr, "player_id"].map(rp[col]).to_numpy() * pg.loc[isr, "dress"].to_numpy()
+            tot = pg[st].groupby(keys).transform("sum").to_numpy()
+            r_new = pd.Series(np.where(isr, new, 0.0)).groupby(keys).transform("sum").to_numpy()
+            nr_old = pd.Series(np.where(isr, 0.0, pg[st].to_numpy())).groupby(keys).transform("sum").to_numpy()
+            scale = np.clip((tot - r_new) / np.maximum(nr_old, 1e-9), 0.0, None)
+            pg[st] = np.where(isr, new, pg[st].to_numpy() * scale)
+        print(f"[unified] rookie priors applied to {pg.loc[isr, 'player_id'].nunique()} rookies", flush=True)
     rates_p = OUT / "player_rates_2027.csv"
     extra = []
     if rates_p.exists():
