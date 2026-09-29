@@ -1,0 +1,122 @@
+{
+ "2026020002": {
+  "game_id": 2026020002,
+  "date": "2026-09-29",
+  "start_utc": "2026-09-29T23:00:00+00:00",
+  "as_of": "2026-09-29T21:50:05.934843+00:00",
+  "roster_snapshot": "2026-09-29",
+  "notes": [],
+  "home": {
+   "team": "TOR",
+   "forwards": [
+    8478458,
+    8479318,
+    8477939,
+    8486067,
+    8475166,
+    8484158,
+    8477426,
+    8476925,
+    8479520,
+    8476927,
+    8479772,
+    8480870
+   ],
+   "defense": [
+    8476853,
+    8478178,
+    8476931,
+    8475690,
+    8475171,
+    8479442
+   ],
+   "skaters": [
+    8478458,
+    8479318,
+    8477939,
+    8486067,
+    8475166,
+    8484158,
+    8477426,
+    8476925,
+    8479520,
+    8476927,
+    8479772,
+    8480870,
+    8476853,
+    8478178,
+    8476931,
+    8475690,
+    8475171,
+    8479442
+   ],
+   "goalie": 8475683,
+   "lineup_source": "DF_PROJECTED",
+   "goalie_source": "DF_CONFIRMED",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: William Villeneuve, Max Domi, Dakota Joshua, Elvis Merzlikins",
+    "DF dropped unavailable/injured: Kirill Marchenko",
+    "DF lines 2026-09-29 'Projected' updated 09-29 12:14Z",
+    "topped up 1 F / 0 D from roster 2026-09-29 by prior TOI"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  },
+  "away": {
+   "team": "MTL",
+   "forwards": [
+    8475184,
+    8480018,
+    8481540,
+    8483515,
+    8481618,
+    8484984,
+    8480074,
+    8476479,
+    8481523,
+    8482737,
+    8478133,
+    8476981
+   ],
+   "defense": [
+    8476875,
+    8480865,
+    8483457,
+    8478851,
+    8481593,
+    8482964
+   ],
+   "skaters": [
+    8475184,
+    8480018,
+    8481540,
+    8483515,
+    8481618,
+    8484984,
+    8480074,
+    8476479,
+    8481523,
+    8482737,
+    8478133,
+    8476981,
+    8476875,
+    8480865,
+    8483457,
+    8478851,
+    8481593,
+    8482964
+   ],
+   "goalie": 8482487,
+   "lineup_source": "DF_PROJECTED",
+   "goalie_source": "DF_CONFIRMED",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Kaiden Guhle, Oliver Kapanen, Lucas Condotta",
+    "DF lines 2026-09-29 'Training Camp 2026' updated 09-28 18:21Z"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  }
+ }
+}
