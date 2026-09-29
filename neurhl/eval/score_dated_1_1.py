@@ -80,7 +80,7 @@ def skaters():
 def seasons(res, final):
     out = {}
     tp = team_points(res)
-    for d in sorted(UNI.glob("season_*")):
+    for d in sorted(list(UNI.glob("season_*")) + list(UNI.glob("v*_20*"))):   # reruns and engine sets
         t = tp.join(pd.read_csv(d / "teams_2027.csv").set_index("team")[["points", "points_p10", "points_p90"]])
         if not final:
             out[d.name] = {"pace_mae": float((t.pts / t.gp * 84 - t.points).abs().mean())}

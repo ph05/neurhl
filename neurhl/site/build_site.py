@@ -21,9 +21,10 @@ DOCS = PROJ / "docs"
 UNI = NOUT / "neurhl_1_0"          # NeurHL 1.0, the unified model (PLAN_NeurHL_1_0.md)
 # PLAN_NeurHL4 A5: the season set of the engine refit on all seasons is the primary forecast
 # once it exists and its consistency check has passed; otherwise the frozen 1.0 files
-_V2 = UNI / "v2_20260929"
-if (_V2 / "checks_2027.json").exists() and json.loads((_V2 / "checks_2027.json").read_text()).get("pass"):
-    UNI = _V2
+for _v in sorted(UNI.glob("v*_20*"), reverse=True):          # newest dated set that passed its check
+    if (_v / "checks_2027.json").exists() and json.loads((_v / "checks_2027.json").read_text()).get("pass"):
+        UNI = _v
+        break
 FROZEN = ["neurhl/output/games_2027.csv", "neurhl/output/projection_2027.csv",
           "neurhl/output/player_proj_2027.csv"]
 FROZEN_1_0 = [str((UNI / f).relative_to(PROJ)) for f in ("games_2027.csv", "teams_2027.csv", "skaters_2027.csv")]
