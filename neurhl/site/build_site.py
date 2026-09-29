@@ -165,6 +165,51 @@ def main():
                          "beat_elo": ss["seasons_beat_elo"], "beat_h": ss["seasons_beat_h"],
                          "pg": {h: v["rel_diff"] for h, v in gg["PG"]["heads"].items()},
                          "sstop": ss["pass"]}
+    # full stat lines for the tables (technical page)
+    tx, sx, gx = [], [], []
+    if unified:
+        tt = pd.read_csv(UNI / "teams_2027.csv")
+        for r in tt.itertuples():
+            tx.append({"ab": r.team, "gp": int(r.gp), "w": round(r.w, 1), "l": round(r.l, 1), "otl": round(r.otl, 1),
+                       "rw": round(r.rw, 1), "pts": round(r.points, 1), "p10": int(round(r.points_p10)),
+                       "p50": int(round(r.points_p50)), "p90": int(round(r.points_p90)),
+                       "gf": round(r.goals_for, 1), "ga": round(r.goals_against, 1),
+                       "sf": round(r.sog_for, 1), "sa": round(r.sog_against, 1),
+                       "xgf": round(r.xgf_for, 1), "xga": round(r.xgf_against, 1),
+                       "ppo": round(r.pp_opps_for, 1), "ppg": round(r.pp_goals_for, 1),
+                       "pp": round(r.pp_pct, 1), "pk": round(r.pk_pct, 1),
+                       "sh": round(r.shooting_pct, 2), "sv": round(r.save_pct * (100 if r.save_pct < 1 else 1), 2),
+                       "po": round(r.playoff_pct, 1), "div_p": round(r.division_pct, 1),
+                       "pres": round(r.presidents_pct, 1), "r2": round(r.round2_pct, 1),
+                       "cf": round(r.conf_final_pct, 1), "fin": round(r.cup_final_pct, 1), "cup": round(r.cup_pct, 1)})
+        ss_ = pd.read_csv(UNI / "skaters_2027.csv")
+        ss_ = ss_[ss_.gp >= 1]
+        for r in ss_.itertuples():
+            sx.append([r.name if isinstance(r.name, str) else str(r.player_id), r.team, r.pos,
+                       round(r.gp, 1), round(r.toi_per_gp, 1), round(r.goals, 1), round(r.assists, 1),
+                       round(r.points, 1), round(r.points_p10, 1), round(r.points_p90, 1), round(r.sog, 1),
+                       round(r.ixg, 1), round(r.shooting_pct, 1), round(r.pim, 1), round(r.hits, 1),
+                       round(r.blocks, 1), round(r.fo_won / r.fo_taken * 100, 1) if r.fo_taken > 50 else None,
+                       round(r.oi_xgf, 1), round(r.oi_xga, 1)])
+        gg_ = pd.read_csv(UNI / "goalies_2027.csv")
+        gg_ = gg_[gg_.starts >= 1]
+        for r in gg_.itertuples():
+            gx.append([r.name if isinstance(r.name, str) else str(r.player_id), r.team, round(r.starts, 1),
+                       round(r.wins, 1), round(r.sa, 1), round(r.ga, 1), round(r.sv_pct, 4), round(r.gaa, 2),
+                       round(r.shutouts, 1)])
+    seal = rd(NOUT / "g_seal_result.json")
+    lm = rd(CONFIGS / "live_models.json") or {}
+    run = rd(UNI / "run_2027.json") or {}
+    calib = {k: rd(CONFIGS / f"calibration_1_1{k}.json") for k in ("", "b", "c", "d", "e")}
+    meta_x = {"engine": lm.get("neurhl_g"), "release": lm.get("release", "NeurHL 1.0"),
+              "season_set": str(UNI.relative_to(PROJ)), "rosters": run.get("rosters_date"),
+              "m0": run.get("goal_mult_m0"), "draws": run.get("draws"), "sims": run.get("sims"),
+              "seal": None if not seal else {"n": seal["n"], "mode": seal.get("mode"),
+                                            "d_elo": seal["S1"]["diff"], "se_elo": seal["S1"]["se"],
+                                            "p_elo": seal["S1"]["p"], "d_h": seal["S2"].get("diff"),
+                                            "se_h": seal["S2"].get("se"), "p_h": seal["S2"].get("p")},
+              "calib": {k or "a": ({kk: vv for kk, vv in v.items() if isinstance(vv, (int, float, str))}
+                                   if v else None) for k, v in calib.items()}}
     card = rd(NOUT / "live" / "scorecard_2027.json") or {}
     files = FROZEN_1_0 if unified else FROZEN
     sha = {f: hashlib.sha256((PROJ / f).read_bytes()).hexdigest() for f in files}
@@ -176,7 +221,7 @@ def main():
             "checks": {k: checks[k] for k in ("pass", "passed", "n")} if checks else None,
             "live": card, "tonight": tonight(),
             "teams": teams, "games": games, "players": players,
-            "evidence": evidence}
+            "evidence": evidence, "teams_x": tx, "skaters_x": sx, "goalies": gx, "meta": meta_x}
     DOCS.mkdir(exist_ok=True)
     (DOCS / "data.js").write_text(
         "window.NEURHL = " + json.dumps(data, separators=(",", ":")) + ";\n")

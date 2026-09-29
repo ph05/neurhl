@@ -811,3 +811,23 @@ iteration window and then on G_GATE, both must hold:
 **If adopted.** A live bundle `g2027_v4` (seasons <= 2026) replaces
 `g2027_v3` from a declared forecast, after a clean preview test. Its season
 set is `output/neurhl_1_0/v4_20260929/`.
+
+## A20 (2026-09-29): g1x fails the A19 rule; the NeurHL 1.1 engine is g2027_v3
+
+On the iteration window, g1x against g1rk, the same games, for skaters with
+non-NHL games in the two previous seasons (176,458 skater-games):
+
+| Measure | Difference (SE) | Seasons better |
+|---|---|---|
+| Goals | +0.00008 (0.00006) | 1 of 6 |
+| Assists | -0.00006 (0.00007) | 3 of 6 |
+| Final probability | -0.00013 | |
+
+The rule requires both skater losses to be lower, so g1x fails and no
+G_GATE run is spent on it. Reading: for players with NHL history, the NHL
+record already carries the information that other leagues add; the value
+of non-NHL records sits with rookies, which g1rk has.
+
+**Release naming.** Releases are numbered NeurHL 1.1, 1.2 and so on. Bundle
+names (`g2027_v2`, `g2027_v3`) are internal file names only. NeurHL 1.1's
+engine is `g2027_v3` (configuration g1rk).

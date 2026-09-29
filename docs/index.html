@@ -1,560 +1,256 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>NeurHL 2026-27</title>
-<meta name="description" content="NeurHL 1.0: preregistered NHL projections for 2026-27, frozen before opening night and scored in public.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeurHL 2026-27 NHL Projections</title>
+<meta name="description" content="NeurHL: preregistered NHL projections for 2026-27. Standings, playoff odds, team and player projections, game probabilities and scoring.">
 <style>
-:root{
-  color-scheme: light;
-  --ice:#F3F6F9; --card:#FFFFFF; --ink:#0F1B2A; --ink2:#3C4B5B; --mut:#6A7784;
-  --line:#D6DEE6; --grid:#E6ECF1; --blue:#1F4FB8; --blue-soft:#1F4FB81F;
-  --red:#C62F3B; --red-soft:#C62F3B1A; --amber:#A8660B; --amber-soft:#A8660B1C;
-  --green:#1C7A55; --green-soft:#1C7A551C; --chip:#E9EEF3;
-  --display:"Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
-  --body:"Alegreya Sans", "Gill Sans", "Segoe UI", system-ui, sans-serif;
-  --mono:"Spline Sans Mono", ui-monospace, "SF Mono", Menlo, monospace;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    color-scheme: dark;
-    --ice:#0C131C; --card:#131D29; --ink:#E6EDF3; --ink2:#AFBDCA; --mut:#7F8E9C;
-    --line:#26354A; --grid:#1B2736; --blue:#6E9BFF; --blue-soft:#6E9BFF24;
-    --red:#FF6B74; --red-soft:#FF6B741F; --amber:#E0A247; --amber-soft:#E0A24720;
-    --green:#4FC795; --green-soft:#4FC7951F; --chip:#1B2736;
-  }
-}
-:root[data-theme="dark"]{
-  color-scheme: dark;
-  --ice:#0C131C; --card:#131D29; --ink:#E6EDF3; --ink2:#AFBDCA; --mut:#7F8E9C;
-  --line:#26354A; --grid:#1B2736; --blue:#6E9BFF; --blue-soft:#6E9BFF24;
-  --red:#FF6B74; --red-soft:#FF6B741F; --amber:#E0A247; --amber-soft:#E0A24720;
-  --green:#4FC795; --green-soft:#4FC7951F; --chip:#1B2736;
-}
-*{box-sizing:border-box}
-html{scroll-padding-top:64px}
-body{margin:0;background:var(--ice);color:var(--ink);font:17px/1.55 var(--body);
-  -webkit-font-smoothing:antialiased}
-a{color:var(--blue)}
-a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{
-  outline:2px solid var(--blue);outline-offset:2px}
-.wrap{max-width:1120px;margin:0 auto;padding-inline:20px}
-.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.label{font:600 13px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
-
-/* bar */
-.bar{position:sticky;top:0;z-index:5;background:var(--ice);border-bottom:1px solid var(--line);
-  padding-top:env(safe-area-inset-top,0px)}
-.bar .wrap{display:flex;align-items:center;gap:24px;min-height:56px;flex-wrap:wrap}
-.mark{font:700 26px/1 var(--display);letter-spacing:.01em;color:var(--ink);text-decoration:none;
-  display:flex;align-items:baseline;gap:8px}
-.mark b{color:var(--blue);font-weight:700}
-.mark small{font:500 13px/1 var(--mono);color:var(--mut)}
-nav{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto}
-nav a{font:600 15px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;
-  color:var(--ink2);text-decoration:none;padding-block:8px;border-bottom:2px solid transparent}
-nav a:hover{color:var(--ink);border-bottom-color:var(--red)}
-
-/* hero */
-.hero{padding-block:44px 28px;display:grid;gap:18px}
-.hero h1{font:700 clamp(40px,6.4vw,76px)/.95 var(--display);margin:0;letter-spacing:-.005em;
-  text-wrap:balance;max-width:15ch}
-.hero h1 em{font-style:normal;color:var(--blue)}
-.hero p{margin:0;max-width:62ch;color:var(--ink2);font-size:19px}
-.stamp{display:flex;flex-wrap:wrap;gap:10px 28px;padding-top:6px}
-.stamp div{display:grid;gap:4px}
-.stamp .v{font:500 15px/1.2 var(--mono);color:var(--ink)}
-.status{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
-.pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 12px;
-  font:600 14px/1 var(--display);letter-spacing:.05em;text-transform:uppercase;background:var(--chip);color:var(--ink2)}
-.pill i{width:8px;height:8px;border-radius:50%;background:currentColor;display:block}
-.pill.blue{background:var(--blue-soft);color:var(--blue)}
-.pill.red{background:var(--red-soft);color:var(--red)}
-.pill.amber{background:var(--amber-soft);color:var(--amber)}
-.pill.green{background:var(--green-soft);color:var(--green)}
-
-section{padding-block:36px;border-top:1px solid var(--line)}
-.sh{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
-.sh h2{font:700 38px/1 var(--display);margin:0;letter-spacing:.005em}
-.sh p{margin:6px 0 0;color:var(--ink2);max-width:64ch}
-
-/* standings */
-.confs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,500px),1fr));gap:28px}
-.conf h3{font:700 20px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;margin:0 0 10px;
-  display:flex;justify-content:space-between;align-items:baseline}
-.axis,.trow{display:grid;grid-template-columns:44px 1fr 56px 52px;align-items:center;gap:10px}
-.axis{height:22px;color:var(--mut)}
-.axis .scale{position:relative;height:100%}
-.axis .scale span{position:absolute;transform:translateX(-50%);font:400 11px/22px var(--mono)}
-.trow{min-height:34px;border-top:1px solid var(--grid)}
-.trow.cut{border-top:2px solid var(--red)}
-.trow .ab{font:700 17px/1 var(--display);letter-spacing:.04em}
-.trow .ab small{display:block;font:500 11px/1.2 var(--body);letter-spacing:0;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44px}
-.lane{position:relative;height:24px}
-.lane .gl{position:absolute;top:0;bottom:0;width:1px;background:var(--grid)}
-.lane .band{position:absolute;top:7px;height:10px;border-radius:5px;background:var(--blue-soft);border:1px solid var(--blue)}
-.lane .mean{position:absolute;top:3px;width:3px;height:18px;margin-left:-1.5px;background:var(--blue);border-radius:2px}
-.lane .howe{position:absolute;top:8px;width:8px;height:8px;margin-left:-4px;border-radius:50%;
-  border:2px solid var(--ink2);background:var(--card)}
-.trow .pts{text-align:right;font:500 15px/1 var(--mono)}
-.trow .po{text-align:right;font:500 14px/1 var(--mono);color:var(--ink2)}
-.legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:16px;color:var(--ink2);font-size:15px}
-.legend span{display:inline-flex;align-items:center;gap:8px}
-.k-band{width:26px;height:10px;border-radius:5px;background:var(--blue-soft);border:1px solid var(--blue)}
-.k-mean{width:3px;height:16px;background:var(--blue);border-radius:2px}
-.k-howe{width:8px;height:8px;border-radius:50%;border:2px solid var(--ink2)}
-.k-cut{width:22px;height:0;border-top:2px solid var(--red)}
-
-/* games */
-.gbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
-button,select,input{font:inherit;color:var(--ink)}
-.btn{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer;
-  font:600 15px/1 var(--display);letter-spacing:.05em;text-transform:uppercase}
-.btn:hover{border-color:var(--blue);color:var(--blue)}
-.field{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:400 15px/1.2 var(--mono)}
-.gday{font:700 22px/1 var(--display);letter-spacing:.03em;margin-left:4px}
-.glist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:12px}
-.game{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:10px}
-.game .teams{display:flex;justify-content:space-between;align-items:baseline;font:700 20px/1 var(--display);letter-spacing:.04em}
-.game .teams .at{color:var(--mut);font-weight:500;font-size:15px}
-.game .final{font:500 13px/1 var(--mono);color:var(--ink2)}
-.split{position:relative;height:12px;border-radius:6px;overflow:hidden;background:var(--chip);display:flex}
-.split .a{background:var(--ink2);opacity:.35}
-.split .h{background:var(--blue);margin-left:auto}
-.split .elo{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--red)}
-.game .nums,.tg .nums{display:flex;justify-content:space-between;font:400 13px/1.2 var(--mono);color:var(--ink2)}
-.empty{color:var(--mut);padding:20px 0}
-
-/* players */
-.pbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
-.pbar .field{flex:1 1 200px}
-.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
-table{border-collapse:collapse;width:100%;min-width:640px}
-th,td{padding:8px 10px;text-align:right;white-space:nowrap}
-th{font:600 13px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);
-  border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0}
-th button{all:unset;cursor:pointer}
-th button[aria-sort]{color:var(--ink)}
-th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
-td{font:400 15px/1.2 var(--mono);border-top:1px solid var(--grid)}
-td.nm{font:500 16px/1.2 var(--body)}
-td .pb{display:inline-block;height:6px;border-radius:3px;background:var(--blue);vertical-align:middle;margin-right:8px;opacity:.75}
-.more{margin-top:12px}
-
-/* tonight */
-.tn{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px}
-.tg{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px}
-.tg .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.tg .mu{font:700 21px/1 var(--display);letter-spacing:.04em}
-.tg .mu .at{color:var(--mut);font-weight:500;font-size:15px}
-.tg .when{font:500 12px/1 var(--mono);color:var(--mut)}
-.tg .refs{display:flex;gap:14px;flex-wrap:wrap;font:400 13px/1.3 var(--mono);color:var(--ink2)}
-.tg .refs b{color:var(--ink);font-weight:500}
-.tg table{min-width:0;width:100%}
-.tg td,.tg th{padding:3px 4px;font-size:13px}
-.tg td:first-child,.tg th:first-child{text-align:left}
-.chip{display:inline-block;padding:2px 6px;border-radius:4px;background:var(--chip);font:600 11px/1.2 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
-.chip.ok{background:var(--green-soft);color:var(--green)}
-/* evidence */
-.ev{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:10px;align-content:start}
-.card h3{font:700 22px/1.1 var(--display);margin:0;letter-spacing:.01em}
-.card p{margin:0;color:var(--ink2);font-size:16px}
-.card .big{font:500 30px/1 var(--mono);color:var(--ink)}
-.card .big small{font-size:14px;color:var(--mut)}
-.bars{display:grid;gap:8px}
-.bars div{display:grid;grid-template-columns:110px 1fr 58px;gap:10px;align-items:center;font-size:15px}
-.bars .t{height:8px;border-radius:4px;background:var(--chip);position:relative}
-.bars .t b{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--green)}
-.nulls{margin:18px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:8px 24px}
-.nulls li{display:grid;grid-template-columns:12px 1fr;gap:10px;font-size:16px;color:var(--ink2)}
-.nulls li::before{content:"";width:10px;height:10px;border-radius:2px;background:var(--red);margin-top:7px;opacity:.8}
-.nulls b{color:var(--ink);font-weight:500}
-
-/* method */
-.tl{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;margin:8px 0 6px}
-.tl div{height:44px;border-radius:4px;display:flex;align-items:flex-end;justify-content:center;
-  font:500 10px/1 var(--mono);padding-bottom:4px;color:var(--ink)}
-.tl .tr{background:var(--chip)}
-.tl .dv{background:var(--amber-soft);box-shadow:inset 0 -3px 0 var(--amber)}
-.tl .tu{background:var(--blue-soft);box-shadow:inset 0 -3px 0 var(--blue)}
-.tl .cf{background:var(--green-soft);box-shadow:inset 0 -3px 0 var(--green)}
-.tl .ns{background:repeating-linear-gradient(135deg,var(--chip) 0 4px,var(--card) 4px 8px);box-shadow:inset 0 -3px 0 var(--mut)}
-.tl .lv{background:var(--red-soft);box-shadow:inset 0 -3px 0 var(--red)}
-.tlk{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:15px;color:var(--ink2)}
-.tlk span{display:inline-flex;align-items:center;gap:7px}
-.tlk i{width:14px;height:10px;border-radius:2px;display:block}
-.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px;margin-top:26px}
-.cols h3{font:700 20px/1 var(--display);letter-spacing:.05em;text-transform:uppercase;margin:0 0 8px}
-.cols p,.cols li{color:var(--ink2);font-size:16px}
-.cols ul{padding-left:18px;margin:0;display:grid;gap:6px}
-.flow{overflow-x:auto;margin-top:26px}
-.flow svg{display:block;min-width:760px;width:100%;height:auto}
-.flow .nd rect{fill:var(--card);stroke:var(--line)}
-.flow .nd.hl rect{stroke:var(--blue);stroke-width:1.5}
-.flow .nd text{fill:var(--ink);font:600 15px var(--display);letter-spacing:.03em}
-.flow .nd text.s{fill:var(--mut);font:400 12px var(--body);letter-spacing:0}
-.flow path{fill:none;stroke:var(--mut);stroke-width:1.3}
-footer{border-top:1px solid var(--line);padding-block:28px 40px;color:var(--mut);font-size:15px}
-footer .wrap{display:grid;gap:8px}
-code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-radius:4px}
-@media (max-width:560px){
-  .axis,.trow{grid-template-columns:40px 1fr 48px 44px;gap:8px}
-  .bars div{grid-template-columns:90px 1fr 52px}
-  .tl div{font-size:0}
-  nav{gap:12px}
-}
-@media (prefers-reduced-motion:no-preference){
-  .lane .band,.lane .mean{transition:left .3s ease,width .3s ease}
-}
+  :root { --fg:#111; --muted:#555; --rule:#ccc; --head:#e8e8e8; --alt:#f6f6f6; --link:#0645ad; --bg:#fff; --hi:#fff6d5; }
+  html { background: var(--bg); }
+  body { margin: 0 auto; max-width: 1180px; padding: 12px 16px 40px; color: var(--fg); background: var(--bg);
+         font: 13px/1.45 Verdana, Geneva, "DejaVu Sans", Arial, sans-serif; }
+  a { color: var(--link); text-decoration: none; } a:hover { text-decoration: underline; }
+  h1 { font-size: 20px; margin: 4px 0 2px; font-weight: bold; }
+  h2 { font-size: 16px; margin: 26px 0 6px; padding-bottom: 3px; border-bottom: 2px solid var(--fg); }
+  h3 { font-size: 13px; margin: 14px 0 4px; }
+  p { margin: 6px 0; max-width: 88ch; }
+  .meta { color: var(--muted); font-size: 12px; }
+  .meta b { color: var(--fg); font-weight: normal; }
+  nav { margin: 8px 0 4px; padding: 5px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); font-size: 12px; }
+  nav a { margin-right: 14px; white-space: nowrap; }
+  .wrap { overflow-x: auto; margin: 4px 0 8px; }
+  table { border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+  th, td { padding: 2px 6px; border-bottom: 1px solid #e2e2e2; white-space: nowrap; }
+  th { background: var(--head); border-bottom: 1px solid #999; text-align: right; font-weight: bold; cursor: pointer; user-select: none; }
+  th.l, td.l { text-align: left; } td { text-align: right; }
+  tbody tr:nth-child(even) { background: var(--alt); }
+  tbody tr:hover { background: var(--hi); }
+  th.sorted::after { content: " \25BE"; } th.sorted.asc::after { content: " \25B4"; }
+  .controls { font-size: 12px; margin: 6px 0; } .controls label { margin-right: 12px; }
+  .controls input, .controls select { font: inherit; font-size: 12px; padding: 1px 3px; }
+  .note { color: var(--muted); font-size: 11px; }
+  .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(540px, 1fr)); gap: 4px 24px; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 11px; }
+  dl { margin: 4px 0; } dt { font-weight: bold; margin-top: 6px; } dd { margin: 2px 0 2px 0; max-width: 88ch; }
 </style>
 </head>
 <body>
-<header class="bar">
-  <div class="wrap">
-    <a class="mark" href="#top">Neur<b>HL</b> <small>1.0</small></a>
-    <nav aria-label="Sections">
-      <a href="#tonight" id="navtonight" hidden>Tonight</a><a href="#standings">Standings</a><a href="#games">Games</a><a href="#players">Players</a>
-      <a href="#evidence">Evidence</a><a href="#method">Method</a>
-    </nav>
-  </div>
-</header>
+<h1>NeurHL: 2026-27 NHL projections</h1>
+<div class="meta" id="meta"></div>
+<nav>
+  <a href="#standings">Standings</a><a href="#odds">Playoff odds</a><a href="#teamstats">Team stats</a>
+  <a href="#today">Today</a><a href="#games">Games</a><a href="#skaters">Skaters</a><a href="#goalies">Goalies</a>
+  <a href="#scoring">Scoring</a><a href="#method">Methodology</a><a href="#files">Files</a>
+  <a href="https://github.com/ph05/neurhl">Repository</a>
+</nav>
 
-<main id="top">
-  <div class="wrap hero">
-    <span class="label">2026-27 NHL season · preregistered projections</span>
-    <h1>Every game, team and skater, <em>frozen before the first faceoff.</em></h1>
-    <p>NeurHL 1.0 is one model for the whole season. The same engine predicts every skater's game, every game and every season total, and the levels add up exactly: a player's goals are the sum of his games, a team's goals are the sum of its players, and its points are the sum of its games. The predictions were frozen before opening night and are scored in public as the games are played. The evidence behind each claim, including the claims that failed, is on this page.</p>
-    <div class="stamp" id="stamp"></div>
-    <div class="status" id="status"></div>
-  </div>
+<h2 id="standings">Projected standings</h2>
+<p class="note">Mean of 20,000 simulated seasons. P10/P50/P90 are percentiles of season points. HOWE is an independent house projection shown for reference.</p>
+<div class="grid4" id="divs"></div>
 
-  <section id="tonight" hidden>
-    <div class="wrap">
-      <div class="sh">
-        <div><h2><span id="tntitle">Tonight</span> <span class="label" id="tndate"></span></h2>
-          <p>NeurHL 1.0's forecasts for the latest game day, each committed to the public repository before puck drop, with that day's lineups and every game played so far. The engine simulates every game 10,000 times from the dressed lineups; its neural player layer (NeurHL-H) and in-season Elo are shown for reference. Lineups marked confirmed come from posted lines; the others are projections.</p></div>
-      </div>
-      <div class="tn" id="tnlist"></div>
-    </div>
-  </section>
+<h2 id="odds">Playoff odds (%)</h2>
+<div class="wrap"><table id="t_odds"></table></div>
 
-  <section id="standings">
-    <div class="wrap">
-      <div class="sh">
-        <div><h2>Projected standings</h2>
-          <p>Points from 20,000 simulated seasons of the real 84-game schedule. Every game comes from the same engine as the game odds, with lineups and goalie starts sampled from each roster; each team's strength is also drawn once per simulated season, so the bands carry uncertainty about how good a team is as well as game-to-game luck.</p></div>
-      </div>
-      <div class="confs" id="confs"></div>
-      <div class="legend">
-        <span><i class="k-band"></i>80% of simulated seasons</span>
-        <span><i class="k-mean"></i>NeurHL mean</span>
-        <span><i class="k-howe"></i>HOWE baseline mean</span>
-        <span><i class="k-cut"></i>Projected playoff line (top 8)</span>
-        <span class="num" style="margin-left:auto">PTS · playoff %</span>
-      </div>
-    </div>
-  </section>
+<h2 id="teamstats">Projected team statistics (season totals)</h2>
+<div class="wrap"><table id="t_team"></table></div>
 
-  <section id="games">
-    <div class="wrap">
-      <div class="sh">
-        <div><h2>Games</h2>
-          <p>Home-win probability for every regular-season game, fixed before the season. The red tick is the preseason Elo reference. With in-season information NeurHL 1.0's game level beat Elo on its gate seasons; before the season every game uses opening-night rosters and form, so the edge should be smaller.</p></div>
-      </div>
-      <div class="gbar">
-        <button class="btn" id="gprev" type="button" aria-label="Previous game day">&larr; Prev</button>
-        <input class="field" type="date" id="gdate" min="2026-09-29" max="2027-04-10" aria-label="Game date">
-        <button class="btn" id="gnext" type="button" aria-label="Next game day">Next &rarr;</button>
-        <span class="gday" id="gday"></span>
-      </div>
-      <div class="glist" id="glist"></div>
-    </div>
-  </section>
+<h2 id="today">Today</h2>
+<p class="note" id="today_note"></p>
+<div class="wrap"><table id="t_today"></table></div>
+<div id="today_players"></div>
 
-  <section id="players">
-    <div class="wrap">
-      <div class="sh">
-        <div><h2>Skater projections</h2>
-          <p>Expected games, ice time, goals, assists and points for every skater on the post-deadline rosters. Each total is the sum of that skater's projected games in the season simulation, so the skaters on a team add up to the team's goals and shots.</p></div>
-      </div>
-      <div class="pbar">
-        <input class="field" id="pq" type="search" placeholder="Search skaters" aria-label="Search skaters">
-        <select class="field" id="pteam" aria-label="Team"><option value="">All teams</option></select>
-        <select class="field" id="ppos" aria-label="Position"><option value="">Forwards and defence</option><option value="F">Forwards</option><option value="D">Defence</option></select>
-      </div>
-      <div class="tbl"><table id="ptable">
-        <thead><tr>
-          <th scope="col">Skater</th><th scope="col">Team</th>
-          <th scope="col"><button data-k="3" type="button">GP</button></th>
-          <th scope="col"><button data-k="4" type="button">TOI/GP</button></th>
-          <th scope="col"><button data-k="5" type="button">G</button></th>
-          <th scope="col"><button data-k="6" type="button">A</button></th>
-          <th scope="col"><button data-k="7" type="button" aria-sort="descending">PTS</button></th>
-        </tr></thead>
-        <tbody></tbody>
-      </table></div>
-      <button class="btn more" id="pmore" type="button">Show 50 more</button>
-    </div>
-  </section>
+<h2 id="games">Game probabilities</h2>
+<div class="controls">
+  <label>Team <select id="g_team"><option value="">All</option></select></label>
+  <label>Month <select id="g_month"><option value="">All</option></select></label>
+  <span class="note">P(home) is the preseason model probability of a home win, including overtime and shootout. Elo is the preseason Elo reference.</span>
+</div>
+<div class="wrap"><table id="t_games"></table></div>
 
-  <section id="evidence">
-    <div class="wrap">
-      <div class="sh">
-        <div><h2>What the evidence supports</h2>
-          <p>A result counts as confirmed only if it came from seasons no decision had used, scored once after the model was frozen. Everything else is labelled for what it is.</p></div>
-      </div>
-      <div class="ev" id="ev"></div>
-      <ul class="nulls">
-        <li><span><b>Neural game network over event embeddings.</b> Five configurations; the best (0.6966) finished level with a constant home-win rate (0.6898).</span></li>
-        <li><span><b>Embeddings as team strength.</b> A 7.6-million-event transformer learns player type (position decodable at 95%), not team quality.</span></li>
-        <li><span><b>Rookie encoder.</b> Validation error equal to predicting the mean at every season.</span></li>
-        <li><span><b>Event simulator for game odds.</b> Blended with Elo it scored 0.6776 against Elo's 0.6767.</span></li>
-        <li><span><b>Absences, goalie quality, schedule density.</b> Each added log loss to the game model.</span></li>
-        <li><span><b>Starting-goalie model.</b> A goalie's share of starts to date predicts starters better.</span></li>
-      </ul>
-      <p style="margin-top:18px;color:var(--ink2)">Every claim, with its window and record file: <a href="https://github.com/ph05/neurhl/blob/main/EVIDENCE.md">EVIDENCE.md</a>.</p>
-    </div>
-  </section>
+<h2 id="skaters">Skater projections</h2>
+<div class="controls">
+  <label>Search <input id="s_q" size="16"></label>
+  <label>Team <select id="s_team"><option value="">All</option></select></label>
+  <label>Pos <select id="s_pos"><option value="">All</option><option>F</option><option>D</option></select></label>
+  <label>Min GP <input id="s_gp" size="3" value="20"></label>
+  <label><input type="checkbox" id="s_all"> Show all rows</label>
+</div>
+<div class="wrap"><table id="t_sk"></table></div>
+<p class="note">Expected values over lineup draws; GP is the expected number of games dressed. P10/P90 are percentiles of season points. oiXGF/oiXGA: on-ice expected goals for and against. FO%: faceoffs won (players with over 50 projected faceoffs).</p>
 
-  <section id="method">
-    <div class="wrap">
-      <div class="sh">
-        <div><h2>How it was built and tested</h2>
-          <p>Seasons were given roles before any model was fitted, and the scoring code refuses to cross them. Each season is labelled by the year it ends.</p></div>
-      </div>
-      <div class="tl" id="tl" role="img" aria-label="Season roles from 2008 to 2027"></div>
-      <div class="tlk">
-        <span><i style="background:var(--chip)"></i>Training only</span>
-        <span><i style="background:var(--amber)"></i>Development</span>
-        <span><i style="background:var(--blue)"></i>Tune</span>
-        <span><i style="background:var(--green)"></i>Confirmation, scored once</span>
-        <span><i style="background:repeating-linear-gradient(135deg,var(--mut) 0 3px,transparent 3px 6px)"></i>Trains, never scores</span>
-        <span><i style="background:var(--red)"></i>Live 2026-27</span>
-      </div>
+<h2 id="goalies">Goalie projections</h2>
+<div class="wrap"><table id="t_gl"></table></div>
 
-      <div class="flow">
-        <svg viewBox="0 0 980 250" role="img" aria-label="NeurHL 1.0: data to player states, the game engine, and the season">
-          <g class="nd"><rect x="10" y="95" width="160" height="60" rx="8"/><text x="24" y="120">PLAY-BY-PLAY, SHIFTS</text><text class="s" x="24" y="140">7.6M events, 2008-2026</text></g>
-          <g class="nd"><rect x="220" y="10" width="190" height="52" rx="8"/><text x="234" y="33">PLAYER STATE</text><text class="s" x="234" y="51">after every game played</text></g>
-          <g class="nd"><rect x="220" y="76" width="190" height="52" rx="8"/><text x="234" y="99">SHOT QUALITY (xG)</text><text class="s" x="234" y="117">walk-forward</text></g>
-          <g class="nd"><rect x="220" y="142" width="190" height="52" rx="8"/><text x="234" y="165">NEURAL PLAYER LAYER</text><text class="s" x="234" y="183">confirmed against Elo</text></g>
-          <g class="nd"><rect x="220" y="208" width="190" height="36" rx="8"/><text x="234" y="231">LINEUPS AND GOALIES</text></g>
-          <g class="nd hl"><rect x="460" y="70" width="180" height="110" rx="8"/><text x="474" y="96">GAME ENGINE</text><text class="s" x="474" y="116">player-games sum to</text><text class="s" x="474" y="134">team box scores and</text><text class="s" x="474" y="152">the result, stacked</text><text class="s" x="474" y="170">with Elo</text></g>
-          <g class="nd hl"><rect x="690" y="95" width="120" height="60" rx="8"/><text x="704" y="120">SEASON</text><text class="s" x="704" y="140">20,000 runs</text></g>
-          <g class="nd"><rect x="840" y="14" width="130" height="46" rx="8"/><text x="852" y="42">SKATER LINES</text></g>
-          <g class="nd"><rect x="840" y="102" width="130" height="46" rx="8"/><text x="852" y="130">GAME ODDS</text></g>
-          <g class="nd"><rect x="840" y="190" width="130" height="46" rx="8"/><text x="852" y="218">STANDINGS</text></g>
-          <path d="M170 125 C195 125 195 36 220 36"/><path d="M170 125 C195 125 195 102 220 102"/>
-          <path d="M170 125 C195 125 195 168 220 168"/><path d="M170 125 C195 125 195 226 220 226"/>
-          <path d="M410 36 C435 36 435 100 460 100"/><path d="M410 102 C435 102 435 115 460 115"/>
-          <path d="M410 168 C435 168 435 140 460 140"/><path d="M410 226 C435 226 435 160 460 160"/>
-          <path d="M640 125 L690 125"/><path d="M640 95 C740 95 740 37 840 37"/>
-          <path d="M640 110 C740 110 740 125 840 125"/><path d="M810 140 C825 140 825 213 840 213"/>
-        </svg>
-      </div>
+<h2 id="scoring">Scoring and evidence</h2>
+<div id="scoring_live"></div>
+<div class="wrap"><table id="t_ev"></table></div>
 
-      <div class="cols">
-        <div><h3>Rules that held throughout</h3>
-          <ul>
-            <li>Every input to a season's prediction comes from earlier seasons only.</li>
-            <li>Plans, gates and decision rules were committed before the numbers that tested them.</li>
-            <li>Searches were capped and every configuration was logged.</li>
-            <li>No betting-market data in any feature, target or selection step.</li>
-            <li>A causality audit corrupts all data after a cut point and requires earlier inputs to stay bit-identical.</li>
-          </ul></div>
-        <div><h3>What went wrong and was fixed</h3>
-          <ul>
-            <li>Two leaks let the event simulator see the next event; both passed the realism gates before an audit caught them.</li>
-            <li>A comparison of the season layer with a baseline used different seasons. On matched seasons the baseline is better.</li>
-            <li>Playoff ties were broken alphabetically, worth up to 1.6 playoff points for some clubs.</li>
-            <li>The engine's gate script skipped three declared checks. Computed afterwards from the same predictions, one calibration check fails: its team shots-on-goal intervals are too wide.</li>
-            <li>An exclusion rule was changed after results were visible. It is recorded, and results are reported both ways.</li>
-          </ul></div>
-        <div><h3>Read further</h3>
-          <ul>
-            <li><a href="https://github.com/ph05/neurhl">Source code and data</a></li>
-            <li><a href="https://github.com/ph05/neurhl/blob/main/PLAN_NeurHL_LIVE.md">Live scoring protocol</a></li>
-            <li><a href="https://github.com/ph05/neurhl/blob/main/PLAN_NeurHL.md">Preregistration: neural hierarchy</a></li>
-            <li><a href="https://github.com/ph05/neurhl/blob/main/PLAN_NeurHL2.md">Preregistration: event simulator</a></li>
-            <li><a href="https://github.com/ph05/neurhl/blob/main/PLAN_NeurHL3.md">Preregistration: player layers</a></li>
-          </ul></div>
-      </div>
-    </div>
-  </section>
-</main>
+<h2 id="method">Methodology</h2>
+<dl>
+<dt>Data</dt>
+<dd>NHL play-by-play and shift charts, 2008-09 to 2025-26; shot locations and expected goals from a gradient-boosted shot model recalibrated in season; daily roster snapshots from the NHL; lineups from NHL game reports and Daily Faceoff; injuries from MoneyPuck's injury list, with undated entries researched individually; players' records in other leagues (AHL, CHL, NCAA, USHL, KHL, SHL, Liiga and others) from the NHL's player records. No betting-market data enters any model.</dd>
+<dt>Game engine</dt>
+<dd>For every game the engine takes the two dressed lineups and each skater's and goalie's state (exponentially weighted rates, career totals, adjusted plus-minus priors). Neural heads adjust shrunk-history baselines for each skater; a deterministic team layer allocates ice time by strength, builds team scoring rates from the players on the ice, and splits team totals back to players so that player and team numbers add up exactly. Win probabilities come from integrating a score-and-time-dependent goal hazard over the game. Rookies and players with little NHL history also receive their records from other leagues, translated to NHL terms with league factors estimated from past moves.</dd>
+<dt>Final probability</dt>
+<dd>A logistic stack over the engine, the neural player layer (NeurHL-H) and Elo, fitted on out-of-sample predictions of earlier seasons.</dd>
+<dt>Lineups and availability</dt>
+<dd>For the season projection, each team's roster is sampled game by game: a model of each skater's probability of dressing, injured players out until their return date, call-ups filling gaps, and goalie start shares with a back-to-back adjustment. Game-day forecasts use the posted or projected lineup instead.</dd>
+<dt>Season simulation</dt>
+<dd>Each simulated season draws one strength shock per team (standard deviation 0.07 on the log goal rate), plays every game from its probabilities, and applies the NHL's standings, tiebreakers and playoff format. A walk-forward backtest on 2019-2024 found this setting calibrated: 80% intervals covered 82% of team point totals.</dd>
+<dt>Stat-sheet distributions</dt>
+<dd>Box scores are simulated from the model means. The dispersion of team shots, expected goals and power-play opportunities, and the slope of goal and expected-goal means, were fitted by maximum likelihood on out-of-sample seasons and are scored against the unfitted versions at the end of the season.</dd>
+<dt>Preregistration and scoring</dt>
+<dd>Every model version, test and decision rule is committed to the repository before the games it is judged on, with SHA-256 hashes of the prediction files. Forecasts are committed before puck drop. Inference is made once, after the last regular-season game; interim numbers on this page are descriptive. Plans: <a href="https://github.com/ph05/neurhl/blob/main/PLAN_NeurHL_1_0.md">PLAN_NeurHL_1_0</a>, <a href="https://github.com/ph05/neurhl/blob/main/PLAN_NeurHL_1_1.md">PLAN_NeurHL_1_1</a>, <a href="https://github.com/ph05/neurhl/blob/main/PLAN_NeurHL4.md">PLAN_NeurHL4</a>; claims and their evidence: <a href="https://github.com/ph05/neurhl/blob/main/EVIDENCE.md">EVIDENCE.md</a>.</dd>
+</dl>
 
-<footer>
-  <div class="wrap">
-    <span>Data: NHL public APIs and game reports, MoneyPuck (raw recorded fields only), Natural Stat Trick and Hockey-Reference. All data remain the property of their sources.</span>
-    <span>Code: MIT License. NeurHL is an independent research project, not affiliated with the NHL.</span>
-  </div>
-</footer>
+<h2 id="files">Files</h2>
+<div id="files_list"></div>
 
 <script src="data.js"></script>
 <script>
-(function(){
-  const D = window.NEURHL;
-  const $ = (s, el=document) => el.querySelector(s);
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-  const f1 = x => (Math.round(x*10)/10).toFixed(1);
-  const fdate = d => new Date(d+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+(function () {
+  const D = window.NEURHL || {};
+  const $ = id => document.getElementById(id);
+  const f1 = x => x == null ? "" : Number(x).toFixed(1);
+  const f0 = x => x == null ? "" : Math.round(x).toString();
+  const pc = x => x == null ? "" : (100 * x).toFixed(1);
+  const esc = s => String(s).replace(/[&<>]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;"}[c]));
 
-  /* stamp and status */
-  const nGames = D.games.length, played = (D.live && D.live.games_played) || 0;
-  const sha = D.game_sha || D.sha256["neurhl/output/games_2027.csv"];
-  const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const [fy, fm, fd] = D.frozen.split("-").map(Number);
-  const frozenLabel = `${fd} ${MON[fm - 1]} ${fy}`;
-  $("#stamp").innerHTML = [
-    ["Frozen", frozenLabel],["Opening night","29 Sep 2026"],
-    ["Games",nGames.toLocaleString()],["Skaters",D.players.length],
-    ["Game file SHA-256", sha.slice(0,12)+"…"]
-  ].map(([k,v]) => `<div><span class="label">${k}</span><span class="v">${esc(v)}</span></div>`).join("");
-  const c1 = D.evidence.c1;
-  const c1pill = !c1 ? `<span class="pill amber"><i></i>Game-model confirmation: pending</span>`
-    : c1.verdict === "PASS" ? `<span class="pill green"><i></i>Game-model confirmation: passed</span>`
-    : `<span class="pill red"><i></i>Game-model confirmation: null</span>`;
-  $("#status").innerHTML =
-    `<span class="pill blue"><i></i>Live: ${played.toLocaleString()} of ${nGames.toLocaleString()} games played</span>` +
-    `<span class="pill green"><i></i>Player-game layer: confirmed</span>` + c1pill +
-    (D.checks ? `<span class="pill ${D.checks.pass ? "green" : "red"}"><i></i>Levels agree: ${D.checks.passed} of ${D.checks.n} checks</span>` : "");
-
-  /* tonight */
-  const T = D.tonight || {};
-  if (T.games && T.games.length) {
-    $("#tonight").hidden = false; $("#navtonight").hidden = false;
-    $("#tndate").textContent = fdate(T.date);
-    if (T.games.every(g => g.kind === "preview")) $("#tntitle").textContent = "Next game day";
-    const pc = x => (x == null || isNaN(x)) ? "–" : Math.round(x * 100) + "%";
-    const LU = {NHL_API: "confirmed", DF_CONFIRMED: "confirmed", DF_PROJECTED: "projected lines", FALLBACK: "projected from roster"};
-    const chip = s => `<span class="chip${/CONFIRMED|NHL_API/.test(s) ? " ok" : ""}">${esc(LU[s] || String(s).toLowerCase())}</span>`;
-    $("#tnlist").innerHTML = T.games.map(g => {
-      const t = g.start ? new Date(g.start).toLocaleTimeString("en-US", {hour: "numeric", minute: "2-digit", timeZone: "America/New_York"}) + " ET" : "";
-      const rows = (g.top || []).map(x => `<tr><td>${esc(x[0])} <span class="label">${x[1]}</span></td><td class="num">${x[2].toFixed(1)}</td><td class="num">${pc(x[3])}</td><td class="num">${pc(x[4])}</td></tr>`).join("");
-      return `<article class="tg">
-        <div class="hd"><span class="mu">${g.away} <span class="at">at</span> ${g.home}</span><span class="when">${t} · ${g.kind}</span></div>
-        <div class="split" role="img" aria-label="NeurHL-G home win ${pc(g.g)}">
-          <span class="a" style="width:${(1 - g.g) * 100}%"></span><span class="h" style="width:${g.g * 100}%"></span>
-          <span class="elo" style="left:calc(${(1 - g.elo) * 100}% - 1px)"></span></div>
-        <div class="nums"><span>${g.away} ${pc(1 - g.g)}</span><span>OT ${pc(g.ot)}</span><span>${g.home} ${pc(g.g)}</span></div>
-        <div class="refs"><span>NeurHL-H <b>${pc(g.h)}</b></span><span>Elo <b>${pc(g.elo)}</b></span><span>Goals <b>${g.score[1].toFixed(1)}–${g.score[0].toFixed(1)}</b></span><span>xG <b>${g.xg[1].toFixed(1)}–${g.xg[0].toFixed(1)}</b></span><span>SOG <b>${Math.round(g.sog[1])}–${Math.round(g.sog[0])}</b></span></div>
-        <div class="refs"><span>${g.away} ${chip(g.lineup[1])}</span><span>${g.home} ${chip(g.lineup[0])}</span></div>
-        <table><thead><tr><th>Likeliest scorers</th><th>SOG</th><th>Goal</th><th>Point</th></tr></thead><tbody>${rows}</tbody></table>
-      </article>`;
-    }).join("");
+  // generic sortable table: cols = [{k, h, l (left), f (format), t (title)}], rows = array of objects
+  function table(el, cols, rows, opt) {
+    opt = opt || {};
+    let key = opt.sort || null, asc = !!opt.asc;
+    function draw() {
+      let r = rows.slice();
+      if (key) {
+        r.sort((a, b) => { const x = a[key], y = b[key];
+          if (x == null) return 1; if (y == null) return -1;
+          return (typeof x === "string" ? x.localeCompare(y) : x - y) * (asc ? 1 : -1); });
+      }
+      if (opt.limit) r = r.slice(0, opt.limit());
+      const head = "<thead><tr>" + cols.map(c => `<th class="${c.l ? "l" : ""}${c.k === key ? " sorted" + (asc ? " asc" : "") : ""}" data-k="${c.k}" title="${c.t || ""}">${c.h}</th>`).join("") + "</tr></thead>";
+      const body = "<tbody>" + r.map((x, i) => "<tr>" + cols.map(c => `<td class="${c.l ? "l" : ""}">${c.f ? c.f(x[c.k], x, i) : esc(x[c.k] == null ? "" : x[c.k])}</td>`).join("") + "</tr>").join("") + "</tbody>";
+      el.innerHTML = head + body;
+      el.querySelectorAll("th").forEach(th => th.onclick = () => {
+        const k = th.dataset.k; if (k === "_rk") return;
+        if (key === k) asc = !asc; else { key = k; asc = typeof rows[0]?.[k] === "string"; }
+        draw();
+      });
+    }
+    draw();
+    return { redraw: (newRows) => { if (newRows) rows = newRows; draw(); } };
   }
 
-  /* standings */
-  const LO = 55, HI = 125, pos = x => ((Math.min(Math.max(x,LO),HI)-LO)/(HI-LO)*100);
-  const ticks = [60,70,80,90,100,110,120];
-  const conf = c => {
-    const ts = D.teams.filter(t => t.conf === c).sort((a,b) => b.pts - a.pts);
-    const rows = ts.map((t,i) => `
-      <div class="trow${i===8?" cut":""}">
-        <div class="ab">${t.ab}<small>${esc(t.div)}</small></div>
-        <div class="lane" title="${esc(t.name)}: ${f1(t.pts)} points (80%: ${t.p10}-${t.p90}); HOWE ${f1(t.howe)}">
-          ${ticks.map(v=>`<span class="gl" style="left:${pos(v)}%"></span>`).join("")}
-          <span class="band" style="left:${pos(t.p10)}%;width:${pos(t.p90)-pos(t.p10)}%"></span>
-          <span class="howe" style="left:${pos(t.howe)}%"></span>
-          <span class="mean" style="left:${pos(t.pts)}%"></span>
-        </div>
-        <div class="pts">${f1(t.pts)}</div>
-        <div class="po">${Math.round(t.po)}%</div>
-      </div>`).join("");
-    return `<div class="conf"><h3>${c==="E"?"Eastern":"Western"} Conference <span class="label">Points · Playoff</span></h3>
-      <div class="axis"><span></span><div class="scale">${ticks.map(v=>`<span style="left:${pos(v)}%">${v}</span>`).join("")}</div><span></span><span></span></div>
-      ${rows}</div>`;
-  };
-  $("#confs").innerHTML = conf("E") + conf("W");
+  // ---- header
+  const M = D.meta || {};
+  const ck = D.checks ? `${D.checks.passed}/${D.checks.n}` : "n/a";
+  $("meta").innerHTML = [
+    `<b>${esc(M.release || "NeurHL")}</b>`, `engine <b>${esc(M.engine || "")}</b>`,
+    `rosters <b>${esc(M.rosters || "")}</b>`, `${M.draws || ""} lineup draws, ${(M.sims || 0).toLocaleString()} simulated seasons`,
+    `consistency checks <b>${ck}</b>`, `season set <code>${esc(M.season_set || "")}</code>`,
+    `live results through <b>${esc((D.live && D.live.as_of) || "")}</b> (${(D.live && D.live.games_played) || 0} games)`
+  ].join(" &middot; ");
 
-  /* games */
-  const days = [...new Set(D.games.map(g => g[1]))].sort();
-  const today = new Date().toISOString().slice(0,10);
-  let di = Math.max(0, days.findIndex(d => d >= today)); if (today > days[days.length-1]) di = days.length-1;
-  const showDay = () => {
-    const d = days[di]; $("#gdate").value = d; $("#gday").textContent = fdate(d);
-    const gs = D.games.filter(g => g[1] === d);
-    $("#glist").innerHTML = gs.length ? gs.map(g => {
-      const [id,,aw,hm,p,pe,pot,res] = g;
-      const fin = res ? `<span class="final">Final${res[2]!=="REG"?" / "+res[2]:""}: ${aw} ${res[0]}, ${hm} ${res[1]}</span>` : `<span class="final">Home win ${Math.round(p*100)}%</span>`;
-      return `<article class="game">
-        <div class="teams"><span>${aw} <span class="at">at</span> ${hm}</span>${fin}</div>
-        <div class="split" role="img" aria-label="NeurHL home win ${Math.round(p*100)} percent, Elo ${Math.round(pe*100)} percent">
-          <span class="a" style="width:${(1-p)*100}%"></span><span class="h" style="width:${p*100}%"></span>
-          <span class="elo" style="left:calc(${(1-pe)*100}% - 1px)"></span></div>
-        <div class="nums"><span>${aw} ${Math.round((1-p)*100)}%</span><span>OT ${Math.round(pot*100)}% · Elo ${hm} ${Math.round(pe*100)}%</span><span>${hm} ${Math.round(p*100)}%</span></div>
-      </article>`;}).join("") : `<p class="empty">No games on this date.</p>`;
-  };
-  $("#gprev").onclick = () => { if (di>0){di--;showDay();} };
-  $("#gnext").onclick = () => { if (di<days.length-1){di++;showDay();} };
-  $("#gdate").onchange = e => { const v = e.target.value; const j = days.findIndex(d => d >= v); di = j<0 ? days.length-1 : j; showDay(); };
-  showDay();
+  // ---- teams
+  const T0 = {}; (D.teams || []).forEach(t => T0[t.ab] = t);
+  const TX = (D.teams_x || []).map(t => Object.assign({}, t, { name: (T0[t.ab] || {}).name || t.ab,
+    div: (T0[t.ab] || {}).div || "", howe: (T0[t.ab] || {}).howe, diff: t.gf - t.ga }));
 
-  /* players */
-  const teamsAb = [...new Set(D.players.map(p => p[1]))].sort();
-  $("#pteam").innerHTML += teamsAb.map(t => `<option>${t}</option>`).join("");
-  let sortK = 7, sortDir = -1, limit = 50;
-  const maxP = Math.max(...D.players.map(p => p[7]));
-  const drawP = () => {
-    const q = $("#pq").value.trim().toLowerCase(), tm = $("#pteam").value, ps = $("#ppos").value;
-    const rows = D.players.filter(p => (!q || p[0].toLowerCase().includes(q)) && (!tm || p[1]===tm) && (!ps || p[2]===ps))
-      .sort((a,b) => sortDir*(a[sortK]-b[sortK]));
-    $("#ptable tbody").innerHTML = rows.slice(0,limit).map(p => `<tr>
-      <td class="nm">${esc(p[0])} <span class="label">${p[2]}</span></td><td>${p[1]}</td>
-      <td>${Math.round(p[3])}</td><td>${f1(p[4])}</td><td>${f1(p[5])}</td><td>${f1(p[6])}</td>
-      <td><span class="pb" style="width:${Math.round(p[7]/maxP*60)}px"></span>${f1(p[7])}</td></tr>`).join("");
-    $("#pmore").hidden = rows.length <= limit;
-  };
-  document.querySelectorAll("#ptable th button").forEach(b => b.onclick = () => {
-    const k = +b.dataset.k; sortDir = (k===sortK) ? -sortDir : -1; sortK = k;
-    document.querySelectorAll("#ptable th button").forEach(x => x.removeAttribute("aria-sort"));
-    b.setAttribute("aria-sort", sortDir<0 ? "descending" : "ascending"); drawP();
-  });
-  ["#pq","#pteam","#ppos"].forEach(s => $(s).addEventListener("input", () => { limit = 50; drawP(); }));
-  $("#pmore").onclick = () => { limit += 50; drawP(); };
-  drawP();
+  const divs = {}; TX.forEach(t => (divs[t.div] = divs[t.div] || []).push(t));
+  $("divs").innerHTML = Object.keys(divs).sort().map((d, i) => `<div><h3>${esc(d)}</h3><div class="wrap"><table id="div_${i}"></table></div></div>`).join("");
+  Object.keys(divs).sort().forEach((d, i) => table($("div_" + i), [
+    { k: "name", h: "Team", l: 1 }, { k: "pts", h: "PTS", f: f1 }, { k: "p10", h: "P10" }, { k: "p50", h: "P50" }, { k: "p90", h: "P90" },
+    { k: "w", h: "W", f: f1 }, { k: "l", h: "L", f: f1 }, { k: "otl", h: "OTL", f: f1 }, { k: "diff", h: "DIFF", f: f0, t: "Goals for minus against" },
+    { k: "po", h: "PO%", f: f1 }, { k: "howe", h: "HOWE", f: f1, t: "HOWE projected points" }
+  ], divs[d], { sort: "pts" }));
 
-  /* evidence */
-  const E = D.evidence, pg = E.pg;
-  const pgRows = [["Ice-time share","toi_share"],["Shots","shots"],["P(goal)","goal1"],["P(assist)","assist1"]]
-    .map(([n,k]) => `<div><span>${n}</span><span class="t"><b style="width:${Math.min(100,-pg[k].rel*100/12*100)}%"></b></span><span class="num">${(pg[k].rel*100).toFixed(1)}%</span></div>`).join("");
-  const sm = E.season, v1k = Object.keys(sm).find(k => k.startsWith("v1")), nk = Object.keys(sm).find(k => k.includes("shipped"));
-  let c1card;
-  if (!c1) {
-    c1card = `<div class="card"><span class="pill amber"><i></i>Pending: one-shot test</span>
-      <h3>NeurHL-H against Elo, game by game</h3>
-      <div class="big">${E.tune.diff.toFixed(4)} <small>log loss, tune window (exploratory)</small></div>
-      <p>On the tune window NeurHL-H beat Elo in every season (p = ${E.tune.p.toFixed(4)}), but the model and scoring rule changed while those results were visible. The decisive test on 2018-2026 (10,184 games) is frozen and runs once.</p></div>`;
-  } else {
-    const pass = c1.verdict === "PASS";
-    c1card = `<div class="card"><span class="pill ${pass?"green":"red"}"><i></i>${pass?"Confirmed":"Null"}: one-shot test</span>
-      <h3>NeurHL-H against Elo, game by game</h3>
-      <div class="big">${c1.diff>=0?"+":""}${c1.diff.toFixed(4)} <small>log loss vs Elo, ${c1.n_games.toLocaleString()} games</small></div>
-      <p>95% interval ${c1.ci95[0].toFixed(4)} to ${c1.ci95[1].toFixed(4)}; ${c1.p_two_sided < 1e-4 ? "p &lt; 0.0001" : "p = " + c1.p_two_sided.toFixed(4)}; season-clustered p = ${c1.clustered_p.toFixed(4)}; better in ${c1.seasons_won} of ${c1.seasons} seasons. Tune-window estimate was ${E.tune.diff.toFixed(4)}.</p></div>`;
+  table($("t_odds"), [
+    { k: "name", h: "Team", l: 1 }, { k: "pts", h: "PTS", f: f1 }, { k: "po", h: "Playoffs", f: f1 }, { k: "div_p", h: "Division", f: f1 },
+    { k: "pres", h: "Presidents'", f: f1 }, { k: "r2", h: "Round 2", f: f1 }, { k: "cf", h: "Conf. final", f: f1 },
+    { k: "fin", h: "Cup final", f: f1 }, { k: "cup", h: "Cup", f: f1 }
+  ], TX, { sort: "cup" });
+
+  table($("t_team"), [
+    { k: "name", h: "Team", l: 1 }, { k: "gf", h: "GF", f: f0 }, { k: "ga", h: "GA", f: f0 }, { k: "diff", h: "DIFF", f: f0 },
+    { k: "xgf", h: "xGF", f: f0 }, { k: "xga", h: "xGA", f: f0 }, { k: "sf", h: "SF", f: f0 }, { k: "sa", h: "SA", f: f0 },
+    { k: "sh", h: "SH%", f: x => x == null ? "" : Number(x).toFixed(1) }, { k: "sv", h: "SV%", f: x => x == null ? "" : Number(x).toFixed(1) },
+    { k: "ppo", h: "PPO", f: f0, t: "Power-play opportunities" }, { k: "ppg", h: "PPG", f: f0 }, { k: "pp", h: "PP%", f: f1 }, { k: "pk", h: "PK%", f: f1 },
+    { k: "rw", h: "RW", f: f1, t: "Regulation wins" }
+  ], TX, { sort: "diff" });
+
+  // ---- today
+  const TN = D.tonight || { games: [] };
+  const src = s => ({ NHL_API: "official", DF_CONFIRMED: "confirmed", DF_PROJECTED: "projected", FALLBACK: "fallback" }[s] || s || "");
+  $("today_note").textContent = TN.games.length ? `Latest committed forecast for each game on ${TN.date}. Forecasts are committed to the repository before puck drop.` : "No forecasts yet for the current game day.";
+  table($("t_today"), [
+    { k: "start", h: "Start (ET)", l: 1, f: s => s ? new Date(s).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }) : "" },
+    { k: "away", h: "Away", l: 1 }, { k: "home", h: "Home", l: 1 }, { k: "g", h: "P(home)", f: pc },
+    { k: "h", h: "NeurHL-H", f: pc }, { k: "elo", h: "Elo", f: pc }, { k: "ot", h: "P(OT)", f: pc },
+    { k: "score", h: "Goals A-H", f: s => s ? `${Number(s[1]).toFixed(2)}-${Number(s[0]).toFixed(2)}` : "" },
+    { k: "xg", h: "xG A-H", f: s => s ? `${Number(s[1]).toFixed(2)}-${Number(s[0]).toFixed(2)}` : "" },
+    { k: "sog", h: "SOG A-H", f: s => s ? `${Number(s[1]).toFixed(1)}-${Number(s[0]).toFixed(1)}` : "" },
+    { k: "lineup", h: "Lineups A/H", l: 1, f: s => s ? `${src(s[1])} / ${src(s[0])}` : "" }, { k: "kind", h: "Forecast", l: 1 }
+  ], TN.games);
+  const tp = [];
+  TN.games.forEach(g => (g.top || []).forEach(p => tp.push({ game: `${g.away}@${g.home}`, name: p[0], team: p[1], sog: p[2], pg: p[3], pp: p[4] })));
+  if (tp.length) {
+    $("today_players").innerHTML = '<h3>Top projected skaters</h3><div class="wrap"><table id="t_tp"></table></div>';
+    table($("t_tp"), [{ k: "game", h: "Game", l: 1 }, { k: "name", h: "Player", l: 1 }, { k: "team", h: "Team", l: 1 },
+      { k: "sog", h: "SOG", f: f1 }, { k: "pg", h: "P(goal)", f: pc }, { k: "pp", h: "P(point)", f: pc }], tp, { sort: "pp" });
   }
-  $("#ev").innerHTML = `
-    <div class="card"><span class="pill green"><i></i>Confirmed</span>
-      <h3>Player-game layer beats each skater's own recent average</h3>
-      <div class="bars">${pgRows}</div>
-      <p>Improvement over the baseline on ${pg.n.toLocaleString()} held-out skater-games (2018-2020), frozen and scored once. It wins in every season; clustered by player and game, z runs from ${Math.abs(Math.max(...["toi_share","shots","goal1","assist1"].map(k=>pg[k].z2))).toFixed(0)} to ${Math.abs(Math.min(...["toi_share","shots","goal1","assist1"].map(k=>pg[k].z2))).toFixed(0)}.</p></div>
-    ${c1card}
-    ${E.g ? `<div class="card"><span class="pill amber"><i></i>Gate evidence · live test running</span>
-      <h3>The game engine at the core of NeurHL 1.0</h3>
-      <div class="big">${E.g.d_elo.toFixed(4)} <small>log loss vs Elo, ${E.g.n.toLocaleString()} gate games</small></div>
-      <p>Scored once on 6,289 gate games (2019-2024), stacked with Elo and the neural player layer: better than Elo in ${E.g.beat_elo} of 5 seasons, and level with the neural player layer alone (${E.g.d_h >= 0 ? "+" : ""}${E.g.d_h.toFixed(4)}, not significant), which is why the final probability combines them. Its player projections beat the confirmed player-game layer on all four targets. The 2026-27 season is the prospective test.</p></div>` : ""}
-    <div class="card"><span class="pill">Development only</span>
-      <h3>Season standings: level with Elo</h3>
-      <div class="big">${sm[nk].mae.toFixed(2)} <small>vs Elo ${sm[v1k].mae.toFixed(2)} points MAE</small></div>
-      <p>On the five backtest seasons both records share, the Elo baseline is slightly more accurate (not significant). The simulator's 80% intervals are calibrated at 0.794 coverage.</p></div>`;
 
-  /* timeline */
-  const role = y => y===2008?"tr": y<=2011?"dv": (y===2013||y===2021)?"ns": y<=2017?"tu": y<=2026?"cf":"lv";
-  $("#tl").innerHTML = Array.from({length:20},(_,i)=>2008+i).map(y => `<div class="${role(y)}" title="${y-1}-${String(y).slice(2)}">${String(y).slice(2)}</div>`).join("");
+  // ---- games
+  const G = (D.games || []).map(r => ({ id: r[0], date: r[1], away: r[2], home: r[3], p: r[4], elo: r[5], ot: r[6],
+    res: r[7] ? `${r[7][0]}-${r[7][1]}${r[7][2] && r[7][2] !== "REG" ? " " + r[7][2] : ""}` : "" }));
+  Object.keys(T0).sort().forEach(t => { $("g_team").add(new Option(t, t)); $("s_team").add(new Option(t, t)); });
+  [...new Set(G.map(g => g.date.slice(0, 7)))].forEach(m => $("g_month").add(new Option(m, m)));
+  const gcols = [{ k: "date", h: "Date", l: 1 }, { k: "away", h: "Away", l: 1 }, { k: "home", h: "Home", l: 1 },
+    { k: "p", h: "P(home)", f: pc }, { k: "elo", h: "Elo", f: pc }, { k: "ot", h: "P(OT)", f: pc }, { k: "res", h: "Result A-H", l: 1 }];
+  const gsel = () => G.filter(g => (!$("g_team").value || g.home === $("g_team").value || g.away === $("g_team").value)
+    && (!$("g_month").value || g.date.startsWith($("g_month").value)));
+  const gt = table($("t_games"), gcols, gsel().slice(0, 200));
+  const gre = () => { const r = gsel(); gt.redraw(($("g_team").value || $("g_month").value) ? r : r.slice(0, 200)); };
+  $("g_team").onchange = gre; $("g_month").onchange = gre;
+
+  // ---- skaters
+  const S = (D.skaters_x || []).map(r => ({ name: r[0], team: r[1], pos: r[2], gp: r[3], toi: r[4], g: r[5], a: r[6], p: r[7],
+    p10: r[8], p90: r[9], sog: r[10], ixg: r[11], sh: r[12], pim: r[13], hit: r[14], blk: r[15], fo: r[16], oxf: r[17], oxa: r[18] }));
+  const scols = [{ k: "_rk", h: "Rk", f: (v, x, i) => i + 1 }, { k: "name", h: "Player", l: 1 }, { k: "team", h: "Team", l: 1 }, { k: "pos", h: "Pos", l: 1 },
+    { k: "gp", h: "GP", f: f1 }, { k: "toi", h: "TOI/GP", f: f1 }, { k: "g", h: "G", f: f1 }, { k: "a", h: "A", f: f1 }, { k: "p", h: "PTS", f: f1 },
+    { k: "p10", h: "P10", f: f0 }, { k: "p90", h: "P90", f: f0 }, { k: "sog", h: "SOG", f: f0 }, { k: "ixg", h: "ixG", f: f1 },
+    { k: "sh", h: "SH%", f: f1 }, { k: "pim", h: "PIM", f: f0 }, { k: "hit", h: "HIT", f: f0 }, { k: "blk", h: "BLK", f: f0 },
+    { k: "fo", h: "FO%", f: f1 }, { k: "oxf", h: "oiXGF", f: f1 }, { k: "oxa", h: "oiXGA", f: f1 }];
+  const ssel = () => { const q = $("s_q").value.toLowerCase(), tm = $("s_team").value, ps = $("s_pos").value, mg = +$("s_gp").value || 0;
+    return S.filter(s => s.gp >= mg && (!tm || s.team === tm) && (!ps || s.pos === ps) && (!q || s.name.toLowerCase().includes(q))); };
+  const st = table($("t_sk"), scols, ssel(), { sort: "p", limit: () => $("s_all").checked ? 100000 : 100 });
+  ["s_q", "s_team", "s_pos", "s_gp", "s_all"].forEach(id => $(id).oninput = () => st.redraw(ssel()));
+
+  // ---- goalies
+  const GL = (D.goalies || []).map(r => ({ name: r[0], team: r[1], gs: r[2], w: r[3], sa: r[4], ga: r[5], sv: r[6], gaa: r[7], so: r[8] }));
+  table($("t_gl"), [{ k: "name", h: "Goalie", l: 1 }, { k: "team", h: "Team", l: 1 }, { k: "gs", h: "GS", f: f1 }, { k: "w", h: "W", f: f1 },
+    { k: "sa", h: "SA", f: f0 }, { k: "ga", h: "GA", f: f0 }, { k: "sv", h: "SV%", f: x => x == null ? "" : Number(x).toFixed(3).replace(/^0/, "") },
+    { k: "gaa", h: "GAA", f: x => x == null ? "" : Number(x).toFixed(2) }, { k: "so", h: "SO", f: f1 }], GL, { sort: "gs" });
+
+  // ---- scoring and evidence
+  const L = D.live || {};
+  $("scoring_live").innerHTML = `<p>${(L.games_played || 0)} regular-season games scored so far. Interim numbers are descriptive; the preregistered comparison is made once, after the last regular-season game (2027-04-10).</p>`;
+  const E = D.evidence || {}, rows = [];
+  const fx = (x, d) => x == null ? "" : Number(x).toFixed(d == null ? 4 : d);
+  if (E.c1) rows.push({ c: "NeurHL-H vs Elo, per-game log loss (confirmatory, one shot)", w: "2018-2026 excl. 2021", n: E.c1.n_games, d: fx(E.c1.diff), ci: `${fx(E.c1.ci95[0])} to ${fx(E.c1.ci95[1])}`, p: E.c1.p_two_sided < 1e-4 ? "<0.0001" : fx(E.c1.p_two_sided, 4) });
+  if (M.seal) {
+    rows.push({ c: "Engine stack vs Elo, per-game log loss (descriptive seal)", w: "2025-2026", n: M.seal.n, d: fx(M.seal.d_elo), ci: `${fx(M.seal.d_elo - 1.96 * M.seal.se_elo)} to ${fx(M.seal.d_elo + 1.96 * M.seal.se_elo)}`, p: fx(M.seal.p_elo, 4) });
+    rows.push({ c: "Engine stack vs NeurHL-H, per-game log loss (descriptive seal)", w: "2025-2026", n: M.seal.n, d: fx(M.seal.d_h), ci: `${fx(M.seal.d_h - 1.96 * M.seal.se_h)} to ${fx(M.seal.d_h + 1.96 * M.seal.se_h)}`, p: fx(M.seal.p_h, 4) });
+  }
+  if (E.g) rows.push({ c: "Engine stack vs Elo, per-game log loss (gate)", w: "2019-2024 excl. 2021", n: E.g.n, d: fx(E.g.d_elo), ci: `${fx(E.g.d_elo - 1.96 * E.g.se_elo)} to ${fx(E.g.d_elo + 1.96 * E.g.se_elo)}`, p: "" });
+  if (E.pg) Object.entries(E.pg).filter(([k]) => k !== "n").forEach(([k, v]) => rows.push({ c: `Player-game layer vs own history: ${k} (confirmatory)`, w: "2018-2020", n: E.pg.n, d: `${(100 * v.rel).toFixed(1)}%`, ci: "", p: `z ${Number(v.z2).toFixed(1)}` }));
+  table($("t_ev"), [{ k: "c", h: "Comparison", l: 1 }, { k: "w", h: "Seasons", l: 1 }, { k: "n", h: "N" }, { k: "d", h: "Difference" },
+    { k: "ci", h: "95% CI", l: 1 }, { k: "p", h: "p" }], rows);
+
+  // ---- files
+  const sha = D.sha256 || {};
+  $("files_list").innerHTML = "<p>Season forecast files and their SHA-256 hashes. All inputs, code, plans and committed forecasts are in the repository.</p><div class=\"wrap\"><table><thead><tr><th class=\"l\">File</th><th class=\"l\">SHA-256</th></tr></thead><tbody>" +
+    Object.entries(sha).map(([f, h]) => `<tr><td class="l"><a href="https://github.com/ph05/neurhl/blob/main/${f}">${esc(f)}</a></td><td class="l"><code>${h}</code></td></tr>`).join("") + "</tbody></table></div>";
 })();
 </script>
 </body>
