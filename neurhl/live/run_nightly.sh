@@ -49,6 +49,7 @@ UV=(uv run --no-project --python 3.12 --with numpy --with "pandas<3" --with pyar
 # (ingest_2027.py refuses a mismatch rather than score with a differently-unpickled model)
 T="$REPO/neurhl/data/tensors"
 status=0
+nonfatal=""   # names of non-fatal steps that failed, summarised at the end
 
 step() {  # step NAME CMD...
   local name="$1"; shift
@@ -64,9 +65,9 @@ echo "[run_nightly $(ts)] start ($REPO)"
 
 step "score_live_2027" "${UV[@]}" neurhl/eval/score_live_2027.py || status=1
 step "score_neurhl_1_0" "${UV[@]}" neurhl/eval/score_neurhl_1_0.py || status=1
-step "score_dated_1_1" "${UV[@]}" neurhl/eval/score_dated_1_1.py || echo "[run_nightly $(ts)] score_dated_1_1 failed (non-fatal)"
+step "score_dated_1_1" "${UV[@]}" neurhl/eval/score_dated_1_1.py || { echo "[run_nightly $(ts)] score_dated_1_1 failed (non-fatal)"; nonfatal="$nonfatal score_dated_1_1"; }
 # NeurHL 1.1 C2b (exploratory, PLAN_NeurHL_1_1 A9): tonight's projection of the final standings
-step "live_standings_1_1" "${UV[@]}" neurhl/sim/live_standings_2027.py || echo "[run_nightly $(ts)] live_standings_1_1 failed (non-fatal)"
+step "live_standings_1_1" "${UV[@]}" neurhl/sim/live_standings_2027.py || { echo "[run_nightly $(ts)] live_standings_1_1 failed (non-fatal)"; nonfatal="$nonfatal live_standings_1_1"; }
 
 if step "ingest_2027" "${UV[@]}" neurhl/live/ingest_2027.py; then
   need=0
@@ -93,7 +94,7 @@ fi
 if step "fetch" git -C "$REPO" fetch --quiet origin main; then
   step "score_live_g_2027" "${UV[@]}" neurhl/eval/score_live_g_2027.py || status=1
   # NeurHL 1.1 C1 (PLAN_NeurHL_1_1): calibrated stat-sheet counts; descriptive until the season ends
-  step "score_calibration_1_1" "${UV[@]}" neurhl/eval/score_calibration_1_1.py || echo "[run_nightly $(ts)] score_calibration_1_1 failed (non-fatal)"
+  step "score_calibration_1_1" "${UV[@]}" neurhl/eval/score_calibration_1_1.py || { echo "[run_nightly $(ts)] score_calibration_1_1 failed (non-fatal)"; nonfatal="$nonfatal score_calibration_1_1"; }
 else
   status=1
   echo "[run_nightly $(ts)] score_live_g_2027: skipped (fetch failed; a stale origin/main would mark forecasts MISSED)"
@@ -120,4 +121,5 @@ else
 fi
 
 echo "[run_nightly $(ts)] exit $status"
+[ -n "$nonfatal" ] && echo "[run_nightly $(ts)] WARNING non-fatal failures:$nonfatal"
 exit $status
