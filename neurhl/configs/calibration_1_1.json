@@ -1,0 +1,103 @@
+{
+ "plan": "PLAN_NeurHL_1_1.md C1",
+ "source": "neurhl/output/preds/g_gate_games.csv",
+ "source_sha256": "6569402137d5633b0cf303cd53b0968be59d0fb68bb1444d7d3e1743f3683844",
+ "seasons": [
+  2019,
+  2020,
+  2022,
+  2023,
+  2024
+ ],
+ "r_frozen": 40.0,
+ "sog_dispersion": {
+  "r_hat": 98.68,
+  "n_team_games": 12578,
+  "coverage_r40": 0.8608681825409445,
+  "coverage_rhat": 0.7970265543011608,
+  "logscore_gain_per_team_game": 0.020555107556239793,
+  "by_season": {
+   "2019": {
+    "n": 2542,
+    "coverage_r40": 0.8587726199842644,
+    "coverage_rhat": 0.7828481510621558,
+    "logscore_gain_per_team_game": 0.013535776574872222
+   },
+   "2020": {
+    "n": 2164,
+    "coverage_r40": 0.8729205175600739,
+    "coverage_rhat": 0.8151571164510166,
+    "logscore_gain_per_team_game": 0.026102705960755937
+   },
+   "2022": {
+    "n": 2624,
+    "coverage_r40": 0.8586128048780488,
+    "coverage_rhat": 0.7995426829268293,
+    "logscore_gain_per_team_game": 0.02275822958286516
+   },
+   "2023": {
+    "n": 2624,
+    "coverage_r40": 0.8548018292682927,
+    "coverage_rhat": 0.7926829268292683,
+    "logscore_gain_per_team_game": 0.01700461008048565
+   },
+   "2024": {
+    "n": 2624,
+    "coverage_r40": 0.866234756097561,
+    "coverage_rhat": 0.8006859756097561,
+    "logscore_gain_per_team_game": 0.024127382550819566
+   }
+  }
+ },
+ "goal_slope": {
+  "b_hat": 0.7015,
+  "n_team_games": 12536,
+  "level_by_season": {
+   "2019": 0.9910571963645081,
+   "2020": 0.9884227087263441,
+   "2022": 1.011773195428499,
+   "2023": 0.9816526003224224,
+   "2024": 0.9879540966481941
+  },
+  "logscore_gain_per_team_game": 0.004649066860356911,
+  "deciles": {
+   "pred": [
+    2.163,
+    2.46,
+    2.632,
+    2.776,
+    2.91,
+    3.049,
+    3.195,
+    3.364,
+    3.604,
+    4.167
+   ],
+   "pred_cal": [
+    2.393,
+    2.616,
+    2.742,
+    2.846,
+    2.942,
+    3.041,
+    3.144,
+    3.262,
+    3.425,
+    3.8
+   ],
+   "obs": [
+    2.373,
+    2.567,
+    2.814,
+    2.765,
+    2.887,
+    3.002,
+    3.09,
+    3.324,
+    3.422,
+    3.732
+   ]
+  }
+ },
+ "live_goal_form": "mu' = m_t * M * (mu_raw / M) ** b_hat; m_t and M from configs/live_goal_calibration.json and each forecast's goal_mult"
+}

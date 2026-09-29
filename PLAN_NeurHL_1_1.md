@@ -1,0 +1,176 @@
+# PLAN NeurHL 1.1: calibrated count distributions, then further layers
+
+STATUS: COMMITTED 2026-09-29, BEFORE THE FIRST 2026-27 REGULAR-SEASON GAME
+(2026-09-29 21:00 UTC). Append-only. C1 is fully specified here. C2 and C3
+are declared as next steps; each gets its own dated amendment before any
+number it will be judged on is computed.
+
+## Why
+
+A review of the 53 works cited by the project's write-up asked whether any of
+them justifies new architecture. The review read each work, in full where a
+copy was reachable.
+
+**The finding matches the project's own record.** No cited method offers a
+change to the win-probability engine with an expected gain the sealed test
+could detect:
+- the sealed test (2,624 games) has a minimum detectable effect of 0.0026
+  against NeurHL-H;
+- the candidates found are worth 0.0003 to 0.002.
+
+The sealed 2025 and 2026 seasons therefore stay unspent, kept for new
+information.
+
+**Three places do justify new components:**
+
+| # | Component | Layer | Basis |
+|---|---|---|---|
+| C1 | Fitted count distributions: team-shots dispersion and goal-mean slope | Stat sheet and goal totals; win probabilities unchanged | Gneiting and Raftery (2007), optimum score estimation; Czado, Gneiting and Held (2009), count dispersion; Gneiting, Balabdaoui and Raftery (2007), a hump-shaped PIT means too wide; Dawid (1984), prequential tuning; Efron and Morris (1975), shrinking extremes. Also PLAN_NeurHL4 A2: gate C fails on team-shots coverage, 0.860 against a nominal 0.80. |
+| C2 | Team strength that evolves within the season, and a season shock estimated for this engine | Season simulator | Lopez, Matthews and Baumer (2018), state-space team strength (structure only: their estimates come from betting markets, which never enter this project); Efron and Morris; Gneiting and Raftery (fitting by CRPS) |
+| C3 | Rating with a gain that shrinks as a season's games accumulate, and weighted overtime and shootout results | A candidate stack column | Elo (1978), §3.73 "development coefficient"; Whelan and Klein (2021), four-outcome Bradley-Terry |
+
+Rejected, with evidence:
+- **Excitation after goals (Hawkes 1971).** On 2012 and 2014-2018, periods 1-2,
+  the goal rate in the 30 s after a goal is 2.9 per 60 minutes, against about
+  5.5 later, at every lead. That is inhibition, not excitation.
+- **Stack weights gated by season phase.** Walk-forward on 2014-2018, it adds
+  +0.00074 log loss (SE 0.00029).
+- **A tree-model stack column.** Rung R3 already lost to Elo.
+- **A manpower state in the outcome chain.** About zero effect pre-game.
+- **Neural point-process game predictors.** A documented null.
+- **Training the network on CRPS.** It already trains on proper losses.
+- **Anything market-based.** Firewall.
+
+## C1: fitted count distributions
+
+### Phase A (declared before fitting)
+
+- **Targets:**
+  - team shots on goal per team-game;
+  - team regulation goals per team-game (the overtime or shootout winner's
+    extra goal removed, as `eval/score_live_g_2027.py` counts them).
+- **Forms.** Each calibrated forecast is a fixed function of numbers frozen in
+  each pregame forecast file, plus the constants below.
+  - **Shots:** NB2(mu, r_hat), Var = mu + mu^2 / r_hat, where mu is the
+    file's `sog_home` / `sog_away`. The frozen comparator is NB2(mu, 40), the
+    stat sheet's dispersion.
+  - **Goals:** Poisson(m_t * M * (raw / M) ^ b_hat). Here raw is
+    `goals_home_raw` / `goals_away_raw`, m_t is the file's `goal_mult`, and
+    M = 3.2534 is the mean raw projection in
+    `configs/live_goal_calibration.json`. The frozen comparator is
+    Poisson(m_t * raw), the A1 mean. At b_hat = 1 the two are identical.
+- **Fit.** `neurhl/eval/fit_calibration_1_1.py` maximises the NB log score
+  (for r) and the Poisson log score (for b, with a free level per season)
+  over NeurHL-G's out-of-sample predictions on G_GATE:
+  - source: `neurhl/output/preds/g_gate_games.csv`;
+  - configuration g1, the live bundle's configuration;
+  - seasons 2019, 2020 and 2022-2024;
+  - 12,578 team-games for shots and 12,536 for goals.
+
+  Rows from 2025 or 2026 stop the fit.
+- **Seen before fitting (postdictions, disclosed).** During the review:
+  - on the iteration window (2012, 2014-2018), r = 83 and a goal slope of
+    0.60 (linear);
+  - walk-forward on G_GATE seasons, r = 90-100 and b = 0.68-0.73.
+
+  None of these numbers is evidence for C1; only the 2026-27 games are.
+
+### Phase B (fitted values, frozen here)
+
+| Quantity | Value |
+|---|---|
+| r_hat | 98.68 |
+| G_GATE 80% randomised-PIT coverage, r = 40 / r_hat | 0.861 / 0.797 |
+| G_GATE NB log-score gain per team-game | +0.0206 |
+| b_hat | 0.7015 |
+| G_GATE Poisson log-score gain per team-game | +0.0046 |
+| G_GATE top decile, predicted / calibrated / realised | 4.167 / 3.800 / 3.732 |
+| G_GATE bottom decile, predicted / calibrated / realised | 2.163 / 2.393 / 2.373 |
+| `neurhl/configs/calibration_1_1.json` | sha256 `230d88eab2c7614872f1723cea1a50dc74db3056d26f4c1f8993448843f68b6f` |
+
+Running the fit again reproduces the file byte for byte
+(`neurhl/tests/test_calibration_1_1.py`).
+
+### Test (one inference, after the last regular-season game, 2027-04-10)
+
+- **Games:** every 2026-27 regular-season game counted by
+  `eval/score_live_g_2027.py` for the pregame forecast (the same selection
+  and validity rules, reused in code).
+- **Primary, one Holm family of two:** the mean paired log-score difference
+  per team-game (calibrated minus frozen) for shots and for goals. Each test
+  is two-sided at 0.05 by week-block bootstrap (9,999 draws, seed 711).
+- **Also reported:**
+  - 80% randomised-PIT coverage for shots (nominal 0.80; the calibrated
+    forecast passes if within ±0.03);
+  - goal quintiles, frozen against calibrated against realised;
+  - a team-clustered standard error.
+- **Interim:** scorecards (`neurhl/output/live/scorecard_1_1_2027.json`,
+  nightly) are descriptive only.
+- **Stopping rule:** the full regular season. No earlier inference.
+
+### Consequences, fixed now
+
+| Outcome | Consequence |
+|---|---|
+| Both pass | From 2027-28, the stat sheet uses the fitted dispersion and slope. The 2026-27 frozen files are never edited. |
+| One passes | That one is adopted for 2027-28 and the other is a documented null. |
+| Neither passes | Both are documented nulls. The frozen stat sheet stands. |
+
+### The dated file set beside the NeurHL 1.0 freeze
+
+`neurhl/sim/calibrate_1_0_goals.py` applies the goal slope to the frozen
+NeurHL 1.0 files and writes `neurhl/output/neurhl_1_0/cal_20260929/`. The
+frozen files are read, never written.
+- Each team-game is scaled as a unit by f = k * (g / m0 / M)^(b_hat - 1),
+  with one league constant k = 1.0050. So the league's goals are unchanged
+  (3.034 per team-game) and every sum rule still holds.
+- Affected: team goals for and against, power-play goals and percentages,
+  skater goals, assists and points, and goalie goals against.
+- Unchanged: win probabilities, standings, shots and ice time.
+- The spread of team goals-for per game falls from 0.303 to 0.215.
+- b_hat was fitted on game-day predictions, while these are
+  preseason-convention predictions, so the set is an approximation.
+- It is scored beside the frozen files, under the frozen files' own
+  measures (PLAN_NeurHL_1_0, Scoring: team goals and skater points MAE).
+  The frozen files remain NeurHL 1.0's forecast.
+
+| File | SHA-256 |
+|---|---|
+| `neurhl/output/neurhl_1_0/cal_20260929/games_2027.csv` | `c642e5b2c89aac5987bf7b6def2bba05a2e9fb3d0f1be1c9a6bec8d9d196aa6b` |
+| `neurhl/output/neurhl_1_0/cal_20260929/teams_2027.csv` | `d2e3a2b2a0301798ada9bcb147913cfbc652e776d91edd6c43eae41d7d8e9fc4` |
+| `neurhl/output/neurhl_1_0/cal_20260929/skaters_2027.csv` | `7b4254405e685c6eb5898f490fbc7dab9fe4554a85961aa1805a83918ac1e496` |
+| `neurhl/output/neurhl_1_0/cal_20260929/goalies_2027.csv` | `bf1291ff42f3ae7748fb3d820d8a5be80709e48217c532c584262bc1fe3d172b` |
+| `neurhl/output/neurhl_1_0/cal_20260929/player_games_2027.csv.gz` | `c185d7b4974a9542b795ac15c5b8fb17f181abc365b5d9ba52d7353c0c236964` |
+| `neurhl/output/neurhl_1_0/cal_20260929/checks.json` | `8e44928b82c31b89425a50fca750934f89dd77000efdf04653f9e73bfab48599` |
+
+### Known limitation
+
+Player shots in the stat sheet are a multinomial split of team shots. A
+sharper team total narrows player intervals, which the gate already found a
+little too narrow (coverage 0.783). C1 does not change player distributions.
+
+## C2 and C3: declared next steps
+
+- **C2.** A historical backtest of the NeurHL 1.0 season model, in the
+  preseason convention:
+  - G snapshots trained walk-forward with configuration g1, and the
+    availability model fitted on earlier seasons;
+  - seasons 2012, 2014-2020 and 2022-2024; never 2025 or 2026.
+
+  It compares the constant season shock, a weekly AR(1) team-strength path,
+  and AR(1) with shrinkage of later games toward the mean, on points CRPS,
+  MAE, 80% coverage and playoff Brier. Parameters are fitted on 2012-2018
+  and judged on 2019-2024, under a rule committed in an amendment before the
+  judging run.
+- **C3.** A rating with a Kalman-style gain (high at season start and after
+  roster turnover, falling as games accumulate) and outcome targets {1, p_OT,
+  1 - p_OT, 0}, with p_OT learned. In the review, overtime and shootout
+  winners' slope on the Elo logit was 0.34, against 1.28 for regulation
+  winners (2012 and 2014-2018). It is fitted on 2009-2017 and judged as a
+  stack-column candidate on the iteration and gate windows. If it helps, it
+  becomes a live exploratory column, declared before the games it is scored
+  on. The frozen Elo comparator is never changed.
+- **Neither spends the sealed seasons.** An engine candidate may: in-season
+  fine-tuning with decoupled L2-SP (Li, Grandvalet and Davoine 2018;
+  Loshchilov and Hutter 2019). But only under its own plan, and only if its
+  pre-gate gain reaches the sealed test's detectable size.

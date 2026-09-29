@@ -10,6 +10,7 @@
 #                                       (PLAN_NeurHL4 LIVE). Forecasts are committed by the publishing
 #                                       clone, so the fetch brings their commits into origin/main here;
 #                                       if it fails the scorer is skipped and the last scorecard stands
+#      then neurhl/eval/score_calibration_1_1.py: NeurHL 1.1 C1 (non-fatal)
 #   5. neurhl/site/build_site.py, then neurhl/live/publish.sh: results, scorecards and site, once
 #                                       2026-27 games have been played
 # Log: data/raw/lineup_snapshots/launchd_nightly.log (launchd redirects stdout/stderr there; run any
@@ -88,6 +89,8 @@ fi
 # 4. NeurHL-G scorecard, after the ingest so its stat-sheet actuals are current
 if step "fetch" git -C "$REPO" fetch --quiet origin main; then
   step "score_live_g_2027" "${UV[@]}" neurhl/eval/score_live_g_2027.py || status=1
+  # NeurHL 1.1 C1 (PLAN_NeurHL_1_1): calibrated stat-sheet counts; descriptive until the season ends
+  step "score_calibration_1_1" "${UV[@]}" neurhl/eval/score_calibration_1_1.py || echo "[run_nightly $(ts)] score_calibration_1_1 failed (non-fatal)"
 else
   status=1
   echo "[run_nightly $(ts)] score_live_g_2027: skipped (fetch failed; a stale origin/main would mark forecasts MISSED)"
@@ -101,6 +104,7 @@ if [ -f "$RES" ] && [ "$(wc -l < "$RES")" -gt 1 ]; then
     # publish.sh refuses a missing path, so the NeurHL-G scorecard goes only once it exists
     [ -f neurhl/output/live/scorecard_g_2027.json ] && PUB+=(neurhl/output/live/scorecard_g_2027.json)
     [ -f neurhl/output/live/scorecard_1_0_2027.json ] && PUB+=(neurhl/output/live/scorecard_1_0_2027.json)
+    [ -f neurhl/output/live/scorecard_1_1_2027.json ] && PUB+=(neurhl/output/live/scorecard_1_1_2027.json)
     PUBLISH_MSG="live: results and scorecard through $(date -v-1d '+%Y-%m-%d')" \
       step "publish" bash neurhl/live/publish.sh - "${PUB[@]}" docs || status=1
   else

@@ -1,0 +1,21 @@
+{
+ "b_hat": 0.7015,
+ "M": 3.253411054611206,
+ "m0": 0.9229290835140593,
+ "k": 1.0050494697700847,
+ "pass": true,
+ "max_abs_diff": {
+  "skater goals = game goals, per team-game": 5.524658260736004e-05,
+  "team goals_for = sum of skater goals": 0.00028368791197408427,
+  "goalie goals against = team goals against": 0.000102620003588072,
+  "league goals for = goals against": 0.0
+ },
+ "league_goals_per_team_game": {
+  "frozen": 3.0339234077380954,
+  "calibrated": 3.033923407738096
+ },
+ "team_goals_for_sd_per_game": {
+  "frozen": 0.3028866879407634,
+  "calibrated": 0.21483800108212925
+ }
+}
