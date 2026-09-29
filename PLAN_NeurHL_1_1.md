@@ -379,3 +379,36 @@ coefficients) on 2012 and 2014-2016 (3,720 games):
 Mostly, the single-seed gains came from tuning partly undoing one seed's
 noise, which the ensemble already averages away. C4 is not taken to G_GATE,
 and the sealed seasons stay unspent.
+
+## A6 (2026-09-29, before the first 2026-27 game): C1b, team-xG dispersion
+
+**The problem.** The frozen stat sheet draws team xG from a gamma
+distribution around the model mean with shape 9. On G_GATE (the same
+12,574 out-of-sample team-games), its 80% intervals cover 0.855.
+
+**The fit.** `neurhl/eval/fit_calibration_1_1b.py` fits the shape by maximum
+likelihood:
+- k_hat = 11.86;
+- coverage 0.798;
+- +0.0179 nats per team-game.
+
+This was seen once, in exploration, before fitting. It is disclosed as a
+postdiction.
+
+**The test.**
+- The calibrated forecast is gamma(k_hat) around each pregame forecast's
+  frozen `xgf_home` / `xgf_away`. The comparator is gamma(9).
+- The target is the ingest's team xG (`xgf_all`); degraded games are left
+  out.
+- It uses the same games, the same bootstrap and the same single inference
+  after the regular season as C1, but a separate Holm family of one.
+- C1's two declared tests are unchanged.
+
+**Seen but not tested.** Power-play opportunities are under-dispersed
+(variance/mean 0.665; Poisson 80% coverage 0.883). They cannot be tested
+this season, because the forecast files do not store their mean. This is
+recorded for the 2027-28 stat sheet.
+
+| File | SHA-256 |
+|---|---|
+| `neurhl/configs/calibration_1_1b.json` | `53cae3662e8ea40f5f50db952987500cb113c55fbee0dbe37e637152e54e6956` |

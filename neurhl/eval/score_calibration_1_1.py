@@ -152,6 +152,25 @@ def main(argv=None) -> int:
         sg.update({"available": True, "coverage80_frozen": pit_cov(ys[k], mu[k], R_FROZEN),
                    "coverage80_cal": pit_cov(ys[k], mu[k], r_hat)})
         card["sog"] = sg
+    # C1b (A6): team xG, gamma(k_hat) against the frozen gamma(9); its own family of one
+    calb = root / "neurhl/configs/calibration_1_1b.json"
+    if calb.exists() and t is not None and len(g):
+        k_hat = json.loads(calb.read_text())["k_hat"]
+        tt = t[~t.game_id.isin(tabs["degraded"])]
+        side = {s_: tt[tt.is_home == s_].drop_duplicates("game_id").set_index("game_id")["xgf_all"]
+                for s_ in (1, 0)}
+        yx = np.r_[g.game_id.map(side[1]), g.game_id.map(side[0])].astype(float)
+        mx = np.r_[g.xgf_home, g.xgf_away].astype(float)
+        kx = np.isfinite(yx) & np.isfinite(mx) & (mx > 0) & (yx > 0)
+        gl_ = lambda y_, m_, k_: stats.gamma.logpdf(y_, k_, scale=m_ / k_)  # noqa: E731
+        xg = compare(gl_(yx[kx], mx[kx], k_hat), gl_(yx[kx], mx[kx], 9.0), weeks[kx], teams[kx], final)
+        cov = lambda k_: float(np.mean((lambda u: (u > 0.1) & (u < 0.9))(stats.gamma.cdf(yx[kx], k_, scale=mx[kx] / k_))))  # noqa: E731
+        xg.update({"available": True, "k_hat": k_hat,
+                   "coverage80_frozen": cov(9.0) if kx.any() else None,
+                   "coverage80_cal": cov(k_hat) if kx.any() else None})
+        card["xg"] = xg
+    else:
+        card["xg"] = {"available": False}
     if final:
         card["holm"] = holm({"sog": card["sog"].get("p_week_bootstrap"),
                              "goals": card["goals"].get("p_week_bootstrap")})

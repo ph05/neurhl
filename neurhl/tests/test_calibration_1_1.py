@@ -82,6 +82,7 @@ def main():
         (repo.root / "neurhl/configs/calibration_1_1.json").write_text(json.dumps(
             {"sog_dispersion": {"r_hat": r_hat}, "goal_slope": {"b_hat": b_hat}}))
         (repo.root / "neurhl/configs/live_goal_calibration.json").write_text(json.dumps({"M": Mv}))
+        (repo.root / "neurhl/configs/calibration_1_1b.json").write_text(json.dumps({"k_hat": 12.0}))
         p = subprocess.run([sys.executable, str(NRL / "eval" / "score_calibration_1_1.py"),
                             "--root", str(repo.root), "--offline", "--as-of", "2026-10-02"],
                            capture_output=True, text=True, env=repo.env)
@@ -105,6 +106,12 @@ def main():
         check("SOG: degraded G3 left out", card["sog"]["n_team_games"] == 2)
         check("SOG: paired log-score difference", abs(card["sog"]["diff"] - ds) < 1e-9,
               f"{card['sog']['diff']:.6f} vs {ds:.6f}")
+        gx = lambda y, mu, k: stats.gamma.logpdf(y, k, scale=mu / k)  # noqa: E731
+        yx, mx = np.array([3.0, 2.0]), np.array([3.2, 2.5])
+        dx = float(np.mean(gx(yx, mx, 12.0) - gx(yx, mx, 9.0)))
+        check("xG (C1b): paired log-score difference, degraded G3 left out",
+              card["xg"]["n_team_games"] == 2 and abs(card["xg"]["diff"] - dx) < 1e-9,
+              f"{card['xg'].get('diff', float('nan')):.6f} vs {dx:.6f}")
         check("interim card makes no inference", card["status"] == "interim" and "holm" not in card)
 
     print(f"\n{sum(RES)}/{len(RES)} checks pass")
