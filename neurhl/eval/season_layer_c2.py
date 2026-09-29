@@ -150,7 +150,7 @@ def main():
         fit = run_grid(FIT, model)
         best = min(GRID, key=lambda g: fit[g].crps.mean())
         top = sorted(GRID, key=lambda g: fit[g].crps.mean())[:5]
-        judge = run_grid(JUDGE, model)
+        judge = run_grid(JUDGE, model, list(dict.fromkeys([best, FROZEN])))   # only the two compared
         a, b = judge[best].copy(), judge[FROZEN]
         a["diff_"] = a.crps.to_numpy() - b.crps.to_numpy()
         out[model] = {
