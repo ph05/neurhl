@@ -293,3 +293,35 @@ published as an exploratory NeurHL 1.1 product (not a replacement for the
 frozen files). It is scored at the end of the season at the same checkpoints
 against the final table, beside the frozen preseason files plus actual
 points.
+
+## A3 (2026-09-29, before the first 2026-27 game): blended skater season points (C4)
+
+**The blend.** The earlier player-season work declared a 50/50 blend of two
+paths and found it had the lowest points error over 11 vantages: 9.07 per 82
+games, against 9.41 and 9.77 for the paths alone. The paths are:
+- path A, the gradient-boosted season model;
+- path B, the summed player-game layer.
+
+NeurHL 1.0's skater totals come from the engine alone. Its player heads beat
+path B on every shared target (PLAN_NeurHL4 gate PG).
+`neurhl/sim/skaters_blend_1_1.py` blends the two surviving paths 50/50 per
+game played:
+- points per game = 0.5 x the engine's + 0.5 x c x path A's;
+- path A is `proj_p_path_a / exp_gp` in the dated U1 file
+  `neurhl/output/player_proj_2027_20260928.csv`;
+- c = 0.9625 puts path A on the engine's league scoring level (path A runs
+  about 4% higher), so the league's skater points are unchanged (21,830);
+- games played stay the engine's (the availability model);
+- goals and assists scale with points;
+- 725 of 925 skaters have a path-A row; the others keep their 1.0 values.
+
+**Scope and scoring.** Skater totals only. Team files are unchanged, and a
+team's skater sums may differ from its team goals by the redistribution. It
+is scored at season end beside the frozen skaters file, on the frozen file's
+own measure: skater points MAE for skaters with at least 40 games
+(PLAN_NeurHL_1_0, Scoring). It is exploratory: it replaces nothing.
+
+| File | SHA-256 |
+|---|---|
+| `neurhl/output/neurhl_1_0/skaters_blend_20260929/skaters_2027.csv` | `8ce690f3de7a473ceb4a69981b05cdbe1df1e1095acfa3a1c5c0654913d6f5fd` |
+| `neurhl/output/neurhl_1_0/skaters_blend_20260929/run.json` | `1bd76d1e487967bff21d279f049abf8a8faed708d7c80efba334f4c375f861a2` |
