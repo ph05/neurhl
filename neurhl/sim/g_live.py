@@ -117,6 +117,19 @@ def build(games: pd.DataFrame, lineups: dict, results: pd.DataFrame = None,
     N = len(games)
     gi = {g: i for i, g in enumerate(games.game_id)}
     Fs, Fb = names["sk_feat"], names["sk_base"]
+    # a live bundle trained with rookie inputs (candidate g1rk, PLAN_NeurHL_1_1 A16) lists them in
+    # its own feature names; fill them from the 2026-27 rookie table. Other bundles: unchanged.
+    try:
+        _b = json.loads((ROOT / "configs" / "live_models.json").read_text())["neurhl_g"]
+        _bn = json.loads((ROOT / "checkpoints" / "g" / _b / "bundle.json").read_text())["names"]["sk_feat"]
+    except (OSError, KeyError, ValueError):
+        _bn = Fs
+    if "rk_flag" in _bn:
+        _rk = pd.read_csv(ROOT / "configs" / "rookie_priors_2027.csv").set_index("player_id")
+        sk["rk_pred_g"] = sk.player_id.map(_rk.pred_g)
+        sk["rk_pred_a"] = sk.player_id.map(_rk.pred_a)
+        sk["rk_flag"] = sk.player_id.isin(_rk.index).astype(float)
+        Fs = _bn
     SK = np.full((N, 2, NS, len(Fs)), np.nan, np.float32)
     SKB = np.full((N, 2, NS, len(Fb)), np.nan, np.float32)
     SKM = np.zeros((N, 2, NS), np.float32)
