@@ -99,12 +99,26 @@ def scores(sim, y):
     return crps, np.abs(sim.mean(0) - y), ((y >= lo) & (y <= hi)).astype(float)
 
 
+def _memo(model, V):
+    import pickle
+    f = SRC / f"c2memo_{model}_{V}.pkl"
+    return f, (pickle.loads(f.read_bytes()) if f.exists() else {})
+
+
 def run_grid(seasons, model, grid=None):
+    """Per-season results are memoised on disk by (model, season, variant); the
+    simulation is seeded, so a cached result equals a fresh one."""
+    import pickle
     res = {}
     cache = {V: load(V) for V in seasons}
+    memo = {V: _memo(model, V) for V in seasons}
     for g in (grid or GRID):
         rows = []
         for V in seasons:
+            f, mm = memo[V]
+            if g in mm:
+                rows.append(mm[g])
+                continue
             d = cache[V]
             teams, hi, ai, y = realised(d)
             if model == "engine":
@@ -119,8 +133,11 @@ def run_grid(seasons, model, grid=None):
                 var = g
             sim = simulate(d, lp, k, hi, ai, len(teams), *var, SEED + V)
             c, m, cov = scores(sim, y)
-            rows.append(pd.DataFrame({"season": V, "team": teams, "crps": c, "ae": m, "cov": cov}))
+            mm[g] = pd.DataFrame({"season": V, "team": teams, "crps": c, "ae": m, "cov": cov})
+            rows.append(mm[g])
         res[g] = pd.concat(rows, ignore_index=True)
+    for V, (f, mm) in memo.items():
+        f.write_bytes(pickle.dumps(mm))
     return res
 
 
@@ -141,7 +158,16 @@ def summary(df):
             "n": int(len(df))}
 
 
+def fit_only():
+    """Fill the memo for the fit seasons (no judge season is simulated)."""
+    for model in ("engine", "elo"):
+        run_grid(FIT, model)
+    run_grid(FIT, "blend", [(a_,) + g for a_ in (0, 0.25, 0.5, 0.75, 1) for g in GRID])
+
+
 def main():
+    if "--fit-only" in sys.argv:
+        return fit_only()
     avail = [V for V in FIT + JUDGE if (SRC / f"pre_{V}.parquet").exists()]
     missing = sorted(set(FIT + JUDGE) - set(avail))
     assert not missing, f"missing preseason outputs: {missing}"
