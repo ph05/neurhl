@@ -759,3 +759,31 @@ and g1rk:
 
 The last row is within the +0.0003 allowance. So, as A16 declares, one
 G_GATE run follows under the same rule.
+
+## A18 (2026-09-29): g1rk on G_GATE meets the A16 rule; live bundle g2027_v3
+
+G_GATE 2019, 2020 and 2022-2024, five seeds, the same games as g1:
+
+| Measure | g1 | g1rk | Difference (SE) | Seasons better |
+|---|---|---|---|---|
+| Rookie goals (22,539 rookie skater-games) | 0.34761 | 0.34743 | -0.00017 (0.00018) | 3 of 5 |
+| Rookie assists | 0.47827 | 0.47778 | -0.00049 (0.00022) | 5 of 5 |
+| Final-probability log loss | 0.66006 | 0.65994 | -0.00012 | |
+
+For g1rk, the final probability against Elo is -0.00572 (5 of 5 seasons) and
+against NeurHL-H -0.00061 (4 of 5).
+
+**The live bundle.** `g2027_v3` (configuration g1rk, seasons <= 2026, five
+seeds; the stack refit on out-of-sample predictions of 2011-2026) is trained
+with `train/train_live_g.build` on the loader's all-seasons path. The sealed
+seasons are spent (PLAN_NeurHL4 A6).
+
+**Live rookie inputs.** 2026-27 rookies' inputs come from
+`configs/rookie_priors_2027.csv` (`sim/g_live.py` fills them when the bundle
+lists them).
+
+**The switch.** It happens only after a preview forecast with `g2027_v3`
+runs cleanly in a temporary folder, and from the first forecast after it is
+declared in an appendix to this amendment. The season set is rerun with
+`g2027_v3` as `output/neurhl_1_0/v3_20260929/`, which becomes the primary
+once it passes the consistency check.
