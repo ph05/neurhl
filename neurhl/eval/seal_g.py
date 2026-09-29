@@ -43,6 +43,9 @@ def git(*a):
     return subprocess.run(["git", "-C", str(PROJ), *a], capture_output=True, text=True)
 
 
+DESCRIPTIVE = "--descriptive" in sys.argv     # PLAN_NeurHL4 A5: S-STOP waived, result descriptive
+
+
 def preconditions():
     assert not OUT.exists(), "the seal has already been spent (single use)"
     git("fetch", "-q", "origin")
@@ -55,7 +58,14 @@ def preconditions():
     assert git("merge-base", "--is-ancestor", fz, "origin/main").returncode == 0, \
         "FREEZE commit is not on origin/main"
     ss = json.loads((NOUT / "g_sstop.json").read_text())
-    assert ss.get("pass") is True, "S-STOP did not pass; the seal is not spent"
+    if not DESCRIPTIVE:
+        assert ss.get("pass") is True, "S-STOP did not pass; the seal is not spent"
+    else:
+        a5 = (PROJ / "PLAN_NeurHL4.md").read_text()
+        assert "## A5 (2026-09-29" in a5, "descriptive mode needs PLAN_NeurHL4 A5"
+        a5c = git("log", "-1", "--format=%H", "-S", "## A5 (2026-09-29", "--", "PLAN_NeurHL4.md").stdout.strip()
+        assert a5c and git("merge-base", "--is-ancestor", a5c, "origin/main").returncode == 0, \
+            "PLAN_NeurHL4 A5 is not on origin/main"
     cp = CONFIGS / "neurhl_g" / f"{cfg_name}.json"
     assert hashlib.sha256(cp.read_bytes()).hexdigest() == cfg_sha, "frozen config changed"
     for line in (CONFIGS / "sealed_inputs.sha256").read_text().splitlines():
@@ -197,6 +207,7 @@ def main():
         sec[k]["better"] = bool(sec[k]["diff"] < 0 and sec[k]["p_holm"] < 0.05)
 
     res = {"test": "NeurHL-G one-shot seal (PLAN_NeurHL4 SEAL)", "config": cfg_name,
+           "mode": "descriptive (PLAN_NeurHL4 A5: S-STOP failed and was waived)" if DESCRIPTIVE else "confirmatory",
            "freeze_commit": fz, "n": int(len(ev)),
            "ll": {"neurhl_g": float(lg.mean()), "elo": float(le.mean()),
                   "neurhl_h": float(lh[ok_h].mean())},
@@ -211,6 +222,9 @@ def main():
 
     from train.train_live_g import build
     build(cfg_name, 2026, "g2027_v2", purpose="score")
+    if DESCRIPTIVE:          # A5: the switch is made by hand after A1's goal level is re-derived
+        print("bundle g2027_v2 built; configs/live_models.json NOT switched (descriptive mode)")
+        return
     p = CONFIGS / "live_models.json"
     cur = json.loads(p.read_text()) if p.exists() else {}
     cur["neurhl_g"] = "g2027_v2"
