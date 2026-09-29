@@ -174,3 +174,80 @@ little too narrow (coverage 0.783). C1 does not change player distributions.
   fine-tuning with decoupled L2-SP (Li, Grandvalet and Davoine 2018;
   Loshchilov and Hutter 2019). But only under its own plan, and only if its
   pre-gate gain reaches the sealed test's detectable size.
+
+## A1 (2026-09-29 04:30 UTC, before any C2 or C3 number is judged)
+
+### C3: dropped as an exploratory null
+
+The C3 rating was built (`neurhl/sim/ratings_v2.py`) and tuned by walk-forward
+log loss on 2010-2012 and 2014-2017 before a rule was written here. So these
+results are reported as exploratory. The tuned values:
+- p_ot = 0.69;
+- season carry-over 0.81;
+- the margin exponent went to 0.
+
+Out of sample, without retuning, against the frozen Elo:
+
+| Window | Difference (SE) |
+|---|---|
+| 2012, 2014-2018 | +0.00038 (0.00048) |
+| 2019-2024 | +0.00055 (0.00046) |
+
+As a stack column (walk-forward on 2019-2024), it changes log loss by
++0.00007 (SE 0.00007). C3 is dropped: no live column, and nothing is
+adopted.
+
+### C2: the decision rule, fixed before the judging run
+
+**Inputs.** `neurhl/eval/backtest_unified_season.py` writes preseason-convention
+per-game outputs for 2012, 2014-2020 and 2022-2024:
+- the g1 engine trained on seasons < V, 5 seeds;
+- opening-night rows for every game;
+- the frozen Elo entering V;
+- the live bundle's Elo + NeurHL-G fallback stack.
+
+Seasons 2025 and 2026 are refused.
+
+**Variants.** `neurhl/eval/season_layer_c2.py` simulates 4,000 seasons per
+variant. Team strength moves each game's logit by
+k * (s_home - s_away), with k the snapshot's own sensitivity, exactly as
+NeurHL 1.0:
+- s_team(week) = s0 + a random walk with weekly innovation sd sw;
+- s0 has sd sigma0;
+- each game's logit is shrunk toward the season's mean logit by
+  rho^(weeks from opening night).
+
+The grid:
+
+| Parameter | Values |
+|---|---|
+| sigma0 | 0, 0.03, 0.05, 0.07, 0.09, 0.11, 0.13 |
+| sw | 0, 0.005, 0.01, 0.015, 0.02 |
+| rho | 1, 0.995, 0.99, 0.98 |
+
+The frozen NeurHL 1.0 layer is (0.07, 0, 1).
+
+**Selection.** The variant with the lowest mean team-season points CRPS on the
+fit seasons 2012 and 2014-2018.
+
+**Judging.** On 2019, 2020 and 2022-2024 (never used for a season-level
+decision about this engine), the selected variant is compared with (0.07, 0, 1)
+on:
+- mean team-season points CRPS, paired by team-season, with a season-block
+  bootstrap interval;
+- points MAE;
+- 10th-90th percentile coverage.
+
+**Adoption requires both:**
+- the judged CRPS difference below 0;
+- the selected variant's coverage within 0.80 ± 0.05.
+
+If it is adopted, the season layer is rerun on the frozen NeurHL 1.0 games
+file (`games_2027.csv`: its probabilities, outcome4 and rate sensitivities are
+used unchanged). The result is issued as a dated file set beside the 1.0
+freeze and scored at season end with the frozen set's own measures (points
+MAE, CRPS, coverage). Otherwise C2 is a documented null and 1.0's season
+layer stands.
+
+**Also reported, not deciding:** the same grid on a preseason Elo-only
+season model (the logit being the frozen Elo entering V).
