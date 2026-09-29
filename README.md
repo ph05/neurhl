@@ -20,11 +20,9 @@ Releases are numbered 1.1, 1.2 and so on.
 
 NeurHL was built under preregistration. Every model, gate and decision rule
 was committed before the numbers that tested it existed, and the final tests
-ran once on seasons no decision had touched. The record of what worked and
-what did not is kept as carefully as the model. [EVIDENCE.md](EVIDENCE.md)
-lists every claim with the strength of the evidence behind it, and
-[PLAN_NeurHL_1_0.md](PLAN_NeurHL_1_0.md) defines NeurHL 1.0 and how it is
-scored.
+ran once on seasons no decision had touched. Frozen prediction files are
+identified by their SHA-256 hashes, and forecasts are committed before the
+games they cover.
 
 ## How NeurHL 1.0 works
 
@@ -76,28 +74,24 @@ flowchart LR
 ## The 2026-27 season
 
 - **NeurHL 1.1 (current):** every game, team and skater from the refit engine
-  `g2027_v3` ([neurhl/output/neurhl_1_1/season/](neurhl/output/neurhl_1_1/season/)),
-  with its hashes in the RELEASE section of
-  [PLAN_NeurHL_1_1.md](PLAN_NeurHL_1_1.md). On the formerly sealed 2025-26
-  seasons, the engine's configuration beat Elo by 0.0069 nats per game and
-  the neural player layer by 0.0021 (descriptive; PLAN_NeurHL4 A6).
+  `g2027_v3` ([neurhl/output/neurhl_1_1/season/](neurhl/output/neurhl_1_1/season/)).
+  On the formerly sealed 2025-26 seasons, the engine's configuration beat Elo
+  by 0.0069 nats per game and the neural player layer by 0.0021 (descriptive:
+  its earlier pre-test had failed).
 - **NeurHL 1.0 freeze (earlier):** every game, team and skater, frozen before opening
-  night ([neurhl/output/neurhl_1_0/](neurhl/output/neurhl_1_0/)), with its hashes in
-  [PLAN_NeurHL_1_0.md](PLAN_NeurHL_1_0.md).
+  night ([neurhl/output/neurhl_1_0/](neurhl/output/neurhl_1_0/)).
 - **Game-day forecasts:** a morning forecast and a pregame forecast about an
   hour before puck drop, committed here before each game, with the lineups
   used and full simulated stat lines ([neurhl/output/live/](neurhl/output/live/)).
 - **NeurHL 1.1 layers:** calibrated count distributions for the stat
   sheets, calibrated goal totals and blended skater points. Each is
   preregistered before the games it is judged on, and ships as a dated file
-  set scored beside the freeze, which is never edited
-  ([PLAN_NeurHL_1_1.md](PLAN_NeurHL_1_1.md)). A walk-forward backtest of the
+  set scored beside the freeze, which is never edited. A walk-forward backtest of the
   season layer on 2019-2024 supports the frozen one (80% intervals cover
   0.82). An exploratory projection of the final standings, updated from each
   night's results, is published in `neurhl/output/live/standings_1_1_2027.csv`.
 - **Earlier freeze:** the forecasts frozen on 2026-09-25 by an earlier,
-  separately built season layer are unchanged and scored as preregistered
-  ([PLAN_NeurHL_LIVE.md](PLAN_NeurHL_LIVE.md)).
+  separately built season layer are unchanged and scored as preregistered.
 
 ## Findings
 
@@ -137,12 +131,8 @@ quantity used to predict a season comes from earlier seasons only, and every
 search over configurations was capped and logged in
 `neurhl/configs/search_ledger*.csv`.
 
-The preregistration documents are the primary record:
-[PLAN_NeurHL.md](PLAN_NeurHL.md) (neural hierarchy and NeurHL-H),
-[PLAN_NeurHL2.md](PLAN_NeurHL2.md) (event simulator and season layer),
-[PLAN_NeurHL3.md](PLAN_NeurHL3.md) (player and goalie layers) and
-[PLAN_NeurHL_LIVE.md](PLAN_NeurHL_LIVE.md) (live scoring). Each amendment is
-dated and committed before the run it governs.
+Each model, gate and amendment was dated and committed before the run it
+governs.
 
 ## Outputs
 
@@ -201,15 +191,13 @@ number comes from CPU inference over a saved checkpoint.
 |---|---|
 | `neurhl/` | NeurHL: data builders, models, training, evaluation, simulation, tests |
 | `neurhl/site/` | Builds the projection site in `docs/` |
-| `src/` | The baselines NeurHL is measured against: v1 (Elo with xG) and HOWE (an equal blend of v1 and a ridge model); see [src/README.md](src/README.md) |
+| `src/` | The baselines NeurHL is measured against: v1 (Elo with xG) and HOWE (an equal blend of v1 and a ridge model) |
 | `data/processed/` | Derived team, player and game tables |
-| `PLAN_*.md`, `NOTES.md` | Preregistrations and the findings log |
 
-Nothing in `src/` imports NeurHL. The baselines' own history is in `PLAN.md`
-and `PLAN_V3.md` through `PLAN_V6.md`.
+Nothing in `src/` imports NeurHL.
 
-Commit IDs quoted inside plan documents and records were assigned before the
-repository was published; `neurhl/configs/commit_map.csv` maps each one to
+Commit IDs quoted inside records were assigned before the repository was
+published; `neurhl/configs/commit_map.csv` maps each one to
 its commit here.
 
 ## Data

@@ -19,3 +19,7 @@ neurhl/data/tensors/
 neurhl/checkpoints/
 data/raw/mp_extra/
 data/raw/right_rail/
+
+# Markdown documents are kept in a private repository; only the root README is published
+*.md
+!/README.md
