@@ -18,7 +18,9 @@ and re-derives, independently of the simulator's code:
               season totals equal the sums of the player-game rows
   across paths  when the opening-night preview exists, the season model's
               opening-night probabilities agree with the game-day path
-Writes output/neurhl_1_0/checks_2027.json; exits 1 if any check fails.
+Writes output/neurhl_1_0/checks_2027.json (checks_2027_rerun.json once
+PLAN_NeurHL_1_0.md has its FREEZE section, so the hashed record is never
+overwritten); exits 1 if any check fails.
 """
 import json
 import sys
@@ -126,7 +128,10 @@ def main():
               f"max |diff| {d.max():.3f} over {len(d)} games")
 
     ok = all(r["pass"] for r in RES)
-    (OUT / "checks_2027.json").write_text(json.dumps({"pass": ok, "n": len(RES),
+    # after the freeze, checks_2027.json is a hashed record: a rerun writes beside it
+    frozen = "\n## FREEZE" in (ROOT.parent / "PLAN_NeurHL_1_0.md").read_text()
+    dest = OUT / ("checks_2027_rerun.json" if frozen else "checks_2027.json")
+    dest.write_text(json.dumps({"pass": ok, "n": len(RES),
                                                       "passed": sum(r["pass"] for r in RES),
                                                       "checks": RES}, indent=1))
     print(f"\n{sum(r['pass'] for r in RES)}/{len(RES)} checks pass")
