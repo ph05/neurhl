@@ -352,3 +352,30 @@ z = a x z_stack + (1 - a) x z_elo_pre, with a in {0, 0.25, 0.5, 0.75, 1}
 than both, with coverage within 0.80 ± 0.05. When C2c is adopted, its
 variant is the one rerun for 2026-27, with z_elo_pre from the frozen games
 file's `p_home_win_elo`.
+
+## A5 (2026-09-29): C4, in-season fine-tuning of the engine, is an exploratory null
+
+**Method.** Iteration window only (`neurhl/eval/finetune_g_c4.py`,
+`finetune_g_c4_stack.py`). In each season, from game 300 on, every block of
+150 games is predicted two ways:
+- by the season's frozen g1 snapshots;
+- by copies fine-tuned on the season's games already played: 3 epochs, AdamW
+  with no decay toward zero, and decoupled L2-SP toward the frozen weights
+  with lam = 10.
+
+**A single seed misleads.** Against a single frozen seed, the tuned copy
+looked strong: 8 of 9 season-seed runs improved, by up to 0.006 nats per
+game.
+
+**The live recipe shows no gain.** Measured the way the model is used (a
+five-seed ensemble, stacked with Elo and NeurHL-H by the live bundle's
+coefficients) on 2012 and 2014-2016 (3,720 games):
+
+| Measure | Tuned minus frozen (SE) |
+|---|---|
+| Raw ensemble | -0.00116 (0.00117) |
+| Final stacked probability | -0.00006 (0.00034) |
+
+Mostly, the single-seed gains came from tuning partly undoing one seed's
+noise, which the ensemble already averages away. C4 is not taken to G_GATE,
+and the sealed seasons stay unspent.

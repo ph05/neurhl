@@ -56,8 +56,12 @@ def preseason_elo(V: int) -> dict:
     g = pd.read_csv(PROJ / "data" / "processed" / "games.csv", keep_default_na=False,
                     parse_dates=["date"])
     g = g[g.season_end <= V].sort_values("date").reset_index(drop=True)
-    _, _, pre = E.run_elo(g, K=v1["K"], H=v1["H"], phi_s=v1["phi_s"])
-    return pre[V], v1["H"]
+    _, _, pre = E.run_elo(g, K=v1["K"], H=v1["H"], phi_s=v1["phi_s"], expansion_init=v1["expansion_init"])
+    r = dict(pre[V])
+    # an expansion team (VGK 2018, SEA 2022) enters at the frozen v1 expansion rating
+    for t in set(g[g.season_end == V].home) | set(g[g.season_end == V].away):
+        r.setdefault(t, v1["expansion_init"])
+    return r, v1["H"]
 
 
 def preseason_arrays(D, P: dict, idx: np.ndarray, elo_pre_raw: np.ndarray, stats: dict) -> dict:
