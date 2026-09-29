@@ -421,6 +421,8 @@ def main():
     ap.add_argument("--draws", type=int, default=32)
     ap.add_argument("--sims", type=int, default=20000)
     ap.add_argument("--seed", type=int, default=711)
+    ap.add_argument("--out-dir", help="write the season files here instead of output/neurhl_1_0 "
+                                      "(a dated file set, e.g. output/neurhl_1_0/v2_20260929)")
     a = ap.parse_args()
     t0 = time.time()
     OUT.mkdir(parents=True, exist_ok=True)
@@ -694,15 +696,18 @@ def main():
     cons["corr_game_prob_vs_0925"] = float(gm[["p_home_win", "p_home_win_0925"]].corr().iloc[0, 1])
 
     # ---- write
-    from common import refuse_if_frozen_1_0
-    refuse_if_frozen_1_0("the NeurHL 1.0 season files")
-    gm.to_csv(OUT / "games_2027.csv", index=False, float_format="%.5f")
-    tm.to_csv(OUT / "teams_2027.csv", index=False, float_format="%.4f")
-    sk.to_csv(OUT / "skaters_2027.csv", index=False, float_format="%.4f")
-    gl.to_csv(OUT / "goalies_2027.csv", index=False, float_format="%.4f")
-    pq.to_csv(OUT / "team_points_quantiles_2027.csv", index=False, float_format="%.1f")
-    pg.to_csv(OUT / "player_games_2027.csv.gz", index=False, float_format="%.5f")
-    (OUT / "consistency_2027.json").write_text(json.dumps(cons, indent=1))
+    W_ = Path(a.out_dir).resolve() if a.out_dir else OUT
+    if W_ == OUT.resolve():
+        from common import refuse_if_frozen_1_0
+        refuse_if_frozen_1_0("the NeurHL 1.0 season files")
+    W_.mkdir(parents=True, exist_ok=True)
+    gm.to_csv(W_ / "games_2027.csv", index=False, float_format="%.5f")
+    tm.to_csv(W_ / "teams_2027.csv", index=False, float_format="%.4f")
+    sk.to_csv(W_ / "skaters_2027.csv", index=False, float_format="%.4f")
+    gl.to_csv(W_ / "goalies_2027.csv", index=False, float_format="%.4f")
+    pq.to_csv(W_ / "team_points_quantiles_2027.csv", index=False, float_format="%.1f")
+    pg.to_csv(W_ / "player_games_2027.csv.gz", index=False, float_format="%.5f")
+    (W_ / "consistency_2027.json").write_text(json.dumps(cons, indent=1))
     code = subprocess.run(["git", "-C", str(PROJ), "rev-parse", "--short", "HEAD"],
                           capture_output=True, text=True).stdout.strip()
     run = {"rosters_date": a.rosters_date, "draws": K, "sims": a.sims, "seed": a.seed,
@@ -711,11 +716,11 @@ def main():
            "availability": av_src, "home_edge_rating": float(hedge), "code": code,
            "created_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
            "seconds": round(time.time() - t0, 1)}
-    (OUT / "run_2027.json").write_text(json.dumps(run, indent=1))
+    (W_ / "run_2027.json").write_text(json.dumps(run, indent=1))
     print(json.dumps(cons, indent=1)[:2500])
     print(tm[["team", "points", "points_p10", "points_p90", "playoff_pct", "cup_pct", "goals_for",
               "goals_against"]].head(10).to_string(index=False))
-    print(f"[unified] done in {time.time() - t0:.0f}s -> {OUT}")
+    print(f"[unified] done in {time.time() - t0:.0f}s -> {W_}")
 
 
 if __name__ == "__main__":

@@ -40,6 +40,9 @@ def check(name, ok, detail=""):
 
 
 def main():
+    global OUT
+    if "--dir" in sys.argv:                  # check a dated file set instead of the frozen files
+        OUT = Path(sys.argv[sys.argv.index("--dir") + 1]).resolve()
     g = pd.read_csv(OUT / "games_2027.csv")
     t = pd.read_csv(OUT / "teams_2027.csv")
     sk = pd.read_csv(OUT / "skaters_2027.csv")
@@ -120,7 +123,11 @@ def main():
         check(f"season {c} = sum of the player-game rows", d < 1e-2, f"max |diff| {d:.1e}")
 
     prev = ROOT / "output" / "live" / "2027" / "2026-09-29" / "preview.csv"
-    if prev.exists():
+    run_b = json.loads((OUT / "run_2027.json").read_text()).get("bundle") if (OUT / "run_2027.json").exists() else None
+    same_engine = prev.exists() and run_b in set(pd.read_csv(prev).get("bundle", pd.Series(dtype=str)))
+    if prev.exists() and not same_engine:
+        print(f"\nACROSS PATHS: skipped (the preview was made by a different engine than {run_b})")
+    if same_engine:
         print("\nACROSS PATHS")
         pv = pd.read_csv(prev).set_index("game_id")
         d = (gi.loc[pv.index, "p_home_win"] - pv.p_home_win_neurhl_g).abs()
@@ -129,7 +136,8 @@ def main():
 
     ok = all(r["pass"] for r in RES)
     # after the freeze, checks_2027.json is a hashed record: a rerun writes beside it
-    frozen = "\n## FREEZE" in (ROOT.parent / "PLAN_NeurHL_1_0.md").read_text()
+    frozen = "\n## FREEZE" in (ROOT.parent / "PLAN_NeurHL_1_0.md").read_text() \
+        and OUT == (ROOT / "output" / "neurhl_1_0").resolve()
     dest = OUT / ("checks_2027_rerun.json" if frozen else "checks_2027.json")
     dest.write_text(json.dumps({"pass": ok, "n": len(RES),
                                                       "passed": sum(r["pass"] for r in RES),
