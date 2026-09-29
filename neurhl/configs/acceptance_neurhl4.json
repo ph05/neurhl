@@ -10,9 +10,9 @@
   "detail": ""
  },
  {
-  "check": "master loader drops SEALED seasons",
+  "check": "seal spent: loader includes 2025-2026 and the one-shot seal result exists",
   "pass": true,
-  "detail": "max season 2024"
+  "detail": "max season 2026"
  },
  {
   "check": "all 37 sealed inputs unchanged",
@@ -27,12 +27,17 @@
  {
   "check": "G_GATE runs within cap (2)",
   "pass": true,
-  "detail": "1/2"
+  "detail": "2/2"
  },
  {
-  "check": "G_ITER full runs within cap (14)",
+  "check": "G_ITER full runs within cap (14), NeurHL-G ladder",
   "pass": true,
   "detail": "13/14"
+ },
+ {
+  "check": "PLAN_NeurHL_1_1 iteration runs as declared (g1rk, g1x, g1 rescoring)",
+  "pass": true,
+  "detail": "g1rk:full:iter, g1:full:iter, g1x:full:iter"
  },
  {
   "check": "state-builder causality audit clean",
@@ -40,13 +45,18 @@
   "detail": "4 checks"
  },
  {
-  "check": "seal not spent (allowed)",
+  "check": "seal result added exactly once",
   "pass": true,
-  "detail": "no result yet"
+  "detail": ""
+ },
+ {
+  "check": "FREEZE commit precedes the seal result",
+  "pass": true,
+  "detail": ""
  },
  {
   "check": "every live forecast committed before its game's start",
   "pass": true,
-  "detail": "0 files"
+  "detail": "2 files"
  }
 ]
