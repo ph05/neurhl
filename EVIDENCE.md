@@ -111,6 +111,20 @@ player-games, games and season totals. Its claims are of two kinds:
 | Its levels agree: skater totals sum to team totals, games to seasons, player-games to season lines, with 18 skater-games and one goalie start per team-game, and league points equal to 2 x games + overtime games in every simulated season | Verified on the frozen outputs by an independent check | `neurhl/tests/check_neurhl_1_0.py`, `neurhl/output/neurhl_1_0/checks_2027.json` |
 | Its 2026-27 forecasts are accurate | No evidence yet. Frozen before the first game and scored once, after the regular season. Its game level is the gated engine; its season layer carries a season-level uncertainty calibrated for an earlier model | `PLAN_NeurHL_1_0.md` |
 
+## NeurHL 1.1 layers (PLAN_NeurHL_1_1)
+
+These layers came from a review of every work the project cites. Each is
+preregistered before the games it is judged on, and ships as a dated file
+set scored beside the NeurHL 1.0 freeze. The frozen files are never edited.
+
+| Claim | Status | Record |
+|---|---|---|
+| The stat sheet's team-shot intervals are too wide, and its team goal means too extreme | Development evidence on 2019-2024 (G_GATE): with the frozen r = 40, 80% intervals cover 0.861; with the fitted r = 98.68 they cover 0.797 (+0.021 nats per team-game). A goal slope of 0.70 brings the top predicted decile from 4.17 to 3.80 against 3.73 realised. The 2026-27 test was fixed before the first game, with one inference at season end | `PLAN_NeurHL_1_1.md` C1, `neurhl/configs/calibration_1_1.json`, `neurhl/eval/score_calibration_1_1.py` |
+| Goal totals and skater points can be sharpened without changing any win probability | Dated sets `neurhl/output/neurhl_1_0/cal_20260929/` (goal slope; team goals-for spread 0.303 to 0.215 per game at an unchanged league level) and `skaters_blend_20260929/` (50/50 engine and season-model paths). No evidence yet; scored at season end | `PLAN_NeurHL_1_1.md` C1, A3; `neurhl/eval/score_dated_1_1.py` |
+| A filtered team rating with weighted overtime results beats Elo | Null (exploratory): slightly worse out of sample (+0.00038 and +0.00055 log loss) and adds nothing to the stack (+0.00007, SE 0.00007) | `PLAN_NeurHL_1_1.md` A1 |
+| Goals excite goals (Hawkes self-excitation) | Rejected: in periods 1-2 of 2012 and 2014-2018, the goal rate in the 30 s after a goal is 2.9 per 60 minutes, against about 5.5 later, at every lead | `PLAN_NeurHL_1_1.md` |
+| Stack weights should vary with the season phase | Rejected: walk-forward on 2014-2018, +0.00074 log loss (SE 0.00029) | `PLAN_NeurHL_1_1.md` |
+
 ## The 2026-27 season
 
 Predictions for every game, team and skater were frozen before opening night

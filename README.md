@@ -74,6 +74,11 @@ flowchart LR
 - **Game-day forecasts:** a morning forecast and a pregame forecast about an
   hour before puck drop, committed here before each game, with the lineups
   used and full simulated stat lines ([neurhl/output/live/](neurhl/output/live/)).
+- **NeurHL 1.1 layers:** calibrated count distributions for the stat
+  sheets, calibrated goal totals and blended skater points. Each is
+  preregistered before the games it is judged on, and ships as a dated file
+  set scored beside the freeze, which is never edited
+  ([PLAN_NeurHL_1_1.md](PLAN_NeurHL_1_1.md)).
 - **Earlier freeze:** the forecasts frozen on 2026-09-25 by an earlier,
   separately built season layer are unchanged and scored as preregistered
   ([PLAN_NeurHL_LIVE.md](PLAN_NeurHL_LIVE.md)).
@@ -131,6 +136,9 @@ dated and committed before the run it governs.
 | `neurhl/output/neurhl_1_0/teams_2027.csv` | NeurHL 1.0: team points (mean, 10th, 50th and 90th percentiles), record, goals, shots, xG, playoff, division, Presidents' Trophy and Cup odds |
 | `neurhl/output/neurhl_1_0/skaters_2027.csv`, `goalies_2027.csv` | NeurHL 1.0: season totals for every skater and goalie, with intervals for goals, assists and points |
 | `neurhl/output/neurhl_1_0/player_games_2027.csv.gz` | NeurHL 1.0: every skater's expected line in every game |
+| `neurhl/output/neurhl_1_0/cal_20260929/` | NeurHL 1.1: the 1.0 goal totals with the fitted goal slope (dated set, scored beside 1.0) |
+| `neurhl/output/neurhl_1_0/skaters_blend_20260929/` | NeurHL 1.1: skater points blended 50/50 from the engine and the season model (dated set) |
+| `neurhl/configs/calibration_1_1.json` | NeurHL 1.1: fitted team-shots dispersion and goal slope, applied to the frozen game-day stat sheets when scored |
 | `neurhl/output/games_2027.csv`, `projection_2027.csv`, `player_proj_2027.csv` | The earlier freeze (2026-09-25) |
 | `neurhl/output/live/scorecard_2027.json` | Running live scorecard |
 | `neurhl/output/live/2027/<date>/` | NeurHL-G game-day forecasts (morning and pregame): home-win probability from NeurHL-G, NeurHL-H and Elo, the lineups used and where they came from, and simulated stat lines for every dressed player |
