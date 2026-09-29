@@ -5,8 +5,9 @@ Inputs:
   results   neurhl/output/live/results_2027.csv (completed regular-season games)
   games     the frozen neurhl/output/neurhl_1_0/games_2027.csv: every game's
             stacked probability, outcome4 and rate sensitivity, unchanged
-  params    sigma0 and sw from neurhl/output/neurhl_1_1/live_standings_c2b.json
-            (the selected "update" variant)
+  params    sigma0 and sw from neurhl/configs/live_standings_1_1.json (the
+            backtest's selected "update" variant, published as exploratory:
+            PLAN_NeurHL_1_1 A9)
 
 Team strength is updated from the games played (sim/live_standings_1_1.posterior)
 and the remaining games are simulated with drift (project). Playoff odds use the
@@ -31,16 +32,13 @@ from sim.live_standings_1_1 import posterior, project  # noqa: E402
 
 LIVE = ROOT / "output" / "live"
 UNI = ROOT / "output" / "neurhl_1_0"
-PARAMS = ROOT / "output" / "neurhl_1_1" / "live_standings_c2b.json"
+PARAMS = ROOT / "configs" / "live_standings_1_1.json"
 SIMS, SEED = 20000, 711
 
 
 def main():
     prm = json.loads(PARAMS.read_text())
-    if not prm.get("decision", {}).get("adopt"):
-        print("[live_standings] C2b was not adopted; nothing to do")
-        return 0
-    sigma0, sw = prm["selected_update"]["sigma0"], prm["selected_update"]["sw"]
+    sigma0, sw = prm["sigma0"], prm["sw"]
     g = pd.read_csv(UNI / "games_2027.csv")
     res_p = LIVE / "results_2027.csv"
     res = pd.read_csv(res_p) if res_p.exists() else pd.DataFrame(columns=["game_id"])
@@ -90,8 +88,15 @@ def main():
                         "strength_shift": m, "strength_sd": np.sqrt(np.diag(C))})
     out = out.sort_values("points", ascending=False)
     out.insert(0, "as_of", dt.date.today().isoformat())
+    out.insert(1, "status", "exploratory")
     LIVE.mkdir(parents=True, exist_ok=True)
+    if not played.any():
+        print("[live_standings] no completed games yet; nothing written")
+        return 0
     out.to_csv(LIVE / "standings_1_1_2027.csv", index=False, float_format="%.3f")
+    hist = LIVE / "standings_1_1"                       # one dated copy per night, for season-end scoring
+    hist.mkdir(parents=True, exist_ok=True)
+    out.to_csv(hist / f"{dt.date.today().isoformat()}.csv", index=False, float_format="%.3f")
     print(out.head(10).to_string(index=False))
     return 0
 

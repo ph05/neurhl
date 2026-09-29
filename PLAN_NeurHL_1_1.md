@@ -457,3 +457,72 @@ stack), log loss averaged over every seed subset of each size:
 
 The gains follow a + b/k. Doubling to 10 seeds would improve the stacked
 probability by about 0.00002, so the live bundle keeps its five seeds.
+
+## A9 (2026-09-29, before the first 2026-27 game): C2, C2b and C2c results under the rules of A1, A2 and A4
+
+The inputs are `neurhl/data/tensors/_season_bt/pre_<V>.parquet` (g1 snapshots,
+five seeds, for every season 2012, 2014-2020 and 2022-2024). Results are in
+`neurhl/output/neurhl_1_1/season_layer_c2.json` and `live_standings_c2b.json`.
+
+### C2 (A1): not adopted
+
+The fit seasons selected (sigma0, sw, rho) = (0.07, 0.005, 0.98). On the
+judge seasons (158 team-seasons):
+
+| Layer | Points CRPS | MAE | 80% coverage |
+|---|---|---|---|
+| Selected (0.07, 0.005, 0.98) | 6.836 | 9.47 | 0.804 |
+| Frozen NeurHL 1.0 (0.07, 0, 1) | 6.799 | 9.42 | 0.823 |
+
+The difference is +0.037, 95% CI -0.19 to +0.28. The rule requires a
+negative difference, so C2 is not adopted.
+
+**Reading.** This backtest supports the frozen season layer. Its season-shock
+size, carried over from NeurHL-2, is also the size the fit seasons select
+for this engine (sigma0 = 0.07). On held-out seasons its 80% intervals cover
+0.823. The same engine in the preseason convention beats a preseason
+Elo-only season model:
+
+| Season model | CRPS | MAE |
+|---|---|---|
+| Engine | 6.80 | 9.42 |
+| Elo only | 6.87 | 9.47 |
+
+This replaces the earlier known limitation ("the season shock is carried
+over, not recalibrated for this engine") with evidence.
+
+### C2c (A4): not adopted
+
+The selected variant was a = 0.5, (0.07, 0.005, 0.99). Its judged CRPS,
+6.807, is above the frozen layer's 6.799.
+
+### C2b (A2): not adopted
+
+- **The update is better.** Updating team strength from games played beats
+  leaving the prior, on CRPS: difference -0.39, season-block 95% CI -0.66 to
+  -0.12. It is better at every checkpoint (4 to 20 weeks), with MAE 5.74
+  against 6.24.
+- **The coverage rule fails.** On the judge seasons, the selected variant's
+  (0.07, 0.02) 10th-90th percentile coverage is 0.876, outside 0.80 ± 0.05.
+  (It was 0.819 on the fit seasons.)
+
+### A separate, prospective exploratory test
+
+The judge seasons are now spent for C2b, and 2026-27 is unseen. So the same
+variant, unchanged, is published nightly from the first night with completed
+games, as an exploratory projection.
+- **Code:** `neurhl/sim/live_standings_2027.py`, run by the nightly job,
+  non-fatal.
+- **Outputs:** `neurhl/output/live/standings_1_1_2027.csv`, plus one dated
+  copy per night in `neurhl/output/live/standings_1_1/`.
+- **Labels:** each row says "exploratory", and the config states the backtest
+  status.
+- **Scoring, at season end:** for the copies nearest to 4, 8, 12, 16 and 20
+  weeks after opening night, final-points CRPS, MAE and coverage against the
+  final table. The comparator is the frozen NeurHL 1.0 preseason simulation
+  plus actual points.
+- **Status:** nothing is adopted from this test; it replaces nothing.
+
+| File | SHA-256 |
+|---|---|
+| `neurhl/configs/live_standings_1_1.json` | `6611ca2f0bfb105e74be652a8b53a8ccc35794f039fa1e4d4a59e0eb7c2a2497` |

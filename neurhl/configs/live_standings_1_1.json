@@ -1,0 +1,6 @@
+{
+ "plan": "PLAN_NeurHL_1_1 A9",
+ "status": "exploratory: not adopted in the backtest (judge coverage 0.876 outside 0.80 +- 0.05; CRPS -0.39, 95% CI -0.66 to -0.12)",
+ "sigma0": 0.07,
+ "sw": 0.02
+}
