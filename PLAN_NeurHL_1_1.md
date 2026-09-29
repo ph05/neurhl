@@ -440,3 +440,20 @@ that already include team-shot spread, so the gain may be small or negative.
 | File | SHA-256 |
 |---|---|
 | `neurhl/configs/calibration_1_1c.json` | `f19291cf492326a5510364ec28cb08ff168f9e3934aa8ca1d14f7782775f94c8` |
+
+## A8 (2026-09-29): ensemble size, an exploratory null
+
+The question is whether more seeds would help. On 2012 and 2014-2017 (the g1
+snapshots saved by the C2 backtest; game-day states; the live bundle's
+stack), log loss averaged over every seed subset of each size:
+
+| Seeds | Raw engine | Stacked |
+|---|---|---|
+| 1 | 0.67923 | 0.67242 |
+| 2 | 0.67780 | 0.67230 |
+| 3 | 0.67733 | 0.67226 |
+| 4 | 0.67710 | 0.67224 |
+| 5 | 0.67696 | 0.67223 |
+
+The gains follow a + b/k. Doubling to 10 seeds would improve the stacked
+probability by about 0.00002, so the live bundle keeps its five seeds.
