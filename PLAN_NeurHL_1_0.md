@@ -187,3 +187,30 @@ The remaining over-prediction comes mostly from misnamed starters: in 11 of
 32 teams in 2023-24, the goalie named starter took fewer starts than the
 backup. No share rule fixes that. Skater lineups are unchanged: the same
 random draws give the same skaters.
+
+## FREEZE (2026-09-29): the NeurHL 1.0 predictions for 2026-27
+
+Run on the post-deadline rosters of 2026-09-28 with 64 lineup
+draws and 20,000 simulated seasons (seed 711); season shock sd
+0.07; stat-sheet goal multiplier 0.9229; engine bundle
+`g2027_v1` (sha256 a43965e13ff54796...); lineups from sim/availability_2027.py;
+code at commit `9c78a40`. The consistency check passed 42 of 42.
+
+| File | SHA-256 |
+|---|---|
+| `neurhl/output/neurhl_1_0/games_2027.csv` | `0e6ec35ca83c8919ecf6f90906d0f47137cf1385ba7d5bdf55c46ee38068fff1` |
+| `neurhl/output/neurhl_1_0/teams_2027.csv` | `969526a2592b85b5843d0360693da18569904413ac582231962865652921dd86` |
+| `neurhl/output/neurhl_1_0/team_points_quantiles_2027.csv` | `7a1a7b606265499b0008067f0e95ce0252d253acd4a307e8743a6891d288f729` |
+| `neurhl/output/neurhl_1_0/skaters_2027.csv` | `946ea41d4b85f615710dfd457ee81a233a6b8a70ab9e40809bb1b77873cdf753` |
+| `neurhl/output/neurhl_1_0/goalies_2027.csv` | `046ce38daa7cad3aec9f5be4a3133f8a29c31dac9f176bfacbc9d679c6999ed2` |
+| `neurhl/output/neurhl_1_0/player_games_2027.csv.gz` | `23f7c873fbdb1429a9b1a8191d6c6bce03e23cf96dd28c81cca0617c65353f1e` |
+| `neurhl/output/neurhl_1_0/consistency_2027.json` | `a3835c1989cb4de1a8e5b23fe9652483fb850757a59e73ee1f3c8383e6ceb77d` |
+| `neurhl/output/neurhl_1_0/checks_2027.json` | `ac389097708eb9cdf85c9f29dfd1d70d824f72b4a2fef4c10e81636ab9e1b097` |
+| `neurhl/output/neurhl_1_0/run_2027.json` | `3bedbc7d069e3480b7a0882f99c283cbe7973ad47bc40ea136900b89b1ce7ac2` |
+| `neurhl/output/neurhl_1_0/player_rates_2027.csv` | `6875cc0850961c5b82f93d7f179cdf6f038b55263846e37bbe03adcc4e785190` |
+| `neurhl/output/neurhl_1_0/availability_2027.csv` | `0c28bef2206dd06e235a2ab06fa3ea72c053ccf4006bf51211f454bbe9f881fe` |
+
+Highest projected points: CAR 114.0, COL 111.7, TBL 106.1, VGK 105.3, DAL 102.2. Highest Cup odds: CAR 17.4%, COL 14.6%, VGK 7.5%, TBL 7.2%, DAL 5.0%.
+
+These files are never edited. A correction is issued as a new, dated file set
+beside them, and both are scored.

@@ -1,0 +1,217 @@
+{
+ "pass": true,
+ "n": 42,
+ "passed": 42,
+ "checks": [
+  {
+   "check": "1,344 regular-season games",
+   "pass": true,
+   "detail": "1344"
+  },
+  {
+   "check": "home-win probabilities strictly inside (0, 1)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "outcome4 sums to 1",
+   "pass": true,
+   "detail": "max err 1.0e-05"
+  },
+  {
+   "check": "outcome4 home mass equals the home-win probability",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "league goals per team-game in [2.7, 3.3]",
+   "pass": true,
+   "detail": "3.034"
+  },
+  {
+   "check": "share of games past regulation in [0.18, 0.27]",
+   "pass": true,
+   "detail": "0.225"
+  },
+  {
+   "check": "home-win rate in [0.50, 0.57]",
+   "pass": true,
+   "detail": "0.532"
+  },
+  {
+   "check": "32 teams",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "each team plays 84 games",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "wins + losses + OT losses = games",
+   "pass": true,
+   "detail": "max |diff| 1.0e-04"
+  },
+  {
+   "check": "league points = 2 x games + overtime games",
+   "pass": true,
+   "detail": "2990.77 vs 2990.77"
+  },
+  {
+   "check": "playoff_pct sums to 16 slots",
+   "pass": true,
+   "detail": "16.000000"
+  },
+  {
+   "check": "division_pct sums to 4 slots",
+   "pass": true,
+   "detail": "4.000000"
+  },
+  {
+   "check": "presidents_pct sums to 1 slots",
+   "pass": true,
+   "detail": "1.000000"
+  },
+  {
+   "check": "round2_pct sums to 8 slots",
+   "pass": true,
+   "detail": "8.000000"
+  },
+  {
+   "check": "conf_final_pct sums to 4 slots",
+   "pass": true,
+   "detail": "4.000000"
+  },
+  {
+   "check": "cup_final_pct sums to 2 slots",
+   "pass": true,
+   "detail": "2.000000"
+  },
+  {
+   "check": "cup_pct sums to 1 slots",
+   "pass": true,
+   "detail": "1.000000"
+  },
+  {
+   "check": "expected wins from the MC match the games file within 1 win",
+   "pass": true,
+   "detail": "max |diff| 0.436"
+  },
+  {
+   "check": "team goals_for = sum of its skaters' goals",
+   "pass": true,
+   "detail": "max |diff| 0.0003"
+  },
+  {
+   "check": "team sog_for = sum of its skaters' sog",
+   "pass": true,
+   "detail": "max |diff| 0.0004"
+  },
+  {
+   "check": "team hits = sum of its skaters",
+   "pass": true,
+   "detail": "max |diff| 0.0004"
+  },
+  {
+   "check": "team blocks = sum of its skaters",
+   "pass": true,
+   "detail": "max |diff| 0.0004"
+  },
+  {
+   "check": "team giveaways = sum of its skaters",
+   "pass": true,
+   "detail": "max |diff| 0.0003"
+  },
+  {
+   "check": "team takeaways = sum of its skaters",
+   "pass": true,
+   "detail": "max |diff| 0.0003"
+  },
+  {
+   "check": "team pim = sum of its skaters",
+   "pass": true,
+   "detail": "max |diff| 0.0004"
+  },
+  {
+   "check": "team fo_won = sum of its skaters",
+   "pass": true,
+   "detail": "max |diff| 0.0004"
+  },
+  {
+   "check": "skater games = 18 x team games",
+   "pass": true,
+   "detail": "max |diff| 0.0003"
+  },
+  {
+   "check": "goalie starts = team games",
+   "pass": true,
+   "detail": "max |diff| 0.0000"
+  },
+  {
+   "check": "goalie goals against sum to the team's",
+   "pass": true,
+   "detail": "max |diff| 0.0001"
+  },
+  {
+   "check": "goalie wins sum to the team's expected wins",
+   "pass": true,
+   "detail": "max |diff| 0.0001"
+  },
+  {
+   "check": "every skater with a game and every goalie with a start has a name",
+   "pass": true,
+   "detail": "0 unnamed"
+  },
+  {
+   "check": "18 skaters dressed per team-game",
+   "pass": true,
+   "detail": "max |diff| 6.0e-05"
+  },
+  {
+   "check": "per team-game skater goals = the game file's team goals",
+   "pass": true,
+   "detail": "max |diff| 5.0e-05"
+  },
+  {
+   "check": "skater ice time per team-game within the budget [280, 300] minutes",
+   "pass": true,
+   "detail": "range 291.7-295.4"
+  },
+  {
+   "check": "faceoff wins of the two teams sum to the game's faceoffs",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "season goals = sum of the player-game rows",
+   "pass": true,
+   "detail": "max |diff| 1.1e-04"
+  },
+  {
+   "check": "season assists = sum of the player-game rows",
+   "pass": true,
+   "detail": "max |diff| 1.1e-04"
+  },
+  {
+   "check": "season gp = sum of the player-game rows",
+   "pass": true,
+   "detail": "max |diff| 2.0e-04"
+  },
+  {
+   "check": "season sog = sum of the player-game rows",
+   "pass": true,
+   "detail": "max |diff| 1.2e-04"
+  },
+  {
+   "check": "season toi = sum of the player-game rows",
+   "pass": true,
+   "detail": "max |diff| 1.4e-04"
+  },
+  {
+   "check": "opening night agrees with the game-day preview within 0.06",
+   "pass": true,
+   "detail": "max |diff| 0.015 over 5 games"
+  }
+ ]
+}

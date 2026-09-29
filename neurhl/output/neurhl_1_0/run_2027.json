@@ -1,0 +1,16 @@
+{
+ "rosters_date": "2026-09-28",
+ "draws": 64,
+ "sims": 20000,
+ "seed": 711,
+ "team_sigma": 0.07,
+ "goal_mult_m0": 0.9229290835140593,
+ "days_in_opening": 0.0,
+ "bundle": "g2027_v1",
+ "bundle_sha": "a43965e13ff54796",
+ "availability": "sim/availability_2027.py",
+ "home_edge_rating": 0.13237868978962403,
+ "code": "9c78a40",
+ "created_utc": "2026-09-29T02:12:11+00:00",
+ "seconds": 681.1
+}

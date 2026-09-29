@@ -216,7 +216,7 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
 <body>
 <header class="bar">
   <div class="wrap">
-    <a class="mark" href="#top">Neur<b>HL</b> <small>2.0</small></a>
+    <a class="mark" href="#top">Neur<b>HL</b> <small>1.0</small></a>
     <nav aria-label="Sections">
       <a href="#tonight" id="navtonight" hidden>Tonight</a><a href="#standings">Standings</a><a href="#games">Games</a><a href="#players">Players</a>
       <a href="#evidence">Evidence</a><a href="#method">Method</a>
@@ -228,7 +228,7 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
   <div class="wrap hero">
     <span class="label">2026-27 NHL season · preregistered projections</span>
     <h1>Every game, team and skater, <em>frozen before the first faceoff.</em></h1>
-    <p>NeurHL projects the season from play-by-play up. Its predictions were committed on 25 September 2026, four days before opening night, and are scored in public as the games are played. The evidence behind each claim, including the claims that failed, is on this page.</p>
+    <p>NeurHL 1.0 is one model for the whole season. The same engine predicts every skater's game, every game and every season total, and the levels add up exactly: a player's goals are the sum of his games, a team's goals are the sum of its players, and its points are the sum of its games. The predictions were frozen before opening night and are scored in public as the games are played. The evidence behind each claim, including the claims that failed, is on this page.</p>
     <div class="stamp" id="stamp"></div>
     <div class="status" id="status"></div>
   </div>
@@ -237,7 +237,7 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
     <div class="wrap">
       <div class="sh">
         <div><h2><span id="tntitle">Tonight</span> <span class="label" id="tndate"></span></h2>
-          <p>NeurHL-G's forecasts for the latest game day, each committed to the public repository before puck drop. The engine simulates every game 10,000 times from the dressed lineups; NeurHL-H and in-season Elo are shown for reference. Lineups marked confirmed come from posted lines; the others are projections.</p></div>
+          <p>NeurHL 1.0's forecasts for the latest game day, each committed to the public repository before puck drop, with that day's lineups and every game played so far. The engine simulates every game 10,000 times from the dressed lineups; its neural player layer (NeurHL-H) and in-season Elo are shown for reference. Lineups marked confirmed come from posted lines; the others are projections.</p></div>
       </div>
       <div class="tn" id="tnlist"></div>
     </div>
@@ -247,7 +247,7 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
     <div class="wrap">
       <div class="sh">
         <div><h2>Projected standings</h2>
-          <p>Points from 20,000 simulated seasons over the real 84-game schedule and announced rosters. Each team's strength is drawn once per simulated season, so the bands carry uncertainty about how good a team is as well as game-to-game luck.</p></div>
+          <p>Points from 20,000 simulated seasons of the real 84-game schedule. Every game comes from the same engine as the game odds, with lineups and goalie starts sampled from each roster; each team's strength is also drawn once per simulated season, so the bands carry uncertainty about how good a team is as well as game-to-game luck.</p></div>
       </div>
       <div class="confs" id="confs"></div>
       <div class="legend">
@@ -264,7 +264,7 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
     <div class="wrap">
       <div class="sh">
         <div><h2>Games</h2>
-          <p>Home-win probability for every regular-season game, fixed before the season. The red tick is a preseason Elo reference, frozen on the same day; we expect Elo to score better game by game (see the live protocol).</p></div>
+          <p>Home-win probability for every regular-season game, fixed before the season. The red tick is the preseason Elo reference. With in-season information NeurHL 1.0's game level beat Elo on its gate seasons; before the season every game uses opening-night rosters and form, so the edge should be smaller.</p></div>
       </div>
       <div class="gbar">
         <button class="btn" id="gprev" type="button" aria-label="Previous game day">&larr; Prev</button>
@@ -280,7 +280,7 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
     <div class="wrap">
       <div class="sh">
         <div><h2>Skater projections</h2>
-          <p>Expected games, ice time, goals, assists and points for 711 skaters on announced rosters. Points are the 50/50 blend of a gradient-boosted season model and the player-game layer summed over the schedule, the combination that won the backtest.</p></div>
+          <p>Expected games, ice time, goals, assists and points for every skater on the post-deadline rosters. Each total is the sum of that skater's projected games in the season simulation, so the skaters on a team add up to the team's goals and shots.</p></div>
       </div>
       <div class="pbar">
         <input class="field" id="pq" type="search" placeholder="Search skaters" aria-label="Search skaters">
@@ -338,21 +338,23 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
       </div>
 
       <div class="flow">
-        <svg viewBox="0 0 980 250" role="img" aria-label="NeurHL pipeline">
-          <g class="nd"><rect x="10" y="95" width="170" height="60" rx="8"/><text x="24" y="120">PLAY-BY-PLAY, SHIFTS</text><text class="s" x="24" y="140">7.6M events, 2008-2026</text></g>
-          <g class="nd"><rect x="250" y="10" width="190" height="52" rx="8"/><text x="264" y="33">SHOT QUALITY (xG)</text><text class="s" x="264" y="51">refit each season</text></g>
-          <g class="nd"><rect x="250" y="76" width="190" height="52" rx="8"/><text x="264" y="99">RIDGE RAPM</text><text class="s" x="264" y="117">on-ice player effects</text></g>
-          <g class="nd"><rect x="250" y="142" width="190" height="52" rx="8"/><text x="264" y="165">EVENT SIMULATOR</text><text class="s" x="264" y="183">score effects, audited</text></g>
-          <g class="nd hl"><rect x="250" y="208" width="190" height="36" rx="8"/><text x="264" y="231">PLAYER-GAME LAYER</text></g>
-          <g class="nd hl"><rect x="530" y="95" width="190" height="60" rx="8"/><text x="544" y="120">SEASON SIMULATOR</text><text class="s" x="544" y="140">20,000 seasons</text></g>
-          <g class="nd"><rect x="790" y="40" width="180" height="46" rx="8"/><text x="804" y="68">TEAM POINTS, ODDS</text></g>
-          <g class="nd"><rect x="790" y="102" width="180" height="46" rx="8"/><text x="804" y="130">GAME PROBABILITIES</text></g>
-          <g class="nd"><rect x="790" y="196" width="180" height="46" rx="8"/><text x="804" y="224">SKATER POINTS</text></g>
-          <path d="M180 125 C215 125 215 36 250 36"/><path d="M180 125 C215 125 215 102 250 102"/>
-          <path d="M180 125 C215 125 215 168 250 168"/><path d="M180 125 C215 125 215 226 250 226"/>
-          <path d="M440 102 C485 102 485 120 530 120"/><path d="M440 168 C485 168 485 130 530 130" stroke-dasharray="4 4"/>
-          <path d="M720 118 C755 118 755 63 790 63"/><path d="M720 125 L790 125"/>
-          <path d="M440 226 L790 219"/>
+        <svg viewBox="0 0 980 250" role="img" aria-label="NeurHL 1.0: data to player states, the game engine, and the season">
+          <g class="nd"><rect x="10" y="95" width="160" height="60" rx="8"/><text x="24" y="120">PLAY-BY-PLAY, SHIFTS</text><text class="s" x="24" y="140">7.6M events, 2008-2026</text></g>
+          <g class="nd"><rect x="220" y="10" width="190" height="52" rx="8"/><text x="234" y="33">PLAYER STATE</text><text class="s" x="234" y="51">after every game played</text></g>
+          <g class="nd"><rect x="220" y="76" width="190" height="52" rx="8"/><text x="234" y="99">SHOT QUALITY (xG)</text><text class="s" x="234" y="117">walk-forward</text></g>
+          <g class="nd"><rect x="220" y="142" width="190" height="52" rx="8"/><text x="234" y="165">NEURAL PLAYER LAYER</text><text class="s" x="234" y="183">confirmed against Elo</text></g>
+          <g class="nd"><rect x="220" y="208" width="190" height="36" rx="8"/><text x="234" y="231">LINEUPS AND GOALIES</text></g>
+          <g class="nd hl"><rect x="460" y="70" width="180" height="110" rx="8"/><text x="474" y="96">GAME ENGINE</text><text class="s" x="474" y="116">player-games sum to</text><text class="s" x="474" y="134">team box scores and</text><text class="s" x="474" y="152">the result, stacked</text><text class="s" x="474" y="170">with Elo</text></g>
+          <g class="nd hl"><rect x="690" y="95" width="120" height="60" rx="8"/><text x="704" y="120">SEASON</text><text class="s" x="704" y="140">20,000 runs</text></g>
+          <g class="nd"><rect x="840" y="14" width="130" height="46" rx="8"/><text x="852" y="42">SKATER LINES</text></g>
+          <g class="nd"><rect x="840" y="102" width="130" height="46" rx="8"/><text x="852" y="130">GAME ODDS</text></g>
+          <g class="nd"><rect x="840" y="190" width="130" height="46" rx="8"/><text x="852" y="218">STANDINGS</text></g>
+          <path d="M170 125 C195 125 195 36 220 36"/><path d="M170 125 C195 125 195 102 220 102"/>
+          <path d="M170 125 C195 125 195 168 220 168"/><path d="M170 125 C195 125 195 226 220 226"/>
+          <path d="M410 36 C435 36 435 100 460 100"/><path d="M410 102 C435 102 435 115 460 115"/>
+          <path d="M410 168 C435 168 435 140 460 140"/><path d="M410 226 C435 226 435 160 460 160"/>
+          <path d="M640 125 L690 125"/><path d="M640 95 C740 95 740 37 840 37"/>
+          <path d="M640 110 C740 110 740 125 840 125"/><path d="M810 140 C825 140 825 213 840 213"/>
         </svg>
       </div>
 
@@ -370,6 +372,7 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
             <li>Two leaks let the event simulator see the next event; both passed the realism gates before an audit caught them.</li>
             <li>A comparison of the season layer with a baseline used different seasons. On matched seasons the baseline is better.</li>
             <li>Playoff ties were broken alphabetically, worth up to 1.6 playoff points for some clubs.</li>
+            <li>The engine's gate script skipped three declared checks. Computed afterwards from the same predictions, one calibration check fails: its team shots-on-goal intervals are too wide.</li>
             <li>An exclusion rule was changed after results were visible. It is recorded, and results are reported both ways.</li>
           </ul></div>
         <div><h3>Read further</h3>
@@ -403,9 +406,12 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
 
   /* stamp and status */
   const nGames = D.games.length, played = (D.live && D.live.games_played) || 0;
-  const sha = D.sha256["neurhl/output/games_2027.csv"];
+  const sha = D.game_sha || D.sha256["neurhl/output/games_2027.csv"];
+  const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const [fy, fm, fd] = D.frozen.split("-").map(Number);
+  const frozenLabel = `${fd} ${MON[fm - 1]} ${fy}`;
   $("#stamp").innerHTML = [
-    ["Frozen","25 Sep 2026"],["Opening night","29 Sep 2026"],
+    ["Frozen", frozenLabel],["Opening night","29 Sep 2026"],
     ["Games",nGames.toLocaleString()],["Skaters",D.players.length],
     ["Game file SHA-256", sha.slice(0,12)+"…"]
   ].map(([k,v]) => `<div><span class="label">${k}</span><span class="v">${esc(v)}</span></div>`).join("");
@@ -415,7 +421,8 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
     : `<span class="pill red"><i></i>Game-model confirmation: null</span>`;
   $("#status").innerHTML =
     `<span class="pill blue"><i></i>Live: ${played.toLocaleString()} of ${nGames.toLocaleString()} games played</span>` +
-    `<span class="pill green"><i></i>Player-game layer: confirmed</span>` + c1pill;
+    `<span class="pill green"><i></i>Player-game layer: confirmed</span>` + c1pill +
+    (D.checks ? `<span class="pill ${D.checks.pass ? "green" : "red"}"><i></i>Levels agree: ${D.checks.passed} of ${D.checks.n} checks</span>` : "");
 
   /* tonight */
   const T = D.tonight || {};
@@ -537,9 +544,9 @@ code{font:400 .9em var(--mono);background:var(--chip);padding:1px 5px;border-rad
       <p>Improvement over the baseline on ${pg.n.toLocaleString()} held-out skater-games (2018-2020), frozen and scored once. It wins in every season; clustered by player and game, z runs from ${Math.abs(Math.max(...["toi_share","shots","goal1","assist1"].map(k=>pg[k].z2))).toFixed(0)} to ${Math.abs(Math.min(...["toi_share","shots","goal1","assist1"].map(k=>pg[k].z2))).toFixed(0)}.</p></div>
     ${c1card}
     ${E.g ? `<div class="card"><span class="pill amber"><i></i>Gate evidence · live test running</span>
-      <h3>NeurHL-G, the game engine</h3>
+      <h3>The game engine at the core of NeurHL 1.0</h3>
       <div class="big">${E.g.d_elo.toFixed(4)} <small>log loss vs Elo, ${E.g.n.toLocaleString()} gate games</small></div>
-      <p>Better than Elo in ${E.g.beat_elo} of 5 seasons, and level with NeurHL-H (${E.g.d_h >= 0 ? "+" : ""}${E.g.d_h.toFixed(4)}, not significant), so NeurHL-H stays the primary win-probability model. Its player projections beat the confirmed player-game layer on all four targets; its 2026-27 forecasts are the prospective test.</p></div>` : ""}
+      <p>Scored once on 6,289 gate games (2019-2024), stacked with Elo and the neural player layer: better than Elo in ${E.g.beat_elo} of 5 seasons, and level with the neural player layer alone (${E.g.d_h >= 0 ? "+" : ""}${E.g.d_h.toFixed(4)}, not significant), which is why the final probability combines them. Its player projections beat the confirmed player-game layer on all four targets. The 2026-27 season is the prospective test.</p></div>` : ""}
     <div class="card"><span class="pill">Development only</span>
       <h3>Season standings: level with Elo</h3>
       <div class="big">${sm[nk].mae.toFixed(2)} <small>vs Elo ${sm[v1k].mae.toFixed(2)} points MAE</small></div>

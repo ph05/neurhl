@@ -1,0 +1,52 @@
+{
+ "meta": {
+  "rosters_date": "2026-09-28",
+  "roster_snapshot": "2026-09-28",
+  "reserve_snapshot": "2026-09-27",
+  "unavailable": [
+   8476945
+  ],
+  "df_dirs": [
+   "/Users/ph/Development/nhl-2026-2027-models/data/raw/lineup_snapshots/2026-09-28"
+  ]
+ },
+ "model": {
+  "beta": {
+   "const": -0.18048,
+   "logit_shrunk": 0.45228,
+   "log1p_exposure": 0.22163,
+   "age_over29": -0.05608,
+   "age_under24": 0.08247,
+   "is_d": -0.2194,
+   "toi_z": 0.40415,
+   "no_recent_nhl": -0.42335
+  },
+  "k_prior": 40.0,
+  "m0": 0.76905,
+  "targets": [
+   2012,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2022,
+   2023,
+   2024
+  ],
+  "n_obs": 6980,
+  "toi_mu": {
+   "F": 15.012359230141225,
+   "D": 19.2879580452654
+  },
+  "toi_sd": {
+   "F": 3.3181940697795302,
+   "D": 3.5023287256171947
+  }
+ },
+ "k": 64,
+ "seed": 20260929,
+ "persist": true
+}

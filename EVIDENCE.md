@@ -101,6 +101,16 @@ NeurHL-H's projections as inputs, and attention across rosters. Gradient-boosted
 trees and a logistic model on game-level features, stacked with Elo, did no
 better than Elo. Every run is in `neurhl/configs/search_ledger_g.csv`.
 
+## NeurHL 1.0, the unified model (PLAN_NeurHL_1_0)
+
+NeurHL 1.0 joins the confirmed and gated components into one model for
+player-games, games and season totals. Its claims are of two kinds:
+
+| Claim | Status | Record |
+|---|---|---|
+| Its levels agree: skater totals sum to team totals, games to seasons, player-games to season lines, with 18 skater-games and one goalie start per team-game, and league points equal to 2 x games + overtime games in every simulated season | Verified on the frozen outputs by an independent check | `neurhl/tests/check_neurhl_1_0.py`, `neurhl/output/neurhl_1_0/checks_2027.json` |
+| Its 2026-27 forecasts are accurate | No evidence yet. Frozen before the first game and scored once, after the regular season. Its game level is the gated engine; its season layer carries a season-level uncertainty calibrated for an earlier model | `PLAN_NeurHL_1_0.md` |
+
 ## The 2026-27 season
 
 Predictions for every game, team and skater were frozen before opening night

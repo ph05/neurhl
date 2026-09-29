@@ -1,9 +1,13 @@
 # NeurHL
 
-**NeurHL 1.0** projects the 2026-27 NHL season from the puck up: every
-regular-season game, every team's points and playoff odds, and goals, assists
-and points for 711 skaters. The predictions were frozen before opening night
-and are scored in public as the season is played.
+**NeurHL 1.0** predicts the 2026-27 NHL season with one model at every level:
+every skater's game, every game, and every season total. The same engine
+produces all three, and they are built to agree. A skater's season goals are
+the sum of his projected games, a team's goals are the sum of its skaters',
+and its points are the sum of its games. That agreement is checked
+([`neurhl/tests/check_neurhl_1_0.py`](neurhl/tests/check_neurhl_1_0.py)). The
+predictions were frozen before opening night and are scored in public as the
+season is played.
 
 **Browse the projections: [ph05.github.io/neurhl](https://ph05.github.io/neurhl/)**
 
@@ -11,84 +15,88 @@ NeurHL was built under preregistration. Every model, gate and decision rule
 was committed before the numbers that tested it existed, and the final tests
 ran once on seasons no decision had touched. The record of what worked and
 what did not is kept as carefully as the model. [EVIDENCE.md](EVIDENCE.md)
-lists every claim with the strength of the evidence behind it.
+lists every claim with the strength of the evidence behind it, and
+[PLAN_NeurHL_1_0.md](PLAN_NeurHL_1_0.md) defines NeurHL 1.0 and how it is
+scored.
 
-## NeurHL 2.0: the game engine
-
-**NeurHL-G** predicts one game at a time from the two dressed rosters. It
-carries every skater's state from every game he has played (this season's
-games so far and all earlier seasons), deploys ice time by strength so team
-budgets hold exactly, and simulates each game 10,000 times: ice time, shots,
-individual xG, goals and assists for every skater, both goalies, power-play
-opportunities, the score and the result, including overtime and shootouts.
-
-- **Against Elo:** better game by game on its gate window (2019-2024, 6,289
-  games): log loss 0.6601 vs 0.6657, better in all five seasons.
-- **Against NeurHL-H:** level (0.6601 vs 0.6606, not significant). The engine
-  has not been shown to add win-probability information beyond NeurHL-H, so
-  NeurHL-H stays the primary win-probability model and NeurHL-G is live as
-  exploratory. Its player projections beat the confirmed player-game layer on
-  all four targets and its team box scores beat both declared baselines; one
-  declared calibration check fails (its team shots-on-goal intervals are too
-  wide).
-- **Live:** every 2026-27 game gets a morning forecast and a pregame forecast
-  about an hour before puck drop, committed here before the game, with lineup
-  provenance, win probabilities from NeurHL-G, NeurHL-H and Elo, and full
-  simulated stat lines ([neurhl/output/live/](neurhl/output/live/)).
-
-The plan, gates and every decision are in [PLAN_NeurHL4.md](PLAN_NeurHL4.md),
-committed before the numbers that tested them.
-
-## Findings (NeurHL 1.0)
-
-- **Player games: confirmed.** A chained gradient-boosted model of ice time,
-  shots, goals and assists beats each skater's own recent average on all four
-  targets. It was frozen after development and scored once on 2017-18 through
-  2019-20 (130,092 skater-games). Gains range from 2.6% to 10.2%, and the
-  model wins in every season.
-- **Game outcomes: confirmed.** NeurHL-H, a neural player layer feeding a
-  small logistic head, beats Elo on 10,184 held-out games from 2017-18
-  through 2025-26: log loss 0.6650 vs 0.6697 (95% CI of the difference
-  -0.0065 to -0.0031), better in all eight seasons. The test was frozen in
-  advance and run once. NeurHL-H uses each game's dressed lineup, known
-  about an hour before puck drop, which Elo does not.
-- **Neural representations of hockey events: a documented null.** A
-  transformer trained on 7.6 million play-by-play events learns what kind of
-  player someone is (position is linearly decodable at 95%). Pooled over a
-  roster, it says almost nothing about how good a team is, and every attempt
-  to beat Elo from pooled embeddings finished level with a constant home-win
-  rate. NeurHL-H does use the embeddings, inside a player-level model anchored
-  on each player's own history; no ablation has yet isolated what they add
-  there.
-- **Season standings: level with Elo, not better.** The season simulator's
-  80% intervals are calibrated (0.794 coverage). On matched backtest seasons
-  its points error is slightly worse than the Elo baseline's (9.99 vs 9.17,
-  not significant).
-
-## How it works
+## How NeurHL 1.0 works
 
 ```mermaid
 flowchart LR
-  A[Play-by-play, shifts<br/>and shots, 2008-2026] --> B[Shot-quality model<br/>walk-forward xG]
-  A --> C[Ridge RAPM<br/>player on-ice effects]
-  A --> D[Event simulator<br/>Transformer-Hawkes]
-  A --> E[Player-game layer<br/>ice time, shots, goals, assists]
-  C --> F[Season simulator<br/>20,000 seasons]
-  D -. score effects .-> F
-  E --> G[Player season<br/>projections]
-  F --> H[Team points<br/>and playoff odds]
-  F --> I[Per-game<br/>probabilities]
+  A[Play-by-play, shifts<br/>and shots, 2008-2026] --> B[Player, goalie and<br/>team state after<br/>every game]
+  A --> C[Walk-forward xG<br/>and RAPM priors]
+  A --> D[Neural player layer<br/>NeurHL-H]
+  B --> E[Game engine<br/>player-games sum to<br/>team box scores<br/>and the result]
+  C --> E
+  D --> E
+  F[Rosters, availability,<br/>goalie starts] --> E
+  E --> G[Game odds<br/>stacked with Elo]
+  E --> H[Skater and goalie<br/>stat lines]
+  G --> I[Season: 84 games,<br/>20,000 runs]
+  H --> I
+  I --> J[Standings, playoff<br/>and Cup odds,<br/>season totals]
 ```
 
-| Component | What it does | Status |
-|---|---|---|
-| Shot-quality (xG) model | Gradient-boosted goal probability per shot, refit each season on prior seasons only | Beats distance-and-angle in 18/18 seasons; top-decile calibration misses its 0.005 target |
-| RAPM | Stint-level ridge regression of on-ice shot rates, with team-season fixed effects | Used for roster strength; not shown better than team-demeaned raw rates |
-| Event simulator | 5.3M-parameter marked point process over the event stream, 5-seed ensemble | Reproduces per-period event rates and score effects; audited for leakage |
-| Player-game layer | Chained models for opportunity, volume and conversion, using usage, absences and opponent context | Confirmed on 2017-18 to 2019-20 |
-| Season simulator | Team scoring rates, roster RAPM and score effects, integrated per game; team strength drawn once per simulated season | Calibrated intervals; level with Elo on points error |
-| Player season projection | 50/50 blend of a gradient-boosted season model and the player-game layer summed over the schedule | Best of three in backtest (9.07 points per 82 games) |
-| NeurHL-H | Neural player layer aggregated over the dressed lineup to team shot share, combined with Elo in a thin logistic head | Confirmed on 2017-18 to 2025-26: log loss -0.0048 vs Elo |
+1. **State.** After every game, each skater's, goalie's and team's state is
+   updated from what happened in it, on top of every earlier season. Game 50
+   of a season sees games 1 to 49.
+2. **Game engine.** For two dressed lineups, the engine predicts each
+   skater's ice time by strength, shots, individual xG, goals and assists,
+   and the goalies' results. Team ice time is conserved exactly, and player
+   outputs add up to the team totals. A score-and-time hazard integration
+   turns the teams' scoring rates into the result, including overtime and
+   shootouts. The final win probability stacks the engine with Elo and the
+   neural player layer.
+3. **Season.** Every one of the 1,344 games is run through the engine many
+   times, each time with lineups and goalie starts sampled from the rosters
+   and an availability model. Games played, ice time and every counting stat
+   come from those sampled lineups. 20,000 simulated seasons then give the
+   standings, playoff odds and Cup odds. The preseason freeze evaluates every
+   game with the state as of opening night; the game-day forecasts use every
+   game played so far.
+4. **Stat sheets.** Hits, blocked shots, giveaways, takeaways, faceoffs and
+   penalty minutes come from each player's per-60 rates times the engine's
+   ice time, with faceoffs balanced between the two teams in every game.
+
+| Component | Evidence |
+|---|---|
+| Neural player layer with Elo (NeurHL-H) | **Confirmed**: beats Elo on 10,184 held-out games, 2017-18 to 2025-26 (log loss 0.6650 vs 0.6697; 95% CI of the difference -0.0065 to -0.0031; 8 of 8 seasons) |
+| Player-game layer (the engine's starting point for skaters) | **Confirmed**: beats each skater's recent average on ice time, shots, goals and assists (130,092 held-out skater-games) |
+| Game engine (NeurHL-G), stacked with Elo and NeurHL-H | Gate evidence: beats Elo on 6,289 games of 2019-2024 (-0.0056, 5 of 5 seasons); level with NeurHL-H alone; player heads beat the player-game layer on all four targets; one calibration check fails (team shots-on-goal intervals too wide) |
+| Season simulation | Development evidence: the season-level uncertainty was calibrated for the earlier season layer (80% intervals covered 0.794) and is carried over |
+| Walk-forward xG | Beats distance-and-angle in 18 of 18 seasons; top-decile calibration misses its 0.005 target after a 2023 change in shot-location recording |
+
+## The 2026-27 season
+
+- **NeurHL 1.0 freeze:** every game, team and skater, frozen before opening
+  night ([neurhl/output/neurhl_1_0/](neurhl/output/neurhl_1_0/)), with its hashes in
+  [PLAN_NeurHL_1_0.md](PLAN_NeurHL_1_0.md).
+- **Game-day forecasts:** a morning forecast and a pregame forecast about an
+  hour before puck drop, committed here before each game, with the lineups
+  used and full simulated stat lines ([neurhl/output/live/](neurhl/output/live/)).
+- **Earlier freeze:** the forecasts frozen on 2026-09-25 by an earlier,
+  separately built season layer are unchanged and scored as preregistered
+  ([PLAN_NeurHL_LIVE.md](PLAN_NeurHL_LIVE.md)).
+
+## Findings
+
+- **Lineups beat team ratings, and the gain concentrates where lineups
+  differ.** The confirmed gain of the neural player layer over Elo is near
+  zero when neither team is missing regulars, and largest when one team is
+  missing far more than the other (exploratory split of the confirmation
+  games).
+- **Two very different models reach the same skill.** The game engine,
+  which models every skater's deployment and every team's scoring process,
+  matches the much simpler neural player layer on win probability. The binding
+  constraint is the information available before the game, not model
+  capacity.
+- **Neural representations of hockey events: a documented null.** A
+  transformer trained on 7.6 million play-by-play events learns what kind of
+  player someone is (position is linearly decodable at 95%). Pooled over a
+  roster, it says almost nothing about how good a team is.
+- **The earlier season layer was level with Elo, not better.** On matched
+  backtest seasons its points error was slightly worse than the Elo
+  baseline's (9.99 vs 9.17, not significant).
 
 ## How it was tested
 
@@ -119,9 +127,11 @@ dated and committed before the run it governs.
 
 | File | Contents |
 |---|---|
-| `neurhl/output/games_2027.csv` | Home-win probability for all 1,344 games, with a preseason Elo reference |
-| `neurhl/output/projection_2027.csv` | Team points (mean, 10th and 90th percentile), wins and playoff probability |
-| `neurhl/output/player_proj_2027.csv` | Skater games, ice time, goals, assists and points |
+| `neurhl/output/neurhl_1_0/games_2027.csv` | NeurHL 1.0: every game's home-win probability, four-way outcome, goals, shots, xG and power plays, with Elo and the earlier freeze beside it |
+| `neurhl/output/neurhl_1_0/teams_2027.csv` | NeurHL 1.0: team points (mean, 10th, 50th and 90th percentiles), record, goals, shots, xG, playoff, division, Presidents' Trophy and Cup odds |
+| `neurhl/output/neurhl_1_0/skaters_2027.csv`, `goalies_2027.csv` | NeurHL 1.0: season totals for every skater and goalie, with intervals for goals, assists and points |
+| `neurhl/output/neurhl_1_0/player_games_2027.csv.gz` | NeurHL 1.0: every skater's expected line in every game |
+| `neurhl/output/games_2027.csv`, `projection_2027.csv`, `player_proj_2027.csv` | The earlier freeze (2026-09-25) |
 | `neurhl/output/live/scorecard_2027.json` | Running live scorecard |
 | `neurhl/output/live/2027/<date>/` | NeurHL-G game-day forecasts (morning and pregame): home-win probability from NeurHL-G, NeurHL-H and Elo, the lineups used and where they came from, and simulated stat lines for every dressed player |
 | `neurhl/output/g_gates.json` | NeurHL-G gate results on 2019-2024 |
@@ -141,9 +151,12 @@ uv run --no-project --python 3.12 --with numpy --with "pandas<3" --with pyarrow 
 uv run --no-project --python 3.12 --with numpy --with "pandas<3" --with pyarrow \
   python neurhl/tests/review_tests_neurhl4.py
 
-# 2026-27 team and per-game projections (20,000 simulated seasons)
+# NeurHL 1.0 for 2026-27 (every game, team and skater), then its consistency check
 uv run --no-project --python 3.12 --with numpy --with "pandas<3" --with pyarrow \
-  --with scipy python neurhl/sim/project_2027.py
+  --with numba --with torch --with scipy --with scikit-learn==1.9.1 --with requests \
+  python neurhl/sim/unified_2027.py --rosters-date 2026-09-28
+uv run --no-project --python 3.12 --with numpy --with "pandas<3" \
+  python neurhl/tests/check_neurhl_1_0.py
 
 # live scorecard
 uv run --no-project --python 3.12 --with numpy --with "pandas<3" --with requests \

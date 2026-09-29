@@ -1,0 +1,134 @@
+{
+ "rule": "points, regulation wins, total wins, dedicated-rng coin flip",
+ "max_abs_diff_pct": 0.015000000000003899,
+ "teams": {
+  "ANA": {
+   "actual_pct": 5.02,
+   "fractional_pct": 5.02
+  },
+  "BOS": {
+   "actual_pct": 25.855,
+   "fractional_pct": 25.843
+  },
+  "BUF": {
+   "actual_pct": 56.76,
+   "fractional_pct": 56.76
+  },
+  "CAR": {
+   "actual_pct": 92.945,
+   "fractional_pct": 92.95
+  },
+  "CBJ": {
+   "actual_pct": 36.41,
+   "fractional_pct": 36.425
+  },
+  "CGY": {
+   "actual_pct": 19.35,
+   "fractional_pct": 19.352
+  },
+  "CHI": {
+   "actual_pct": 2.77,
+   "fractional_pct": 2.765
+  },
+  "COL": {
+   "actual_pct": 85.515,
+   "fractional_pct": 85.5
+  },
+  "DAL": {
+   "actual_pct": 82.3,
+   "fractional_pct": 82.295
+  },
+  "DET": {
+   "actual_pct": 25.985,
+   "fractional_pct": 25.985
+  },
+  "EDM": {
+   "actual_pct": 85.805,
+   "fractional_pct": 85.808
+  },
+  "FLA": {
+   "actual_pct": 66.49,
+   "fractional_pct": 66.49
+  },
+  "LAK": {
+   "actual_pct": 76.92,
+   "fractional_pct": 76.925
+  },
+  "MIN": {
+   "actual_pct": 88.495,
+   "fractional_pct": 88.502
+  },
+  "MTL": {
+   "actual_pct": 27.42,
+   "fractional_pct": 27.413
+  },
+  "NJD": {
+   "actual_pct": 66.575,
+   "fractional_pct": 66.567
+  },
+  "NSH": {
+   "actual_pct": 34.99,
+   "fractional_pct": 34.997
+  },
+  "NYI": {
+   "actual_pct": 22.135,
+   "fractional_pct": 22.137
+  },
+  "NYR": {
+   "actual_pct": 75.845,
+   "fractional_pct": 75.832
+  },
+  "OTT": {
+   "actual_pct": 57.725,
+   "fractional_pct": 57.727
+  },
+  "PHI": {
+   "actual_pct": 14.095,
+   "fractional_pct": 14.1
+  },
+  "PIT": {
+   "actual_pct": 46.205,
+   "fractional_pct": 46.203
+  },
+  "SEA": {
+   "actual_pct": 26.065,
+   "fractional_pct": 26.07
+  },
+  "SJS": {
+   "actual_pct": 0.485,
+   "fractional_pct": 0.487
+  },
+  "STL": {
+   "actual_pct": 33.375,
+   "fractional_pct": 33.38
+  },
+  "TBL": {
+   "actual_pct": 91.335,
+   "fractional_pct": 91.338
+  },
+  "TOR": {
+   "actual_pct": 44.15,
+   "fractional_pct": 44.157
+  },
+  "UTA": {
+   "actual_pct": 62.575,
+   "fractional_pct": 62.567
+  },
+  "VAN": {
+   "actual_pct": 35.1,
+   "fractional_pct": 35.087
+  },
+  "VGK": {
+   "actual_pct": 78.25,
+   "fractional_pct": 78.252
+  },
+  "WPG": {
+   "actual_pct": 82.985,
+   "fractional_pct": 82.99
+  },
+  "WSH": {
+   "actual_pct": 50.07,
+   "fractional_pct": 50.072
+  }
+ }
+}

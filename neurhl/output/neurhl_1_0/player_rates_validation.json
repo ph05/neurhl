@@ -1,0 +1,1518 @@
+{
+ "definition": {
+  "source": "NHL play-by-play JSON, regular season, periods 1-4, per player-game joined to shift TOI (player_games)",
+  "seasons_used": [
+   2012,
+   2026
+  ],
+  "rates": "per 60 minutes of total TOI; 2027 table is rink-neutral",
+  "pen_taken60/pen_drawn60": "minor penalties (typeCode MIN; a double minor counts 2)",
+  "blocks60": "excludes shots blocked by the shooter's teammate",
+  "lookback_seasons": 3,
+  "toi_minutes_basis": "minutes weighted 1, 0.6, 0.36 for V-1, V-2, V-3",
+  "rink_neutralised_stats": [
+   "hits",
+   "blocks",
+   "give",
+   "take"
+  ],
+  "rink_era_end": 2024,
+  "level_normalisation": "per season and position group (F/D) to V-1",
+  "decay": {
+   "hits60": 0.45,
+   "blocks60": 0.6,
+   "giveaways60": 0.75,
+   "takeaways60": 0.75,
+   "fo_taken60": 0.3,
+   "pim60": 0.9,
+   "pen_taken60": 0.9,
+   "pen_drawn60": 0.75,
+   "fo_win_share": 0.45
+  },
+  "k": {
+   "hits60": 44.0,
+   "blocks60": 405.0,
+   "giveaways60": 615.0,
+   "takeaways60": 707.0,
+   "fo_taken60": 38.0,
+   "pim60": 202.0,
+   "pen_taken60": 535.0,
+   "pen_drawn60": 813.0,
+   "fo_win_share": 127.0
+  },
+  "k_units": "minutes of TOI; faceoffs taken for fo_win_share",
+  "fo_win_share_prior": 0.5,
+  "tuned_on_vantages": [
+   2015,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022
+  ],
+  "tuning_deviance_by_decay": {
+   "hits60": {
+    "0.3": {
+     "deviance": 35267.6,
+     "k": 44.0
+    },
+    "0.45": {
+     "deviance": 34976.4,
+     "k": 44.0
+    },
+    "0.6": {
+     "deviance": 35211.6,
+     "k": 44.0
+    },
+    "0.75": {
+     "deviance": 35759.9,
+     "k": 50.0
+    },
+    "0.9": {
+     "deviance": 36485.7,
+     "k": 50.0
+    }
+   },
+   "blocks60": {
+    "0.3": {
+     "deviance": 15135.4,
+     "k": 352.0
+    },
+    "0.45": {
+     "deviance": 14893.2,
+     "k": 352.0
+    },
+    "0.6": {
+     "deviance": 14818.6,
+     "k": 405.0
+    },
+    "0.75": {
+     "deviance": 14859.8,
+     "k": 405.0
+    },
+    "0.9": {
+     "deviance": 14981.5,
+     "k": 466.0
+    }
+   },
+   "giveaways60": {
+    "0.3": {
+     "deviance": 11737.3,
+     "k": 615.0
+    },
+    "0.45": {
+     "deviance": 11512.5,
+     "k": 615.0
+    },
+    "0.6": {
+     "deviance": 11398.5,
+     "k": 615.0
+    },
+    "0.75": {
+     "deviance": 11372.2,
+     "k": 615.0
+    },
+    "0.9": {
+     "deviance": 11402.7,
+     "k": 707.0
+    }
+   },
+   "takeaways60": {
+    "0.3": {
+     "deviance": 10796.4,
+     "k": 615.0
+    },
+    "0.45": {
+     "deviance": 10615.1,
+     "k": 615.0
+    },
+    "0.6": {
+     "deviance": 10524.0,
+     "k": 707.0
+    },
+    "0.75": {
+     "deviance": 10502.4,
+     "k": 707.0
+    },
+    "0.9": {
+     "deviance": 10530.7,
+     "k": 813.0
+    }
+   },
+   "fo_taken60": {
+    "0.3": {
+     "deviance": 226343.6,
+     "k": 38.0
+    },
+    "0.45": {
+     "deviance": 228098.0,
+     "k": 38.0
+    },
+    "0.6": {
+     "deviance": 232577.7,
+     "k": 44.0
+    },
+    "0.75": {
+     "deviance": 238626.4,
+     "k": 44.0
+    },
+    "0.9": {
+     "deviance": 245467.7,
+     "k": 50.0
+    }
+   },
+   "pim60": {
+    "0.3": {
+     "deviance": 33324.2,
+     "k": 176.0
+    },
+    "0.45": {
+     "deviance": 32306.1,
+     "k": 176.0
+    },
+    "0.6": {
+     "deviance": 31762.7,
+     "k": 176.0
+    },
+    "0.75": {
+     "deviance": 31536.0,
+     "k": 202.0
+    },
+    "0.9": {
+     "deviance": 31531.1,
+     "k": 202.0
+    }
+   },
+   "pen_taken60": {
+    "0.3": {
+     "deviance": 9537.2,
+     "k": 466.0
+    },
+    "0.45": {
+     "deviance": 9311.4,
+     "k": 466.0
+    },
+    "0.6": {
+     "deviance": 9181.2,
+     "k": 466.0
+    },
+    "0.75": {
+     "deviance": 9126.3,
+     "k": 466.0
+    },
+    "0.9": {
+     "deviance": 9122.2,
+     "k": 535.0
+    }
+   },
+   "pen_drawn60": {
+    "0.3": {
+     "deviance": 10028.1,
+     "k": 813.0
+    },
+    "0.45": {
+     "deviance": 9860.1,
+     "k": 813.0
+    },
+    "0.6": {
+     "deviance": 9764.5,
+     "k": 813.0
+    },
+    "0.75": {
+     "deviance": 9728.9,
+     "k": 813.0
+    },
+    "0.9": {
+     "deviance": 9731.6,
+     "k": 934.0
+    }
+   },
+   "fo_win_share": {
+    "0.3": {
+     "deviance": 1257529.5,
+     "k": 127.0
+    },
+    "0.45": {
+     "deviance": 1257482.3,
+     "k": 127.0
+    },
+    "0.6": {
+     "deviance": 1257485.8,
+     "k": 146.0
+    },
+    "0.75": {
+     "deviance": 1257522.5,
+     "k": 146.0
+    },
+    "0.9": {
+     "deviance": 1257579.9,
+     "k": 169.0
+    }
+   }
+  },
+  "eval_min_minutes": 500.0,
+  "eval_min_faceoffs": 200,
+  "validation_notes": "Targets are realised (recorded) per-60 rates in V for skaters with >= 500 minutes (win share: >= 200 faceoffs). model = shrunk rate from seasons < V; for rink-judged stats it is multiplied by the expected venue factor of the team the player opened V with (first game). last_season = raw V-1 rate (position mean if no V-1 minutes); position_mean = V-1 F/D mean (C/W/D for faceoffs; 0.5 for win share). with_prev restricts to players with V-1 minutes. bias = mean(pred - y)."
+ },
+ "league_per60_by_group": {
+  "2012": {
+   "F": {
+    "hits60": 4.9296,
+    "blocks60": 1.7535,
+    "giveaways60": 1.3713,
+    "takeaways60": 1.7233,
+    "fo_taken60": 19.4389,
+    "pim60": 2.55,
+    "pen_taken60": 0.8049,
+    "pen_drawn60": 0.864
+   },
+   "D": {
+    "hits60": 4.1187,
+    "blocks60": 4.4839,
+    "giveaways60": 1.5897,
+    "takeaways60": 0.8816,
+    "fo_taken60": 0.0092,
+    "pim60": 1.7024,
+    "pen_taken60": 0.6645,
+    "pen_drawn60": 0.4307
+   }
+  },
+  "2013": {
+   "F": {
+    "hits60": 5.2147,
+    "blocks60": 1.7835,
+    "giveaways60": 1.3605,
+    "takeaways60": 1.6326,
+    "fo_taken60": 20.0937,
+    "pim60": 2.584,
+    "pen_taken60": 0.7859,
+    "pen_drawn60": 0.8717
+   },
+   "D": {
+    "hits60": 4.2236,
+    "blocks60": 4.5042,
+    "giveaways60": 1.6369,
+    "takeaways60": 0.8079,
+    "fo_taken60": 0.0132,
+    "pim60": 1.8491,
+    "pen_taken60": 0.6993,
+    "pen_drawn60": 0.4161
+   }
+  },
+  "2014": {
+   "F": {
+    "hits60": 5.0806,
+    "blocks60": 1.7627,
+    "giveaways60": 1.3616,
+    "takeaways60": 1.6304,
+    "fo_taken60": 20.4081,
+    "pim60": 2.4015,
+    "pen_taken60": 0.7879,
+    "pen_drawn60": 0.8735
+   },
+   "D": {
+    "hits60": 4.2379,
+    "blocks60": 4.4522,
+    "giveaways60": 1.6727,
+    "takeaways60": 0.8625,
+    "fo_taken60": 0.0106,
+    "pim60": 1.7885,
+    "pen_taken60": 0.6856,
+    "pen_drawn60": 0.4307
+   }
+  },
+  "2015": {
+   "F": {
+    "hits60": 5.431,
+    "blocks60": 1.8411,
+    "giveaways60": 1.4303,
+    "takeaways60": 1.6972,
+    "fo_taken60": 20.6018,
+    "pim60": 2.062,
+    "pen_taken60": 0.7326,
+    "pen_drawn60": 0.8233
+   },
+   "D": {
+    "hits60": 4.4167,
+    "blocks60": 4.5101,
+    "giveaways60": 1.7596,
+    "takeaways60": 0.8667,
+    "fo_taken60": 0.0104,
+    "pim60": 1.6533,
+    "pen_taken60": 0.6584,
+    "pen_drawn60": 0.4024
+   }
+  },
+  "2016": {
+   "F": {
+    "hits60": 5.0983,
+    "blocks60": 1.8351,
+    "giveaways60": 1.4459,
+    "takeaways60": 1.5721,
+    "fo_taken60": 20.1997,
+    "pim60": 2.0629,
+    "pen_taken60": 0.7462,
+    "pen_drawn60": 0.8376
+   },
+   "D": {
+    "hits60": 4.2016,
+    "blocks60": 4.4203,
+    "giveaways60": 1.7834,
+    "takeaways60": 0.8276,
+    "fo_taken60": 0.0091,
+    "pim60": 1.6965,
+    "pen_taken60": 0.6689,
+    "pen_drawn60": 0.41
+   }
+  },
+  "2017": {
+   "F": {
+    "hits60": 4.6134,
+    "blocks60": 1.8415,
+    "giveaways60": 1.5748,
+    "takeaways60": 1.6783,
+    "fo_taken60": 20.1306,
+    "pim60": 1.9325,
+    "pen_taken60": 0.7019,
+    "pen_drawn60": 0.798
+   },
+   "D": {
+    "hits60": 4.1279,
+    "blocks60": 4.439,
+    "giveaways60": 1.9143,
+    "takeaways60": 0.8719,
+    "fo_taken60": 0.0074,
+    "pim60": 1.6147,
+    "pen_taken60": 0.6436,
+    "pen_drawn60": 0.3984
+   }
+  },
+  "2018": {
+   "F": {
+    "hits60": 4.4936,
+    "blocks60": 1.9622,
+    "giveaways60": 1.6536,
+    "takeaways60": 1.7889,
+    "fo_taken60": 20.3092,
+    "pim60": 1.7796,
+    "pen_taken60": 0.6825,
+    "pen_drawn60": 0.7874
+   },
+   "D": {
+    "hits60": 4.2156,
+    "blocks60": 4.5331,
+    "giveaways60": 2.0248,
+    "takeaways60": 0.9727,
+    "fo_taken60": 0.0111,
+    "pim60": 1.5375,
+    "pen_taken60": 0.6335,
+    "pen_drawn60": 0.3812
+   }
+  },
+  "2019": {
+   "F": {
+    "hits60": 4.6658,
+    "blocks60": 1.9104,
+    "giveaways60": 1.8318,
+    "takeaways60": 1.8674,
+    "fo_taken60": 19.6864,
+    "pim60": 1.677,
+    "pen_taken60": 0.6563,
+    "pen_drawn60": 0.7684
+   },
+   "D": {
+    "hits60": 4.3049,
+    "blocks60": 4.394,
+    "giveaways60": 2.1802,
+    "takeaways60": 1.0764,
+    "fo_taken60": 0.0085,
+    "pim60": 1.5395,
+    "pen_taken60": 0.62,
+    "pen_drawn60": 0.3599
+   }
+  },
+  "2020": {
+   "F": {
+    "hits60": 4.6046,
+    "blocks60": 1.8592,
+    "giveaways60": 1.7819,
+    "takeaways60": 1.7701,
+    "fo_taken60": 19.1095,
+    "pim60": 1.7114,
+    "pen_taken60": 0.6634,
+    "pen_drawn60": 0.7635
+   },
+   "D": {
+    "hits60": 4.0364,
+    "blocks60": 4.1532,
+    "giveaways60": 2.1,
+    "takeaways60": 1.0165,
+    "fo_taken60": 0.0028,
+    "pim60": 1.5008,
+    "pen_taken60": 0.6159,
+    "pen_drawn60": 0.3772
+   }
+  },
+  "2021": {
+   "F": {
+    "hits60": 4.7033,
+    "blocks60": 1.7469,
+    "giveaways60": 1.5191,
+    "takeaways60": 1.4683,
+    "fo_taken60": 18.4093,
+    "pim60": 1.6577,
+    "pen_taken60": 0.6197,
+    "pen_drawn60": 0.7243
+   },
+   "D": {
+    "hits60": 4.0478,
+    "blocks60": 3.9226,
+    "giveaways60": 1.8683,
+    "takeaways60": 0.7952,
+    "fo_taken60": 0.002,
+    "pim60": 1.4509,
+    "pen_taken60": 0.5959,
+    "pen_drawn60": 0.3552
+   }
+  },
+  "2022": {
+   "F": {
+    "hits60": 4.8119,
+    "blocks60": 1.752,
+    "giveaways60": 1.6282,
+    "takeaways60": 1.6785,
+    "fo_taken60": 18.7203,
+    "pim60": 1.8365,
+    "pen_taken60": 0.6699,
+    "pen_drawn60": 0.7665
+   },
+   "D": {
+    "hits60": 4.3372,
+    "blocks60": 4.168,
+    "giveaways60": 1.8007,
+    "takeaways60": 0.9915,
+    "fo_taken60": 0.0012,
+    "pim60": 1.5541,
+    "pen_taken60": 0.6247,
+    "pen_drawn60": 0.3948
+   }
+  },
+  "2023": {
+   "F": {
+    "hits60": 4.7039,
+    "blocks60": 1.9372,
+    "giveaways60": 1.6108,
+    "takeaways60": 1.7444,
+    "fo_taken60": 18.9188,
+    "pim60": 1.8644,
+    "pen_taken60": 0.6889,
+    "pen_drawn60": 0.7951
+   },
+   "D": {
+    "hits60": 4.3308,
+    "blocks60": 4.5742,
+    "giveaways60": 1.7122,
+    "takeaways60": 1.068,
+    "fo_taken60": 0.0018,
+    "pim60": 1.6906,
+    "pen_taken60": 0.6684,
+    "pen_drawn60": 0.4109
+   }
+  },
+  "2024": {
+   "F": {
+    "hits60": 4.8451,
+    "blocks60": 2.0698,
+    "giveaways60": 1.449,
+    "takeaways60": 1.6898,
+    "fo_taken60": 18.7819,
+    "pim60": 1.8748,
+    "pen_taken60": 0.6823,
+    "pen_drawn60": 0.7854
+   },
+   "D": {
+    "hits60": 4.1897,
+    "blocks60": 4.8828,
+    "giveaways60": 1.5256,
+    "takeaways60": 0.9639,
+    "fo_taken60": 0.0018,
+    "pim60": 1.7187,
+    "pen_taken60": 0.6582,
+    "pen_drawn60": 0.4112
+   }
+  },
+  "2025": {
+   "F": {
+    "hits60": 4.9448,
+    "blocks60": 2.1409,
+    "giveaways60": 2.7563,
+    "takeaways60": 0.9476,
+    "fo_taken60": 18.7453,
+    "pim60": 1.6647,
+    "pen_taken60": 0.6239,
+    "pen_drawn60": 0.7106
+   },
+   "D": {
+    "hits60": 3.3487,
+    "blocks60": 4.5107,
+    "giveaways60": 3.2741,
+    "takeaways60": 1.0022,
+    "fo_taken60": 0.0012,
+    "pim60": 1.4712,
+    "pen_taken60": 0.5956,
+    "pen_drawn60": 0.3749
+   }
+  },
+  "2026": {
+   "F": {
+    "hits60": 4.8179,
+    "blocks60": 1.9861,
+    "giveaways60": 2.9326,
+    "takeaways60": 0.9687,
+    "fo_taken60": 18.5394,
+    "pim60": 1.8058,
+    "pen_taken60": 0.6563,
+    "pen_drawn60": 0.7611
+   },
+   "D": {
+    "hits60": 3.0239,
+    "blocks60": 4.2028,
+    "giveaways60": 3.1154,
+    "takeaways60": 0.8642,
+    "fo_taken60": 0.0023,
+    "pim60": 1.6635,
+    "pen_taken60": 0.6489,
+    "pen_drawn60": 0.4087
+   }
+  }
+ },
+ "rink_factor_sd": {
+  "2012": {
+   "hits": 0.188,
+   "blocks": 0.151,
+   "give": 0.411,
+   "take": 0.303
+  },
+  "2013": {
+   "hits": 0.199,
+   "blocks": 0.129,
+   "give": 0.439,
+   "take": 0.296
+  },
+  "2014": {
+   "hits": 0.182,
+   "blocks": 0.146,
+   "give": 0.388,
+   "take": 0.272
+  },
+  "2015": {
+   "hits": 0.188,
+   "blocks": 0.138,
+   "give": 0.392,
+   "take": 0.411
+  },
+  "2016": {
+   "hits": 0.206,
+   "blocks": 0.153,
+   "give": 0.386,
+   "take": 0.303
+  },
+  "2017": {
+   "hits": 0.205,
+   "blocks": 0.134,
+   "give": 0.376,
+   "take": 0.292
+  },
+  "2018": {
+   "hits": 0.184,
+   "blocks": 0.115,
+   "give": 0.321,
+   "take": 0.344
+  },
+  "2019": {
+   "hits": 0.188,
+   "blocks": 0.122,
+   "give": 0.341,
+   "take": 0.328
+  },
+  "2020": {
+   "hits": 0.205,
+   "blocks": 0.13,
+   "give": 0.322,
+   "take": 0.275
+  },
+  "2021": {
+   "hits": 0.245,
+   "blocks": 0.13,
+   "give": 0.337,
+   "take": 0.315
+  },
+  "2022": {
+   "hits": 0.19,
+   "blocks": 0.104,
+   "give": 0.34,
+   "take": 0.292
+  },
+  "2023": {
+   "hits": 0.216,
+   "blocks": 0.071,
+   "give": 0.274,
+   "take": 0.263
+  },
+  "2024": {
+   "hits": 0.156,
+   "blocks": 0.053,
+   "give": 0.346,
+   "take": 0.24
+  },
+  "2025": {
+   "hits": 0.076,
+   "blocks": 0.061,
+   "give": 0.053,
+   "take": 0.088
+  },
+  "2026": {
+   "hits": 0.039,
+   "blocks": 0.045,
+   "give": 0.044,
+   "take": 0.047
+  }
+ },
+ "validation": {
+  "2023": {
+   "n": 617,
+   "n_with_prev": 599,
+   "n_no_history": 14,
+   "stats": {
+    "hits60": {
+     "model": {
+      "corr": 0.91,
+      "mae": 1.1191,
+      "bias": 0.1606
+     },
+     "last_season": {
+      "corr": 0.8844,
+      "mae": 1.2517,
+      "bias": 0.2661
+     },
+     "position_mean": {
+      "corr": 0.0792,
+      "mae": 2.697,
+      "bias": -0.2931
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.9207,
+       "mae": 1.0683,
+       "bias": 0.1647
+      },
+      "last_season": {
+       "corr": 0.8999,
+       "mae": 1.1902,
+       "bias": 0.2779
+      }
+     },
+     "model_without_venue_factor": {
+      "corr": 0.8988,
+      "mae": 1.1871,
+      "bias": 0.1864
+     }
+    },
+    "blocks60": {
+     "model": {
+      "corr": 0.9028,
+      "mae": 0.576,
+      "bias": -0.3028
+     },
+     "last_season": {
+      "corr": 0.8588,
+      "mae": 0.6629,
+      "bias": -0.2925
+     },
+     "position_mean": {
+      "corr": 0.774,
+      "mae": 0.8068,
+      "bias": -0.3147
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.9041,
+       "mae": 0.574,
+       "bias": -0.3033
+      },
+      "last_season": {
+       "corr": 0.8587,
+       "mae": 0.6649,
+       "bias": -0.2945
+      }
+     },
+     "model_without_venue_factor": {
+      "corr": 0.899,
+      "mae": 0.5764,
+      "bias": -0.301
+     }
+    },
+    "giveaways60": {
+     "model": {
+      "corr": 0.6888,
+      "mae": 0.3569,
+      "bias": 0.0639
+     },
+     "last_season": {
+      "corr": 0.4976,
+      "mae": 0.4964,
+      "bias": 0.07
+     },
+     "position_mean": {
+      "corr": 0.1167,
+      "mae": 0.4752,
+      "bias": 0.0803
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.688,
+       "mae": 0.3568,
+       "bias": 0.0657
+      },
+      "last_season": {
+       "corr": 0.5058,
+       "mae": 0.4965,
+       "bias": 0.0725
+      }
+     },
+     "model_without_venue_factor": {
+      "corr": 0.6277,
+      "mae": 0.3861,
+      "bias": 0.0763
+     }
+    },
+    "takeaways60": {
+     "model": {
+      "corr": 0.7579,
+      "mae": 0.3188,
+      "bias": -0.056
+     },
+     "last_season": {
+      "corr": 0.5616,
+      "mae": 0.4441,
+      "bias": -0.0595
+     },
+     "position_mean": {
+      "corr": 0.5226,
+      "mae": 0.4134,
+      "bias": -0.0484
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.763,
+       "mae": 0.3148,
+       "bias": -0.0539
+      },
+      "last_season": {
+       "corr": 0.5656,
+       "mae": 0.443,
+       "bias": -0.0587
+      }
+     },
+     "model_without_venue_factor": {
+      "corr": 0.7143,
+      "mae": 0.3398,
+      "bias": -0.0458
+     }
+    },
+    "fo_taken60": {
+     "model": {
+      "corr": 0.9403,
+      "mae": 3.1273,
+      "bias": 0.2002
+     },
+     "last_season": {
+      "corr": 0.9336,
+      "mae": 3.1373,
+      "bias": -0.0041
+     },
+     "position_mean": {
+      "corr": 0.7298,
+      "mae": 7.6118,
+      "bias": 0.5813
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.9411,
+       "mae": 3.1144,
+       "bias": 0.1682
+      },
+      "last_season": {
+       "corr": 0.936,
+       "mae": 3.0789,
+       "bias": -0.0992
+      }
+     }
+    },
+    "pim60": {
+     "model": {
+      "corr": 0.7571,
+      "mae": 0.6187,
+      "bias": -0.1091
+     },
+     "last_season": {
+      "corr": 0.5262,
+      "mae": 0.8321,
+      "bias": -0.0291
+     },
+     "position_mean": {
+      "corr": 0.0667,
+      "mae": 0.99,
+      "bias": -0.1759
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.7718,
+       "mae": 0.6038,
+       "bias": -0.1086
+      },
+      "last_season": {
+       "corr": 0.5377,
+       "mae": 0.8192,
+       "bias": -0.0287
+      }
+     }
+    },
+    "pen_taken60": {
+     "model": {
+      "corr": 0.7107,
+      "mae": 0.188,
+      "bias": -0.0364
+     },
+     "last_season": {
+      "corr": 0.477,
+      "mae": 0.2626,
+      "bias": -0.0216
+     },
+     "position_mean": {
+      "corr": 0.0238,
+      "mae": 0.2736,
+      "bias": -0.0454
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.7247,
+       "mae": 0.185,
+       "bias": -0.0369
+      },
+      "last_season": {
+       "corr": 0.4863,
+       "mae": 0.2616,
+       "bias": -0.0232
+      }
+     }
+    },
+    "pen_drawn60": {
+     "model": {
+      "corr": 0.7313,
+      "mae": 0.191,
+      "bias": -0.0092
+     },
+     "last_season": {
+      "corr": 0.4367,
+      "mae": 0.2852,
+      "bias": 0.0189
+     },
+     "position_mean": {
+      "corr": 0.5021,
+      "mae": 0.2422,
+      "bias": -0.0237
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.7364,
+       "mae": 0.1909,
+       "bias": -0.01
+      },
+      "last_season": {
+       "corr": 0.4383,
+       "mae": 0.2872,
+       "bias": 0.0185
+      }
+     }
+    },
+    "fo_win_share": {
+     "n": 175,
+     "model": {
+      "corr": 0.7751,
+      "mae": 0.027,
+      "bias": -0.0009
+     },
+     "last_season": {
+      "corr": 0.5357,
+      "mae": 0.0424,
+      "bias": -0.0115
+     },
+     "position_mean": {
+      "corr": null,
+      "mae": 0.043,
+      "bias": 0.0042
+     }
+    }
+   },
+   "venue_slope": {
+    "hits": 0.795,
+    "blocks": 0.797,
+    "give": 0.844,
+    "take": 0.813
+   }
+  },
+  "2024": {
+   "n": 616,
+   "n_with_prev": 584,
+   "n_no_history": 21,
+   "stats": {
+    "hits60": {
+     "model": {
+      "corr": 0.8695,
+      "mae": 1.215,
+      "bias": -0.0824
+     },
+     "last_season": {
+      "corr": 0.8469,
+      "mae": 1.34,
+      "bias": -0.041
+     },
+     "position_mean": {
+      "corr": 0.0853,
+      "mae": 2.6611,
+      "bias": -0.2445
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.8987,
+       "mae": 1.1262,
+       "bias": -0.0537
+      },
+      "last_season": {
+       "corr": 0.8774,
+       "mae": 1.2408,
+       "bias": -0.0271
+      }
+     },
+     "model_without_venue_factor": {
+      "corr": 0.8683,
+      "mae": 1.2365,
+      "bias": -0.0539
+     }
+    },
+    "blocks60": {
+     "model": {
+      "corr": 0.9147,
+      "mae": 0.5473,
+      "bias": -0.2504
+     },
+     "last_season": {
+      "corr": 0.8457,
+      "mae": 0.6472,
+      "bias": -0.2169
+     },
+     "position_mean": {
+      "corr": 0.7788,
+      "mae": 0.8181,
+      "bias": -0.2392
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.919,
+       "mae": 0.5407,
+       "bias": -0.2605
+      },
+      "last_season": {
+       "corr": 0.8465,
+       "mae": 0.6482,
+       "bias": -0.2266
+      }
+     },
+     "model_without_venue_factor": {
+      "corr": 0.9148,
+      "mae": 0.5478,
+      "bias": -0.2493
+     }
+    },
+    "giveaways60": {
+     "model": {
+      "corr": 0.6976,
+      "mae": 0.3447,
+      "bias": 0.1904
+     },
+     "last_season": {
+      "corr": 0.5543,
+      "mae": 0.4401,
+      "bias": 0.1686
+     },
+     "position_mean": {
+      "corr": 0.1093,
+      "mae": 0.4734,
+      "bias": 0.2002
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.7086,
+       "mae": 0.3394,
+       "bias": 0.1931
+      },
+      "last_season": {
+       "corr": 0.5731,
+       "mae": 0.4332,
+       "bias": 0.1703
+      }
+     },
+     "model_without_venue_factor": {
+      "corr": 0.6075,
+      "mae": 0.3823,
+      "bias": 0.2011
+     }
+    },
+    "takeaways60": {
+     "model": {
+      "corr": 0.7804,
+      "mae": 0.3175,
+      "bias": 0.1022
+     },
+     "last_season": {
+      "corr": 0.6531,
+      "mae": 0.4104,
+      "bias": 0.1123
+     },
+     "position_mean": {
+      "corr": 0.5782,
+      "mae": 0.4218,
+      "bias": 0.0987
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.785,
+       "mae": 0.3153,
+       "bias": 0.0975
+      },
+      "last_season": {
+       "corr": 0.6561,
+       "mae": 0.4117,
+       "bias": 0.1077
+      }
+     },
+     "model_without_venue_factor": {
+      "corr": 0.7598,
+      "mae": 0.3379,
+      "bias": 0.1128
+     }
+    },
+    "fo_taken60": {
+     "model": {
+      "corr": 0.9364,
+      "mae": 2.9556,
+      "bias": -0.4541
+     },
+     "last_season": {
+      "corr": 0.9226,
+      "mae": 3.2512,
+      "bias": -0.4976
+     },
+     "position_mean": {
+      "corr": 0.7584,
+      "mae": 6.8439,
+      "bias": 0.2466
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.9434,
+       "mae": 2.8135,
+       "bias": -0.3879
+      },
+      "last_season": {
+       "corr": 0.9324,
+       "mae": 3.0715,
+       "bias": -0.5948
+      }
+     }
+    },
+    "pim60": {
+     "model": {
+      "corr": 0.7963,
+      "mae": 0.5876,
+      "bias": -0.0288
+     },
+     "last_season": {
+      "corr": 0.6882,
+      "mae": 0.7327,
+      "bias": 0.0253
+     },
+     "position_mean": {
+      "corr": 0.0567,
+      "mae": 0.9365,
+      "bias": -0.0559
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.8208,
+       "mae": 0.5658,
+       "bias": -0.0295
+      },
+      "last_season": {
+       "corr": 0.7076,
+       "mae": 0.7228,
+       "bias": 0.0241
+      }
+     }
+    },
+    "pen_taken60": {
+     "model": {
+      "corr": 0.6687,
+      "mae": 0.1898,
+      "bias": -0.0047
+     },
+     "last_season": {
+      "corr": 0.6119,
+      "mae": 0.238,
+      "bias": 0.0076
+     },
+     "position_mean": {
+      "corr": 0.0317,
+      "mae": 0.2605,
+      "bias": -0.0077
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.6996,
+       "mae": 0.1846,
+       "bias": -0.0027
+      },
+      "last_season": {
+       "corr": 0.6361,
+       "mae": 0.2362,
+       "bias": 0.0089
+      }
+     }
+    },
+    "pen_drawn60": {
+     "model": {
+      "corr": 0.7315,
+      "mae": 0.191,
+      "bias": 0.0208
+     },
+     "last_season": {
+      "corr": 0.6473,
+      "mae": 0.2344,
+      "bias": 0.0188
+     },
+     "position_mean": {
+      "corr": 0.5013,
+      "mae": 0.2417,
+      "bias": 0.0073
+     },
+     "with_prev": {
+      "model": {
+       "corr": 0.7431,
+       "mae": 0.1856,
+       "bias": 0.0232
+      },
+      "last_season": {
+       "corr": 0.6563,
+       "mae": 0.2323,
+       "bias": 0.0212
+      }
+     }
+    },
+    "fo_win_share": {
+     "n": 179,
+     "model": {
+      "corr": 0.7325,
+      "mae": 0.0288,
+      "bias": -0.0001
+     },
+     "last_season": {
+      "corr": 0.6338,
+      "mae": 0.0383,
+      "bias": -0.004
+     },
+     "position_mean": {
+      "corr": null,
+      "mae": 0.0465,
+      "bias": 0.0067
+     }
+    }
+   },
+   "venue_slope": {
+    "hits": 0.801,
+    "blocks": 0.765,
+    "give": 0.825,
+    "take": 0.801
+   }
+  }
+ },
+ "league_per_team_game": {
+  "2024": {
+   "games": 1312,
+   "skater_minutes": 297.68,
+   "hits": {
+    "all": 22.732,
+    "skaters": 22.731,
+    "goalies": 0.001
+   },
+   "blocks": {
+    "all": 15.739,
+    "skaters": 15.739,
+    "goalies": 0.0
+   },
+   "giveaways": {
+    "all": 7.711,
+    "skaters": 7.314,
+    "goalies": 0.397
+   },
+   "takeaways": {
+    "all": 7.004,
+    "skaters": 6.973,
+    "goalies": 0.031
+   },
+   "blocks_by_teammate_excluded": 1.287,
+   "faceoffs": {
+    "taken_per_team_game": 56.546,
+    "won_per_team_game": 28.273,
+    "skater_fo_won": 28.273,
+    "skater_fo_lost": 28.273
+   },
+   "pim": {
+    "all": 9.276,
+    "skaters": 8.997,
+    "goalies": 0.056,
+    "bench": 0.223
+   },
+   "minor_penalties": {
+    "all_players": 3.362,
+    "skaters_taken": 3.338,
+    "goalies_taken": 0.024,
+    "bench_minors": 0.112,
+    "skaters_drawn": 3.167
+   },
+   "penalties_any_type": {
+    "all": 3.814,
+    "skaters_taken": 3.675,
+    "skaters_drawn": 3.402,
+    "skater_majors": 0.248
+   },
+   "credited_player_not_in_player_games": 0
+  },
+  "2025": {
+   "games": 1312,
+   "skater_minutes": 298.0,
+   "hits": {
+    "all": 21.453,
+    "skaters": 21.453,
+    "goalies": 0.0
+   },
+   "blocks": {
+    "all": 15.244,
+    "skaters": 15.244,
+    "goalies": 0.0
+   },
+   "giveaways": {
+    "all": 15.002,
+    "skaters": 14.697,
+    "goalies": 0.304
+   },
+   "takeaways": {
+    "all": 4.812,
+    "skaters": 4.812,
+    "goalies": 0.0
+   },
+   "blocks_by_teammate_excluded": 1.477,
+   "faceoffs": {
+    "taken_per_team_game": 56.628,
+    "won_per_team_game": 28.314,
+    "skater_fo_won": 28.314,
+    "skater_fo_lost": 28.314
+   },
+   "pim": {
+    "all": 8.138,
+    "skaters": 7.891,
+    "goalies": 0.043,
+    "bench": 0.204
+   },
+   "minor_penalties": {
+    "all_players": 3.065,
+    "skaters_taken": 3.043,
+    "goalies_taken": 0.021,
+    "bench_minors": 0.102,
+    "skaters_drawn": 2.876
+   },
+   "penalties_any_type": {
+    "all": 3.434,
+    "skaters_taken": 3.311,
+    "skaters_drawn": 3.081,
+    "skater_majors": 0.232
+   },
+   "credited_player_not_in_player_games": 0
+  },
+  "2026": {
+   "games": 1312,
+   "skater_minutes": 298.2,
+   "hits": {
+    "all": 20.449,
+    "skaters": 20.449,
+    "goalies": 0.0
+   },
+   "blocks": {
+    "all": 14.191,
+    "skaters": 14.191,
+    "goalies": 0.0
+   },
+   "giveaways": {
+    "all": 15.383,
+    "skaters": 14.931,
+    "goalies": 0.452
+   },
+   "takeaways": {
+    "all": 4.611,
+    "skaters": 4.611,
+    "goalies": 0.0
+   },
+   "blocks_by_teammate_excluded": 1.383,
+   "faceoffs": {
+    "taken_per_team_game": 56.018,
+    "won_per_team_game": 28.009,
+    "skater_fo_won": 28.009,
+    "skater_fo_lost": 28.009
+   },
+   "pim": {
+    "all": 8.977,
+    "skaters": 8.697,
+    "goalies": 0.077,
+    "bench": 0.203
+   },
+   "minor_penalties": {
+    "all_players": 3.278,
+    "skaters_taken": 3.247,
+    "goalies_taken": 0.031,
+    "bench_minors": 0.101,
+    "skaters_drawn": 3.096
+   },
+   "penalties_any_type": {
+    "all": 3.694,
+    "skaters_taken": 3.558,
+    "skaters_drawn": 3.305,
+    "skater_majors": 0.239
+   },
+   "credited_player_not_in_player_games": 0
+  },
+  "faceoffs_per_game": 56.397
+ },
+ "priors_2027": {
+  "position_mean": {
+   "hits60": {
+    "D": 3.0239,
+    "F": 4.8179
+   },
+   "blocks60": {
+    "D": 4.2028,
+    "F": 1.9861
+   },
+   "giveaways60": {
+    "D": 3.1154,
+    "F": 2.9326
+   },
+   "takeaways60": {
+    "D": 0.8642,
+    "F": 0.9687
+   },
+   "fo_taken60": {
+    "C": 31.6602,
+    "D": 0.0023,
+    "W": 5.0382
+   },
+   "pim60": {
+    "D": 1.6635,
+    "F": 1.8058
+   },
+   "pen_taken60": {
+    "D": 0.6489,
+    "F": 0.6563
+   },
+   "pen_drawn60": {
+    "D": 0.4087,
+    "F": 0.7611
+   }
+  },
+  "newcomer_mean": {
+   "hits60": {
+    "D": 3.1005,
+    "F": 5.3153
+   },
+   "blocks60": {
+    "D": 3.4748,
+    "F": 2.0912
+   },
+   "giveaways60": {
+    "D": 3.2499,
+    "F": 3.2281
+   },
+   "takeaways60": {
+    "D": 0.7624,
+    "F": 0.963
+   },
+   "fo_taken60": {
+    "C": 21.3627,
+    "D": 0.0,
+    "W": 5.7089
+   },
+   "pim60": {
+    "D": 1.8299,
+    "F": 1.9817
+   },
+   "pen_taken60": {
+    "D": 0.6984,
+    "F": 0.7137
+   },
+   "pen_drawn60": {
+    "D": 0.4667,
+    "F": 0.8525
+   },
+   "fo_win_share": {
+    "C": 0.4463,
+    "W": 0.4307,
+    "D": 0.5
+   }
+  }
+ },
+ "table_check_at_2026_minutes": {
+  "hits60": {
+   "implied": 20.226,
+   "realised": 20.449
+  },
+  "blocks60": {
+   "implied": 14.019,
+   "realised": 14.191
+  },
+  "giveaways60": {
+   "implied": 15.039,
+   "realised": 14.931
+  },
+  "takeaways60": {
+   "implied": 4.669,
+   "realised": 4.611
+  },
+  "fo_taken60": {
+   "implied": 56.026,
+   "realised": 56.018
+  },
+  "pim60": {
+   "implied": 8.576,
+   "realised": 8.697
+  },
+  "pen_taken60": {
+   "implied": 3.225,
+   "realised": 3.247
+  },
+  "pen_drawn60": {
+   "implied": 3.12,
+   "realised": 3.096
+  }
+ }
+}
