@@ -64,6 +64,7 @@ echo "[run_nightly $(ts)] start ($REPO)"
 
 step "score_live_2027" "${UV[@]}" neurhl/eval/score_live_2027.py || status=1
 step "score_neurhl_1_0" "${UV[@]}" neurhl/eval/score_neurhl_1_0.py || status=1
+step "score_dated_1_1" "${UV[@]}" neurhl/eval/score_dated_1_1.py || echo "[run_nightly $(ts)] score_dated_1_1 failed (non-fatal)"
 
 if step "ingest_2027" "${UV[@]}" neurhl/live/ingest_2027.py; then
   need=0
@@ -105,6 +106,7 @@ if [ -f "$RES" ] && [ "$(wc -l < "$RES")" -gt 1 ]; then
     [ -f neurhl/output/live/scorecard_g_2027.json ] && PUB+=(neurhl/output/live/scorecard_g_2027.json)
     [ -f neurhl/output/live/scorecard_1_0_2027.json ] && PUB+=(neurhl/output/live/scorecard_1_0_2027.json)
     [ -f neurhl/output/live/scorecard_1_1_2027.json ] && PUB+=(neurhl/output/live/scorecard_1_1_2027.json)
+    [ -f neurhl/output/live/scorecard_dated_1_1_2027.json ] && PUB+=(neurhl/output/live/scorecard_dated_1_1_2027.json)
     PUBLISH_MSG="live: results and scorecard through $(date -v-1d '+%Y-%m-%d')" \
       step "publish" bash neurhl/live/publish.sh - "${PUB[@]}" docs || status=1
   else
