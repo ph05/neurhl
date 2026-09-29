@@ -325,3 +325,30 @@ own measure: skater points MAE for skaters with at least 40 games
 |---|---|
 | `neurhl/output/neurhl_1_0/skaters_blend_20260929/skaters_2027.csv` | `8ce690f3de7a473ceb4a69981b05cdbe1df1e1095acfa3a1c5c0654913d6f5fd` |
 | `neurhl/output/neurhl_1_0/skaters_blend_20260929/run.json` | `1bd76d1e487967bff21d279f049abf8a8faed708d7c80efba334f4c375f861a2` |
+
+## A4 (2026-09-29, before any C2 judging season has been computed): season-level blend (C2c)
+
+**Motivation.** On matched seasons, the preseason Elo projection beat the
+earlier season layer. NeurHL 1.0's game probabilities already stack Elo with
+the engine, but with weights fitted on game-day predictions; opening-night
+predictions of games months away may want a different mix.
+
+**Variants.** C2c adds a blended game logit:
+
+z = a x z_stack + (1 - a) x z_elo_pre, with a in {0, 0.25, 0.5, 0.75, 1}
+
+- z_stack is the preseason stacked logit and z_elo_pre the frozen Elo logit
+  entering the season.
+- It is crossed with the A1 grid (sigma0, sw, rho). k and outcome4 are the
+  game's own.
+
+**Selection and judging.**
+- Selection: the (a, sigma0, sw, rho) with the lowest mean fit-season CRPS
+  (2012, 2014-2018).
+- Judging: on 2019, 2020 and 2022-2024, against the frozen layer
+  (a = 1, 0.07, 0, 1) and against A1's selected variant.
+
+**Adoption.** C2c replaces A1's selection only if its judged CRPS is lower
+than both, with coverage within 0.80 ± 0.05. When C2c is adopted, its
+variant is the one rerun for 2026-27, with z_elo_pre from the frozen games
+file's `p_home_win_elo`.
