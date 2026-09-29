@@ -92,6 +92,59 @@ def seasons(res, final):
     return out
 
 
+def live_standings(res):
+    """C2b exploratory (PLAN_NeurHL_1_1 A9), final only: for the nightly copy
+    nearest to 4, 8, 12, 16 and 20 weeks after opening night, final-points CRPS,
+    MAE and 10-90 coverage; the comparator is the frozen preseason simulation
+    with no update, plus the points earned by that date (rebuilt here)."""
+    import json as _j
+    from sim.live_standings_1_1 import project
+    hist = LIVE / "standings_1_1"
+    files = sorted(hist.glob("*.csv")) if hist.exists() else []
+    if not files:
+        return {"available": False}
+    g = pd.read_csv(UNI / "games_2027.csv")
+    prm = _j.loads((UNI.parent.parent / "configs" / "live_standings_1_1.json").read_text())
+    teams = sorted(set(g.home))
+    ti = {t: i for i, t in enumerate(teams)}
+    T = len(teams)
+    hi, ai = g.home.map(ti).to_numpy(), g.away.map(ti).to_numpy()
+    z = np.log(g.p_home_win / (1 - g.p_home_win)).to_numpy()
+    k = g.rate_sensitivity.to_numpy()
+    o4 = g[["p_home_reg", "p_away_reg", "p_home_ot", "p_away_ot"]].to_numpy()
+    d0 = pd.to_datetime(g.date).min()
+    wk = ((pd.to_datetime(g.date) - d0).dt.days // 7).to_numpy()
+    final = team_points(res).pts
+    dates = pd.to_datetime([f.stem for f in files])
+    out = {}
+    for w in (4, 8, 12, 16, 20):
+        target = d0 + pd.Timedelta(days=7 * w)
+        f = files[int(np.argmin(np.abs((dates - target).days)))]
+        live = pd.read_csv(f).set_index("team")
+        qcols = [f"q{i:02d}" for i in range(1, 100)]
+        day = f.stem
+        played = g.game_id.isin(res[res.date < day].game_id).to_numpy()
+        r = res.set_index("game_id").loc[g.game_id[played]]
+        hw = (r.home_g > r.away_g).to_numpy()
+        extra = r.last_period.isin(["OT", "SO"]).to_numpy()
+        pts = np.zeros(T)
+        np.add.at(pts, hi[played], np.where(hw, 2, np.where(extra, 1, 0)))
+        np.add.at(pts, ai[played], np.where(~hw, 2, np.where(extra, 1, 0)))
+        rem = ~played
+        sim = project(z[rem], k[rem], hi[rem], ai[rem], o4[rem], wk[rem], 0, pts, np.zeros(T),
+                      np.eye(T) * prm["sigma0"] ** 2, prm["sw"], 20000, 711)
+        qn = np.percentile(sim, np.arange(1, 100), axis=0).T
+        y = final.reindex(teams).to_numpy(float)
+        cl = np.array([crps_from_quantiles(live.loc[t, qcols].to_numpy(float), y[i]) for i, t in enumerate(teams)])
+        cn = np.array([crps_from_quantiles(qn[i], y[i]) for i in range(T)])
+        out[str(w)] = {"copy": day, "crps_live": float(cl.mean()), "crps_no_update": float(cn.mean()),
+                       "mae_live": float(np.abs(live.loc[teams, "points"].to_numpy() - y).mean()),
+                       "mae_no_update": float(np.abs(sim.mean(0) - y).mean()),
+                       "coverage_live": float(np.mean((y >= live.loc[teams, "points_p10"].to_numpy())
+                                                      & (y <= live.loc[teams, "points_p90"].to_numpy())))}
+    return out
+
+
 def main():
     res_p = LIVE / "results_2027.csv"
     res = pd.read_csv(res_p) if res_p.exists() else pd.DataFrame()
@@ -105,6 +158,7 @@ def main():
         card["seasons"] = seasons(res, final)
     if final:
         card["skaters"] = skaters()
+        card["live_standings"] = live_standings(res)
     LIVE.mkdir(parents=True, exist_ok=True)
     (LIVE / "scorecard_dated_1_1_2027.json").write_text(json.dumps(card, indent=1))
     print(json.dumps(card, indent=1))
