@@ -83,6 +83,7 @@ def main():
             {"sog_dispersion": {"r_hat": r_hat}, "goal_slope": {"b_hat": b_hat}}))
         (repo.root / "neurhl/configs/live_goal_calibration.json").write_text(json.dumps({"M": Mv}))
         (repo.root / "neurhl/configs/calibration_1_1b.json").write_text(json.dumps({"k_hat": 12.0}))
+        (repo.root / "neurhl/configs/calibration_1_1d.json").write_text(json.dumps({"b_x": 0.8, "k_x": 12.0}))
         p = subprocess.run([sys.executable, str(NRL / "eval" / "score_calibration_1_1.py"),
                             "--root", str(repo.root), "--offline", "--as-of", "2026-10-02"],
                            capture_output=True, text=True, env=repo.env)
@@ -112,6 +113,11 @@ def main():
         check("xG (C1b): paired log-score difference, degraded G3 left out",
               card["xg"]["n_team_games"] == 2 and abs(card["xg"]["diff"] - dx) < 1e-9,
               f"{card['xg'].get('diff', float('nan')):.6f} vs {dx:.6f}")
+        Mx = mx.mean()
+        m2 = Mx * (mx / Mx) ** 0.8
+        dd = float(np.mean(gx(yx, m2, 12.0) - gx(yx, mx, 9.0)))
+        check("xG slope (C1d): paired log-score difference", abs(card["xg_slope"]["diff"] - dd) < 1e-9,
+              f"{card['xg_slope'].get('diff', float('nan')):.6f} vs {dd:.6f}")
         check("skater shots (C1c): card present; the synthetic files carry no p10/p90, so unavailable",
               card.get("skater_sog", {}).get("available") is False)
         S = load("scal", NRL / "eval" / "score_calibration_1_1.py")

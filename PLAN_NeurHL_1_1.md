@@ -526,3 +526,43 @@ games, as an exploratory projection.
 | File | SHA-256 |
 |---|---|
 | `neurhl/configs/live_standings_1_1.json` | `6611ca2f0bfb105e74be652a8b53a8ccc35794f039fa1e4d4a59e0eb7c2a2497` |
+
+## A10 (2026-09-29, before the first 2026-27 game): C1d, team-xG mean slope; and further exploratory nulls
+
+### C1d
+
+**The fit.** Team xG ~ gamma(k_x) with mean M x (mu / M) ^ b_x, where:
+- mu is each pregame forecast's frozen `xgf_home` / `xgf_away`;
+- M is the mean of those frozen forecasts over the games scored. M depends
+  only on published forecasts, never on outcomes.
+
+`neurhl/eval/fit_calibration_1_1d.py` fits both parameters jointly on
+G_GATE:
+- b_x = 0.7849 and k_x = 11.98;
+- 80% coverage 0.797;
+- +0.0233 nats per team-game against the frozen gamma(9).
+
+Exploration (disclosed): walk-forward within G_GATE, it beat C1b's shape-only
+layer by +0.0066, +0.0033 and +0.0045 in 2022-2024.
+
+**The test.** Against the frozen gamma(9), with the same games, bootstrap and
+single season-end inference as C1, in a separate Holm family of one.
+
+| File | SHA-256 |
+|---|---|
+| `neurhl/configs/calibration_1_1d.json` | `c54bf85707ee0b1aab823740bab88790526084f97e4f849aa1507540b6f51683` |
+
+### Exploratory nulls (none adopted)
+
+- **Venue-specific home advantage.** A shrunk per-venue residual from the
+  previous three seasons, added to the live stack's inputs, walk-forward on
+  2016-2024 (10,020 games): -0.00002 (SE 0.00009). Its coefficient is
+  negative: venue residuals tend to reverse.
+- **Skater point probabilities.** On G_GATE they are already calibrated:
+  every decile is within 0.014, and the mean is 0.340 predicted against
+  0.348 realised. No layer.
+- **Shot-feature drift (population stability index, 2021-22 against
+  2022-23 and 2023-24).** Every feature stays below 0.05: angle 0.047,
+  distance 0.033, time since the last event 0.026. Conversion inside 10 ft
+  fell from 16.6% to 14.5%. The xG model's close-shot-conversion era
+  feature already targets this. Diagnostic only.

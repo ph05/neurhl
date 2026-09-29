@@ -199,8 +199,22 @@ def main(argv=None) -> int:
                    "coverage80_frozen": cov(9.0) if kx.any() else None,
                    "coverage80_cal": cov(k_hat) if kx.any() else None})
         card["xg"] = xg
+        # C1d (A10): mean slope about the mean frozen forecast, with its own shape; family of one
+        cald = root / "neurhl/configs/calibration_1_1d.json"
+        if cald.exists() and kx.any():
+            cd = json.loads(cald.read_text())
+            Mx = float(mx[kx].mean())
+            m2 = Mx * (mx[kx] / Mx) ** cd["b_x"]
+            xd = compare(gl_(yx[kx], m2, cd["k_x"]), gl_(yx[kx], mx[kx], 9.0), weeks[kx], teams[kx], final)
+            u2 = stats.gamma.cdf(yx[kx], cd["k_x"], scale=m2 / cd["k_x"])
+            xd.update({"available": True, "b_x": cd["b_x"], "k_x": cd["k_x"], "centre_M": Mx,
+                       "coverage80_cal": float(np.mean((u2 > 0.1) & (u2 < 0.9)))})
+            card["xg_slope"] = xd
+        else:
+            card["xg_slope"] = {"available": False}
     else:
         card["xg"] = {"available": False}
+        card["xg_slope"] = {"available": False}
     # C1c (A7): skater shots, NB(sog_mean, r_s) 80% interval against the frozen p10-p90, interval score
     calc = root / "neurhl/configs/calibration_1_1c.json"
     j = skater_rows(g, tabs, root, first, prefix) if calc.exists() else None

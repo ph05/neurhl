@@ -1,0 +1,18 @@
+{
+ "plan": "PLAN_NeurHL_1_1 A10 (C1d)",
+ "source": "neurhl/output/preds/g_gate_games.csv",
+ "source_sha256": "6569402137d5633b0cf303cd53b0968be59d0fb68bb1444d7d3e1743f3683844",
+ "seasons": [
+  2019,
+  2020,
+  2022,
+  2023,
+  2024
+ ],
+ "n_team_games": 12574,
+ "b_x": 0.7849,
+ "k_x": 11.98,
+ "centre": "the season's mean frozen pregame team-xG forecast",
+ "coverage80": 0.7972801017973596,
+ "logscore_gain_vs_frozen_k9": 0.023266252140461584
+}
