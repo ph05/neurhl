@@ -647,3 +647,19 @@ separate Holm family of two. The fixed layers stay the declared primaries.
 With C1's calibrated means, regulation goals on G_GATE have variance/mean
 0.943. Poisson 80% coverage is 0.808, and a fitted negative binomial gains
 nothing. No layer.
+
+## A14 (2026-09-29, before the first 2026-27 game): the engine replacement (PLAN_NeurHL4 A5)
+
+From the switch to `g2027_v2`, every scored game-day forecast comes from the
+refit engine (configuration g1, seasons <= 2026).
+
+- **C1's goal form.** It uses M from `configs/live_goal_calibration.json` as
+  re-derived for `g2027_v2` by A1's procedure (the value is recorded when
+  it is computed), and each forecast's own `goal_mult`. The dispersion and
+  slope parameters (r_hat, b_hat, k_hat, b_x, k_x, n_hat, r_s) are unchanged.
+  They were fitted on the out-of-sample predictions of configuration g1,
+  which is the refit engine's configuration.
+- **The C1 dated goal set and the skater blend** were built from the
+  `g2027_v1` season files and stay as declared. Equivalents built from the
+  `g2027_v2` season set are issued beside it if time allows before the first
+  game, as their own dated sets.

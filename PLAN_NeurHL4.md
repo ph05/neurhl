@@ -383,3 +383,51 @@ before the study ran (team-game correlation at least 0.98, bias within 2%):
 **Unchanged.** The xG model, NeurHL-G's weights and stack, and the way every
 win probability is computed. Only the source of shot records for games
 MoneyPuck has not yet covered changes.
+
+## A5 (2026-09-29, before the first 2026-27 game and before the sealed seasons are read): the seal spent descriptively; the engine refit on all seasons becomes the live engine
+
+**Owner directive (2026-09-29).** Spend the sealed seasons, refit the engine
+on everything, and run the refit as the single replacement engine.
+
+**1. Descriptive seal.**
+- `eval/seal_g.py --descriptive` runs the SEAL procedure exactly as declared
+  (section SEAL): configuration g1, snapshots 2025 (seasons <= 2024) and 2026
+  (seasons <= 2025), five seeds, the walk-forward stack, S1, S2 and the
+  secondary family.
+- Only the S-STOP precondition is waived. The FREEZE-on-origin check, the
+  config hash and the sealed-input hashes are all still checked. The 37
+  sealed inputs were verified unchanged before this amendment.
+- Because S-STOP failed, the result is reported as **descriptive, not
+  confirmatory**, whatever it shows. It is written to
+  `output/g_seal_result.json` with `"mode": "descriptive"`, and it is
+  reported in full, including a null.
+- The seasons are then spent for good.
+
+**2. Refit.** The same run trains the live bundle `g2027_v2`:
+- configuration g1, seasons <= 2026, five seeds;
+- the stack refit on out-of-sample predictions of 2011-2026 (fallback Elo +
+  G where NeurHL-H is missing), as `train/train_live_g.build` declares.
+
+**3. Replacement.**
+- `configs/live_models.json` points to `g2027_v2`. From the first
+  forecast after this switch, every game-day forecast (morning and pregame)
+  uses `g2027_v2` alone. The files record the bundle name and sha, so every
+  scored row states its engine.
+- The LIVE scoring rules (section LIVE) are unchanged. In the season-end
+  scorecard, the engine's rows are the `g2027_v2` rows.
+- `g2027_v1` stays hashed in the repository and no longer forecasts.
+
+**4. Goal level (A1).** A1's procedure is run once with `g2027_v2`, as the
+switch happens, before the first game:
+- m0 = L/M on fallback lineups for the first 14 days of the schedule;
+- `configs/live_goal_calibration.json` is the new state;
+- the `g2027_v1` state is kept as `configs/live_goal_calibration_g2027_v1.json`.
+
+**5. Season forecast.** The NeurHL 1.0 season model (`sim/unified_2027.py`) is
+rerun with `g2027_v2` on the same post-deadline rosters, draws, seeds and
+settings.
+- It is issued as the dated file set `output/neurhl_1_0/v2_20260929/`, with
+  the same consistency check.
+- That set becomes the primary 2026-27 season forecast.
+- The frozen `g2027_v1` files (PLAN_NeurHL_1_0 FREEZE) stay unchanged and are
+  scored beside it as the earlier freeze.
