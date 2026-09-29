@@ -96,7 +96,9 @@ def main():
     out.to_csv(LIVE / "standings_1_1_2027.csv", index=False, float_format="%.3f")
     hist = LIVE / "standings_1_1"                       # one dated copy per night, for season-end scoring
     hist.mkdir(parents=True, exist_ok=True)
-    out.to_csv(hist / f"{dt.date.today().isoformat()}.csv", index=False, float_format="%.3f")
+    q = pd.DataFrame(np.percentile(sim, np.arange(1, 100), axis=0).T, columns=[f"q{i:02d}" for i in range(1, 100)])
+    q.insert(0, "team", teams)                            # full distribution, for season-end CRPS
+    out.merge(q, on="team").to_csv(hist / f"{dt.date.today().isoformat()}.csv", index=False, float_format="%.3f")
     print(out.head(10).to_string(index=False))
     return 0
 
