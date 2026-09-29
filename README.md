@@ -1,13 +1,20 @@
 # NeurHL
 
-**NeurHL 1.0** predicts the 2026-27 NHL season with one model at every level:
+**NeurHL 1.1** (current release) predicts the 2026-27 NHL season with one model at every level:
 every skater's game, every game, and every season total. The same engine
 produces all three, and they are built to agree. A skater's season goals are
 the sum of his projected games, a team's goals are the sum of its skaters',
 and its points are the sum of its games. That agreement is checked
-([`neurhl/tests/check_neurhl_1_0.py`](neurhl/tests/check_neurhl_1_0.py)). The
-predictions were frozen before opening night and are scored in public as the
-season is played.
+([`neurhl/tests/check_neurhl_1_0.py`](neurhl/tests/check_neurhl_1_0.py)). NeurHL 1.1
+was issued before the first game on 2026-09-29. It adds four things:
+- the game engine refit on every season through 2025-26;
+- rookies' records from other leagues;
+- MoneyPuck's injury list, with every undated entry researched;
+- fitted stat-sheet distributions.
+
+The NeurHL 1.0 forecasts, frozen the night before, stay unchanged and are
+scored beside it. Both are scored in public as the season is played.
+Releases are numbered 1.1, 1.2 and so on.
 
 **Browse the projections: [ph05.github.io/neurhl](https://ph05.github.io/neurhl/)**
 
@@ -68,7 +75,13 @@ flowchart LR
 
 ## The 2026-27 season
 
-- **NeurHL 1.0 freeze:** every game, team and skater, frozen before opening
+- **NeurHL 1.1 (current):** every game, team and skater from the refit engine
+  `g2027_v3` ([neurhl/output/neurhl_1_1/season/](neurhl/output/neurhl_1_1/season/)),
+  with its hashes in the RELEASE section of
+  [PLAN_NeurHL_1_1.md](PLAN_NeurHL_1_1.md). On the formerly sealed 2025-26
+  seasons, the engine's configuration beat Elo by 0.0069 nats per game and
+  the neural player layer by 0.0021 (descriptive; PLAN_NeurHL4 A6).
+- **NeurHL 1.0 freeze (earlier):** every game, team and skater, frozen before opening
   night ([neurhl/output/neurhl_1_0/](neurhl/output/neurhl_1_0/)), with its hashes in
   [PLAN_NeurHL_1_0.md](PLAN_NeurHL_1_0.md).
 - **Game-day forecasts:** a morning forecast and a pregame forecast about an
@@ -135,6 +148,7 @@ dated and committed before the run it governs.
 
 | File | Contents |
 |---|---|
+| `neurhl/output/neurhl_1_1/season/` | NeurHL 1.1, the current release: games, teams (with points percentiles and playoff odds), skaters, goalies and every player-game, in the same layout as the 1.0 files |
 | `neurhl/output/neurhl_1_0/games_2027.csv` | NeurHL 1.0: every game's home-win probability, four-way outcome, goals, shots, xG and power plays, with Elo and the earlier freeze beside it |
 | `neurhl/output/neurhl_1_0/teams_2027.csv` | NeurHL 1.0: team points (mean, 10th, 50th and 90th percentiles), record, goals, shots, xG, playoff, division, Presidents' Trophy and Cup odds |
 | `neurhl/output/neurhl_1_0/skaters_2027.csv`, `goalies_2027.csv` | NeurHL 1.0: season totals for every skater and goalie, with intervals for goals, assists and points |

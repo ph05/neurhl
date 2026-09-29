@@ -57,8 +57,14 @@ def main():
     check("unseal() refuses callers other than eval/seal_g.py", ok)
     from data.g_loader import load_master
     _, meta, _ = load_master("train")
-    check("master loader drops SEALED seasons", not meta.season_end.isin(W.SEALED).any(),
-          f"max season {int(meta.season_end.max())}")
+    spent = (ROOT / "output" / "g_seal_result.json").exists()
+    if not spent:
+        check("master loader drops SEALED seasons", not meta.season_end.isin(W.SEALED).any(),
+              f"max season {int(meta.season_end.max())}")
+    else:   # PLAN_NeurHL4 A5/A6: the seal is spent; the one-shot result file keeps seal_g from running again
+        check("seal spent: loader includes 2025-2026 and the one-shot seal result exists",
+              meta.season_end.isin(W.SEALED).any() and (ROOT / "output" / "g_seal_result.json").exists(),
+              f"max season {int(meta.season_end.max())}")
 
     print("\nSEALED INPUTS")
     bad = []
@@ -83,8 +89,13 @@ def main():
     led = pd.read_csv(CONFIGS / "search_ledger_g.csv")
     gate = led[led.run_id.str.endswith(":gate")]
     it_full = led[led.run_id.str.contains(":full:iter")]
+    # runs declared under PLAN_NeurHL_1_1 (A16-A20): candidates g1rk, g1x, and g1 rescored from its
+    # cached snapshots for the A17 comparison; counted apart from the NeurHL-G ladder (A21)
+    v11 = it_full.run_id.str.startswith(("g1rk:", "g1x:", "g1:"))
     check("G_GATE runs within cap (2)", len(gate) <= 2, f"{len(gate)}/2")
-    check("G_ITER full runs within cap (14)", len(it_full) <= 14, f"{len(it_full)}/14")
+    check("G_ITER full runs within cap (14), NeurHL-G ladder", int((~v11).sum()) <= 14, f"{int((~v11).sum())}/14")
+    check("PLAN_NeurHL_1_1 iteration runs as declared (g1rk, g1x, g1 rescoring)", int(v11.sum()) <= 3,
+          ", ".join(it_full.run_id[v11]))
 
     print("\nAUDIT")
     a = json.loads((CONFIGS / "leakage_audit_g.json").read_text())

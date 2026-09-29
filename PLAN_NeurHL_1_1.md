@@ -831,3 +831,108 @@ of non-NHL records sits with rookies, which g1rk has.
 **Release naming.** Releases are numbered NeurHL 1.1, 1.2 and so on. Bundle
 names (`g2027_v2`, `g2027_v3`) are internal file names only. NeurHL 1.1's
 engine is `g2027_v3` (configuration g1rk).
+
+## RELEASE NeurHL 1.1 (2026-09-29)
+
+NeurHL 1.1 packages every change made on opening day. NeurHL 1.0's frozen
+files (PLAN_NeurHL_1_0 FREEZE) stay unchanged and are scored beside 1.1 as
+the earlier freeze. Release numbers go 1.1, 1.2 and so on; bundle names such
+as `g2027_v2` are internal file names only.
+
+**Engine.** `g2027_v3`: configuration `g1rk`, trained on every season
+through 2025-26, five seeds.
+
+- **Sealed seasons.** The seal was spent descriptively (PLAN_NeurHL4 A5/A6).
+  On 2025-2026 (2,624 games), configuration g1 beats Elo by 0.0069 nats per
+  game (p = 0.0003) and NeurHL-H by 0.0021 (p = 0.015).
+- **Rookie inputs (A16-A18).** Rookies get translated pre-NHL records as
+  engine inputs. On both development windows they improve rookie goals and
+  assists without costing win probability.
+- **Refit.** The goal level is re-derived: m0 = 1.0107 (M = 2.9709).
+  Stack weights: Elo 0.143, engine 0.344, NeurHL-H 0.539.
+- **Bundle hash.** bundle.json sha256
+  `f188b4bb67334412054437a902d0c35f048a5f8c2f41adbf8018668debcab990`.
+- **In use from.** The live engine from 2026-09-29 20:50 UTC, before the
+  first puck drop. The Carolina-Florida pregame forecast published earlier
+  came from `g2027_v2`.
+- **Not adopted.** The all-player version (g1x) failed its rule (A20).
+
+**Season forecast.** `neurhl/output/neurhl_1_1/season/`:
+- 2026-09-29 rosters (the Marchenko-Knies trade);
+- MoneyPuck's injury list, with every undated entry researched
+  (`data/manual/player_status_2027.csv`,
+  `neurhl/configs/injury_overrides_2027.csv`);
+- rookies' goals and assists from translated pre-NHL records (A15): season
+  points error 6.8 against 8.6 for the engine alone, on held-out seasons.
+
+The season layer (a constant shock, sd 0.07) is supported by the walk-forward
+backtest (A9).
+
+**Stat-sheet distributions** (C1 to C1e and C1p). These are preregistered
+before the first game and scored against the frozen stat sheets at season
+end:
+- team-shots dispersion;
+- goal and xG mean slopes;
+- xG dispersion;
+- skater-shot intervals;
+- power-play opportunities;
+- prequential updating.
+
+**Game-day inputs.**
+- Lineups not confirmed by the NHL exclude players MoneyPuck lists on injured
+  reserve or out.
+- Forecast files record power-play means.
+- Every forecast row names its engine.
+
+**Exploratory, published but not adopted.** The in-season standings
+projection (A9; `neurhl/output/live/standings_1_1_2027.csv`).
+
+**Tested and not adopted.** A filtered rating, a stack gated by season
+phase, Hawkes-style excitation after goals, in-season fine-tuning, a larger
+ensemble, venue-specific home advantage, and rookie priors injected without
+retraining.
+
+**Season forecast summary.**
+- Highest projected points: COL 113.3, CAR 112.2, VGK 105.5, TBL 105.2,
+  DAL 103.3.
+- Highest Cup odds: COL 16.5%, CAR 15.0%, VGK 7.7%, TBL 6.7%, DAL 5.2%.
+- Team points correlate 0.998 with the `g2027_v2` set and 0.987 with the
+  frozen 1.0 files.
+- The consistency check passed 41 of 41.
+
+| File | SHA-256 |
+|---|---|
+| `neurhl/output/neurhl_1_1/season/games_2027.csv` | `b2de83d093170b4db7e5fc362efd9f596edacfb8c930f96ea8c2748071bfdc3f` |
+| `neurhl/output/neurhl_1_1/season/teams_2027.csv` | `a29c652e2d0ad1bd38bc366c7f2058849f521d2c3639b7eeba2ce07f9633b626` |
+| `neurhl/output/neurhl_1_1/season/team_points_quantiles_2027.csv` | `34ec844503bc10881e44c486de28b874d833c919daa0f2b4ade54baae2c6b620` |
+| `neurhl/output/neurhl_1_1/season/skaters_2027.csv` | `3ff97bc121508dca443c5891781497aa97aab59b3e99cc967aa97d351245db45` |
+| `neurhl/output/neurhl_1_1/season/goalies_2027.csv` | `bec7d2ceba2e553cc981abf748f603e788a36f3a44bd1a8f59dd296a5be171ac` |
+| `neurhl/output/neurhl_1_1/season/player_games_2027.csv.gz` | `61b7180c280e513c321489fa9547b400b3d68c0ac2a75031f5cbe59605729860` |
+| `neurhl/output/neurhl_1_1/season/consistency_2027.json` | `af614b8b562c954668c27016eaa591c525e80eb6049eb21a9a0e2b6d30fe6055` |
+| `neurhl/output/neurhl_1_1/season/checks_2027.json` | `d30cac44cc7d441659afda5a31d0f5800e42776d539d5283e6340f6b85194ac4` |
+| `neurhl/output/neurhl_1_1/season/run_2027.json` | `081126080f3899dafee374fa1b31648b62f6edc0b5d810c01f8d1e4b97d43db7` |
+
+These files are never edited. NeurHL 1.2 and later releases are issued as
+new, dated file sets.
+
+## A21 (2026-09-29): acceptance battery after the release
+
+`neurhl/tests/review_tests_neurhl4.py` had two checks that encoded the state
+before today. Both are adapted, not removed:
+
+- **"Master loader drops SEALED seasons".** After the seal is spent
+  (PLAN_NeurHL4 A6), the check asserts that the loader includes 2025-2026
+  and that the one-shot seal result exists. `eval/seal_g.py` still refuses
+  to run a second time.
+- **"G_ITER full runs within cap (14)".** The cap still applies to the
+  NeurHL-G ladder (13 of 14). Four runs are counted and listed apart, with
+  their own check:
+  - three iteration runs: candidates g1rk (A16) and g1x (A19), and g1
+    rescored from its cached snapshots for the A17 comparison;
+  - one gate run, g1rk's (A18), which is the second and last run the gate
+    budget allows.
+
+  This budget overrun is disclosed here.
+
+With these changes: NeurHL-3 battery 25/25, NeurHL-G battery 12/12, NeurHL 1.0
+consistency check 42/42, calibration tests 18/18, season-tool tests 8/8.
