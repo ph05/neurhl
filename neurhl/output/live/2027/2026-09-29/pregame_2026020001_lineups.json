@@ -1,0 +1,121 @@
+{
+ "2026020001": {
+  "game_id": 2026020001,
+  "date": "2026-09-29",
+  "start_utc": "2026-09-29T21:00:00+00:00",
+  "as_of": "2026-09-29T19:50:06.325542+00:00",
+  "roster_snapshot": "2026-09-29",
+  "notes": [],
+  "home": {
+   "team": "CAR",
+   "forwards": [
+    8480830,
+    8478427,
+    8480762,
+    8475791,
+    8482702,
+    8482809,
+    8477940,
+    8473533,
+    8476921,
+    8475235,
+    8476873,
+    8477478
+   ],
+   "defense": [
+    8476958,
+    8478970,
+    8480817,
+    8480336,
+    8476906,
+    8484428
+   ],
+   "skaters": [
+    8480830,
+    8478427,
+    8480762,
+    8475791,
+    8482702,
+    8482809,
+    8477940,
+    8473533,
+    8476921,
+    8475235,
+    8476873,
+    8477478,
+    8476958,
+    8478970,
+    8480817,
+    8480336,
+    8476906,
+    8484428
+   ],
+   "goalie": 8483548,
+   "lineup_source": "DF_PROJECTED",
+   "goalie_source": "DF_CONFIRMED",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Seth Jarvis, Alexander Nikishin",
+    "DF lines 2026-09-29/1530 'Ryan Henkel' updated 09-28 15:34Z"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  },
+  "away": {
+   "team": "FLA",
+   "forwards": [
+    8480801,
+    8477493,
+    8477933,
+    8477409,
+    8477935,
+    8479314,
+    8480185,
+    8482113,
+    8483771,
+    8478147,
+    8474189,
+    8477903
+   ],
+   "defense": [
+    8478055,
+    8477932,
+    8478859,
+    8477495,
+    8475179,
+    8475462
+   ],
+   "skaters": [
+    8480801,
+    8477493,
+    8477933,
+    8477409,
+    8477935,
+    8479314,
+    8480185,
+    8482113,
+    8483771,
+    8478147,
+    8474189,
+    8477903,
+    8478055,
+    8477932,
+    8478859,
+    8477495,
+    8475179,
+    8475462
+   ],
+   "goalie": 8474593,
+   "lineup_source": "DF_PROJECTED",
+   "goalie_source": "DF_LINES",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Brad Marchand, Jonah Gadjovich, MacKenzie Entwistle",
+    "DF lines 2026-09-29/1530 'Jameson Olive' updated 09-28 15:32Z",
+    "DF goalie feed: Jacob Markstrom (Unknown), not used"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  }
+ }
+}
