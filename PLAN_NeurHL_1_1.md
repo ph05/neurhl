@@ -412,3 +412,31 @@ recorded for the 2027-28 stat sheet.
 | File | SHA-256 |
 |---|---|
 | `neurhl/configs/calibration_1_1b.json` | `53cae3662e8ea40f5f50db952987500cb113c55fbee0dbe37e637152e54e6956` |
+
+## A7 (2026-09-29, before the first 2026-27 game): C1c, skater-shot intervals
+
+**The fit.** Skater shots on goal per game ~ NB2(mu, r_s) around the
+engine's skater mean. `neurhl/eval/fit_calibration_1_1c.py` fits r_s by
+maximum likelihood on the cached G_GATE predictions (226,354 dressed
+skater-games):
+- r_s = 18.75;
+- randomised-PIT 80% coverage 0.798 against 0.782 for Poisson;
+- +0.0023 nats per skater-game.
+
+**The test.**
+- Games: the same as C1 (pregame, as first committed, before the start),
+  with each file's skater lines as first committed. Degraded games are left
+  out.
+- Comparison: the calibrated 80% interval, the NB(`sog_mean`, r_s) 10th and
+  90th percentiles, against the frozen stat sheet's own `sog_p10`-`sog_p90`.
+- Score: the interval score at alpha = 0.2 (Gneiting and Raftery 2007),
+  width plus 10 times any miss beyond either end; lower is better.
+- One inference after the regular season, with the week-block bootstrap, in
+  a separate Holm family of one. Coverage is also reported.
+
+**Expectation, stated now.** The frozen intervals come from simulated draws
+that already include team-shot spread, so the gain may be small or negative.
+
+| File | SHA-256 |
+|---|---|
+| `neurhl/configs/calibration_1_1c.json` | `f19291cf492326a5510364ec28cb08ff168f9e3934aa8ca1d14f7782775f94c8` |

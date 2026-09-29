@@ -112,6 +112,11 @@ def main():
         check("xG (C1b): paired log-score difference, degraded G3 left out",
               card["xg"]["n_team_games"] == 2 and abs(card["xg"]["diff"] - dx) < 1e-9,
               f"{card['xg'].get('diff', float('nan')):.6f} vs {dx:.6f}")
+        check("skater shots (C1c): card present; the synthetic files carry no p10/p90, so unavailable",
+              card.get("skater_sog", {}).get("available") is False)
+        S = load("scal", NRL / "eval" / "score_calibration_1_1.py")
+        v = S.interval_score(np.array([1.0, 1.0, 1.0]), np.array([3.0, 3.0, 3.0]), np.array([2.0, 0.0, 5.0]))
+        check("interval score: width, plus 10 x the miss beyond each end", np.allclose(v, [2.0, 12.0, 22.0]), str(v))
         check("interim card makes no inference", card["status"] == "interim" and "holm" not in card)
 
     print(f"\n{sum(RES)}/{len(RES)} checks pass")

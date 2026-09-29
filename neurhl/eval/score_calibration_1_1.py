@@ -95,6 +95,36 @@ def compare(new, old, weeks, teams, final):
     return out
 
 
+def skater_rows(g, tabs, root, first, prefix):
+    """Frozen skater lines of the chosen pregame files (as first committed,
+    before the start) joined to the ingest's skater-games (degraded games out)."""
+    import io
+    pg = tabs.get("players")
+    if pg is None or not len(g):
+        return None
+    want = {}
+    for r in g.itertuples():
+        f = r.file[:-4] + "_players.csv"
+        if f in first and first[f][1] < r.start:
+            want.setdefault(f, set()).add(int(r.game_id))
+    got = L.blobs(root, [f"{first[f][0]}:{prefix}{f}" for f in want])
+    parts = []
+    for f, ids in want.items():
+        try:
+            d = pd.read_csv(io.BytesIO(got[f"{first[f][0]}:{prefix}{f}"]))
+            parts.append(d[d.game_id.isin(ids)])
+        except Exception:  # noqa: BLE001
+            continue
+    if not parts:
+        return None
+    act = pg[(pg.pos_group != 2) & ~pg.game_id.isin(tabs["degraded"])]
+    return pd.concat(parts, ignore_index=True).merge(act[["game_id", "player_id", "sog"]], on=["game_id", "player_id"])
+
+
+def interval_score(lo, hi, y, alpha=0.2):
+    return (hi - lo) + (2 / alpha) * np.maximum(lo - y, 0) + (2 / alpha) * np.maximum(y - hi, 0)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Score NeurHL 1.1 C1 (PLAN_NeurHL_1_1).")
     ap.add_argument("--offline", action="store_true")
@@ -171,6 +201,25 @@ def main(argv=None) -> int:
         card["xg"] = xg
     else:
         card["xg"] = {"available": False}
+    # C1c (A7): skater shots, NB(sog_mean, r_s) 80% interval against the frozen p10-p90, interval score
+    calc = root / "neurhl/configs/calibration_1_1c.json"
+    j = skater_rows(g, tabs, root, first, prefix) if calc.exists() else None
+    if j is not None and len(j) and "sog_p10" in j:
+        r_s = json.loads(calc.read_text())["r_s"]
+        mu, ys = j.sog_mean.to_numpy(float), j.sog.to_numpy(float)
+        lo_c = stats.nbinom.ppf(0.1, r_s, r_s / (r_s + mu))
+        hi_c = stats.nbinom.ppf(0.9, r_s, r_s / (r_s + mu))
+        is_c = interval_score(lo_c, hi_c, ys)
+        is_f = interval_score(j.sog_p10.to_numpy(float), j.sog_p90.to_numpy(float), ys)
+        wk = pd.Series(j.game_id).map(dict(zip(g.game_id, g.week))).to_numpy()
+        tm = j.team.to_numpy() if "team" in j else np.zeros(len(j))
+        sk = compare(-is_c, -is_f, wk, tm, final)          # higher is better, as the log scores
+        sk.update({"available": True, "r_s": r_s, "score": "negative interval score (alpha 0.2)",
+                   "coverage80_frozen": float(np.mean((ys >= j.sog_p10) & (ys <= j.sog_p90))),
+                   "coverage80_cal": float(np.mean((ys >= lo_c) & (ys <= hi_c)))})
+        card["skater_sog"] = sk
+    else:
+        card["skater_sog"] = {"available": False}
     if final:
         card["holm"] = holm({"sog": card["sog"].get("p_week_bootstrap"),
                              "goals": card["goals"].get("p_week_bootstrap")})

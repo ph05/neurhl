@@ -1,0 +1,16 @@
+{
+ "plan": "PLAN_NeurHL_1_1 A7 (C1c)",
+ "seasons": [
+  2019,
+  2020,
+  2022,
+  2023,
+  2024
+ ],
+ "n_skater_games": 226354,
+ "r_s": 18.75,
+ "coverage_poisson": 0.7820493563179798,
+ "coverage_nb": 0.797657651289573,
+ "logscore_gain_vs_poisson": 0.0022664071437118747,
+ "inputs_sha256": "b8ff9fc654acf29f34b55566f84e92e0d29e0d66764dcdc9b4aaf4603309e2b3"
+}
