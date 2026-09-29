@@ -689,6 +689,9 @@ def main():
     tab = build_table(data, st, lv, V, k, decay)
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"player_rates_{V}.csv"
+    if V == 2027:
+        from common import refuse_if_frozen_1_0
+        refuse_if_frozen_1_0(path.name)
     tab.to_csv(path, index=False)
     print(f"{path.name}: {len(tab)} players, {int(tab.no_history.sum())} without "
           f"history, {int(tab.on_roster.sum())} on rosters")

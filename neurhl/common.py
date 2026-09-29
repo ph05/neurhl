@@ -37,3 +37,13 @@ UA = {"User-Agent":
 def ensure_dirs() -> None:
     for d in (TENSORS, CKPT, NOUT / "preds", EDA / "figs", CONFIGS):
         d.mkdir(parents=True, exist_ok=True)
+
+
+def refuse_if_frozen_1_0(what: str) -> None:
+    """Stop before overwriting a NeurHL 1.0 file the FREEZE section hashes.
+    Set NEURHL_ALLOW_REFREEZE=1 only for a deliberate, recorded rebuild."""
+    import os
+    plan = NRL.parent / "PLAN_NeurHL_1_0.md"
+    if plan.exists() and "\n## FREEZE" in plan.read_text() and os.environ.get("NEURHL_ALLOW_REFREEZE") != "1":
+        raise SystemExit(f"refusing to write {what}: neurhl/output/neurhl_1_0 is frozen (PLAN_NeurHL_1_0 FREEZE); "
+                         "corrections are issued as new dated file sets")

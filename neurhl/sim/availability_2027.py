@@ -1520,6 +1520,8 @@ def main():
             df = summary_frame(roster, gp)
             print_summary(roster, df)
             p = OUT_DIR / "availability_2027.csv"
+            from common import refuse_if_frozen_1_0
+            refuse_if_frozen_1_0(p.name)
             df.to_csv(p, index=False)
             (OUT_DIR / "availability_model_2027.json").write_text(json.dumps(
                 {"meta": {k: v for k, v in roster.meta.items() if k != "model"}, "model": roster.meta["model"],

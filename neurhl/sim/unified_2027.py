@@ -694,6 +694,8 @@ def main():
     cons["corr_game_prob_vs_0925"] = float(gm[["p_home_win", "p_home_win_0925"]].corr().iloc[0, 1])
 
     # ---- write
+    from common import refuse_if_frozen_1_0
+    refuse_if_frozen_1_0("the NeurHL 1.0 season files")
     gm.to_csv(OUT / "games_2027.csv", index=False, float_format="%.5f")
     tm.to_csv(OUT / "teams_2027.csv", index=False, float_format="%.4f")
     sk.to_csv(OUT / "skaters_2027.csv", index=False, float_format="%.4f")
