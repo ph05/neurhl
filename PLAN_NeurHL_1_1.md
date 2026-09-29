@@ -623,3 +623,27 @@ This was seen in exploration first (variance/mean 0.665).
 | File | SHA-256 |
 |---|---|
 | `neurhl/configs/calibration_1_1e.json` | `5335aefc02f879cfbfe0f1ca30b9e26ebe6ff37f62a4266b169a1542fea5f4f1` |
+
+## A13 (2026-09-29, before the first 2026-27 game): C1p, prequential dispersion; goals need no dispersion layer
+
+### C1p
+
+**What it tests.** Whether the fitted dispersions should keep learning in
+season (Dawid 1984).
+
+**The update.** For team shots (1/r) and team xG (1/k), each team-game uses a
+moment estimate from the 2026-27 team-games on strictly earlier dates, shrunk
+to the G_GATE value (1/98.68 and 1/11.86) with a prior weight of 2,000
+team-games (`eval/score_calibration_1_1.py`, `prequential_phi`):
+- shots: ((y - mu)^2 - mu) / mu^2;
+- xG: (y / mu - 1)^2.
+
+**The test.** The paired log score against the fixed C1 / C1b parameters, on
+the same games, with the same bootstrap and one season-end inference, in a
+separate Holm family of two. The fixed layers stay the declared primaries.
+
+### Exploratory: goals are close to Poisson
+
+With C1's calibrated means, regulation goals on G_GATE have variance/mean
+0.943. Poisson 80% coverage is 0.808, and a fitted negative binomial gains
+nothing. No layer.

@@ -125,6 +125,11 @@ def main():
         check("interval score: width, plus 10 x the miss beyond each end", np.allclose(v, [2.0, 12.0, 22.0]), str(v))
         check("PP opportunities (C1e): unavailable when forecasts lack pp_opps columns",
               card.get("pp_opps", {}).get("available") is False)
+        y_ = np.array([30.0, 20.0, 40.0]); m_ = np.array([30.0, 30.0, 30.0]); o_ = np.array(["d1", "d1", "d2"])
+        ph = S.prequential_phi(y_, m_, o_, 0.01, "nb")
+        e_ = ((y_ - m_) ** 2 - m_) / m_ ** 2
+        want = [0.01, 0.01, (S.N0 * 0.01 + e_[:2].sum()) / (S.N0 + 2)]
+        check("prequential dispersion uses strictly earlier dates only, shrunk to the prior", np.allclose(ph, want), str(ph))
         check("interim card makes no inference", card["status"] == "interim" and "holm" not in card)
 
     print(f"\n{sum(RES)}/{len(RES)} checks pass")

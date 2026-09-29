@@ -129,6 +129,23 @@ def interval_score(lo, hi, y, alpha=0.2):
     return (hi - lo) + (2 / alpha) * np.maximum(lo - y, 0) + (2 / alpha) * np.maximum(y - hi, 0)
 
 
+N0 = 2000.0            # C1p prior weight, in team-games (A13)
+
+
+def prequential_phi(y, mu, order, phi0, kind):
+    """Prequential excess-dispersion estimates (A13): for each team-game, the
+    estimate from team-games strictly earlier in `order` (game date, then id),
+    shrunk to the G_GATE value phi0 with weight N0. kind 'nb': phi = 1/r from
+    ((y - mu)^2 - mu) / mu^2; kind 'gamma': phi = 1/k from (y / mu - 1)^2."""
+    e = ((y - mu) ** 2 - mu) / mu ** 2 if kind == "nb" else (y / mu - 1) ** 2
+    o = np.asarray(order)
+    keys = np.unique(o)
+    tot = pd.Series(e).groupby(o).sum().reindex(keys).cumsum().shift(1, fill_value=0.0)
+    cnt = pd.Series(np.ones(len(e))).groupby(o).sum().reindex(keys).cumsum().shift(1, fill_value=0.0)
+    phi = (N0 * phi0 + tot) / (N0 + cnt)
+    return np.clip(pd.Series(o).map(phi).to_numpy(float), 1e-4, None)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Score NeurHL 1.1 C1 (PLAN_NeurHL_1_1).")
     ap.add_argument("--offline", action="store_true")
@@ -186,6 +203,12 @@ def main(argv=None) -> int:
         sg.update({"available": True, "coverage80_frozen": pit_cov(ys[k], mu[k], R_FROZEN),
                    "coverage80_cal": pit_cov(ys[k], mu[k], r_hat)})
         card["sog"] = sg
+        # C1p (A13): prequentially updated dispersion against the fixed r_hat
+        order = np.r_[g.game_date, g.game_date][k]
+        r_t = 1.0 / prequential_phi(ys[k], mu[k], order, 1.0 / r_hat, "nb")
+        card["sog_prequential"] = {**compare(nb_logpmf(ys[k], mu[k], r_t), nb_logpmf(ys[k], mu[k], r_hat),
+                                             weeks[k], teams[k], final),
+                                   "r_latest": float(r_t[-1]) if len(r_t) else None}
     # C1b (A6): team xG, gamma(k_hat) against the frozen gamma(9); its own family of one
     calb = root / "neurhl/configs/calibration_1_1b.json"
     if calb.exists() and t is not None and len(g):
@@ -203,6 +226,12 @@ def main(argv=None) -> int:
                    "coverage80_frozen": cov(9.0) if kx.any() else None,
                    "coverage80_cal": cov(k_hat) if kx.any() else None})
         card["xg"] = xg
+        if kx.any():                                     # C1p (A13) for the xG shape
+            ox = np.r_[g.game_date, g.game_date][kx]
+            k_t = 1.0 / prequential_phi(yx[kx], mx[kx], ox, 1.0 / k_hat, "gamma")
+            card["xg_prequential"] = {**compare(gl_(yx[kx], mx[kx], k_t), gl_(yx[kx], mx[kx], k_hat),
+                                                weeks[kx], teams[kx], final),
+                                      "k_latest": float(k_t[-1])}
         # C1d (A10): mean slope about the mean frozen forecast, with its own shape; family of one
         cald = root / "neurhl/configs/calibration_1_1d.json"
         if cald.exists() and kx.any():
