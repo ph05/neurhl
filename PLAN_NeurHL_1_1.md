@@ -663,3 +663,85 @@ refit engine (configuration g1, seasons <= 2026).
   `g2027_v1` season files and stay as declared. Equivalents built from the
   `g2027_v2` season set are issued beside it if time allows before the first
   game, as their own dated sets.
+
+## A15 (2026-09-29): rookies and injuries
+
+**Pre-NHL records.** Rookies' records in other leagues now come from the
+NHL's player landing records: AHL, CHL, NCAA, USHL, KHL, SHL, Liiga, NL, DEL,
+Czech, the European second tiers and junior leagues
+(`neurhl/data/build_prenhl.py`). From them, `neurhl/eval/rookie_priors.py`
+learns league translation factors and shrinkage, walk-forward.
+
+Results on 938 rookies from 2014-2024 (goals and assists per game against
+each player's position average; season points MAE):
+
+| Measure | Translated | Position average |
+|---|---|---|
+| Goals per game, error | | -12% |
+| Assists per game, error | | -14% |
+| Season points MAE | 5.28 | 6.29 |
+
+**Inside the engine at inference.** Priors injected as engine baselines
+without retraining did not help (`neurhl/eval/rookie_engine_test.py`,
+three variants). They are not used live; the hook `sim/rookie_hook.py`
+stays disabled.
+
+**Season totals: adopted for the refit engine's season set.**
+`neurhl/eval/rookie_season_test.py` compares preseason engine projections for
+opening-lineup rookies with the translated ones. The weight was chosen on
+2012 and 2014-2018 and judged on 2019-2024 (161 rookies):
+
+| Measure | Engine | Translated |
+|---|---|---|
+| Goals per game, error | 0.063 | 0.049 |
+| Assists per game, error | 0.100 | 0.089 |
+| Season points, error | 8.58 | 6.83 (6.75 at a 0.75 blend) |
+
+The selected weight was 1. `sim/unified_2027.py --rookie-priors` sets each
+rookie's goals and assists per game from `configs/rookie_priors_2027.csv`,
+scaled by his chance of dressing. Teammates are rescaled within each
+team-game, so the team totals stay the engine's.
+
+**Injuries.**
+- MoneyPuck's injury list (status, return date, games still to miss) is now
+  snapshotted daily and every half hour on game days. It enters the
+  availability model and non-confirmed game-day lineups (injured reserve or
+  out, with a dated return).
+- MoneyPuck's placeholder dates (a return a year away) were researched one
+  by one from current reporting. The results, with their sources, are in:
+  - `data/manual/player_status_2027.csv`: Pietrangelo and Ellis, LTIR for
+    the season;
+  - `neurhl/configs/injury_overrides_2027.csv`: 13 games-out values.
+- The refit engine's season set uses the 2026-09-29 rosters. The 2026-09-28
+  snapshot predates the Marchenko-Knies trade.
+
+## A16 (2026-09-29, before the candidate is run): candidate g1rk, rookie inputs in the engine
+
+**The candidate.** `configs/neurhl_g/g1rk.json` is g1 with three extra
+skater inputs:
+- the rookie's translated goals per game;
+- his translated assists per game;
+- a rookie flag.
+
+The values are walk-forward: each season's come from moves and rookies of
+earlier seasons (`data/build_rookie_features.py`, `data/build_g_tensors_rk.py`;
+tensors `g_master_rk`, loaded with NEURHL_MASTER_TAG=rk).
+
+**Iteration run.** `eval/run_g.py --config g1rk --protocol full --window iter`
+(five seeds), compared on the same games with g1's cached iteration
+predictions.
+
+**Adoption rule, fixed now.** Both must hold on the iteration window:
+- the rookie skater-games' Poisson loss for goals and for assists is lower
+  than g1's;
+- the final-probability log loss is no worse than g1's + 0.0003.
+
+**If adopted.**
+- One G_GATE run (the second of the two the gate budget allows) is reported
+  with the same rule.
+- If that also holds, a live bundle `g2027_v3` (configuration g1rk, seasons
+  <= 2026, 2026-27 rookies' inputs from `configs/rookie_priors_2027.csv`)
+  replaces `g2027_v2` from a declared date.
+
+The sealed seasons are spent, so there is no confirmatory test. The live
+2026-27 season scores it.

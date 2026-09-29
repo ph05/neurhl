@@ -1,0 +1,1 @@
+{"epochs1": 10, "epochs2": 4, "w_out1": 0.3, "seeds": 5, "stack_h": true, "threads": 8, "parent": "g1", "delta": "g1 + three rookie inputs (translated pre-NHL goals and assists per game, rookie flag); tensors g_master_rk (NEURHL_MASTER_TAG=rk); PLAN_NeurHL_1_1 A16"}

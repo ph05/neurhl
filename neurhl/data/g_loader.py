@@ -55,8 +55,11 @@ def load_master(purpose: str = "train"):
     import numpy as np
     if purpose not in PURPOSES:
         raise ValueError(f"purpose must be one of {PURPOSES}")
-    meta = pd.read_parquet(TENSORS / "g_meta.parquet")
-    z = np.load(TENSORS / "g_master.npz")
+    import os
+    tag = os.environ.get("NEURHL_MASTER_TAG", "")          # e.g. "rk": candidate tensors beside the master
+    sfx = f"_{tag}" if tag else ""
+    meta = pd.read_parquet(TENSORS / f"g_meta{sfx}.parquet")
+    z = np.load(TENSORS / f"g_master{sfx}.npz")
     keep = ~meta.season_end.isin(W.SEALED).to_numpy()
     if W.is_unsealed() or purpose == "live_inputs":
         keep[:] = True
@@ -64,7 +67,7 @@ def load_master(purpose: str = "train"):
             with open(TENSORS / "_g_loader_access.log", "a") as f:
                 f.write(f"{dt.datetime.now().isoformat()} live_inputs master\n")
     arrays = {k: z[k][keep] for k in z.files}
-    names = json.loads((TENSORS / "g_names.json").read_text())
+    names = json.loads((TENSORS / f"g_names{sfx}.json").read_text())
     return arrays, meta[keep].reset_index(drop=True), names
 
 

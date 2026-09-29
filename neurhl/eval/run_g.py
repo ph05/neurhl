@@ -47,7 +47,10 @@ def model_sha() -> bytes:
     """Hash of the model and trainer source and the master tensor, so cached
     snapshot predictions are reused only for identical code and data."""
     root = Path(__file__).resolve().parents[1]
-    data = [(TENSORS / f).stat() for f in ("g_master.npz", "g_meta.parquet")]
+    import os
+    tag = os.environ.get("NEURHL_MASTER_TAG", "")
+    sfx = f"_{tag}" if tag else ""
+    data = [(TENSORS / f).stat() for f in (f"g_master{sfx}.npz", f"g_meta{sfx}.parquet")]
     fp = "|".join(f"{x.st_size}:{int(x.st_mtime)}" for x in data).encode()
     return hashlib.sha256((root / "models" / "neurhl_g.py").read_bytes()
                           + (root / "train" / "train_neurhl_g.py").read_bytes()
