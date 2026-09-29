@@ -251,3 +251,45 @@ layer stands.
 
 **Also reported, not deciding:** the same grid on a preseason Elo-only
 season model (the logit being the frozen Elo entering V).
+
+## A2 (2026-09-29, before any C2b number is judged): in-season standings (C2b)
+
+**What it projects.** A nightly projection of each team's final points,
+built from three pieces:
+- the points already earned;
+- the frozen NeurHL 1.0 probabilities and outcome4 of the remaining games;
+- a team-strength shock updated from the games played
+  (`neurhl/sim/live_standings_1_1.py`).
+
+The update is a Laplace posterior of the logistic model
+sigmoid(z + k (s_home - s_away)) with prior sd sigma0, plus weekly drift sw
+after the last game played. A game's frozen probability is never changed.
+
+**Backtest.** `neurhl/eval/live_standings_c2b.py` runs on the C2 preseason
+outputs.
+- Checkpoints: 4, 8, 12, 16 and 20 weeks after opening night.
+- Comparator: "no update", the prior left in place and drift from opening
+  night, which is what adding actual points to the frozen preseason
+  simulation does.
+- Grid, for each of the two:
+
+  | Parameter | Values |
+  |---|---|
+  | sigma0 | 0.05, 0.07, 0.09, 0.11, 0.13 |
+  | sw | 0, 0.005, 0.01, 0.02 |
+
+- Selection: the lowest mean points CRPS over the fit seasons 2012 and
+  2014-2018.
+- Judging: on 2019, 2020 and 2022-2024, the update's mean CRPS minus the
+  comparator's, paired by team, season and checkpoint, with a season-block
+  bootstrap interval.
+
+**Adoption requires both:**
+- a difference below 0;
+- the update's 10th-90th percentile coverage within 0.80 ± 0.05.
+
+**If adopted:** from the first night with completed games, the projection is
+published as an exploratory NeurHL 1.1 product (not a replacement for the
+frozen files). It is scored at the end of the season at the same checkpoints
+against the final table, beside the frozen preseason files plus actual
+points.
