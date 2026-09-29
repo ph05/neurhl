@@ -99,19 +99,25 @@ def scores(sim, y):
     return crps, np.abs(sim.mean(0) - y), ((y >= lo) & (y <= hi)).astype(float)
 
 
-def run_grid(seasons, model):
+def run_grid(seasons, model, grid=None):
     res = {}
     cache = {V: load(V) for V in seasons}
-    for g in GRID:
+    for g in (grid or GRID):
         rows = []
         for V in seasons:
             d = cache[V]
             teams, hi, ai, y = realised(d)
             if model == "engine":
                 lp, k = np.log(d.p / (1 - d.p)).to_numpy(), d.k.to_numpy()
+                var = g
+            elif model == "blend":                      # C2c: g = (a, sigma0, sw, rho)
+                a = g[0]
+                lp = a * np.log(d.p / (1 - d.p)).to_numpy() + (1 - a) * d.elo_pre.to_numpy()
+                k, var = d.k.to_numpy(), g[1:]
             else:
                 lp, k = d.elo_pre.to_numpy(), np.full(len(d), float(d.k.mean()))
-            sim = simulate(d, lp, k, hi, ai, len(teams), *g, SEED + V)
+                var = g
+            sim = simulate(d, lp, k, hi, ai, len(teams), *var, SEED + V)
             c, m, cov = scores(sim, y)
             rows.append(pd.DataFrame({"season": V, "team": teams, "crps": c, "ae": m, "cov": cov}))
         res[g] = pd.concat(rows, ignore_index=True)
@@ -157,7 +163,21 @@ def main():
                                              "frozen": float(b[b.season == s].crps.mean())}
                                     for s in JUDGE}}}
         print(model, json.dumps(out[model]["selected"]), json.dumps(out[model]["judge"], indent=None)[:600], flush=True)
-    e, f = out["engine"]["judge"], None
+    # C2c (A4): blend weight crossed with the A1 grid
+    BGRID = [(a_,) + g for a_ in (0, 0.25, 0.5, 0.75, 1) for g in GRID]
+    fitb = run_grid(FIT, "blend", BGRID)
+    bb = min(BGRID, key=lambda g: fitb[g].crps.mean())
+    a1 = (1,) + tuple(out["engine"]["selected"].values())
+    jb = run_grid(JUDGE, "blend", [bb, (1,) + FROZEN, a1])
+    out["blend_c2c"] = {"selected": {"a": bb[0], "sigma0": bb[1], "sw": bb[2], "rho": bb[3]},
+                        "fit": summary(fitb[bb]),
+                        "judge": {"selected": summary(jb[bb]), "frozen": summary(jb[(1,) + FROZEN]),
+                                  "a1_selected": summary(jb[a1])}}
+    cb = out["blend_c2c"]["judge"]
+    out["blend_c2c"]["adopt"] = bool(cb["selected"]["crps"] < min(cb["frozen"]["crps"], cb["a1_selected"]["crps"])
+                                     and abs(cb["selected"]["coverage"] - 0.80) <= 0.05)
+    print("c2c", json.dumps(out["blend_c2c"])[:700], flush=True)
+    e = out["engine"]["judge"]
     out["decision"] = {"adopt": bool(e["crps_diff"] < 0 and abs(e["selected"]["coverage"] - 0.80) <= 0.05),
                        "rule": "PLAN_NeurHL_1_1 A1: judged CRPS difference < 0 and coverage within 0.80 +- 0.05"}
     out["engine_vs_elo_judge_frozen_layer"] = {"engine": out["engine"]["judge"]["frozen"],

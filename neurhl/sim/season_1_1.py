@@ -127,6 +127,7 @@ def main():
     ap.add_argument("--sigma0", type=float, required=True)
     ap.add_argument("--sw", type=float, required=True)
     ap.add_argument("--rho", type=float, required=True)
+    ap.add_argument("--a", type=float, default=1.0, help="C2c blend weight on the stacked logit")
     ap.add_argument("--tag", required=True)
     ap.add_argument("--sims", type=int, default=20000)
     ap.add_argument("--seed", type=int, default=711)
@@ -136,7 +137,15 @@ def main():
     teams = sorted(set(g.home))
     div, conf = U.divisions()
     o4 = g[["p_home_reg", "p_away_reg", "p_home_ot", "p_away_ot"]].to_numpy()
-    stats, res = season_mc_dyn(g, g.p_home_win.to_numpy(), o4, g.rate_sensitivity.to_numpy(), teams,
+    p = g.p_home_win.to_numpy()
+    if a.a != 1.0:                                          # C2c: blend with the preseason Elo logit
+        z = a.a * U.logit(p) + (1 - a.a) * U.logit(g.p_home_win_elo.to_numpy())
+        p = U.sigmoid(z)
+        hw = o4[:, 0] + o4[:, 2]                            # outcome4 rescaled to the blended p
+        o4 = o4.copy()
+        o4[:, [0, 2]] *= (p / hw)[:, None]
+        o4[:, [1, 3]] *= ((1 - p) / (1 - hw))[:, None]
+    stats, res = season_mc_dyn(g, p, o4, g.rate_sensitivity.to_numpy(), teams,
                                div, conf, a.sims, a.seed, a.sigma0, a.sw, a.rho)
     pts = stats["pts"].astype(float)
     tm = frozen.set_index("team").loc[teams].reset_index()
@@ -159,7 +168,7 @@ def main():
     tm.to_csv(out / "teams_2027.csv", index=False, float_format="%.4f")
     pq.to_csv(out / "team_points_quantiles_2027.csv", index=False, float_format="%.2f")
     lp = 2 * len(g) + tm.otl.sum()
-    (out / "run.json").write_text(json.dumps({"sigma0": a.sigma0, "sw": a.sw, "rho": a.rho, "sims": a.sims,
+    (out / "run.json").write_text(json.dumps({"a": a.a, "sigma0": a.sigma0, "sw": a.sw, "rho": a.rho, "sims": a.sims,
                                               "seed": a.seed, "source": "neurhl/output/neurhl_1_0/games_2027.csv",
                                               "league_points": float(tm.points.sum()),
                                               "identity_2N_plus_otl": float(lp)}, indent=1))
