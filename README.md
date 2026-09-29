@@ -78,7 +78,10 @@ flowchart LR
   sheets, calibrated goal totals and blended skater points. Each is
   preregistered before the games it is judged on, and ships as a dated file
   set scored beside the freeze, which is never edited
-  ([PLAN_NeurHL_1_1.md](PLAN_NeurHL_1_1.md)).
+  ([PLAN_NeurHL_1_1.md](PLAN_NeurHL_1_1.md)). A walk-forward backtest of the
+  season layer on 2019-2024 supports the frozen one (80% intervals cover
+  0.82). An exploratory projection of the final standings, updated from each
+  night's results, is published in `neurhl/output/live/standings_1_1_2027.csv`.
 - **Earlier freeze:** the forecasts frozen on 2026-09-25 by an earlier,
   separately built season layer are unchanged and scored as preregistered
   ([PLAN_NeurHL_LIVE.md](PLAN_NeurHL_LIVE.md)).
