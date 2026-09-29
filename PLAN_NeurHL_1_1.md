@@ -787,3 +787,27 @@ runs cleanly in a temporary folder, and from the first forecast after it is
 declared in an appendix to this amendment. The season set is rerun with
 `g2027_v3` as `output/neurhl_1_0/v3_20260929/`, which becomes the primary
 once it passes the consistency check.
+
+## A19 (2026-09-29, before the candidate is run): candidate g1x, non-NHL records for every player
+
+**The candidate.** g1rk plus three inputs for every skater and season:
+- his goals and assists per game in non-NHL leagues over the two previous
+  seasons, translated with league factors fitted only on earlier moves;
+- the non-NHL games behind them.
+
+International events are pooled at a low weight.
+
+**Where the value is expected.** In thin NHL samples: AHL call-ups, players
+returning from Europe or the KHL, and veterans with short NHL seasons.
+Code: `data/build_prior_features.py`, `data/build_g_tensors_x.py`,
+`configs/neurhl_g/g1x.json`.
+
+**Adoption rule, fixed now.** Against g1rk on the same games, on the
+iteration window and then on G_GATE, both must hold:
+- skaters with any non-NHL games in those two seasons have lower Poisson
+  loss for goals and for assists;
+- the final-probability log loss is no worse than g1rk's + 0.0003.
+
+**If adopted.** A live bundle `g2027_v4` (seasons <= 2026) replaces
+`g2027_v3` from a declared forecast, after a clean preview test. Its season
+set is `output/neurhl_1_0/v4_20260929/`.

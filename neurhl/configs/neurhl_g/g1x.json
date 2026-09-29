@@ -1,0 +1,1 @@
+{"epochs1": 10, "epochs2": 4, "w_out1": 0.3, "seeds": 5, "stack_h": true, "threads": 8, "parent": "g1rk", "delta": "g1rk + three all-player non-NHL inputs (translated goals and assists per game over the two previous seasons, non-NHL games); tensors g_master_x (NEURHL_MASTER_TAG=x); PLAN_NeurHL_1_1 A19"}
