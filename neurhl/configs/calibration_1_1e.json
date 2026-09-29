@@ -1,0 +1,18 @@
+{
+ "plan": "PLAN_NeurHL_1_1 A12 (C1e)",
+ "source": "neurhl/output/preds/g_gate_games.csv",
+ "source_sha256": "6569402137d5633b0cf303cd53b0968be59d0fb68bb1444d7d3e1743f3683844",
+ "seasons": [
+  2019,
+  2020,
+  2022,
+  2023,
+  2024
+ ],
+ "n_team_games": 12578,
+ "n_hat": 10,
+ "var_over_mean": 0.6646203599953395,
+ "coverage_poisson": 0.8832087772300843,
+ "coverage_binomial": 0.816186993162665,
+ "logscore_gain_vs_poisson": 0.03352734494112123
+}

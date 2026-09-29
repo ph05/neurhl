@@ -592,3 +592,34 @@ These corrections change no declared test. All were made before any game.
 - **Unchanged, noted.** Skater goals MAE for the calibrated set is reported
   only if the season-end skater file carries goals. The final branches need
   all 1,344 results; a game postponed beyond 2027-04-10 would delay them.
+
+## A12 (2026-09-29, before the first 2026-27 game): C1e, power-play opportunities
+
+**New forecast columns.** From this commit, every game-day forecast file adds
+two last columns: `pp_opps_home` and `pp_opps_away`, the engine's
+power-play opportunity means. They already enter the stat-sheet simulation.
+No existing column, number or selection rule changes, and the PLAN_NeurHL4
+LIVE scorer reads columns by name. This was checked with a preview run into
+a temporary folder.
+
+**The fit.** `neurhl/eval/fit_calibration_1_1e.py` fits the calibrated
+distribution, binomial(n, mu / n), by maximum likelihood over integers 6-40
+on G_GATE (12,578 team-games):
+- n_hat = 10;
+- 80% coverage 0.816, against 0.883 for the frozen Poisson;
+- +0.0335 nats per team-game.
+
+This was seen in exploration first (variance/mean 0.665).
+
+**The test.**
+- Games: every pregame forecast that carries the new columns. Games before
+  the change have none and are skipped.
+- Target: the ingest's official power-play opportunities (`pp_opps` in the
+  team-game table). Degraded games are left out.
+- Comparison: the paired log-score difference, binomial minus Poisson, with
+  the week-block bootstrap.
+- One inference after the regular season, in a separate Holm family of one.
+
+| File | SHA-256 |
+|---|---|
+| `neurhl/configs/calibration_1_1e.json` | `5335aefc02f879cfbfe0f1ca30b9e26ebe6ff37f62a4266b169a1542fea5f4f1` |

@@ -123,6 +123,8 @@ def main():
         S = load("scal", NRL / "eval" / "score_calibration_1_1.py")
         v = S.interval_score(np.array([1.0, 1.0, 1.0]), np.array([3.0, 3.0, 3.0]), np.array([2.0, 0.0, 5.0]))
         check("interval score: width, plus 10 x the miss beyond each end", np.allclose(v, [2.0, 12.0, 22.0]), str(v))
+        check("PP opportunities (C1e): unavailable when forecasts lack pp_opps columns",
+              card.get("pp_opps", {}).get("available") is False)
         check("interim card makes no inference", card["status"] == "interim" and "holm" not in card)
 
     print(f"\n{sum(RES)}/{len(RES)} checks pass")

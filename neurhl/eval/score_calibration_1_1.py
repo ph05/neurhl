@@ -220,6 +220,24 @@ def main(argv=None) -> int:
     else:
         card["xg"] = {"available": False}
         card["xg_slope"] = {"available": False}
+    # C1e (A12): power-play opportunities, binomial(n_hat, mu/n_hat) against the frozen Poisson(mu);
+    # only forecasts that carry pp_opps_home/away (from 2026-09-29) count; family of one
+    cale = root / "neurhl/configs/calibration_1_1e.json"
+    if cale.exists() and t is not None and len(g) and "pp_opps_home" in g and "pp_opps" in t:
+        n_hat = json.loads(cale.read_text())["n_hat"]
+        tt = t[~t.game_id.isin(tabs["degraded"])]
+        side = {s_: tt[tt.is_home == s_].drop_duplicates("game_id").set_index("game_id")["pp_opps"]
+                for s_ in (1, 0)}
+        yp = np.r_[g.game_id.map(side[1]), g.game_id.map(side[0])].astype(float)
+        mp = pd.to_numeric(pd.Series(np.r_[g.pp_opps_home, g.pp_opps_away]), errors="coerce").to_numpy(float)
+        kp = np.isfinite(yp) & np.isfinite(mp) & (mp > 0)
+        pb = np.clip(mp[kp] / n_hat, 1e-9, 0.95)
+        pe = compare(stats.binom.logpmf(yp[kp], n_hat, pb), stats.poisson.logpmf(yp[kp], mp[kp]),
+                     weeks[kp], teams[kp], final)
+        pe.update({"available": True, "n_hat": n_hat})
+        card["pp_opps"] = pe
+    else:
+        card["pp_opps"] = {"available": False}
     # C1c (A7): skater shots, NB(sog_mean, r_s) 80% interval against the frozen p10-p90, interval score
     calc = root / "neurhl/configs/calibration_1_1c.json"
     j = skater_rows(g, tabs, root, first, prefix) if calc.exists() else None

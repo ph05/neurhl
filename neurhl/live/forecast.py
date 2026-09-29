@@ -147,7 +147,9 @@ def run(games: list, date: str, tag: str, now: dt.datetime, dry: bool) -> list:
             "goalie_home": lu["home"]["goalie"], "goalie_away": lu["away"]["goalie"],
             "goalie_src_home": lu["home"]["goalie_source"],
             "goalie_src_away": lu["away"]["goalie_source"],
-            "bundle": bundle, "bundle_sha": bsha, "code": code, "created_utc": created})
+            "bundle": bundle, "bundle_sha": bsha, "code": code, "created_utc": created,
+            # appended last (2026-09-29, PLAN_NeurHL_1_1 A12): the engine's power-play opportunity means
+            "pp_opps_home": round(rows[i]["pp_opps_home"], 3), "pp_opps_away": round(rows[i]["pp_opps_away"], 3)})
         for p in sheets[i]["players"]:
             pl_rows.append({"game_id": int(r.game_id), "team": r.home if p["side"] == 0 else r.away,
                             "player_id": p["player_id"], "name": nm.get(p["player_id"], ""),

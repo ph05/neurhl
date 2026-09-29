@@ -138,6 +138,7 @@ def forecast(name, A, n_sims=10_000, seed=711, p_h=None, goal_mult=1.0):
                      "goals_away": float(o["goals"][i, 1] * goal_mult),
                      "goals_home_raw": float(o["goals"][i, 0]), "goals_away_raw": float(o["goals"][i, 1]),
                      "goal_mult": float(goal_mult),
-                     "sog_home": float(o["sogf"][i, 0]), "sog_away": float(o["sogf"][i, 1])})
+                     "sog_home": float(o["sogf"][i, 0]), "sog_away": float(o["sogf"][i, 1]),
+                     "pp_opps_home": float(o["pp_opps"][i, 0]), "pp_opps_away": float(o["pp_opps"][i, 1])})
         sheets.append(sh)
     return rows, sheets
