@@ -9,6 +9,8 @@ Snapshots, stored raw (a consumer now exists: NeurHL-3 G6 parsing):
   data/raw/lineup_snapshots/<ISO date>/df_injuries.html.gz       (DailyFaceoff injury report)
   data/raw/lineup_snapshots/<ISO date>/df_goalies.html.gz        (DailyFaceoff starting goalies — D4)
   data/raw/lineup_snapshots/<ISO date>/puckpedia.html.gz         (PuckPedia cap landing page)
+  data/raw/lineup_snapshots/<ISO date>/mp_injuries.csv.gz        (MoneyPuck injury list: status,
+                                                                  expected return, games still to miss)
 
 Scheduling: this must run DAILY through 2026-27 (launchd plist
 com.neurhl.snapshot — see neurhl/data/fetch/README_scheduler.md).
@@ -75,6 +77,31 @@ def grab(ses: requests.Session, url: str, dest: Path, skip_existing: bool = True
     return "ok"
 
 
+MP_INJ = "https://moneypuck.com/moneypuck/playerData/playerNews/current_injuries.csv"
+MP_INJ_TIME = "https://moneypuck.com/moneypuck/playerData/playerNews/injury_update_time.txt"
+
+
+def grab_mp_injuries(ses: requests.Session, ddir: Path) -> str:
+    """MoneyPuck's current injury list (player id, team, status, expected return
+    date, games still to miss) and its update time, stored gzipped as fetched.
+    A small file is fine here; the header is checked instead of the size."""
+    time.sleep(2.0)
+    try:
+        r = ses.get(MP_INJ, timeout=60)
+        t = ses.get(MP_INJ_TIME, timeout=60)
+    except requests.RequestException:
+        return "fail"
+    if r.status_code != 200 or not r.text.startswith("playerId,"):
+        return f"{r.status_code}"
+    for name, content in (("mp_injuries.csv.gz", r.content),
+                          ("mp_injury_update_time.txt.gz", t.content if t.status_code == 200 else b"")):
+        tmp = (ddir / name).with_suffix(".part")
+        with gzip.open(tmp, "wb") as f:
+            f.write(content)
+        tmp.rename(ddir / name)
+    return "ok"
+
+
 def main_daily():
     day = date.today().isoformat()
     ddir = RAW / "lineup_snapshots" / day
@@ -98,6 +125,7 @@ def main_daily():
                              ddir / "df_goalies.html.gz")] = 1
     counts["puckpedia:" + grab(ses, "https://puckpedia.com/",
                                ddir / "puckpedia.html.gz")] = 1
+    counts["mp_injuries:" + grab_mp_injuries(ses, ddir)] = 1
     print(f"{day}: {counts}")
 
 
@@ -152,6 +180,7 @@ def main_intraday():
     ddir.mkdir(parents=True, exist_ok=True)
     counts: dict = {"goalies:" + grab(ses, "https://www.dailyfaceoff.com/starting-goalies",
                                       ddir / "df_goalies.html.gz", skip_existing=False): 1}
+    counts["mp_injuries:" + grab_mp_injuries(ses, ddir)] = 1
     unknown = [t for t in teams if t not in NHL_TO_SLUG]
     for team in teams:
         slug = NHL_TO_SLUG.get(team)

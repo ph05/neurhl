@@ -123,6 +123,7 @@ N_F, N_D = 12, 6
 FWD_POS = {"C", "L", "R"}
 
 # ---- declared constants --------------------------------------------------------
+USE_MP_INJURIES = True          # PLAN_NeurHL_1_1 A15: MoneyPuck injury list (dated snapshot)
 IR_RETURN_GAMES = 15            # DailyFaceoff IR players off the NHL roster miss the team's
                                 # next 15 games and rejoin from game 16 (declared; a flat
                                 # prior, since DailyFaceoff gives no return dates)
@@ -692,6 +693,40 @@ def _return_info(team: str, rosters_date: str, sched: pd.DataFrame) -> tuple[int
     return int(row.name) + 1, str(row["date"])[:10]
 
 
+MP_PLACEHOLDER_AFTER = "2027-06-30"   # a return date past the season is MoneyPuck's "no date" placeholder
+MP_DTD_GAMES = 1                      # day-to-day without a date: out for the next game
+
+
+def mp_injuries(on_or_before: str | None = None) -> tuple[pd.DataFrame, str | None]:
+    """The latest MoneyPuck injury snapshot (data/raw/lineup_snapshots/<date>/mp_injuries.csv.gz,
+    PLAN_NeurHL_1_1 A15) on or before the date (default: any), and its date."""
+    base = RAW / "lineup_snapshots"
+    days = sorted(p.parent.name for p in base.glob("*/mp_injuries.csv.gz")
+                  if on_or_before is None or p.parent.name <= on_or_before)
+    if not days:
+        return pd.DataFrame(), None
+    d = pd.read_csv(base / days[-1] / "mp_injuries.csv.gz")
+    return d, days[-1]
+
+
+def _mp_return(r, team: str, from_date: str, sched: pd.DataFrame) -> tuple[int | None, str | None]:
+    """Return (season game number, date) from a MoneyPuck row: its date of return when real;
+    otherwise injured reserve -> IR_RETURN_GAMES games, day-to-day -> MP_DTD_GAMES."""
+    tg = sched[(sched["home"] == team) | (sched["away"] == team)].sort_values(["date", "game_id"])
+    tg = tg.reset_index(drop=True)
+    ret = str(r.dateOfReturn)[:10] if isinstance(r.dateOfReturn, str) else ""
+    if ret and ret <= MP_PLACEHOLDER_AFTER:
+        after = tg[tg["date"].astype(str) >= ret]
+        if not len(after):
+            return None, None
+        return int(after.index[0]) + 1, str(after.iloc[0]["date"])[:10]
+    k = MP_DTD_GAMES if str(r.playerInjuryStatus) in ("DTD", "DD") else IR_RETURN_GAMES
+    after = tg[tg["date"].astype(str) >= from_date]
+    if len(after) <= k:
+        return None, None
+    return int(after.index[k]) + 1, str(after.iloc[k]["date"])[:10]
+
+
 def _goalie_table(team: str, g: pd.DataFrame, prev: int = SEASON - 1) -> pd.DataFrame:
     """Rank and start shares for a team's goalies (roster first, then reserves)."""
     s1, s2 = _goalie_season(prev), _goalie_season(prev - 1)
@@ -798,8 +833,25 @@ def load(rosters_date: str, *, reserves: bool = True, model: AvailModel | None =
     A["df_status"] = [df_status.get((t, p), "") for t, p in zip(A["team"], A["player_id"])]
     A["age"] = [_age(b, p, SEASON - 1) for b, p in zip(A["birthdate"], A["player_id"])]
     A["return_game"], A["return_date"] = pd.array([pd.NA] * len(A), dtype="Int64"), None
+    # MoneyPuck's injury list (A15): roster and injured-reserve players it lists are injured,
+    # back on its date of return (or by the placeholder rules in _mp_return)
+    mp, mp_day = mp_injuries() if USE_MP_INJURIES else (pd.DataFrame(), None)
+    mp_rows = {}
+    if len(mp):
+        mp = mp.drop_duplicates("playerId").set_index("playerId")
+        for i in A.index[A["tier"].eq(0) & A["player_id"].isin(mp.index)]:
+            r = mp.loc[int(A.at[i, "player_id"])]
+            if str(r.teamCode) != A.at[i, "team"]:
+                continue
+            A.at[i, "status"] = "injured"
+            mp_rows[i] = r
+            notes.setdefault(A.at[i, "team"], []).append(
+                f"injured (MoneyPuck {r.playerInjuryStatus}, return {str(r.dateOfReturn)[:10]}): {A.at[i, 'name']}")
     for i in A.index[A["status"] == "injured"]:
-        gno, gdate = _return_info(A.at[i, "team"], rosters_date, sched)
+        if i in mp_rows:
+            gno, gdate = _mp_return(mp_rows[i], A.at[i, "team"], rosters_date, sched)
+        else:
+            gno, gdate = _return_info(A.at[i, "team"], rosters_date, sched)
         A.at[i, "return_game"] = gno if gno is not None else pd.NA
         A.at[i, "return_date"] = gdate if gdate is not None else "9999-12-31"
     A["injured"] = A["status"].eq("injured")
@@ -816,7 +868,8 @@ def load(rosters_date: str, *, reserves: bool = True, model: AvailModel | None =
     S["gord"] = (S["grp"] == "D").astype(int)
     out = Roster(meta={"rosters_date": rosters_date, "roster_snapshot": rday, "reserve_snapshot": pday,
                        "unavailable": sorted(unavail), "model": model.as_dict(),
-                       "df_dirs": sorted(set(ir["df_dir"])) if len(ir) else []})
+                       "df_dirs": sorted(set(ir["df_dir"])) if len(ir) else [],
+                       "mp_injuries": mp_day, "mp_injured": len(mp_rows)})
     for team in teams:
         s = S[S["team"] == team].sort_values(["tier", "gord", "toi_proj", "player_id"],
                                              ascending=[True, True, False, True]).reset_index(drop=True)

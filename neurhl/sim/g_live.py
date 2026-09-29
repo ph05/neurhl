@@ -104,6 +104,8 @@ def build(games: pd.DataFrame, lineups: dict, results: pd.DataFrame = None,
     sk = BS.skater_state(dates, pd.DataFrame(sk_x))
     sk = sk[sk.game_id.isin(ids)].copy()
     sk = pd.concat([sk, shrink(sk, names["priors"])], axis=1)
+    from sim.rookie_hook import apply as rookie_priors      # no-op unless enabled (PLAN_NeurHL_1_1 A15)
+    sk = rookie_priors(sk, names["priors"])
     gk = BS.goalie_state(dates, pd.DataFrame(gk_x)) if gk_x else pd.DataFrame()
     gk = gk[gk.game_id.isin(ids)] if len(gk) else gk
     tm = BS.team_state(dates, pd.DataFrame(tm_x))
