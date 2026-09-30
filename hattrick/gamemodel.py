@@ -172,6 +172,21 @@ def goalie_offset(P: dict, talent_diff) -> np.ndarray:
     return P["goalie"]["coef"] * x
 
 
+def b2b_goalie_offset(P: dict, gap) -> np.ndarray:
+    """Team-specific backup-on-back-to-back adjustment when starters are NOT
+    known (season simulation): extra log multiplier on goals AGAINST in a
+    team's back-to-back games, for a primary-minus-backup save-talent gap
+    ``gap`` (goals saved per shot), beyond the league-average backup effect
+    that ctx['b2b_d'] already contains:
+        coef * -(p_backup_b2b - p_backup_other) * (gap - avg_gap)
+    (usage shares and avg_gap from ``structural.backup_usage``). Add it to
+    the goals of the team's OPPONENT in the team's b2b games."""
+    g = P["goalie"]
+    x = -(g.get("p_backup_b2b", 0.52) - g.get("p_backup_other", 0.34)) * (
+        np.asarray(gap, float) - g.get("avg_gap", 0.004))
+    return g["coef"] * x
+
+
 def rates(P, o_h, d_h, o_a, d_a, sch=None, mu=None, h=None, goalie_h=None,
           goalie_a=None):
     """Expected regulation goals (lam_home, lam_away) for arrays of games.
