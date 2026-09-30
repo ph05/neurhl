@@ -1,0 +1,89 @@
+{
+ "through": "2026-09-29",
+ "games_played": 5,
+ "games": {
+  "neurhl_0925_freeze": {
+   "n": 5,
+   "log_loss": 0.8564259576532406,
+   "brier": 0.3289734152902001,
+   "accuracy": 0.2,
+   "published_before_first_game": true
+  },
+  "neurhl_1.0": {
+   "n": 5,
+   "log_loss": 0.7262421961034218,
+   "brier": 0.26530866678,
+   "accuracy": 0.6,
+   "published_before_first_game": true
+  },
+  "neurhl_1.1": {
+   "n": 5,
+   "log_loss": 0.7389089214545927,
+   "brier": 0.27065731443999996,
+   "accuracy": 0.6,
+   "published_before_first_game": true
+  },
+  "neurhl_1.2": {
+   "n": 5,
+   "log_loss": 0.7404883245659482,
+   "brier": 0.27143222086,
+   "accuracy": 0.6,
+   "published_before_first_game": false
+  },
+  "neurhl_1.3": {
+   "n": 5,
+   "log_loss": 0.7404883245659482,
+   "brier": 0.27143222086,
+   "accuracy": 0.6,
+   "published_before_first_game": false
+  },
+  "neurhl_G_pregame": {
+   "n": 5,
+   "log_loss": 0.7494483392320482,
+   "brier": 0.27545524897999996,
+   "accuracy": 0.6
+  },
+  "neurhl_H_pregame": {
+   "n": 5,
+   "log_loss": 0.7491188116987979,
+   "brier": 0.27686708006,
+   "accuracy": 0.6
+  },
+  "elo_pregame": {
+   "n": 5,
+   "log_loss": 0.7390857931273624,
+   "brier": 0.27196018408,
+   "accuracy": 0.6
+  }
+ },
+ "teams_interim": {
+  "neurhl_0925_freeze": {
+   "teams": 10,
+   "mae_points_so_far": 0.9103437000000001,
+   "rmse_points_so_far": 0.9694792570920227
+  },
+  "neurhl_1.0": {
+   "teams": 10,
+   "mae_points_so_far": 0.7823239999999999,
+   "rmse_points_so_far": 0.8362410680539433
+  },
+  "neurhl_1.1": {
+   "teams": 10,
+   "mae_points_so_far": 0.7937749999999999,
+   "rmse_points_so_far": 0.8510624360351008
+  },
+  "neurhl_1.2": {
+   "teams": 10,
+   "mae_points_so_far": 0.795562,
+   "rmse_points_so_far": 0.8528868638219257
+  },
+  "neurhl_1.3": {
+   "teams": 10,
+   "mae_points_so_far": 0.795562,
+   "rmse_points_so_far": 0.8528868638219257
+  }
+ },
+ "teams_final": {
+  "status": "season not complete"
+ }
+}
