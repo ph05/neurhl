@@ -1,0 +1,19 @@
+{
+ "as_of": "2026-09-30",
+ "games_played": 5,
+ "final": false,
+ "games": {
+  "n_games": 5,
+  "neurhl_1_0": 0.7262421961034218,
+  "elo": 0.7390857931273624,
+  "freeze_0925": 0.8564248581831535,
+  "diff_vs_elo": -0.012843597023940745,
+  "diff_vs_0925": -0.1301826620797315,
+  "home_win_rate": 0.4
+ },
+ "standings": {
+  "final": false,
+  "teams": 10,
+  "pace_mae_neurhl_1_0": 66.04281
+ }
+}

@@ -1,0 +1,22 @@
+{
+ "as_of": "2026-09-30",
+ "games_played": 5,
+ "final": false,
+ "note": "interim: descriptive only",
+ "team_goals": {
+  "frozen": {
+   "mae_goals_for": 1.7442521428571431,
+   "mae_goals_against": 1.6379615476190477
+  },
+  "cal": {
+   "mae_goals_for": 1.7347303571428572,
+   "mae_goals_against": 1.6595872619047618
+  },
+  "unit": "regulation goals per game (pace)"
+ },
+ "seasons": {
+  "v2_20260929": {
+   "pace_mae": 66.62821
+  }
+ }
+}

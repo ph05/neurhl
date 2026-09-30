@@ -1,0 +1,31 @@
+{
+ "as_of": "2026-09-30",
+ "status": "interim",
+ "note": "interim: descriptive only; inference once, after 2027-04-10",
+ "r_hat": 98.68,
+ "b_hat": 0.7015,
+ "M": 2.9708738327026367,
+ "games": 5,
+ "goals": {
+  "n_team_games": 10,
+  "mean_new": -2.190800841815885,
+  "mean_frozen": -2.226745442153319,
+  "diff": 0.03594460033743472,
+  "se_team_clustered": 0.040248109803306995
+ },
+ "sog": {
+  "available": false
+ },
+ "xg": {
+  "available": false
+ },
+ "xg_slope": {
+  "available": false
+ },
+ "pp_opps": {
+  "available": false
+ },
+ "skater_sog": {
+  "available": false
+ }
+}
