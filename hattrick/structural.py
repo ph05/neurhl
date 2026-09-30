@@ -366,3 +366,35 @@ def _glm_all_fe() -> pd.DataFrame:
                     g[["season_end", "away"]].rename(columns={"away": "team"})])
     gp = gp.groupby(["team", "season_end"]).size().rename("gp").reset_index()
     return fe.merge(gp, on=["team", "season_end"])
+
+
+def backup_usage(max_season: int, min_season: int = 2011,
+                 goalie_key: tuple = (3000.0, -0.002, 1.0, 12.0)) -> dict:
+    """Back-to-back goalie usage from seasons [min_season, max_season]:
+    share of starts by a team's non-primary goalie (primary = most starts
+    that season) on the second night of a back-to-back vs other games, and
+    the mean talent gap primary - most-used backup (goals saved per shot,
+    pregame talents)."""
+    g = game_frame()
+    g = g[g.gk_h.notna() & g.gk_a.notna() & (g.season_end >= min_season)
+          & (g.season_end <= max_season)]
+    gt = goalie_game_talent(*goalie_key)
+    g = g.merge(gt[["gid", "gt_h", "gt_a"]], on="gid")
+    t = pd.concat([g[["season_end", "home", "gk_h", "rest_h", "gt_h"]].set_axis(
+        ["season_end", "team", "gk", "rest", "talent"], axis=1),
+        g[["season_end", "away", "gk_a", "rest_a", "gt_a"]].set_axis(
+        ["season_end", "team", "gk", "rest", "talent"], axis=1)])
+    n = t.groupby(["season_end", "team", "gk"]).agg(n=("rest", "size"),
+                                                     talent=("talent", "mean")).reset_index()
+    n = n.sort_values("n", ascending=False)
+    prim = n.drop_duplicates(["season_end", "team"])
+    back = n[~n.set_index(["season_end", "team", "gk"]).index.isin(
+        prim.set_index(["season_end", "team", "gk"]).index)].drop_duplicates(["season_end", "team"])
+    t = t.merge(prim[["season_end", "team", "gk"]].rename(columns={"gk": "prim"}),
+                on=["season_end", "team"])
+    t["backup"] = t.gk != t.prim
+    gap = prim.merge(back, on=["season_end", "team"], suffixes=("_p", "_b"))
+    return {"p_backup_b2b": float(t.backup[t.rest == 1].mean()),
+            "p_backup_other": float(t.backup[t.rest != 1].mean()),
+            "avg_gap": float((gap.talent_p - gap.talent_b).mean()),
+            "seasons": [min_season, max_season]}
