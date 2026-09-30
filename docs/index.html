@@ -53,6 +53,7 @@
 <div class="wrap"><table id="t_odds"></table></div>
 
 <h2 id="teamstats">Projected team statistics (season totals)</h2>
+<p class="note">GF and GA include overtime goals and one goal for each shootout win, as in the standings. Power-play figures are season-level expectations.</p>
 <div class="wrap"><table id="t_team"></table></div>
 
 <h2 id="today">Today</h2>
@@ -77,7 +78,7 @@
   <label><input type="checkbox" id="s_all"> Show all rows</label>
 </div>
 <div class="wrap"><table id="t_sk"></table></div>
-<p class="note">Expected values over lineup draws; GP is the expected number of games dressed. P10/P90 are percentiles of season points. oiXGF/oiXGA: on-ice expected goals for and against. FO%: faceoffs won (players with over 50 projected faceoffs).</p>
+<p class="note">Expected values over lineup draws; GP is the expected number of games dressed. Goals, assists and points include overtime goals. P10/P90 are percentiles of season points. oiXGF/oiXGA: on-ice expected goals for and against. FO%: faceoffs won (players with over 50 projected faceoffs).</p>
 
 <h2 id="goalies">Goalie projections</h2>
 <div class="wrap"><table id="t_gl"></table></div>
@@ -96,6 +97,8 @@
 <dd>A logistic regression combining the game model, a neural player-level model and Elo, fitted on out-of-sample predictions from earlier seasons.</dd>
 <dt>Lineups and availability</dt>
 <dd>For the season projection, each team's roster is sampled game by game: a model of each skater's probability of dressing, injured players out until their return date, call-ups filling gaps, and goalie start shares with a back-to-back adjustment. Game-day forecasts use the posted or projected lineup instead.</dd>
+<dt>Season-level adjustments</dt>
+<dd>The season projection assembles every game from each player's and team's opening-night inputs, which carry the opening weeks' higher rate of power plays into all 84 games. On eleven past seasons, power-play opportunities from these inputs ran 33% above the season totals and power-play time 24% above. Power-play opportunities, power-play time and expected goals are therefore scaled by ratios estimated on 2011-12 to 2017-18 (0.776, 0.826, 0.961) and checked on 2018-19 to 2023-24. The model predicts regulation goals; season totals add expected overtime goals and shootout-deciding goals from each game's probability of going past regulation. The goal level is set so that projected regulation goals over the whole schedule match 2025-26.</dd>
 <dt>Season simulation</dt>
 <dd>Each simulated season draws one strength shock per team (standard deviation 0.07 on the log goal rate), plays every game from its probabilities, and applies the NHL's standings, tiebreakers and playoff format. A walk-forward backtest on 2019-2024 found this setting calibrated: 80% intervals covered 82% of team point totals.</dd>
 <dt>Stat-sheet distributions</dt>
@@ -186,7 +189,7 @@
     { k: "start", h: "Start (ET)", l: 1, f: s => s ? new Date(s).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }) : "" },
     { k: "away", h: "Away", l: 1 }, { k: "home", h: "Home", l: 1 }, { k: "g", h: "P(home)", f: pc },
     { k: "h", h: "Player model", f: pc }, { k: "elo", h: "Elo", f: pc }, { k: "ot", h: "P(OT)", f: pc },
-    { k: "score", h: "Goals A-H", f: s => s ? `${Number(s[1]).toFixed(2)}-${Number(s[0]).toFixed(2)}` : "" },
+    { k: "score", h: "Reg. goals A-H", t: "Expected regulation goals", f: s => s ? `${Number(s[1]).toFixed(2)}-${Number(s[0]).toFixed(2)}` : "" },
     { k: "xg", h: "xG A-H", f: s => s ? `${Number(s[1]).toFixed(2)}-${Number(s[0]).toFixed(2)}` : "" },
     { k: "sog", h: "SOG A-H", f: s => s ? `${Number(s[1]).toFixed(1)}-${Number(s[0]).toFixed(1)}` : "" },
     { k: "lineup", h: "Lineups A/H", l: 1, f: s => s ? `${src(s[1])} / ${src(s[0])}` : "" }, { k: "kind", h: "Forecast", l: 1 }
