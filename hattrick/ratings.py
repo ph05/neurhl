@@ -85,6 +85,7 @@ class HP:
     window: int = 8               # seasons of history for structural fits
     h_halflife: float = 3.0       # recency half-life (seasons) for home ice
     use_roster: bool = False      # add the bottom-up roster second stage
+    pre_sp: bool = False          # preseason: separate net (o-d) / pace (o+d) regressions
     pace_prior: float = 1.0       # x prior variance along pace (o + d) directions
     pace_q: float = 1.0           # x process variance along pace directions
 
@@ -247,12 +248,23 @@ def _preseason_fit(V: int, ridge: float, use_roster: bool) -> dict:
     xo = tr[[f"{k}{l}" for l in (1, 2) for k in OFF_FEATS]].to_numpy()
     xd = tr[[f"{k}{l}" for l in (1, 2) for k in DEF_FEATS]].to_numpy()
     Xo, Xd = xo, xd
-    X = np.r_[Xo, Xd]
-    y = np.r_[tr.o_fe, tr.d_fe]
-    b = _ridge(X, y, np.r_[w, w], ridge)
-    res_o = tr.o_fe.to_numpy() - np.column_stack([np.ones(len(Xo)), Xo]) @ b
-    res_d = tr.d_fe.to_numpy() - np.column_stack([np.ones(len(Xd)), Xd]) @ b
-    out["beta_goals"] = b.tolist()
+    if use_roster == "sp":
+        # net strength and pace regress at their own rates
+        bs_ = _ridge(Xo - Xd, (tr.o_fe - tr.d_fe).to_numpy(), w, ridge)
+        bp_ = _ridge(Xo + Xd, (tr.o_fe + tr.d_fe).to_numpy(), w, ridge)
+        s_hat = np.column_stack([np.ones(len(Xo)), Xo - Xd]) @ bs_
+        p_hat = np.column_stack([np.ones(len(Xo)), Xo + Xd]) @ bp_
+        res_o = tr.o_fe.to_numpy() - (s_hat + p_hat) / 2
+        res_d = tr.d_fe.to_numpy() - (p_hat - s_hat) / 2
+        out["beta_net"], out["beta_pace"] = bs_.tolist(), bp_.tolist()
+        b = None
+    else:
+        X = np.r_[Xo, Xd]
+        y = np.r_[tr.o_fe, tr.d_fe]
+        b = _ridge(X, y, np.r_[w, w], ridge)
+        res_o = tr.o_fe.to_numpy() - np.column_stack([np.ones(len(Xo)), Xo]) @ b
+        res_d = tr.d_fe.to_numpy() - np.column_stack([np.ones(len(Xd)), Xd]) @ b
+    out["beta_goals"] = None if b is None else b.tolist()
     out["feat_goals"] = ["const"] + [f"{k}{l}" for l in (1, 2) for k in OFF_FEATS]
     # shots (seasons with shot targets)
     ts = tr[tr.so_fe.notna()]
@@ -260,10 +272,19 @@ def _preseason_fit(V: int, ridge: float, use_roster: bool) -> dict:
         so_X = ts[["sf1", "cf1", "sf2"]].to_numpy()
         sd_X = ts[["sa1", "ca1", "sa2"]].to_numpy()
         ws = (ts.gp / 82.0).to_numpy()
-        bs = _ridge(np.r_[so_X, sd_X], np.r_[ts.so_fe, ts.sd_fe], np.r_[ws, ws], ridge)
-        out["beta_shots"] = bs.tolist()
-        r_so = ts.so_fe.to_numpy() - np.column_stack([np.ones(len(ts)), so_X]) @ bs
-        r_sd = ts.sd_fe.to_numpy() - np.column_stack([np.ones(len(ts)), sd_X]) @ bs
+        if use_roster == "sp":
+            b1 = _ridge(so_X - sd_X, (ts.so_fe - ts.sd_fe).to_numpy(), ws, ridge)
+            b2 = _ridge(so_X + sd_X, (ts.so_fe + ts.sd_fe).to_numpy(), ws, ridge)
+            sn = np.column_stack([np.ones(len(ts)), so_X - sd_X]) @ b1
+            sp_ = np.column_stack([np.ones(len(ts)), so_X + sd_X]) @ b2
+            r_so = ts.so_fe.to_numpy() - (sn + sp_) / 2
+            r_sd = ts.sd_fe.to_numpy() - (sp_ - sn) / 2
+            out["beta_shots_net"], out["beta_shots_pace"] = b1.tolist(), b2.tolist()
+        else:
+            bs = _ridge(np.r_[so_X, sd_X], np.r_[ts.so_fe, ts.sd_fe], np.r_[ws, ws], ridge)
+            out["beta_shots"] = bs.tolist()
+            r_so = ts.so_fe.to_numpy() - np.column_stack([np.ones(len(ts)), so_X]) @ bs
+            r_sd = ts.sd_fe.to_numpy() - np.column_stack([np.ones(len(ts)), sd_X]) @ bs
         m = tr.so_fe.notna().to_numpy()
         r_fo = res_o[m] - r_so
         r_fd = res_d[m] - r_sd
@@ -288,14 +309,14 @@ def _psd(M, floor):
 
 
 def preseason_table(V: int, ridge: float = 0.05, use_roster: bool = False,
-                    teams: list[str] | None = None) -> pd.DataFrame:
+                    teams: list[str] | None = None, sp: bool = False) -> pd.DataFrame:
     """Top-down preseason ratings for season V from seasons < V only.
 
     Columns: team, o, d, so, sd, fo, fd, o_sd, d_sd, od_cov (true-talent
     prior covariance of o and d), and cov4 (4x4 covariance of so, sd, fo, fd
     as a nested list) for the filter."""
     teams = teams or _teams_of(V)
-    fit = _preseason_fit(V, ridge, False)
+    fit = _preseason_fit(V, ridge, "sp" if sp else False)
     des = _design(V, teams)
     if not fit:                       # before the regression has any data
         fe = S.glm_all_fe().set_index(["team", "season_end"])
@@ -305,18 +326,32 @@ def preseason_table(V: int, ridge: float = 0.05, use_roster: bool = False,
         so, sd = 0.6 * o, 0.6 * d
         cov4 = np.diag([0.05 ** 2, 0.05 ** 2, 0.06 ** 2, 0.06 ** 2])
     else:
-        b = np.array(fit["beta_goals"])
         xo = des[[f"{k}{l}" for l in (1, 2) for k in OFF_FEATS]].to_numpy()
         xd = des[[f"{k}{l}" for l in (1, 2) for k in DEF_FEATS]].to_numpy()
-        o = b[0] + xo @ b[1:]
-        d = b[0] + xd @ b[1:]
+        if fit.get("beta_goals") is not None:
+            b = np.array(fit["beta_goals"])
+            o = b[0] + xo @ b[1:]
+            d = b[0] + xd @ b[1:]
+        else:
+            bn, bp = np.array(fit["beta_net"]), np.array(fit["beta_pace"])
+            s_ = bn[0] + (xo - xd) @ bn[1:]
+            p_ = bp[0] + (xo + xd) @ bp[1:]
+            o, d = (s_ + p_) / 2, (p_ - s_) / 2
         # centre (ratings are relative to the league level mu)
         o, d = o - o.mean(), d - d.mean()
         cov2 = np.array(fit["cov2"])
-        if "beta_shots" in fit:
-            bs = np.array(fit["beta_shots"])
-            so = bs[0] + des[["sf1", "cf1", "sf2"]].to_numpy() @ bs[1:]
-            sd = bs[0] + des[["sa1", "ca1", "sa2"]].to_numpy() @ bs[1:]
+        if "beta_shots" in fit or "beta_shots_net" in fit:
+            fo_X = des[["sf1", "cf1", "sf2"]].to_numpy()
+            fd_X = des[["sa1", "ca1", "sa2"]].to_numpy()
+            if "beta_shots" in fit:
+                bs = np.array(fit["beta_shots"])
+                so = bs[0] + fo_X @ bs[1:]
+                sd = bs[0] + fd_X @ bs[1:]
+            else:
+                b1, b2 = np.array(fit["beta_shots_net"]), np.array(fit["beta_shots_pace"])
+                sn = b1[0] + (fo_X - fd_X) @ b1[1:]
+                spc = b2[0] + (fo_X + fd_X) @ b2[1:]
+                so, sd = (sn + spc) / 2, (spc - sn) / 2
             so, sd = so - so.mean(), sd - sd.mean()
             cov4 = np.array(fit["cov4"])
         else:
@@ -362,7 +397,7 @@ def preseason(V: int, market: pd.DataFrame | None = None, market_weight: float =
     (``blend_market``); the uncertainty is then left unchanged (the caller
     owns the blend weight and any variance reduction)."""
     hp = load_hp()
-    pre = preseason_table(V, hp.ridge, use_roster=hp.use_roster)
+    pre = preseason_table(V, hp.ridge, use_roster=hp.use_roster, sp=hp.pre_sp)
     if market is not None and market_weight > 0:
         P = P or GM.load_params()
         pre = blend_market(pre, market_strength(market, P), market_weight)
@@ -424,7 +459,7 @@ def market_history() -> pd.DataFrame | None:
 def _season_setup(V: int, hp: HP) -> dict:
     """Priors and structural parameters for season V (from seasons < V)."""
     st = S.structural(V, hp.window, hp.h_halflife, goalie_key=hp.goalie)
-    pre = preseason_table(V, hp.ridge, use_roster=hp.use_roster)
+    pre = preseason_table(V, hp.ridge, use_roster=hp.use_roster, sp=hp.pre_sp)
     return {"st": st, "pre": pre}
 
 
@@ -707,7 +742,7 @@ class InSeasonFilter:
         need = {"so", "sd", "fo", "fd", "cov4"}
         if need <= set(pre.columns):
             return pre
-        full = preseason_table(self.V, self.hp.ridge, teams=list(pre.team))
+        full = preseason_table(self.V, self.hp.ridge, teams=list(pre.team), sp=self.hp.pre_sp)
         c4 = np.array(full.cov4.iloc[0])
         out = pre.copy()
         # split o (d) between shot and finishing parts in the prior's proportion

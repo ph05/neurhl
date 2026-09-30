@@ -60,19 +60,26 @@ Calling the model for a schedule (e.g. the 2026-27 season simulator)
     o = pre.set_index("team").o; d = pre.set_index("team").d
     lh, la = GM.rates(P, o[sch.home].to_numpy(), d[sch.home].to_numpy(),
                       o[sch.away].to_numpy(), d[sch.away].to_numpy(), sch)
-    probs = GM.outcome_probs(lh, la, P)        # dict of arrays, one per game
+    probs = GM.outcome_probs(lh, la, P)        # dict of arrays, one per game:
+    #   p_home_reg, p_tie, p_away_reg, p_home_ot, p_away_ot, p_home_so,
+    #   p_away_so, p_home_win, p_so, e_reg_h/a, e_gf_h/a (standings goals),
+    #   e_gf_h/a_noso, e_pts_h/a
     # Monte Carlo: tile lh/la over simulations (or draw o, d per simulation
-    # from N(o, o_sd) etc. and recompute rates), then
-    s = GM.sample(lh_tiled, la_tiled, P, rng)  # reg_h, reg_a, extra, home_win,
-                                               # gf_h, gf_a (standings convention)
-Everything is vectorised numpy; ``sample`` handles ~27M games in chunks.
+    # from N(o, o_sd), N(d, d_sd) with od_cov and recompute rates), then
+    s = GM.sample(lh_tiled, la_tiled, P, rng)  # int16 arrays reg_h, reg_a,
+    #   extra (0 REG / 1 OT / 2 SO), home_win, gf_h, gf_a (standings goals)
+Everything is vectorised numpy; ``sample`` runs ~0.5 s per million games
+(tabulated fast path), so 1,344 x 20,000 games take ~15 s.
+Known starting goalies: add GM.goalie_offset(P, talent_diff) to the
+OPPONENT's log rate and use P["ctx_gk"] instead of P["ctx"]; unknown
+starters in a simulation: GM.b2b_goalie_offset(P, gap) per team for its
+back-to-back games (the league-average backup effect is already in ctx).
+In season: hattrick.ratings.InSeasonFilter(pre, load_filter_params()).
 """
 from __future__ import annotations
 
 import functools
 import json
-from dataclasses import dataclass
-
 import numpy as np
 from scipy.optimize import minimize
 from scipy.special import expit, gammaln, ive
@@ -601,21 +608,6 @@ def margin_loglik(M, margin, w=None):
     return float(np.sum(w * np.log(p)) / w.sum())
 
 
-def _aggregate(lh, la, margin, w, step=0.02):
-    """Collapse games onto a grid of (log lh, log la) cells with per-cell
-    weighted counts of the 9 margin bins (exact up to the grid rounding)."""
-    kh = np.round(np.log(lh) / step).astype(np.int64)
-    ka = np.round(np.log(la) / step).astype(np.int64)
-    key = (kh - kh.min()) * 100000 + (ka - ka.min())
-    uk, inv = np.unique(key, return_inverse=True)
-    idx = np.clip(np.asarray(margin), -4, 4) + 4
-    cnt = np.zeros((len(uk), 9))
-    np.add.at(cnt, (inv, idx), w)
-    lh_c = np.exp(np.bincount(inv, np.log(lh) * w) / np.bincount(inv, w))
-    la_c = np.exp(np.bincount(inv, np.log(la) * w) / np.bincount(inv, w))
-    return lh_c, la_c, cnt
-
-
 def fit_layer(lh, la, reg_h, reg_a, w=None, x0=None, prior_sd: float = 1.5,
               fit_kappa: bool = True, max_games: int = 12000, seed: int = 0) -> dict:
     """Joint ML fit of the base dispersion kappa and the end-game layer on
@@ -689,15 +681,6 @@ def fit_ot(lh, la, extra, home_win, w=None, prior_sd=None) -> dict:
                   method="BFGS").x
     return {"c0": float(zd[0]), "c1": float(zd[1]), "a_ot": float(zo[0]),
             "b_ot": float(zo[1]), "a_so": float(zs[0]), "b_so": float(zs[1])}
-
-
-@dataclass
-class Strengths:
-    """Convenience container: per-game log-rate inputs."""
-    o_h: np.ndarray
-    d_h: np.ndarray
-    o_a: np.ndarray
-    d_a: np.ndarray
 
 
 def expected_points_vs_average(strength, P, home_share: float = 0.5) -> np.ndarray:

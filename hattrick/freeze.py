@@ -78,44 +78,109 @@ def _commit() -> str:
 # ---------------------------------------------------------------------------
 # Rosters at the market date and at the cutoff
 # ---------------------------------------------------------------------------
-def august_roster(ros: pd.DataFrame) -> pd.DataFrame:
-    """Undo every roster move recorded since the August snapshot (the market
-    lines were recorded 2026-08-17): moves files are applied in reverse."""
-    r = ros[["player_id", "team", "grp"]].copy()
-    moves = [("2026-09-29", "moves_vs_2026-09-28.csv"), ("2026-09-28", "moves_vs_2026-09-27.csv"),
-             ("2026-09-27", "moves_vs_2026-08.csv")]
-    for d, f in moves:
-        m = pd.read_csv(SNAP.path(f"data/raw/rosters/{d}/{f}"))
-        m["grp"] = np.where(m.pos == "G", "G", np.where(m.pos == "D", "D", "F"))
-        for x in m.itertuples(index=False):
-            if x.change == "added":
-                r = r[~((r.player_id == x.player_id) & (r.team == x.team))]
-            elif x.change == "removed":
-                if not ((r.player_id == x.player_id) & (r.team == x.team)).any():
-                    r = pd.concat([r, pd.DataFrame([{"player_id": x.player_id, "team": x.team,
-                                                     "grp": x.grp}])])
-    return r.drop_duplicates("player_id").reset_index(drop=True)
+MARKET_DATE = pd.Timestamp("2026-08-17")
+MOVE_FILES = [("2026-09-27", "moves_vs_2026-08.csv"), ("2026-09-28", "moves_vs_2026-09-27.csv"),
+              ("2026-09-29", "moves_vs_2026-09-28.csv")]
 
 
-def components_now_and_august():
-    """Bottom-up components at the cutoff (with injuries, suspensions, the
-    Hellebuyck mixture) and at the market date (August roster, all healthy)."""
+def news_moves(ros: pd.DataFrame) -> pd.DataFrame:
+    """Roster news after the market date that the line could not have priced.
+
+    Only moves that change an NHL team's real strength are kept:
+      * explicit team switches of players with 20+ NHL games in 2025-26 (a
+        player removed from one club and added to another in the roster
+        diffs: trades, terminations and re-signings),
+        e.g. Kreider ANA->MTL (09-12), Evangelista NSH->NJD (09-02), the
+        Knies/Marchenko/Andrae trade (09-28), plus Merzlikins CBJ->TOR (09-28,
+        per the injury research file);
+      * veterans (age >= 25, 50+ NHL games in 2025-26) added from outside.
+    Camp churn (prospects added, depth players assigned or waived) is ignored:
+    the line already assumed a typical opening lineup.
+    Returns player_id, from_team (None = not on an NHL club), to_team.
+    """
+    ms = pd.concat([pd.read_csv(SNAP.path(f"data/raw/rosters/{d}/{f}")) for d, f in MOVE_FILES])
+    sk = D.skater_seasons()
+    gs = D.goalie_seasons()
+    last = pd.concat([sk[sk.season_end == V - 1].groupby("player_id").gp.sum(),
+                      gs[gs.season_end == V - 1].groupby("player_id").gp.sum()])
+    last = last.groupby(level=0).sum()
+    ages = D.age_on(ros.set_index("player_id").birth, V)
+    out = []
+    for pid, d in ms.groupby("player_id"):
+        rem = d[d.change == "removed"].team.tolist()
+        add = d[d.change == "added"].team.tolist()
+        if rem and add and rem[0] != add[-1] and last.get(pid, 0) >= 20:
+            out.append((pid, rem[0], add[-1], "switch"))
+        elif add and not rem and last.get(pid, 0) >= 50 and ages.get(pid, 0) >= 25:
+            out.append((pid, None, add[-1], "veteran addition"))
+    out.append((8478007, "CBJ", "TOR", "switch (research file)"))   # Merzlikins
+    m = pd.DataFrame(out, columns=["player_id", "from_team", "to_team", "kind"])
+    return m.drop_duplicates("player_id", keep="last")
+
+
+def news_components():
+    """Bottom-up components at the cutoff and in the counterfactual 'market
+    date' state: same roster except the news moves undone, every injury,
+    suspension and holdout reported after the market date healed, and
+    Hellebuyck in Winnipeg. LTIR placements made before the market date
+    (Pietrangelo, Ellis) stay in both states."""
     from hattrick import deploy as DP
     from hattrick import goalies as GL
     from hattrick import players as PL
     from hattrick import team_components as TC
 
-    now = pd.read_csv(OUT / f"team_components_{V}.csv")
     ros = PL.roster_2027()
-    aug = august_roster(ros)
-    sk = aug[aug.grp != "G"][["player_id", "team"]]
-    gl = aug[aug.grp == "G"][["player_id", "team"]]
-    info = ros.set_index("player_id")
-    extra = (sk.assign(pos="F").merge(ros[["player_id", "grp", "birth", "name"]], on="player_id", how="left"))
-    extra["pos"] = np.where(extra.grp == "D", "D", "F")
-    augc, _ = TC.components(V, sk, gl, GAMES, roster_kind="opening",
-                            extra=extra[["player_id", "pos", "birth", "name"]].dropna(subset=["pos"]))
-    return now, augc, aug
+    moves = news_moves(ros)
+    cf = ros.copy()
+    for mv in moves.itertuples(index=False):
+        if mv.player_id in set(cf.player_id):
+            if mv.from_team is None:
+                cf = cf[cf.player_id != mv.player_id]
+            else:
+                cf.loc[cf.player_id == mv.player_id, "team"] = mv.from_team
+    status = D.availability_raw_2027().set_index("player_id").manual_status.dropna()
+    pre_market_out = [pid for pid, st in status.items() if st == "LTIR"]
+
+    def comps(r, injuries: bool):
+        sk = r[r.grp != "G"]
+        gl = r[r.grp == "G"][["player_id", "team", "birth", "name"]]
+        extra = sk.assign(pos=np.where(sk.grp == "D", "D", "F"))[["player_id", "pos", "birth", "name"]]
+        if injuries:
+            go, rng_, _ = DP.games_out_2027(sk, GAMES, with_range=True)
+            ggo, gpres, _ = GL.goalie_status_2027(gl, GAMES)
+        else:
+            go = pd.Series(0.0, index=sk.player_id.to_numpy())
+            go[go.index.isin(pre_market_out)] = GAMES
+            rng_, ggo, gpres = None, None, None
+        c, _ = TC.components(V, sk[["player_id", "team", "name"]], gl, GAMES,
+                             roster_kind="opening", games_out=go, games_out_range=rng_,
+                             goalie_out=ggo, goalie_present=gpres, extra=extra)
+        return c
+
+    now = pd.read_csv(OUT / f"team_components_{V}.csv")
+    return now, comps(cf, injuries=False), moves
+
+
+def points_per_goal_diff() -> float:
+    """Standings points per goal of differential (per 82), fitted on 2012-2026."""
+    st = T.standings_all()
+    st = st[(st.season_end >= 2012) & ~st.season_end.isin(C.BROKEN_SEASONS)]
+    x = (st.gf - st.ga) * 82.0 / st.gp
+    return float(np.polyfit(x, st.pts82, 1)[0])
+
+
+def value_news(now: pd.DataFrame, cf: pd.DataFrame) -> pd.DataFrame:
+    """Price the news as points per 82: change in projected goal differential
+    per game (skater goals incl. call-ups; goaltending GSAx; half of the
+    even-strength on-ice xGA index, since relative on-ice impacts overlap
+    within a line) times points per goal of differential."""
+    a, b = now.set_index("team"), cf.set_index("team").reindex(now.team)
+    d_gf = a.gf_pg_total - b.gf_pg_total
+    d_ga = -(a.goalie_gsax60 - b.goalie_gsax60) + 0.5 * (a.ev_xga_impact - b.ev_xga_impact) * 49.0 / 60.0
+    ppg = points_per_goal_diff()
+    return pd.DataFrame({"team": a.index, "news_d_gf_pg": d_gf.to_numpy(),
+                         "news_d_ga_pg": d_ga.to_numpy(),
+                         "news_rel82": (ppg * 82.0 * (d_gf - d_ga)).to_numpy()})
 
 
 def hellebuyck_adjustment(now: pd.DataFrame, goalies: pd.DataFrame) -> pd.Series:
@@ -138,23 +203,26 @@ def hellebuyck_adjustment(now: pd.DataFrame, goalies: pd.DataFrame) -> pd.Series
 def team_targets(log: dict) -> pd.DataFrame:
     from hattrick import players as PL  # noqa: F401  (ensures params exist)
     goalies = pd.read_csv(OUT / f"goalie_rates_{V}.csv")
-    now, augc, aug = components_now_and_august()
+    now, cf, moves = news_components()
     now = now.copy()
     now["goalie_gsax60"] = now.goalie_gsax60 + now.team.map(hellebuyck_adjustment(now, goalies))
+    news = value_news(now, cf).set_index("team").news_rel82
 
-    # roster-change model, fitted on history (walk-forward up to 2026)
+    # roster-change model (current roster vs last season's), fitted on history
     hist_delta = pd.read_csv(RD.OUT)
     rd_fit = RD.to_points(hist_delta, V)
     comps = [c[2:] for c in rd_fit["cols"]]
-
-    def delta(a, b):
-        a, b = a.set_index("team"), b.set_index("team")
-        return pd.DataFrame({"team": a.index, **{f"d_{c}": (a[c] - b[c].reindex(a.index)).to_numpy()
-                                                  for c in comps}})
-
-    news = RD.apply(rd_fit, delta(now, augc))              # 08-17 -> cutoff
-    prev = RD.previous_components(V, GAMES)
-    rd = RD.apply(rd_fit, delta(now, prev))                 # 2025-26 roster -> now
+    a_, b_ = now.set_index("team"), RD.previous_components(V, GAMES).set_index("team")
+    rd = RD.apply(rd_fit, pd.DataFrame({"team": a_.index, **{f"d_{c}": (a_[c] - b_[c].reindex(a_.index)).to_numpy()
+                                                          for c in comps}}))
+    # bottom-up roster view (hattrick.team_points_map), fitted on 2011-2026
+    from hattrick import team_points_map as TPM
+    bu_hist = pd.read_csv(C.OUT / "backtest" / "team_components_hist.csv")
+    bu_fit = TPM.fit(pd.concat([bu_hist, now.assign(season_end=V)], ignore_index=True), V)
+    bu = TPM.predict(bu_fit, pd.concat([bu_hist, now.assign(season_end=V)], ignore_index=True), V)
+    bu = bu.set_index("team").bu_rel82
+    log["news_moves"] = moves.assign(player_id=moves.player_id.astype(int)).to_dict("records")
+    log["points_per_goal_diff"] = points_per_goal_diff()
 
     teams = sorted(C.TEAMS_2027)
     mk = T.market_rel82(V).set_index("team").mkt_rel82.reindex(teams)
@@ -163,17 +231,27 @@ def team_targets(log: dict) -> pd.DataFrame:
                       "mkt_line_rel82": mk.to_numpy(), "news_rel82": news.reindex(teams).to_numpy(),
                       "td_rel82": td.reindex(teams).to_numpy(),
                       "tdr_rel82": (td.reindex(teams) + rd.reindex(teams)).to_numpy(),
-                      "rd_rel82": rd.reindex(teams).to_numpy()})
+                      "rd_rel82": rd.reindex(teams).to_numpy(),
+                      "bu_rel82": bu.reindex(teams).to_numpy()})
 
     # blend weights: all seasons with a market line
     hist = T.blend_frame([2019, 2020, 2022, 2023, 2024, 2025, 2026])
+    hist = hist.merge(TPM.walk_forward_points(bu_hist), on=["team", "season_end"], how="left")
     wf = RD.walk_forward(hist_delta)
     hist = hist.merge(wf, on=["team", "season_end"], how="left")
+    hist["rd_rel82"] = hist.rd_rel82.fillna(0.0)          # expansion teams: no previous roster
     hist["tdr_rel82"] = hist.td_rel82 + hist.rd_rel82
-    views = ["mkt_rel82", "td_rel82", "tdr_rel82"]
+    # pre-declared candidate view sets; the one with the lowest leave-one-
+    # season-out RMSE is used, with weights refitted on all market seasons
+    candidates = [["mkt_rel82"], ["mkt_rel82", "td_rel82"], ["mkt_rel82", "tdr_rel82"],
+                  ["mkt_rel82", "td_rel82", "tdr_rel82"], ["mkt_rel82", "bu_rel82"]]
+    scored = []
+    for cand in candidates:
+        l = T.loso_blend(hist, cand)
+        scored.append((float(np.sqrt((l.blend_rmse ** 2 * l.n).sum() / l.n.sum())), cand, l))
+    rmse, views, loso = min(scored, key=lambda x: x[0])
+    log["blend_candidates"] = {"+".join(c): r_ for r_, c, _ in scored}
     w = T.fit_blend(hist, views)
-    loso = T.loso_blend(hist, views)
-    rmse = float(np.sqrt((loso.blend_rmse ** 2 * loso.n).sum() / loso.n.sum()))
     f["target_rel82"] = f[views].to_numpy() @ w
     league84 = T.league_points_per_team(V, GAMES)
     f["target84"] = league84 + f.target_rel82 * GAMES / 82.0
@@ -182,7 +260,6 @@ def team_targets(log: dict) -> pd.DataFrame:
                     "league_points_per_team_84": league84}
     log["talent_sd_82"] = float(np.sqrt(max(rmse ** 2 - T.LUCK_SD_82 ** 2, 1.0)))
     log["hellebuyck"] = HELLEBUYCK
-    log["august_roster_size"] = int(len(aug))
     return f
 
 
@@ -203,6 +280,13 @@ def main():
     model = S.FittedModel(P, V)
     sch = D.schedule_2027()
     adj = model.game_adjustments(sch)
+    adj = add_backup_b2b(adj, sch, P, GM)
+
+    # league scoring level: the same rule the player layer uses (last intact
+    # season), so team goals and the sum of player goals agree
+    lvl = league_level_mu(model, sch, adj, log)
+    P["mu"] = lvl
+    model = S.FittedModel(P, V)
 
     # 2-3: targets and ratings
     tg = team_targets(log)
@@ -213,8 +297,10 @@ def main():
     net_sd = log["talent_sd_82"] * GAMES / 82.0 / slope.reindex(r.team).to_numpy()
     r["o_sd"] = net_sd / np.sqrt(2)
     r["d_sd"] = net_sd / np.sqrt(2)
-    drift = float(json.loads((C.PARAMS / "ratings_hp.json").read_text()).get("season_drift_sd", 0.05)) \
-        if (C.PARAMS / "ratings_hp.json").exists() else 0.05
+    # within-season drift of each of o and d: the in-season filter's daily
+    # process variance (shot-rate + finishing parts) over a ~190-day season
+    hp = json.loads((C.PARAMS / "ratings_hp.json").read_text())["hp"]
+    drift = float(np.sqrt(190 * (hp["q_s"] + hp["q_f"])))
     log["drift_sd"] = drift
     log["rating_sd_net_mean"] = float(np.mean(net_sd))
 
@@ -236,6 +322,7 @@ def main():
     sk.to_csv(OUT / "skaters_2027.csv", index=False, float_format="%.3f")
     gl.to_csv(OUT / "goalies_2027.csv", index=False, float_format="%.4f")
     r.to_csv(OUT / "ratings_2027.csv", index=False, float_format="%.5f")
+    adj.to_csv(OUT / "game_adjustments_2027.csv", index=False, float_format="%.6f")
     sch.to_csv(OUT / "schedule_2027.csv", index=False)
     state = {**log, "sims": a.sims, "seed": a.seed}
     (OUT / "state_2027.json").write_text(json.dumps(state, indent=1, default=float))
@@ -249,6 +336,50 @@ def main():
     (OUT / "manifest_2027.json").write_text(json.dumps(manifest, indent=1))
     print(teams[["team", "points", "points_p10", "points_p90", "playoff_pct", "cup_pct",
                  "target84", "news_rel82"]].round(1).to_string(index=False))
+
+
+def league_level_mu(model, sch, adj, log, drift_var: float = 0.005) -> float:
+    """mu such that expected goals per team-game (regulation + overtime
+    winners, no shootout) equal last season's league level, allowing for the
+    rating dispersion the simulation adds (Jensen: E[exp(x)] = exp(E x + var/2))."""
+    t = D.team_seasons()
+    last = t[t.season_end == V - 1]
+    L = float((last.gf_all / last.gp).mean())
+    P = model.P
+    flat = np.zeros(len(sch))
+    a2 = adj.set_index("game_id").reindex(sch.game_id)
+    mu0 = P["mu"]
+    for _ in range(3):
+        lh, la = model.rates(flat, flat, flat, flat, a2.adj_h.to_numpy(), a2.adj_a.to_numpy())
+        p = model.probs(lh, la)
+        ot = (p["h_ot"] + p["a_ot"]).mean() / 2.0
+        reg = (lh.mean() + la.mean()) / 2.0 * np.exp(0.5 * (2 * 0.0067 + drift_var))
+        P["mu"] = P["mu"] + np.log((L - ot) / reg)
+        model = S.FittedModel(P, V)
+    log["league_level"] = {"gf_per_team_game_target": L, "mu_fitted": mu0, "mu_used": P["mu"]}
+    return P["mu"]
+
+
+def add_backup_b2b(adj, sch, P, GM) -> pd.DataFrame:
+    """Team-specific backup-on-back-to-back effect: a team whose backup is far
+    below its starter loses more on the second night of a back-to-back.
+    Save talent per shot on goal from the goalie layer (per unblocked attempt
+    x attempts per shot on goal)."""
+    g = pd.read_csv(OUT / f"goalie_rates_{V}.csv")
+    g = g[g.p_present > 0.5].sort_values("start_share", ascending=False)
+    per_sog = g.gsax_per_fa * 1.40
+    g = g.assign(t=per_sog)
+    top2 = g.groupby("team").head(2)
+    gap = top2.groupby("team").t.agg(lambda x: x.iloc[0] - x.iloc[1] if len(x) > 1 else 0.0)
+    sf = GM.schedule_features(sch, V)
+    a = adj.copy()
+    b2b_h = (sf.rest_h.to_numpy() == 1)
+    b2b_a = (sf.rest_a.to_numpy() == 1)
+    off_h = GM.b2b_goalie_offset(P, sch.home.map(gap).fillna(0).to_numpy())
+    off_a = GM.b2b_goalie_offset(P, sch.away.map(gap).fillna(0).to_numpy())
+    a["adj_a"] = a.adj_a + np.where(b2b_h, off_h, 0.0)   # home tired -> away scores more
+    a["adj_h"] = a.adj_h + np.where(b2b_a, off_a, 0.0)
+    return a
 
 
 def game_file(sch, r, model, adj, n_draws: int = 400, seed: int = 11) -> pd.DataFrame:

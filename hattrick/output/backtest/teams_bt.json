@@ -48,6 +48,8 @@
  "B_market_seasons": {
   "mkt": {
    "mae": 9.894916261693226,
+   "crps": 7.0530937966691765,
+   "crps_judge_2019_2024": 6.912036035357238,
    "rmse": 12.540137291407486,
    "mae_judge_2019_2024": 9.559991441385536,
    "per_season": [
@@ -111,6 +113,8 @@
   },
   "td": {
    "mae": 10.449117835706815,
+   "crps": 7.388910946072514,
+   "crps_judge_2019_2024": 7.320509754074444,
    "rmse": 13.095148477737133,
    "mae_judge_2019_2024": 10.199516110905295,
    "per_season": [
@@ -174,6 +178,8 @@
   },
   "mkt+td": {
    "mae": 9.895133971842196,
+   "crps": 7.0507217306952095,
+   "crps_judge_2019_2024": 6.88078645389013,
    "rmse": 12.525659413150615,
    "mae_judge_2019_2024": 9.496954073625334,
    "per_season": [
@@ -249,242 +255,394 @@
     }
    ]
   },
-  "bu": {
-   "mae": 10.847799757036476,
-   "rmse": 13.553086955332272,
-   "mae_judge_2019_2024": 10.840270104670909,
+  "tdr": {
+   "mae": 10.590445975989628,
+   "crps": 7.437097586773574,
+   "crps_judge_2019_2024": 7.496960809321074,
+   "rmse": 13.160465998836651,
+   "mae_judge_2019_2024": 10.5329408588661,
    "per_season": [
     {
      "season_end": 2019,
      "n": 31,
-     "blend_mae": 8.6733,
-     "blend_rmse": 11.073,
-     "w_bu_rel82": 0.9827,
-     "bu_rel82_mae": 8.6475
+     "blend_mae": 9.0867,
+     "blend_rmse": 11.293,
+     "w_tdr_rel82": 0.7903,
+     "tdr_rel82_mae": 8.8377
     },
     {
      "season_end": 2020,
      "n": 31,
-     "blend_mae": 8.7282,
-     "blend_rmse": 11.6329,
-     "w_bu_rel82": 0.9852,
-     "bu_rel82_mae": 8.7354
+     "blend_mae": 8.8108,
+     "blend_rmse": 11.8663,
+     "w_tdr_rel82": 0.8072,
+     "tdr_rel82_mae": 9.1553
     },
     {
      "season_end": 2022,
      "n": 32,
-     "blend_mae": 14.4435,
-     "blend_rmse": 17.1038,
-     "w_bu_rel82": 0.9328,
-     "bu_rel82_mae": 14.2772
+     "blend_mae": 13.6374,
+     "blend_rmse": 16.4607,
+     "w_tdr_rel82": 0.7647,
+     "tdr_rel82_mae": 12.7343
     },
     {
      "season_end": 2023,
      "n": 32,
-     "blend_mae": 11.5784,
-     "blend_rmse": 14.7866,
-     "w_bu_rel82": 0.9754,
-     "bu_rel82_mae": 11.5504
+     "blend_mae": 11.318,
+     "blend_rmse": 14.0285,
+     "w_tdr_rel82": 0.7726,
+     "tdr_rel82_mae": 11.0511
     },
     {
      "season_end": 2024,
      "n": 32,
-     "blend_mae": 10.6443,
-     "blend_rmse": 12.7416,
-     "w_bu_rel82": 0.9786,
-     "bu_rel82_mae": 10.6495
+     "blend_mae": 9.7128,
+     "blend_rmse": 12.2253,
+     "w_tdr_rel82": 0.81,
+     "tdr_rel82_mae": 9.9971
     },
     {
      "season_end": 2025,
      "n": 32,
-     "blend_mae": 11.6441,
-     "blend_rmse": 14.0396,
-     "w_bu_rel82": 1.0992,
-     "bu_rel82_mae": 11.4
+     "blend_mae": 10.5194,
+     "blend_rmse": 12.513,
+     "w_tdr_rel82": 0.8598,
+     "tdr_rel82_mae": 10.9704
     },
     {
      "season_end": 2026,
      "n": 32,
-     "blend_mae": 10.0886,
-     "blend_rmse": 12.4018,
-     "w_bu_rel82": 1.0624,
-     "bu_rel82_mae": 9.9126
+     "blend_mae": 10.9454,
+     "blend_rmse": 12.9545,
+     "w_tdr_rel82": 0.8467,
+     "tdr_rel82_mae": 11.3483
+    }
+   ]
+  },
+  "mkt+tdr": {
+   "mae": 9.894648350440173,
+   "crps": 7.041422325255548,
+   "crps_judge_2019_2024": 6.896570644304944,
+   "rmse": 12.500056317809621,
+   "mae_judge_2019_2024": 9.550564203238578,
+   "per_season": [
+    {
+     "season_end": 2019,
+     "n": 31,
+     "blend_mae": 7.8762,
+     "blend_rmse": 10.2805,
+     "w_mkt_rel82": 0.7867,
+     "w_tdr_rel82": 0.1689,
+     "mkt_rel82_mae": 7.9958,
+     "tdr_rel82_mae": 8.8377
+    },
+    {
+     "season_end": 2020,
+     "n": 31,
+     "blend_mae": 7.3487,
+     "blend_rmse": 10.1493,
+     "w_mkt_rel82": 0.6882,
+     "w_tdr_rel82": 0.2472,
+     "mkt_rel82_mae": 7.183,
+     "tdr_rel82_mae": 9.1553
+    },
+    {
+     "season_end": 2022,
+     "n": 32,
+     "blend_mae": 12.6876,
+     "blend_rmse": 15.7021,
+     "w_mkt_rel82": 0.7736,
+     "w_tdr_rel82": 0.1461,
+     "mkt_rel82_mae": 12.5859,
+     "tdr_rel82_mae": 12.7343
+    },
+    {
+     "season_end": 2023,
+     "n": 32,
+     "blend_mae": 10.4256,
+     "blend_rmse": 13.2202,
+     "w_mkt_rel82": 0.7357,
+     "w_tdr_rel82": 0.1895,
+     "mkt_rel82_mae": 10.4922,
+     "tdr_rel82_mae": 11.0511
+    },
+    {
+     "season_end": 2024,
+     "n": 32,
+     "blend_mae": 9.2936,
+     "blend_rmse": 11.1766,
+     "w_mkt_rel82": 0.7233,
+     "w_tdr_rel82": 0.2079,
+     "mkt_rel82_mae": 9.207,
+     "tdr_rel82_mae": 9.9971
+    },
+    {
+     "season_end": 2025,
+     "n": 32,
+     "blend_mae": 10.5364,
+     "blend_rmse": 12.6552,
+     "w_mkt_rel82": 0.8151,
+     "w_tdr_rel82": 0.1954,
+     "mkt_rel82_mae": 10.5605,
+     "tdr_rel82_mae": 10.9704
+    },
+    {
+     "season_end": 2026,
+     "n": 32,
+     "blend_mae": 10.9518,
+     "blend_rmse": 13.2445,
+     "w_mkt_rel82": 0.8325,
+     "w_tdr_rel82": 0.1934,
+     "mkt_rel82_mae": 10.8633,
+     "tdr_rel82_mae": 11.3483
+    }
+   ]
+  },
+  "mkt+td+tdr": {
+   "mae": 9.91922735934008,
+   "crps": 7.064805685228201,
+   "crps_judge_2019_2024": 6.902053383460846,
+   "rmse": 12.540662176198383,
+   "mae_judge_2019_2024": 9.542238429408853,
+   "per_season": [
+    {
+     "season_end": 2019,
+     "n": 31,
+     "blend_mae": 7.8389,
+     "blend_rmse": 10.3453,
+     "w_mkt_rel82": 0.7626,
+     "w_td_rel82": 0.1566,
+     "w_tdr_rel82": 0.0344,
+     "mkt_rel82_mae": 7.9958,
+     "td_rel82_mae": 8.8711,
+     "tdr_rel82_mae": 8.8377
+    },
+    {
+     "season_end": 2020,
+     "n": 31,
+     "blend_mae": 7.3487,
+     "blend_rmse": 10.1493,
+     "w_mkt_rel82": 0.6882,
+     "w_td_rel82": 0.0,
+     "w_tdr_rel82": 0.2472,
+     "mkt_rel82_mae": 7.183,
+     "td_rel82_mae": 8.198,
+     "tdr_rel82_mae": 9.1553
+    },
+    {
+     "season_end": 2022,
+     "n": 32,
+     "blend_mae": 12.6876,
+     "blend_rmse": 15.7021,
+     "w_mkt_rel82": 0.7736,
+     "w_td_rel82": 0.0,
+     "w_tdr_rel82": 0.1461,
+     "mkt_rel82_mae": 12.5859,
+     "td_rel82_mae": 12.2779,
+     "tdr_rel82_mae": 12.7343
+    },
+    {
+     "season_end": 2023,
+     "n": 32,
+     "blend_mae": 10.4256,
+     "blend_rmse": 13.2202,
+     "w_mkt_rel82": 0.7357,
+     "w_td_rel82": 0.0,
+     "w_tdr_rel82": 0.1895,
+     "mkt_rel82_mae": 10.4922,
+     "td_rel82_mae": 10.7319,
+     "tdr_rel82_mae": 11.0511
+    },
+    {
+     "season_end": 2024,
+     "n": 32,
+     "blend_mae": 9.2886,
+     "blend_rmse": 11.1803,
+     "w_mkt_rel82": 0.717,
+     "w_td_rel82": 0.0387,
+     "w_tdr_rel82": 0.175,
+     "mkt_rel82_mae": 9.207,
+     "td_rel82_mae": 9.7902,
+     "tdr_rel82_mae": 9.9971
+    },
+    {
+     "season_end": 2025,
+     "n": 32,
+     "blend_mae": 10.546,
+     "blend_rmse": 12.6567,
+     "w_mkt_rel82": 0.8105,
+     "w_td_rel82": 0.0288,
+     "w_tdr_rel82": 0.1708,
+     "mkt_rel82_mae": 10.5605,
+     "td_rel82_mae": 11.0826,
+     "tdr_rel82_mae": 10.9704
+    },
+    {
+     "season_end": 2026,
+     "n": 32,
+     "blend_mae": 11.1538,
+     "blend_rmse": 13.4557,
+     "w_mkt_rel82": 0.7725,
+     "w_td_rel82": 0.2527,
+     "w_tdr_rel82": 0.0,
+     "mkt_rel82_mae": 10.8633,
+     "td_rel82_mae": 11.8775,
+     "tdr_rel82_mae": 11.3483
+    }
+   ]
+  },
+  "bu": {
+   "mae": 10.461195111975924,
+   "crps": 7.4318554590849955,
+   "crps_judge_2019_2024": 7.627362817874822,
+   "rmse": 13.143561018800735,
+   "mae_judge_2019_2024": 10.703568895151538,
+   "per_season": [
+    {
+     "season_end": 2019,
+     "n": 31,
+     "blend_mae": 8.5361,
+     "blend_rmse": 10.8976,
+     "w_bu_rel82": 1.029,
+     "bu_rel82_mae": 8.5812
+    },
+    {
+     "season_end": 2020,
+     "n": 31,
+     "blend_mae": 8.37,
+     "blend_rmse": 11.1966,
+     "w_bu_rel82": 1.0303,
+     "bu_rel82_mae": 8.3699
+    },
+    {
+     "season_end": 2022,
+     "n": 32,
+     "blend_mae": 14.2043,
+     "blend_rmse": 16.9659,
+     "w_bu_rel82": 0.9918,
+     "bu_rel82_mae": 14.1833
+    },
+    {
+     "season_end": 2023,
+     "n": 32,
+     "blend_mae": 11.6414,
+     "blend_rmse": 14.6516,
+     "w_bu_rel82": 1.0351,
+     "bu_rel82_mae": 11.6876
+    },
+    {
+     "season_end": 2024,
+     "n": 32,
+     "blend_mae": 10.6254,
+     "blend_rmse": 12.5423,
+     "w_bu_rel82": 1.0401,
+     "bu_rel82_mae": 10.617
+    },
+    {
+     "season_end": 2025,
+     "n": 32,
+     "blend_mae": 10.6592,
+     "blend_rmse": 13.3293,
+     "w_bu_rel82": 1.1461,
+     "bu_rel82_mae": 10.3838
+    },
+    {
+     "season_end": 2026,
+     "n": 32,
+     "blend_mae": 9.0664,
+     "blend_rmse": 11.1578,
+     "w_bu_rel82": 1.087,
+     "bu_rel82_mae": 8.9992
     }
    ]
   },
   "mkt+bu": {
-   "mae": 9.827726998421756,
-   "rmse": 12.503777615780944,
-   "mae_judge_2019_2024": 9.459432527985552,
+   "mae": 9.76290032530979,
+   "crps": 6.993484520664827,
+   "crps_judge_2019_2024": 6.880798128069029,
+   "rmse": 12.436513641322373,
+   "mae_judge_2019_2024": 9.470061625308665,
    "per_season": [
     {
      "season_end": 2019,
      "n": 31,
-     "blend_mae": 7.6324,
-     "blend_rmse": 10.2804,
-     "w_mkt_rel82": 0.814,
-     "w_bu_rel82": 0.2073,
+     "blend_mae": 7.4653,
+     "blend_rmse": 10.186,
+     "w_mkt_rel82": 0.7128,
+     "w_bu_rel82": 0.3426,
      "mkt_rel82_mae": 7.9958,
-     "bu_rel82_mae": 8.6475
+     "bu_rel82_mae": 8.5812
     },
     {
      "season_end": 2020,
      "n": 31,
-     "blend_mae": 7.2366,
-     "blend_rmse": 9.9669,
-     "w_mkt_rel82": 0.7535,
-     "w_bu_rel82": 0.2541,
+     "blend_mae": 7.2125,
+     "blend_rmse": 9.9341,
+     "w_mkt_rel82": 0.659,
+     "w_bu_rel82": 0.3831,
      "mkt_rel82_mae": 7.183,
-     "bu_rel82_mae": 8.7354
+     "bu_rel82_mae": 8.3699
     },
     {
      "season_end": 2022,
      "n": 32,
-     "blend_mae": 12.6681,
-     "blend_rmse": 15.7727,
-     "w_mkt_rel82": 0.7648,
-     "w_bu_rel82": 0.2197,
+     "blend_mae": 12.7034,
+     "blend_rmse": 15.8401,
+     "w_mkt_rel82": 0.6481,
+     "w_bu_rel82": 0.3793,
      "mkt_rel82_mae": 12.5859,
-     "bu_rel82_mae": 14.2772
+     "bu_rel82_mae": 14.1833
     },
     {
      "season_end": 2023,
      "n": 32,
-     "blend_mae": 10.4254,
-     "blend_rmse": 13.224,
-     "w_mkt_rel82": 0.7545,
-     "w_bu_rel82": 0.2433,
+     "blend_mae": 10.554,
+     "blend_rmse": 13.309,
+     "w_mkt_rel82": 0.6399,
+     "w_bu_rel82": 0.4062,
      "mkt_rel82_mae": 10.4922,
-     "bu_rel82_mae": 11.5504
+     "bu_rel82_mae": 11.6876
     },
     {
      "season_end": 2024,
      "n": 32,
-     "blend_mae": 9.2081,
-     "blend_rmse": 11.0584,
-     "w_mkt_rel82": 0.768,
-     "w_bu_rel82": 0.2169,
+     "blend_mae": 9.2821,
+     "blend_rmse": 11.0795,
+     "w_mkt_rel82": 0.6534,
+     "w_bu_rel82": 0.3842,
      "mkt_rel82_mae": 9.207,
-     "bu_rel82_mae": 10.6495
+     "bu_rel82_mae": 10.617
     },
     {
      "season_end": 2025,
      "n": 32,
-     "blend_mae": 10.8108,
-     "blend_rmse": 12.9777,
-     "w_mkt_rel82": 0.7898,
-     "w_bu_rel82": 0.3192,
+     "blend_mae": 10.5517,
+     "blend_rmse": 12.7224,
+     "w_mkt_rel82": 0.7211,
+     "w_bu_rel82": 0.4119,
      "mkt_rel82_mae": 10.5605,
-     "bu_rel82_mae": 11.4
+     "bu_rel82_mae": 10.3838
     },
     {
      "season_end": 2026,
      "n": 32,
-     "blend_mae": 10.6631,
-     "blend_rmse": 13.102,
-     "w_mkt_rel82": 0.8943,
-     "w_bu_rel82": 0.1854,
+     "blend_mae": 10.4199,
+     "blend_rmse": 12.8154,
+     "w_mkt_rel82": 0.8423,
+     "w_bu_rel82": 0.2557,
      "mkt_rel82_mae": 10.8633,
-     "bu_rel82_mae": 9.9126
-    }
-   ]
-  },
-  "mkt+td+bu": {
-   "mae": 9.867431757117544,
-   "rmse": 12.516112383492585,
-   "mae_judge_2019_2024": 9.445572526450965,
-   "per_season": [
-    {
-     "season_end": 2019,
-     "n": 31,
-     "blend_mae": 7.6191,
-     "blend_rmse": 10.2649,
-     "w_mkt_rel82": 0.6744,
-     "w_td_rel82": 0.1592,
-     "w_bu_rel82": 0.1805,
-     "mkt_rel82_mae": 7.9958,
-     "td_rel82_mae": 8.8711,
-     "bu_rel82_mae": 8.6475
-    },
-    {
-     "season_end": 2020,
-     "n": 31,
-     "blend_mae": 7.258,
-     "blend_rmse": 10.0141,
-     "w_mkt_rel82": 0.6118,
-     "w_td_rel82": 0.1734,
-     "w_bu_rel82": 0.2177,
-     "mkt_rel82_mae": 7.183,
-     "td_rel82_mae": 8.198,
-     "bu_rel82_mae": 8.7354
-    },
-    {
-     "season_end": 2022,
-     "n": 32,
-     "blend_mae": 12.6324,
-     "blend_rmse": 15.7122,
-     "w_mkt_rel82": 0.7268,
-     "w_td_rel82": 0.0454,
-     "w_bu_rel82": 0.2105,
-     "mkt_rel82_mae": 12.5859,
-     "td_rel82_mae": 12.2779,
-     "bu_rel82_mae": 14.2772
-    },
-    {
-     "season_end": 2023,
-     "n": 32,
-     "blend_mae": 10.3602,
-     "blend_rmse": 13.1534,
-     "w_mkt_rel82": 0.6605,
-     "w_td_rel82": 0.1257,
-     "w_bu_rel82": 0.2085,
-     "mkt_rel82_mae": 10.4922,
-     "td_rel82_mae": 10.7319,
-     "bu_rel82_mae": 11.5504
-    },
-    {
-     "season_end": 2024,
-     "n": 32,
-     "blend_mae": 9.2328,
-     "blend_rmse": 11.0741,
-     "w_mkt_rel82": 0.6302,
-     "w_td_rel82": 0.1781,
-     "w_bu_rel82": 0.1826,
-     "mkt_rel82_mae": 9.207,
-     "td_rel82_mae": 9.7902,
-     "bu_rel82_mae": 10.6495
-    },
-    {
-     "season_end": 2025,
-     "n": 32,
-     "blend_mae": 10.8749,
-     "blend_rmse": 12.9698,
-     "w_mkt_rel82": 0.6714,
-     "w_td_rel82": 0.1489,
-     "w_bu_rel82": 0.2914,
-     "mkt_rel82_mae": 10.5605,
-     "td_rel82_mae": 11.0826,
-     "bu_rel82_mae": 11.4
-    },
-    {
-     "season_end": 2026,
-     "n": 32,
-     "blend_mae": 10.9429,
-     "blend_rmse": 13.2974,
-     "w_mkt_rel82": 0.717,
-     "w_td_rel82": 0.2232,
-     "w_bu_rel82": 0.1301,
-     "mkt_rel82_mae": 10.8633,
-     "td_rel82_mae": 11.8775,
-     "bu_rel82_mae": 9.9126
+     "bu_rel82_mae": 8.9992
     }
    ]
   },
   "neurhl_judge_2019_2024": {
    "engine_layer_mae": 9.419976265822784,
-   "elo_mae": 9.469256329113923
+   "engine_layer_crps": 6.79884204074367,
+   "elo_mae": 9.469256329113923,
+   "elo_crps": 6.870682455696202
   },
   "selected": "mkt+bu",
-  "talent_sd_82": 9.234692992455384
+  "talent_sd_82": 9.143411373814342
  }
 }

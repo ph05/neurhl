@@ -11,7 +11,8 @@ hattrick/output/backtest/games_search_ledger.json with its tuning-window
 scores. The selected configuration is frozen to
 hattrick/output/params/ratings_hp.json (and Elo's to elo_hp.json).
 
-Run: python3 -m hattrick.backtest.tune_games [--quick]
+Stages (run in this order, as they were): elo, filter, goalie, presp, select.
+Run: python3 -m hattrick.backtest.tune_games [--stage STAGE]
 """
 from __future__ import annotations
 
@@ -132,7 +133,8 @@ def select_final(rows: list, tol: float = 1e-4) -> dict:
     cur.update({"hp": hp, "tuning_ll": pick["ll"], "tuning_ll_frozen": pick["ll_frozen"],
                 "tuning_goal_nll": pick["goal_nll"], "best_tuning_ll": best_ll,
                 "selection_rule": select_final.__doc__.strip(),
-                "n_candidates_within_tol": len(near)})
+                "n_candidates_within_tol": len(near),
+                "frozen_utc": datetime.now(timezone.utc).isoformat(timespec="seconds")})
     (C.PARAMS / "ratings_hp.json").write_text(json.dumps(cur, indent=1, default=float))
     print(json.dumps(cur, indent=1, default=float))
     return cur
@@ -229,7 +231,23 @@ def main():
         cur["goalie_variant_n"] = gres["n"]
         (C.PARAMS / "ratings_hp.json").write_text(json.dumps(cur, indent=1, default=float))
         print(json.dumps(cur, indent=1, default=float))
-    if a.stage == "select":
+    if a.stage in ("all", "presp"):
+        # Structural change found on the tuning window after the first search:
+        # separate preseason regressions for net strength (o - d) and pace
+        # (o + d) (pre_sp). Short re-search of the interacting parameters.
+        cur = json.loads((C.PARAMS / "ratings_hp.json").read_text())
+        cfg = dict(cur["hp"])
+        cfg["goalie"] = tuple(cfg["goalie"])
+        base = replace(R.HP(**cfg), pre_sp=True, pace_q=2.0, ridge=0.2)
+        base = replace(base, goalie=R.HP().goalie, gk_scale=1.0)
+        g1 = {"ridge": [0.5], "prior_scale": [1.0, 2.5], "pace_prior": [0.5, 1.0],
+              "pace_q": [0.5, 1.0], "q_s": [3e-5, 8e-5], "q_f": [1e-5],
+              "integrate": [True], "phi_g": [1.25]}
+        coordinate_search(base, g1, rows, rounds=1)
+        g2 = {"ridge": [0.5, 1.0], "prior_scale": [1.0], "q_s": [3e-5], "q_f": [1e-5],
+              "integrate": [True], "pace_prior": [0.5]}
+        coordinate_search(replace(base, pace_q=1.0), g2, rows, rounds=2)
+    if a.stage in ("all", "select"):
         select_final(rows)
     print(f"done in {time.time() - t0:.0f}s")
 

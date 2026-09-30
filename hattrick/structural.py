@@ -258,19 +258,52 @@ STRUCT_CACHE = C.CACHE / "structural"
 def structural(V: int, window: int = 8, h_halflife: float = 3.0,
                ctx_halflife: float = 6.0, layer_halflife: float = 3.0,
                goalie_key: tuple = (3000.0, -0.002, 1.0, 12.0)) -> dict:
-    """Disk-cached wrapper of ``_structural`` (hattrick/cache/structural/)."""
+    """Disk-cached wrapper of ``_structural`` (hattrick/cache/structural/).
+    The goalie GLM (ctx_gk, beta_gk) is cached separately per goalie_key, so
+    goalie-parameter searches do not refit everything else."""
+    goalie_key = tuple(float(x) for x in goalie_key)
+    base = _disk(("base", V, window, h_halflife, ctx_halflife, layer_halflife,
+                  DEFAULT_GOALIE_KEY),
+                 lambda: _structural(V, window, h_halflife, ctx_halflife,
+                                     layer_halflife, DEFAULT_GOALIE_KEY))
+    if goalie_key == DEFAULT_GOALIE_KEY:
+        return base
+    gk = _disk(("goalie", V, window, ctx_halflife, goalie_key),
+               lambda: _goalie_glm(V, window, ctx_halflife, goalie_key))
+    return {**base, **gk}
+
+
+DEFAULT_GOALIE_KEY = (3000.0, -0.002, 1.0, 12.0)
+
+
+def _disk(key: tuple, compute):
     import hashlib
     import pickle
-    key = repr((STRUCT_VERSION, V, window, h_halflife, ctx_halflife, layer_halflife,
-                tuple(float(x) for x in goalie_key)))
-    f = STRUCT_CACHE / (hashlib.sha1(key.encode()).hexdigest()[:16] + ".pkl")
+    k = repr((STRUCT_VERSION,) + tuple(key[1:])) if key[0] == "base" else repr((STRUCT_VERSION,) + key)
+    f = STRUCT_CACHE / (hashlib.sha1(k.encode()).hexdigest()[:16] + ".pkl")
     if f.exists() and _DISK_CACHE:
         return pickle.loads(f.read_bytes())
-    out = _structural(V, window, h_halflife, ctx_halflife, layer_halflife, goalie_key)
+    out = compute()
     if _DISK_CACHE:
         STRUCT_CACHE.mkdir(parents=True, exist_ok=True)
         f.write_bytes(pickle.dumps(out))
     return out
+
+
+def _goalie_glm(V: int, window: int, ctx_halflife: float, goalie_key: tuple) -> dict:
+    """Goalie-aware goals GLM for target season V (seasons with starters)."""
+    g = game_frame()
+    lo = max(FIRST_SEASON, V - window)
+    gw = g[(g.season_end >= lo) & (g.season_end < V)]
+    w_ctx = recency_weights(V, lo, ctx_halflife)
+    gt = goalie_game_talent(*goalie_key)
+    gk_seasons = sorted(set(g.season_end[g.gk_h.notna()]))
+    gk_use = [s for s in gk_seasons if lo <= s < V and s != 2024]
+    if len(gk_use) < 2:
+        return {"beta_gk": None, "ctx_gk": None}
+    gg = gw[gw.season_end.isin(gk_use) & gw.gk_h.notna() & gw.gk_a.notna()]
+    b = fit_glm(gg, "reg", w_ctx, goalie=gt)["beta"]
+    return {"beta_gk": b.pop("goalie"), "ctx_gk": b}
 
 
 _DISK_CACHE = True      # tests that corrupt data switch this off

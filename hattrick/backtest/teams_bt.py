@@ -77,27 +77,62 @@ def _fit_td_bu(bu, V):
     return T.fit_blend(f, ["td_rel82", "bu_rel82"])
 
 
+def roster_frame() -> pd.DataFrame | None:
+    """Roster-change correction rd_rel82, walk-forward (hattrick.roster_delta)."""
+    from hattrick import roster_delta as RD
+    if not RD.OUT.exists():
+        return None
+    return RD.walk_forward(pd.read_csv(RD.OUT))
+
+
+def crps_normal(mu, sd, x):
+    from scipy.stats import norm
+    z = (x - mu) / sd
+    return sd * (z * (2 * norm.cdf(z) - 1) + 2 * norm.pdf(z) - 1 / np.sqrt(np.pi))
+
+
 def section_b(bu) -> dict:
     seasons = [2019, 2020, 2022, 2023, 2024, 2025, 2026]
     extra = bu[["team", "season_end", "bu_rel82"]] if bu is not None else None
     f = T.blend_frame(seasons, extra=extra)
+    rd = roster_frame()
+    if rd is not None:
+        f = f.merge(rd, on=["team", "season_end"], how="left")
+        f["rd_rel82"] = f.rd_rel82.fillna(0.0)
+        f["tdr_rel82"] = f.td_rel82 + f.rd_rel82
     out = {}
     views = [["mkt_rel82"], ["td_rel82"], ["mkt_rel82", "td_rel82"]]
+    if rd is not None:
+        views += [["tdr_rel82"], ["mkt_rel82", "tdr_rel82"], ["mkt_rel82", "td_rel82", "tdr_rel82"]]
     if bu is not None:
-        views += [["bu_rel82"], ["mkt_rel82", "bu_rel82"], ["mkt_rel82", "td_rel82", "bu_rel82"]]
+        views += [["bu_rel82"], ["mkt_rel82", "bu_rel82"]]
     for cols in views:
         l = T.loso_blend(f, cols)
         key = "+".join(c.replace("_rel82", "") for c in cols)
         n = l.n.sum()
         judge = l[l.season_end.isin([2019, 2020, 2022, 2023, 2024])]
+        # CRPS of a normal predictive: SD from the training seasons' RMSE
+        crps = []
+        for V in l.season_end:
+            tr, te = f[f.season_end != V], f[f.season_end == V].dropna(subset=cols + ["act_rel82"])
+            w = T.fit_blend(tr, cols)
+            trd = tr.dropna(subset=cols + ["act_rel82"])
+            sd = float(np.sqrt(((trd[cols].to_numpy() @ w - trd.act_rel82) ** 2).mean()))
+            crps.append((len(te), float(crps_normal(te[cols].to_numpy() @ w, sd, te.act_rel82).mean()), V))
+        jc = [c for c in crps if c[2] in (2019, 2020, 2022, 2023, 2024)]
+        out_crps = sum(n_ * c for n_, c, _ in crps) / sum(n_ for n_, _, _ in crps)
+        out_crps_j = sum(n_ * c for n_, c, _ in jc) / sum(n_ for n_, _, _ in jc)
         out[key] = {"mae": float((l.blend_mae * l.n).sum() / n),
+                    "crps": out_crps, "crps_judge_2019_2024": out_crps_j,
                     "rmse": float(np.sqrt((l.blend_rmse ** 2 * l.n).sum() / n)),
                     "mae_judge_2019_2024": float((judge.blend_mae * judge.n).sum() / judge.n.sum()),
                     "per_season": l.round(4).to_dict("records")}
     c2 = json.loads((C.ROOT / "neurhl/output/neurhl_1_1/season_layer_c2.json").read_text())
     out["neurhl_judge_2019_2024"] = {
         "engine_layer_mae": c2["engine"]["judge"]["frozen"]["mae"],
-        "elo_mae": c2["elo"]["judge"]["frozen"]["mae"]}
+        "engine_layer_crps": c2["engine"]["judge"]["frozen"]["crps"],
+        "elo_mae": c2["elo"]["judge"]["frozen"]["mae"],
+        "elo_crps": c2["elo"]["judge"]["frozen"]["crps"]}
     best = min((k for k in out if not k.startswith("neurhl")), key=lambda k: out[k]["rmse"])
     out["selected"] = best
     rm = out[best]["rmse"]
@@ -116,7 +151,8 @@ def main():
     b = res["B_market_seasons"]
     for k, v in b.items():
         if isinstance(v, dict) and "mae" in v:
-            print(f"{k:<22} LOSO MAE {v['mae']:.3f}  RMSE {v['rmse']:.3f}  judge-window MAE {v['mae_judge_2019_2024']:.3f}")
+            print(f"{k:<22} LOSO MAE {v['mae']:.3f}  RMSE {v['rmse']:.3f}  CRPS {v['crps']:.3f}  "
+                  f"judge-window MAE {v['mae_judge_2019_2024']:.3f} CRPS {v['crps_judge_2019_2024']:.3f}")
     print("NeurHL judge window:", b["neurhl_judge_2019_2024"], "selected:", b["selected"],
           "talent sd/82:", round(b["talent_sd_82"], 2))
 

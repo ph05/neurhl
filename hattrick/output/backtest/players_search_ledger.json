@@ -2307,5 +2307,155 @@
   "tune_mae": 8.759,
   "tune_mae_A_strict": 8.5273,
   "tune_mae_B_strict": 8.3983
+ },
+ {
+  "config": {
+   "rate_decay": 0.6,
+   "toi_decay": 0.1,
+   "kappa": 0.35,
+   "fin_weight": 0.3,
+   "k_toi_games": 3.0,
+   "prosp_alpha": 0.4,
+   "age_curve": true,
+   "eb_window": 8,
+   "prior_window": 5,
+   "dress_noise": 4.0,
+   "q_scale": 0.8,
+   "spell_len": 40.0,
+   "usage_sd": 0.1258,
+   "sd_scale": 1.25,
+   "team_sd": 0.04,
+   "rho_ga": 0.6,
+   "rk_gp_mult": [
+    0.82,
+    0.776,
+    0.579,
+    0.671
+   ],
+   "rk_rate_mult": [
+    1.187,
+    1.08,
+    1.001,
+    1.437
+   ],
+   "thin_gp_mult": 0.985,
+   "thin_rate_mult": 0.994,
+   "blend_marcel": 0.3,
+   "blend_lastgp": 0.1
+  },
+  "objective": "strict/all",
+  "round": "R2 rookie games/rate by draft class",
+  "tune_mae": 8.7406,
+  "tune_mae_A_strict": 8.5154,
+  "tune_mae_B_strict": 8.3807,
+  "group_ratios": {
+   "n": {
+    "est": 2887.0,
+    "rk_later": 110.0,
+    "rk_r1": 43.0,
+    "rk_top10": 49.0,
+    "rk_undrafted": 55.0,
+    "thin": 798.0
+   },
+   "gpr": {
+    "est": 0.9891,
+    "rk_later": 0.9669,
+    "rk_r1": 0.9946,
+    "rk_top10": 0.9986,
+    "rk_undrafted": 0.9723,
+    "thin": 0.9699
+   },
+   "ppgr": {
+    "est": 0.9742,
+    "rk_later": 1.0003,
+    "rk_r1": 1.0001,
+    "rk_top10": 1.0003,
+    "rk_undrafted": 1.0011,
+    "thin": 1.092
+   },
+   "bias_p": {
+    "est": 0.8375,
+    "rk_later": 0.5572,
+    "rk_r1": -0.4979,
+    "rk_top10": -0.2464,
+    "rk_undrafted": 0.2702,
+    "thin": -1.3477
+   }
+  }
+ },
+ {
+  "config": {
+   "rate_decay": 0.6,
+   "toi_decay": 0.1,
+   "kappa": 0.35,
+   "fin_weight": 0.3,
+   "k_toi_games": 3.0,
+   "prosp_alpha": 0.4,
+   "age_curve": true,
+   "eb_window": 8,
+   "prior_window": 5,
+   "dress_noise": 4.0,
+   "q_scale": 0.8,
+   "spell_len": 40.0,
+   "usage_sd": 0.1258,
+   "sd_scale": 1.25,
+   "team_sd": 0.04,
+   "rho_ga": 0.6,
+   "rk_gp_mult": [
+    0.82,
+    0.776,
+    0.579,
+    0.671
+   ],
+   "rk_rate_mult": [
+    1.187,
+    1.08,
+    1.001,
+    1.437
+   ],
+   "thin_gp_mult": 0.985,
+   "thin_rate_mult": 1.089,
+   "blend_marcel": 0.3,
+   "blend_lastgp": 0.1
+  },
+  "objective": "strict/all",
+  "round": "R2 thin-record calibration after blending",
+  "tune_mae": 8.7577,
+  "tune_mae_A_strict": 8.4604,
+  "tune_mae_B_strict": 8.331,
+  "group_ratios": {
+   "n": {
+    "est": 2887.0,
+    "rk_later": 110.0,
+    "rk_r1": 43.0,
+    "rk_top10": 49.0,
+    "rk_undrafted": 55.0,
+    "thin": 798.0
+   },
+   "gpr": {
+    "est": 0.9893,
+    "rk_later": 0.9653,
+    "rk_r1": 0.9898,
+    "rk_top10": 0.9974,
+    "rk_undrafted": 0.9779,
+    "thin": 0.9693
+   },
+   "ppgr": {
+    "est": 0.9743,
+    "rk_later": 1.0005,
+    "rk_r1": 1.0003,
+    "rk_top10": 1.0006,
+    "rk_undrafted": 1.0012,
+    "thin": 1.0015
+   },
+   "bias_p": {
+    "est": 0.8325,
+    "rk_later": 0.5672,
+    "rk_r1": -0.4173,
+    "rk_top10": -0.2635,
+    "rk_undrafted": 0.214,
+    "thin": -0.0131
+   }
+  }
  }
 ]
