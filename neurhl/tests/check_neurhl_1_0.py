@@ -151,6 +151,16 @@ def main():
             check("every dressed rookie with a recent pre-NHL record is in the rookie table", not miss,
                   f"{len(miss)} missing {miss[:5]}")
 
+    if run.get("shot_level"):                # NeurHL 1.3 (PLAN_NeurHL_1_3 R1)
+        print("\nNEURHL 1.3")
+        sl = run["shot_level"]
+        for col, key in (("sog", "L_sog"), ("attempts", "L_att")):
+            lv = g[[f"{col}_home", f"{col}_away"]].to_numpy().mean()
+            check(f"league {col} per team-game equals last season's ({sl[key]:.3f}) within 0.1%",
+                  abs(lv / sl[key] - 1) < 1e-3, f"{lv:.3f}")
+        d = (gl.groupby("team").sa.sum() - t.sog_against).abs().max()
+        check("goalie shots against sum to the team's shots against", d < tol, f"max |diff| {d:.4f}")
+
     prev = ROOT / "output" / "live" / "2027" / "2026-09-29" / "preview.csv"
     run_b = json.loads((OUT / "run_2027.json").read_text()).get("bundle") if (OUT / "run_2027.json").exists() else None
     same_engine = prev.exists() and run_b in set(pd.read_csv(prev).get("bundle", pd.Series(dtype=str)))

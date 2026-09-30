@@ -1,14 +1,16 @@
 # NeurHL
 
-**NeurHL 1.2** (current release) predicts the 2026-27 NHL season with one model at every level:
+**NeurHL 1.3** (current release) predicts the 2026-27 NHL season with one model at every level:
 every skater's game, every game, and every season total. The same engine
 produces all three, and they are built to agree. A skater's season goals are
 the sum of his projected games, a team's goals are the sum of its skaters',
 and its points are the sum of its games. That agreement is checked
 ([`neurhl/tests/check_neurhl_1_0.py`](neurhl/tests/check_neurhl_1_0.py)).
 
-NeurHL 1.2 (2026-09-29, evening) corrects five errors in 1.1's season
-forecast and goal calibration; the engine is unchanged. See
+NeurHL 1.3 (2026-09-30) anchors the season's shot and attempt levels to
+2025-26; NeurHL 1.2 (2026-09-29, evening) corrected five errors in 1.1's
+season forecast and goal calibration. The engine is unchanged. See
+[NeurHL 1.3 shot level](#neurhl-13-shot-level) and
 [NeurHL 1.2 corrections](#neurhl-12-corrections).
 
 NeurHL 1.1 was issued before the first game on 2026-09-29. It added four things:
@@ -17,8 +19,8 @@ NeurHL 1.1 was issued before the first game on 2026-09-29. It added four things:
 - MoneyPuck's injury list, with every undated entry researched;
 - fitted stat-sheet distributions.
 
-The NeurHL 1.0 forecasts, frozen the night before, and the 1.1 files stay
-unchanged and are scored beside 1.2. Both are scored in public as the season is played.
+The NeurHL 1.0 forecasts, frozen the night before, and the 1.1 and 1.2 files
+stay unchanged and are scored beside 1.3. Both are scored in public as the season is played.
 Releases are numbered 1.1, 1.2 and so on.
 
 **Browse the projections: [ph05.github.io/neurhl](https://ph05.github.io/neurhl/)**
@@ -78,9 +80,12 @@ flowchart LR
 
 ## The 2026-27 season
 
-- **NeurHL 1.2 (current):** every game, team and skater from the refit engine
+- **NeurHL 1.3 (current):** the 1.2 forecast with shots and attempts at
+  their 2025-26 league levels
+  ([neurhl/output/neurhl_1_3/season/](neurhl/output/neurhl_1_3/season/)).
+- **NeurHL 1.2:** every game, team and skater from the refit engine
   `g2027_v3`, with the five corrections below
-  ([neurhl/output/neurhl_1_2/season/](neurhl/output/neurhl_1_2/season/)).
+  ([neurhl/output/neurhl_1_2/season/](neurhl/output/neurhl_1_2/season/)), unchanged and scored.
 - **NeurHL 1.1:** the same engine before the corrections
   ([neurhl/output/neurhl_1_1/season/](neurhl/output/neurhl_1_1/season/)), unchanged and scored.
   On the formerly sealed 2025-26 seasons, the engine's configuration beat Elo
@@ -140,8 +145,36 @@ playoff odds move by at most 0.4 points and 0.5 percentage points.
 | Power-play goals / goals | 24.2% | 20.6% | 19.6% |
 | Goals (with extra time) | 3.02 | 3.12 | 3.13 |
 
-Open item: projected shots per team-game (30.0) remain above 2025-26 (27.8);
-the season setup accounts for about 2% of the gap in history.
+1.2 left projected shots at 30.0 per team-game against 27.8 in 2025-26;
+NeurHL 1.3 addresses it.
+
+## NeurHL 1.3 shot level
+
+League shots fell about 10% over 2024-25 and 2025-26 (31 per team-game in
+2018-2023, 27.8 in 2025-26). The engine's opening-night inputs carry several
+seasons of memory, so early-season predictions lag such a change: in both of
+those seasons the first 50 games ran 4-5% high before in-season data caught
+up. The season forecast keeps opening-night inputs for all 84 games, so the
+lag never decays, and the share of attempts that are shots on goal also moved
+(0.498 in 2023-24, 0.478 in 2025-26; 1.2 had 0.532).
+
+1.3 scales every team's and player's shots and attempts so that their league
+means over the schedule equal 2025-26's, the way the goal level is set. Goals,
+xG, power plays, win probabilities, standings and playoff odds are 1.2's.
+
+| | 1.2 | 1.3 | 2025-26 |
+|---|---|---|---|
+| Shots per team-game | 30.01 | 27.84 | 27.84 |
+| Attempts per team-game | 56.42 | 58.29 | 58.29 |
+| Save percentage | .896 | .888 | .889 |
+
+On eleven past seasons, last season's level was the better estimate of a
+season's league level for shots (mean error 1.9% against 3.3% on 2011-12 to
+2017-18, 1.4% against 2.8% on 2018-19 to 2023-24) and for attempts (1.5%
+against 2.9%, 2.2% against 5.1%)
+([`eval/shot_level_1_3.py`](neurhl/eval/shot_level_1_3.py)). Those seasons
+had been seen before the rule was set, so the comparison is descriptive; 1.2
+and 1.3 team shots are both scored at season end.
 
 ## Findings
 
@@ -188,7 +221,9 @@ governs.
 
 | File | Contents |
 |---|---|
-| `neurhl/output/neurhl_1_2/season/` | NeurHL 1.2, the current release: games, teams, skaters, goalies and every player-game, in the same layout as the 1.0 files; team goals include goals past regulation |
+| `neurhl/output/neurhl_1_3/season/` | NeurHL 1.3, the current release: the 1.2 files with shots and attempts at their 2025-26 league levels |
+| `neurhl/output/neurhl_1_3/shot_level_history.json` | NeurHL 1.3: engine preseason vs last season's league shot and attempt levels, 2011-12 to 2023-24 |
+| `neurhl/output/neurhl_1_2/season/` | NeurHL 1.2: games, teams, skaters, goalies and every player-game, in the same layout as the 1.0 files; team goals include goals past regulation |
 | `neurhl/output/neurhl_1_2/season_convention.json`, `rookie_season_test_rk.json` | NeurHL 1.2: the historical tests behind the power-play ratios and the rookie weights |
 | `neurhl/output/neurhl_1_1/season/` | NeurHL 1.1: games, teams (with points percentiles and playoff odds), skaters, goalies and every player-game, in the same layout as the 1.0 files |
 | `neurhl/output/neurhl_1_0/games_2027.csv` | NeurHL 1.0: every game's home-win probability, four-way outcome, goals, shots, xG and power plays, with Elo and the earlier freeze beside it |

@@ -54,7 +54,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 PROJ = ROOT.parent
 sys.path.insert(0, str(ROOT))
-from common import CONFIGS, NOUT  # noqa: E402
+from common import CONFIGS, NOUT, TENSORS  # noqa: E402
 import sim.g_live as GL  # noqa: E402
 from sim.g_forecast_core import load_bundle, raw_outputs, sha  # noqa: E402
 from sim.game_model import TEAM_SIGMA  # noqa: E402
@@ -436,6 +436,9 @@ def main():
                     help="add overtime and shootout-deciding goals to season totals (PLAN_NeurHL_1_2 R2)")
     ap.add_argument("--goal-state", help="goal-level state file with m0 (default: the live state; "
                                          "PLAN_NeurHL_1_2 R3)")
+    ap.add_argument("--shot-level-last-season", action="store_true",
+                    help="shots and attempts scaled so their league means over the schedule equal the "
+                         "previous season's (PLAN_NeurHL_1_3 R1)")
     ap.add_argument("--goal-level-full", action="store_true",
                     help="m0 = L / M_full: L from the goal state, M_full the engine's mean regulation goals "
                          "over every scheduled game (PLAN_NeurHL_1_2 R3)")
@@ -455,6 +458,7 @@ def main():
     m0 = float(json.loads((Path(a.goal_state) if a.goal_state else gc.STATE).read_text())["m0"])
     ratios = (json.loads(Path(a.level_ratios).read_text())["decision"]["ratios"] if a.level_ratios else {})
     r_ppo, r_ppm, r_xg, r_sog = (float(ratios.get(k, 1.0)) for k in ("pp_opps", "pp_m", "xgf", "sogf"))
+    r_att = r_sog
     av, av_src = availability(games, a.rosters_date)
     expected = av.expected(games)
     elo = GL.elo_logits(games)
@@ -514,6 +518,17 @@ def main():
         acc[key] = acc[key] / K
     p, o4 = acc["p"], acc["o4"]
     M_full = float(acc["goals"].mean())
+    shot_level = {}
+    if a.shot_level_last_season:
+        # 1.3 R1: the season's league shot and attempt levels are last season's (the opening-night
+        # states lag a league-wide change, and the season set never updates them)
+        prev = pd.read_parquet(TENSORS / f"tgx_{SEASON - 1}.parquet", columns=["sogf", "attf"]).mean()
+        M_sog, M_att = float(acc["sogf"].mean()), float(acc["attf"].mean())
+        r_sog, r_att = float(prev.sogf) / M_sog, float(prev.attf) / M_att
+        shot_level = {"L_sog": float(prev.sogf), "M_sog": M_sog, "m_sog": r_sog,
+                      "L_att": float(prev.attf), "M_att": M_att, "m_att": r_att}
+        print(f"[unified] shot level: shots {M_sog:.3f} -> {prev.sogf:.3f} (x{r_sog:.4f}), "
+              f"attempts {M_att:.3f} -> {prev.attf:.3f} (x{r_att:.4f})", flush=True)
     if a.goal_level_full:
         L_ = float(json.loads((Path(a.goal_state) if a.goal_state else gc.STATE).read_text())["L"])
         m0 = L_ / M_full
@@ -530,7 +545,7 @@ def main():
     gsz = games.set_index("game_id")
     pg["team"] = np.where(pg.side == 0, pg.game_id.map(gsz.home), pg.game_id.map(gsz.away))
     pg["date"] = pg.game_id.map(gsz.date)
-    if ratios:
+    if ratios or shot_level:
         # R1: every game carries opening-night season-progress inputs, which overstate power
         # plays for a whole season (history: +33% opportunities, +24% PP minutes). PP and SH
         # minutes are scaled; the clock time freed goes to even strength in proportion to each
@@ -544,8 +559,8 @@ def main():
         pg["toi_sh"] *= r_ppm
         for c in ("ixg", "oi_xgf", "oi_xga"):
             pg[c] *= r_xg
-        for c in ("sog", "att"):
-            pg[c] *= r_sog
+        pg["sog"] *= r_sog
+        pg["att"] *= r_att
     pg["toi"] = pg.toi_ev + pg.toi_pp + pg.toi_sh
     if a.rookie_priors:
         # A15: a rookie's goals and assists per game come from his translated pre-NHL record
@@ -612,6 +627,7 @@ def main():
         ["starts", "sa", "ga", "win", "shutout"]].sum()
     gk[["starts", "sa", "ga", "win", "shutout"]] = gk[["starts", "sa", "ga", "win", "shutout"]] / K
     gk["ga"] *= m0
+    gk["sa"] *= r_sog
     gk["team"] = np.where(gk.side == 0, gk.game_id.map(gsz.home), gk.game_id.map(gsz.away))
 
     # ---- games
@@ -624,7 +640,7 @@ def main():
     gm["p_home_win_h"] = p_h
     for key, lab in (("goals", "goals"), ("sogf", "sog"), ("xgf", "xgf"), ("pp_opps", "pp_opps"),
                      ("attf", "attempts")):
-        mult = {"goals": m0, "sogf": r_sog, "attf": r_sog, "xgf": r_xg, "pp_opps": r_ppo}[key]
+        mult = {"goals": m0, "sogf": r_sog, "attf": r_att, "xgf": r_xg, "pp_opps": r_ppo}[key]
         gm[f"{lab}_home"] = acc[key][:, 0] * mult
         gm[f"{lab}_away"] = acc[key][:, 1] * mult
     # strength split of xG: with R1 ratios, PP and SH xG follow the scaled PP minutes and
@@ -812,7 +828,8 @@ def main():
                           capture_output=True, text=True).stdout.strip()
     run = {"rosters_date": a.rosters_date, "draws": K, "sims": a.sims, "seed": a.seed,
            "team_sigma": TEAM_SIGMA, "goal_mult_m0": m0, "days_in_opening": days0,
-           "goal_state": a.goal_state, "M_full": M_full, "goal_level_full": bool(a.goal_level_full), "level_ratios": ratios, "extra_time": bool(a.extra_time),
+           "goal_state": a.goal_state, "M_full": M_full, "goal_level_full": bool(a.goal_level_full), "level_ratios": ratios, "shot_level": shot_level or None,
+           "extra_time": bool(a.extra_time),
            "rookie_priors": a.rookie_priors, "rookie_weight": ({"g": a.rookie_weight, "a": a.rookie_weight if a.rookie_weight_a is None else a.rookie_weight_a}
                              if a.rookie_priors else None),
            "bundle": bundle, "bundle_sha": sha(ROOT / "checkpoints" / "g" / bundle / "bundle.json")[:16],

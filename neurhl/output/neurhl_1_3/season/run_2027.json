@@ -1,0 +1,47 @@
+{
+ "rosters_date": "2026-09-29",
+ "draws": 64,
+ "sims": 20000,
+ "seed": 711,
+ "team_sigma": 0.07,
+ "goal_mult_m0": 1.005487294729405,
+ "days_in_opening": 0.0,
+ "goal_state": null,
+ "M_full": 2.986281078504232,
+ "goal_level_full": true,
+ "level_ratios": {
+  "pp_opps": 0.7758829079050531,
+  "pp_m": 0.8259054017238869,
+  "xgf": 0.9610157313754054
+ },
+ "extra_time": true,
+ "rookie_priors": "neurhl/configs/rookie_priors_2027.csv",
+ "rookie_weight": {
+  "g": 0.75,
+  "a": 1.0
+ },
+ "bundle": "g2027_v3",
+ "bundle_sha": "f188b4bb67334412",
+ "availability": "sim/availability_2027.py",
+ "home_edge_rating": 0.1360272271992778,
+ "code": "b001285",
+ "created_utc": "2026-09-30T21:03:30+00:00",
+ "seconds": 339.0,
+ "derived_from": "neurhl/output/neurhl_1_2/season",
+ "derived_from_sha256": {
+  "games_2027.csv": "57f584f88bc0069363f16dbafebd546cbf5638821733162aa27978a7f43965c1",
+  "teams_2027.csv": "b52469b01b531c0502ecc2721882ad021dfd18d21c48e2f65189740efde843c1",
+  "skaters_2027.csv": "d9a02b5370e3a4119d03950670cb40fd30698641dc1709294a75db74468ba6f1",
+  "goalies_2027.csv": "baa7a165985aa20366ef0ffb2a25fc8800af2769e1f59c88eca72090aef05ed7",
+  "player_games_2027.csv.gz": "f5220698518b2120a5916641e5f7f322df0601a27ac64c2debfece23fff90da8"
+ },
+ "shot_level": {
+  "L_sog": 27.84375,
+  "M_sog": 30.00862342633928,
+  "m_sog": 0.9278582894129319,
+  "L_att": 58.29153823852539,
+  "M_att": 56.41660274553572,
+  "m_att": 1.0332337539260645,
+  "rule": "PLAN_NeurHL_1_3 R1"
+ }
+}
