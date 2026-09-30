@@ -126,6 +126,20 @@ def test_simulation_bands():
     assert inside > 0.95, inside
 
 
+def test_blend_identity():
+    """Forecast averaging keeps G + A = P, leaves games and ice time alone,
+    and moves interval bands with the mean."""
+    prm, proj, dep = _deploy_2016()
+    tot = DP.add_totals(dep, proj)
+    tot["p_p10"], tot["p_p90"] = tot.p * 0.7, tot.p * 1.3
+    b = PL.blend_paths(tot, V_TEST, prm, 82, w_marcel=0.3, w_last=0.1)
+    assert np.allclose(b.p, b.g + b.a)
+    assert np.allclose(b.gp, tot.gp) and np.allclose(b.toi, tot.toi)
+    ok = b.p > 1
+    assert np.allclose((b.p_p10 / b.p)[ok], 0.7) and np.allclose((b.p_p90 / b.p)[ok], 1.3)
+    assert (b[["g", "a", "p"]] >= 0).all().all()
+
+
 def test_goalie_starts_identity():
     """Rostered goalies' starts plus call-up starts fill every game."""
     r = D.opening_rosters(V_TEST)

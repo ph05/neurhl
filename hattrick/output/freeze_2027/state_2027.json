@@ -1,0 +1,121 @@
+{
+ "cutoff_utc": "2026-09-29T21:00:00+00:00",
+ "created_utc": "2026-09-30T23:57:45+00:00",
+ "code": "ee03fc82670655592bd7e8b3a44db80fbc6deec9",
+ "league_level": {
+  "gf_per_team_game_target": 3.081554878048781,
+  "mu_fitted": 1.0707594857499656,
+  "mu_used": 1.0510359813212384
+ },
+ "news_moves": [
+  {
+   "player_id": 8475184,
+   "from_team": "ANA",
+   "to_team": "MTL",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8476891,
+   "from_team": NaN,
+   "to_team": "BUF",
+   "kind": "veteran addition"
+  },
+  {
+   "player_id": 8479378,
+   "from_team": NaN,
+   "to_team": "NYI",
+   "kind": "veteran addition"
+  },
+  {
+   "player_id": 8480009,
+   "from_team": NaN,
+   "to_team": "NYR",
+   "kind": "veteran addition"
+  },
+  {
+   "player_id": 8480893,
+   "from_team": "CBJ",
+   "to_team": "TOR",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8482111,
+   "from_team": "NSH",
+   "to_team": "STL",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8482126,
+   "from_team": "TOR",
+   "to_team": "CBJ",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8482146,
+   "from_team": "NSH",
+   "to_team": "NJD",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8482447,
+   "from_team": "OTT",
+   "to_team": "VAN",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8482720,
+   "from_team": "TOR",
+   "to_team": "CBJ",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8483565,
+   "from_team": NaN,
+   "to_team": "TOR",
+   "kind": "veteran addition"
+  },
+  {
+   "player_id": 8478007,
+   "from_team": "CBJ",
+   "to_team": "TOR",
+   "kind": "switch (research file)"
+  }
+ ],
+ "points_per_goal_diff": 0.33181949620437207,
+ "blend_candidates": {
+  "mkt_rel82": 12.540137291407486,
+  "mkt_rel82+td_rel82": 12.525659413150615,
+  "mkt_rel82+tdr_rel82": 12.500056317809621,
+  "mkt_rel82+td_rel82+tdr_rel82": 12.540662176198383,
+  "mkt_rel82+bu_rel82": 12.436513641322373
+ },
+ "blend": {
+  "views": [
+   "mkt_rel82",
+   "bu_rel82"
+  ],
+  "weights": {
+   "mkt_rel82": 0.6976411577497578,
+   "bu_rel82": 0.3644617295409719
+  },
+  "loso_rmse_82": 12.436513641322373,
+  "loso_mae_82": 9.76290032530979,
+  "league_points_per_team_84": 93.27286585365853
+ },
+ "talent_sd_82": 9.143411373814342,
+ "hellebuyck": {
+  "player_id": 8476945,
+  "p_dest": {
+   "CAR": 0.35,
+   "BUF": 0.12,
+   "UTA": 0.12,
+   "SJS": 0.08
+  },
+  "season_share": 0.8452380952380952,
+  "start_share": 0.65
+ },
+ "drift_sd": 0.12328828005937953,
+ "rating_sd_net_mean": 0.11614540552842367,
+ "sims": 40000,
+ "seed": 20260929
+}

@@ -97,8 +97,10 @@ class Params:
     team_sd: float = 0.04          # team-season shooting-luck log-SD
     rho_ga: float = 0.6            # goal/assist talent correlation
     # --- thin NHL records (fitted on the 2011-17 strict window, unconditional)
-    rk_gp_mult: float = 1.0        # rookies (no NHL games): expected games
-    rk_rate_mult: float = 1.0      # rookies: scoring rates (g, a1, a2)
+    # rookies (no NHL games), by draft class (top-10 pick, 11-32, later,
+    # undrafted): multipliers on expected games and on scoring rates
+    rk_gp_mult: tuple = (1.0, 1.0, 1.0, 1.0)
+    rk_rate_mult: tuple = (1.0, 1.0, 1.0, 1.0)
     thin_gp_mult: float = 1.0      # 1-81 NHL games: expected games
     thin_rate_mult: float = 1.0    # 1-81 NHL games: scoring rates
     # --- forecast averaging of season totals (weights; HatTrick gets the rest)
@@ -122,7 +124,8 @@ def load_params() -> Params:
     """Tuned parameters if the tuner has written them, else the defaults."""
     if PARAMS_PATH.exists():
         d = json.loads(PARAMS_PATH.read_text()).get("hyper", {})
-        known = {k: v for k, v in d.items() if k in Params.__dataclass_fields__}
+        known = {k: (tuple(v) if isinstance(v, list) else v)
+                 for k, v in d.items() if k in Params.__dataclass_fields__}
         return Params(**known)
     return Params()
 
@@ -1010,11 +1013,28 @@ def project_extra(V: int, prm: Params, ex: pd.DataFrame) -> pd.DataFrame:
 SCORING = ("g", "a1", "a2")
 
 
+RK_CLASSES = ("rk_top10", "rk_r1", "rk_later", "rk_undrafted")
+
+
 def thin_group(proj: pd.DataFrame) -> pd.Series:
-    """'rookie' (no NHL games before V), 'thin' (1-81), else 'est'."""
-    g = proj.nhl_gp.fillna(0.0)
-    return pd.Series(np.where(g <= 0, "rookie", np.where(g < THIN_GP, "thin", "est")),
+    """Rookies (no NHL games before V) by draft class -- 'rk_top10',
+    'rk_r1' (picks 11-32), 'rk_later', 'rk_undrafted' -- then 'thin'
+    (1-81 NHL games) and 'est'."""
+    g = proj.nhl_gp.fillna(0.0).to_numpy()
+    pick = draft_pick(proj.player_id.to_numpy(),
+                      proj.name.to_numpy() if "name" in proj else None)
+    rk = np.select([pick <= 10, pick <= 32, pick < UNDRAFTED_PICK],
+                   list(RK_CLASSES[:3]), RK_CLASSES[3])
+    return pd.Series(np.where(g <= 0, rk, np.where(g < THIN_GP, "thin", "est")),
                      index=proj.index)
+
+
+def group_mults(prm: Params, kind: str) -> dict:
+    rk = prm.rk_gp_mult if kind == "gp" else prm.rk_rate_mult
+    out = dict(zip(RK_CLASSES, rk))
+    out["thin"] = prm.thin_gp_mult if kind == "gp" else prm.thin_rate_mult
+    out["est"] = 1.0
+    return out
 
 
 def calibrate_thin_rates(proj: pd.DataFrame, prm: Params) -> pd.DataFrame:
@@ -1022,8 +1042,9 @@ def calibrate_thin_rates(proj: pd.DataFrame, prm: Params) -> pd.DataFrame:
     fitted on the tuning window (their priors were biased there)."""
     proj = proj.copy()
     grp = thin_group(proj)
-    mult = np.where(grp == "rookie", prm.rk_rate_mult,
-                    np.where(grp == "thin", prm.thin_rate_mult, 1.0))
+    m = group_mults(prm, "rate")
+    m["thin"] = 1.0              # thin records are calibrated after blending
+    mult = grp.map(m).to_numpy(float)
     for c in [c for c in proj.columns if c.startswith(("r60_", "sd60_"))
               and c.split("_")[1] in SCORING]:
         proj[c] = proj[c] * mult
@@ -1051,7 +1072,7 @@ def pipeline(V: int, prm: Params, roster: pd.DataFrame, games: int, kind: str,
     gs = DP.apply_stack(dep, V, prm, kind, games) if stack else \
         dep.set_index("player_id").gp.to_dict()
     grp = dict(zip(proj.player_id, thin_group(proj)))
-    gm = {"rookie": prm.rk_gp_mult, "thin": prm.thin_gp_mult, "est": 1.0}
+    gm = group_mults(prm, "gp")
     cap = dict(zip(dep.player_id, games - dep.games_out))
     gs = {k: min(v * gm[grp.get(k, "est")], cap.get(k, games)) for k, v in gs.items()}
     dep = DP.deploy(proj, ros, V, games, prm.dress_noise, prm.q_scale, gp_override=gs,
@@ -1065,6 +1086,14 @@ def pipeline(V: int, prm: Params, roster: pd.DataFrame, games: int, kind: str,
         q = DP.simulate(tot, proj, V, games, prm.mc(), S=sims)
         tot = tot.merge(q, on="player_id", how="left")
     tot = blend_paths(tot, V, prm, games)
+    # thin NHL records (1-81 games): calibrate the FINAL (blended) scoring,
+    # since Marcel and the last-season-games path both pull them down
+    thin = tot.player_id.map(dict(zip(proj.player_id, thin_group(proj)))) == "thin"
+    if prm.thin_rate_mult != 1.0 and thin.any():
+        tot = tot.copy()
+        cols = [c for c in tot.columns if c in ("g", "a", "p", "a1", "a2", "ppg", "ppa")
+                or c.startswith(("g_p", "a_p", "p_p")) or c in ("g_sd", "a_sd", "p_sd")]
+        tot.loc[thin, cols] = tot.loc[thin, cols] * prm.thin_rate_mult
     return tot.copy(), proj
 
 
@@ -1240,7 +1269,8 @@ def run_freeze(V: int = C.TARGET_SEASON, sims: int = 2000) -> pd.DataFrame:
             "score", "gp", "gp_p10", "gp_p90", "toi", "toi_p10", "toi_p90",
             *[f"toi_{k}" for k in SITS], *[f"tpg_{k}_n" for k in SITS],
             "g", "g_p10", "g_p90", "g_sd", "a", "a_p10", "a_p90", "a_sd",
-            "p", "p_p10", "p_p50", "p_p90", "p_sd", "a1", "a2", "ppg", "ppa",
+            "p", "p_p10", "p_p50", "p_p90", "p_sd", "g_hattrick", "a_hattrick",
+            "a1", "a2", "ppg", "ppa",
             "sog", "sog_p10", "sog_p90", "ixg", "hits", "blk", "pim", "fow", "fol",
             "tk", "gv", "fin", "rel_xgf60", "rel_xgf60_sd", "rel_xga60", "rel_xga60_sd",
             "pr_prosp", "gp_last", "p_last"]

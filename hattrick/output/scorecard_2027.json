@@ -2,6 +2,13 @@
  "through": "2026-09-29",
  "games_played": 5,
  "games": {
+  "hattrick_freeze": {
+   "n": 5,
+   "log_loss": 0.7611649399967393,
+   "brier": 0.28230832358,
+   "accuracy": 0.4,
+   "published_before_first_game": true
+  },
   "neurhl_0925_freeze": {
    "n": 5,
    "log_loss": 0.8564259576532406,
@@ -57,6 +64,11 @@
   }
  },
  "teams_interim": {
+  "hattrick_freeze": {
+   "teams": 10,
+   "mae_points_so_far": 0.835239,
+   "rmse_points_so_far": 0.8911556020976359
+  },
   "neurhl_0925_freeze": {
    "teams": 10,
    "mae_points_so_far": 0.9103437000000001,

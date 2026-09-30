@@ -77,15 +77,17 @@ def load_results(path, before: pd.Timestamp) -> pd.DataFrame:
     return r.sort_values(["date", "game_id"]).reset_index(drop=True)
 
 
-def goalie_offsets(freeze: dict, games: pd.DataFrame, starters: pd.DataFrame | None):
+def goalie_offsets(freeze: dict, games: pd.DataFrame, starters: pd.DataFrame | None, P: dict):
     """Log-rate offsets on goals AGAINST for known starters, relative to the
-    team's expected start mix (the preseason ratings already contain the mix)."""
-    out = pd.DataFrame({"game_id": games.game_id, "gadj_h": 0.0, "gadj_a": 0.0})
+    team's expected start mix (the preseason ratings already contain the mix).
+    Save talent is goals saved above expected per shot on goal: the goalie
+    layer's per-unblocked-attempt figure x 1.40 attempts per shot on goal."""
+    out = pd.DataFrame({"game_id": games.game_id.to_numpy(), "gadj_h": 0.0, "gadj_a": 0.0})
     g = freeze.get("goalies")
     if starters is None or g is None or not len(starters):
         return out
     from hattrick import gamemodel as GM
-    P = GM.load_params()
+    g = g.assign(talent=g.gsax_per_fa * 1.40)
     talent = g.set_index("player_id")
     mix = (g.assign(w=g.start_share * g.talent).groupby("team").w.sum()
            / g.groupby("team").start_share.sum())
@@ -95,7 +97,7 @@ def goalie_offsets(freeze: dict, games: pd.DataFrame, starters: pd.DataFrame | N
         t = gid.map(talent.talent)
         diff = (t - s[side].map(mix)).fillna(0.0)
         out[col] = np.asarray(GM.goalie_offset(P, diff.to_numpy()), float)
-    return out
+    return out.fillna(0.0)
 
 
 def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed: int):
@@ -105,21 +107,28 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     day = pd.Timestamp(date)
     fz = load_freeze()
     P = GM.load_params()
+    P["mu"] = fz["league_level"]["mu_used"]          # the freeze's league level
     model = S.FittedModel(P, C.TARGET_SEASON)
     sch = fz["schedule"]
     res = load_results(results_path, day)
+    ctx = GM.schedule_features(sch, C.TARGET_SEASON)[["game_id", "rest_h", "rest_a", "km_h",
+                                                       "km_a", "dtz_h", "dtz_a"]]
 
-    # 1. filter ratings through the results so far
-    filt = R.InSeasonFilter(fz["ratings"], R.load_filter_params())
-    for g in res.itertuples(index=False):
-        filt.update(g)
-    cur = filt.state()                       # team, o, d, o_sd, d_sd
+    # 1. filter ratings through the results so far, one date at a time
+    fp = R.load_filter_params()
+    fp["P"] = {**fp["P"], "mu": P["mu"]}
+    filt = R.InSeasonFilter(fz["ratings"][["team", "o", "d", "o_sd", "d_sd"]], fp,
+                            start_date=sch.date.min())
+    rr = res.merge(ctx, on="game_id", how="left")
+    for _, day_games in rr.groupby("date", sort=True):
+        filt.update_day(day_games)
+    cur = filt.state()[["team", "o", "d", "o_sd", "d_sd"]]
 
     # 2. forecast today's games
     today = sch[sch.date == day].copy()
     starters = pd.read_csv(goalies_path) if goalies_path else None
-    adj = model.game_adjustments(sch)
-    gadj = goalie_offsets(fz, today, starters)
+    adj = pd.read_csv(FREEZE / "game_adjustments_2027.csv")
+    gadj = goalie_offsets(fz, today, starters, P)
     t = today.merge(adj, on="game_id", how="left").merge(gadj, on="game_id", how="left")
     r = cur.set_index("team")
     lh, la = model.rates(r.o.reindex(t.home).to_numpy(), r.d.reindex(t.home).to_numpy(),
@@ -141,8 +150,9 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
 
     # 3. re-simulate the rest of the season from the current standings
     done = res[["game_id", "home_g", "away_g", "extra"]]
+    left = 1.0 - len(done) / len(sch)
     sim = S.simulate(sch, cur, model, n_sims=sims, seed=seed, completed=done,
-                     game_adj=adj, drift_sd=fz.get("drift_sd", 0.05))
+                     game_adj=adj, drift_sd=fz.get("drift_sd", 0.05) * np.sqrt(left))
     standings = S.summarise(sim)
 
     outdir = LIVE / date

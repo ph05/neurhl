@@ -16,10 +16,20 @@
   "sd_scale": 1.25,
   "team_sd": 0.04,
   "rho_ga": 0.6,
-  "rk_gp_mult": 0.683,
-  "rk_rate_mult": 1.134,
+  "rk_gp_mult": [
+   0.82,
+   0.776,
+   0.579,
+   0.671
+  ],
+  "rk_rate_mult": [
+   1.187,
+   1.08,
+   1.001,
+   1.437
+  ],
   "thin_gp_mult": 0.985,
-  "thin_rate_mult": 0.994,
+  "thin_rate_mult": 1.089,
   "blend_marcel": 0.3,
   "blend_lastgp": 0.1
  },
@@ -695,10 +705,10 @@
    "D": 0.9149062159912937
   },
   "gp_stack_opening_[1,struct,gp1,gp2]": [
-   11.7789,
-   0.5889,
-   0.2128,
-   0.0357
+   10.6636,
+   0.6167,
+   0.2047,
+   0.0329
   ]
  },
  "round2": {
@@ -723,6 +733,74 @@
    8.747920832778677,
    0.3,
    0.1
-  ]
+  ],
+  "rookie_class_ratios_after": {
+   "n": {
+    "est": 2887.0,
+    "rk_later": 110.0,
+    "rk_r1": 43.0,
+    "rk_top10": 49.0,
+    "rk_undrafted": 55.0,
+    "thin": 798.0
+   },
+   "gpr": {
+    "est": 0.9891,
+    "rk_later": 0.9669,
+    "rk_r1": 0.9946,
+    "rk_top10": 0.9986,
+    "rk_undrafted": 0.9723,
+    "thin": 0.9699
+   },
+   "ppgr": {
+    "est": 0.9742,
+    "rk_later": 1.0003,
+    "rk_r1": 1.0001,
+    "rk_top10": 1.0003,
+    "rk_undrafted": 1.0011,
+    "thin": 1.092
+   },
+   "bias_p": {
+    "est": 0.8375,
+    "rk_later": 0.5572,
+    "rk_r1": -0.4979,
+    "rk_top10": -0.2464,
+    "rk_undrafted": 0.2702,
+    "thin": -1.3477
+   }
+  },
+  "group_ratios_final": {
+   "n": {
+    "est": 2887.0,
+    "rk_later": 110.0,
+    "rk_r1": 43.0,
+    "rk_top10": 49.0,
+    "rk_undrafted": 55.0,
+    "thin": 798.0
+   },
+   "gpr": {
+    "est": 0.9893,
+    "rk_later": 0.9653,
+    "rk_r1": 0.9898,
+    "rk_top10": 0.9974,
+    "rk_undrafted": 0.9779,
+    "thin": 0.9693
+   },
+   "ppgr": {
+    "est": 0.9743,
+    "rk_later": 1.0005,
+    "rk_r1": 1.0003,
+    "rk_top10": 1.0006,
+    "rk_undrafted": 1.0012,
+    "thin": 1.0015
+   },
+   "bias_p": {
+    "est": 0.8325,
+    "rk_later": 0.5672,
+    "rk_r1": -0.4173,
+    "rk_top10": -0.2635,
+    "rk_undrafted": 0.214,
+    "thin": -0.0131
+   }
+  }
  }
 }
