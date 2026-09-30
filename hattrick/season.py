@@ -222,6 +222,7 @@ class SeasonResult:
     gf: np.ndarray          # includes OT goals and one goal per SO win
     ga: np.ndarray
     gp: np.ndarray
+    sol: np.ndarray | None = None            # shootout losses (their SO "goal" is in ga)
     playoff_seed: np.ndarray | None = None   # (n_sims, T) seed 1..8 in conf, 0 = out
     rounds: np.ndarray | None = None         # (n_sims, T) rounds won 0..4
     game_home_win: np.ndarray | None = None  # (n_games,) P(home win) over sims
@@ -265,6 +266,7 @@ def simulate(schedule: pd.DataFrame, ratings: pd.DataFrame, model: ScoringModel,
     w = np.zeros_like(pts); rw = np.zeros_like(pts); row = np.zeros_like(pts)
     otl = np.zeros_like(pts); gf = np.zeros_like(pts); ga = np.zeros_like(pts)
     gp = np.zeros_like(pts)
+    sol = np.zeros_like(pts)
     p_home = np.zeros(G)
     for k, g in enumerate(sch.itertuples(index=False)):
         h, a = idx[g.home], idx[g.away]
@@ -291,7 +293,10 @@ def simulate(schedule: pd.DataFrame, ratings: pd.DataFrame, model: ScoringModel,
             ag_s = ga_ + ((ext > 0) & ~hw)
             p_home[k] = hw.mean()
         _book(h, a, hg_s, ag_s, ext, hw, pts, w, rw, row, otl, gf, ga, gp)
-    res = SeasonResult(teams, pts, w, rw, row, otl, gf, ga, gp, game_home_win=p_home)
+        so = ext == 2
+        sol[:, h] += so & ~hw
+        sol[:, a] += so & hw
+    res = SeasonResult(teams, pts, w, rw, row, otl, gf, ga, gp, sol=sol, game_home_win=p_home)
     if playoffs:
         seeds = seed_playoffs(res, rng)
         res.playoff_seed = seeds
@@ -449,7 +454,9 @@ def summarise(res: SeasonResult) -> pd.DataFrame:
                "points_p90": np.percentile(p, 90),
                "w": res.wins[:, i].mean(), "l": (res.gp[:, i] - res.wins[:, i] - res.otl[:, i]).mean(),
                "otl": res.otl[:, i].mean(), "rw": res.rw[:, i].mean(), "row": res.row[:, i].mean(),
-               "gf": res.gf[:, i].mean(), "ga": res.ga[:, i].mean(), "gp": res.gp[:, i].mean()}
+               "gf": res.gf[:, i].mean(), "ga": res.ga[:, i].mean(), "gp": res.gp[:, i].mean(),
+               "gf_sd": res.gf[:, i].std(), "ga_sd": res.ga[:, i].std(),
+               "so_losses": res.sol[:, i].mean() if res.sol is not None else np.nan}
         if res.playoff_seed is not None:
             s = res.playoff_seed[:, i]
             row["playoff_pct"] = 100 * (s > 0).mean()

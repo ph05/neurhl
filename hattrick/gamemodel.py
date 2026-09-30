@@ -17,9 +17,13 @@ Regulation score = Poisson base + end-game layer
     and one-goal regulation margins are far rarer than Poisson says (19-23% vs
     30%) while three-goal margins are more common (19-23% vs 15%). Both are the
     signature of the pulled goalie: a team trailing by one or two late either
-    scores (tie / closer) or concedes into the empty net. The model therefore
-    draws base goals X ~ Pois(bh), Y ~ Pois(ba) independently and then applies
-    one end-game transition to the base margin D = X - Y:
+    scores (tie / closer) or concedes into the empty net. Each team's goals
+    are also UNDERDISPERSED (var/mean ~0.92 given its rate: a leading team
+    sits on its lead, a trailing team pushes), which makes results more
+    predictable from strength than Poisson says. The model therefore draws
+    base goals X, Y independently from a Conway-Maxwell-Poisson distribution
+    p(x) ~ theta^x / (x!)^kappa (kappa = 1 is Poisson, fitted kappa ~1.1-1.2)
+    and then applies one end-game transition to the base margin D = X - Y:
 
       |D| = 1: trailing team ties with prob a1*exp(g*s),
                leader scores an empty-netter with prob b1*exp(-g*s)
@@ -29,9 +33,11 @@ Regulation score = Poisson base + end-game layer
     with s = log(lam_trailing / lam_leading). The base means (bh, ba) are
     solved so that the layer is MEAN-PRESERVING: E[regulation goals] = lam
     exactly, so ratings keep the interpretation "expected regulation goals".
-    Validated against independent Poisson, diagonal (Dixon-Coles-style)
-    tie inflation, in ``hattrick.backtest.games_bt`` (margin distribution,
-    tie rate, total-goals mean and variance).
+    kappa and the layer are fitted jointly by maximum likelihood on the full
+    regulation score (``fit_layer``) and validated out of sample against
+    independent Poisson and a diagonal (Dixon-Coles-style) tie inflation in
+    ``hattrick.backtest.games_bt`` (margin distribution, tie rate,
+    total-goals mean and variance, win-probability calibration).
 
 Overtime / shootout
     P(decided in OT | tie)       = sigmoid(c0 + c1*log((lh+la)/LREF))
@@ -63,12 +69,13 @@ Everything is vectorised numpy; ``sample`` handles ~27M games in chunks.
 """
 from __future__ import annotations
 
+import functools
 import json
 from dataclasses import dataclass
 
 import numpy as np
 from scipy.optimize import minimize
-from scipy.special import expit, ive
+from scipy.special import expit, gammaln, ive
 
 from hattrick import config as C
 
@@ -82,7 +89,9 @@ KMAX = 12           # margin support |D| <= KMAX for probability sums
 # ---------------------------------------------------------------------------
 DEFAULT = {
     # end-game layer (pulled goalie) -- fitted by fit_layer
-    "layer": {"a1": 0.22, "b1": 0.20, "a2": 0.06, "b2": 0.30, "g": 0.5},
+    "layer": {"a1": 0.20, "b1": 0.20, "a2": 0.06, "b2": 0.33, "g": 0.2},
+    # base goal dispersion (Conway-Maxwell-Poisson; 1 = Poisson) -- fit_layer
+    "kappa": 1.15,
     # overtime / shootout (3-on-3 era defaults) -- fitted by fit_ot
     "ot": {"c0": 0.62, "c1": 0.0, "a_ot": 0.08, "b_ot": 1.0, "a_so": 0.0,
            "b_so": 0.3},
@@ -92,9 +101,11 @@ DEFAULT = {
     # own offence gets beta_o[f]*f_X and the goals it allows beta_d[f]*f_X
     "ctx": {"b2b_o": -0.03, "b2b_d": 0.04, "rest3_o": 0.0, "rest3_d": 0.0,
             "km_o": 0.0, "km_d": 0.0, "tz_o": 0.0, "tz_d": 0.0},
-    # starting goalie: goals-against log multiplier per unit of save-talent
-    # (fraction of shots) above the team's usual starter: -beta/(1 - sv)
-    "goalie": {"beta": 1.0, "sv_lg": 0.905},
+    # starting goalie: log multiplier on goals AGAINST per unit of save
+    # talent (goals saved above average per shot on goal, a fraction) above
+    # the team's usual starter. coef is fitted (structural goalie GLM); the
+    # "1:1" hypothesis (talent converts fully into goals) is -1/(1 - sv_lg).
+    "goalie": {"coef": -10.5, "sv_lg": 0.905},
 }
 
 
@@ -152,11 +163,13 @@ def ctx_offsets(P: dict, sch) -> tuple[np.ndarray, np.ndarray]:
 
 def goalie_offset(P: dict, talent_diff) -> np.ndarray:
     """Log multiplier on goals AGAINST for a starter whose save talent is
-    ``talent_diff`` (fraction of shots, e.g. +0.005 = .5 sv% points) above the
-    team's usual starter. NaN (unknown starter) -> 0."""
-    g = P["goalie"]
+    ``talent_diff`` (goals saved above average per shot on goal, e.g. +0.005
+    = half a save-percentage point) above the team's usual starter.
+    NaN (unknown starter) -> 0. Talent units are those of
+    ``structural.goalie_game_talent`` (MoneyPuck GSAx per shot, Marcel-
+    weighted and regressed, plus in-season saves above league average)."""
     x = np.nan_to_num(np.asarray(talent_diff, float))
-    return -g["beta"] * x / (1.0 - g["sv_lg"])
+    return P["goalie"]["coef"] * x
 
 
 def rates(P, o_h, d_h, o_a, d_a, sch=None, mu=None, h=None, goalie_h=None,
@@ -225,31 +238,77 @@ def _transitions(lh, la, L):
     return out
 
 
+NX = 25            # goal support 0..24 per team for the base distribution
+
+
+@functools.lru_cache(maxsize=64)
+def _cmp_table(kappa: float):
+    """Mean of the Conway-Maxwell-Poisson pmf  p(x) ~ theta^x / (x!)^kappa
+    on a grid of log(theta), for inverting mean -> theta."""
+    x = np.arange(NX)
+    lt = np.linspace(-4.0, 4.5 * max(kappa, 1.0), 2001)
+    lp = lt[:, None] * x[None, :] - kappa * gammaln(x + 1)[None, :]
+    pm = np.exp(lp - lp.max(1, keepdims=True))
+    pm /= pm.sum(1, keepdims=True)
+    return lt, (pm * x).sum(1)
+
+
+def base_pmf(mean, kappa: float) -> np.ndarray:
+    """Base goal pmf over 0..NX-1 with the given means, shape (N, NX).
+    kappa = 1 is Poisson; kappa > 1 is underdispersed (var/mean ~ 1/kappa)."""
+    mean = np.asarray(mean, float)
+    x = np.arange(NX)
+    if abs(kappa - 1.0) < 1e-12:
+        lp = x[None, :] * np.log(mean)[:, None] - gammaln(x + 1)[None, :] - mean[:, None]
+        pm = np.exp(lp)
+        return pm / pm.sum(1, keepdims=True)
+    lt, mu = _cmp_table(round(float(kappa), 6))
+    t = np.interp(mean, mu, lt)
+    lp = t[:, None] * x[None, :] - kappa * gammaln(x + 1)[None, :]
+    pm = np.exp(lp - lp.max(1, keepdims=True))
+    return pm / pm.sum(1, keepdims=True)
+
+
+def _diff_pmf(ph, pa, ks):
+    """P(X - Y = k) for independent X~ph, Y~pa (rows), for each k in ks."""
+    out = np.empty((ph.shape[0], len(ks)))
+    for j, k in enumerate(ks):
+        if k >= 0:
+            out[:, j] = (ph[:, k:] * pa[:, :NX - k]).sum(1)
+        else:
+            out[:, j] = (ph[:, :NX + k] * pa[:, -k:]).sum(1)
+    return out
+
+
 def base_rates(lh, la, P, iters: int = 4):
-    """Base Poisson means (bh, ba) that make the end-game layer mean-preserving."""
+    """Base means (bh, ba) and pmfs that make the end-game layer
+    MEAN-PRESERVING: E[regulation goals] = (lh, la) after the layer.
+    Returns bh, ba, T (transition probabilities), ph, pa."""
     lh = np.asarray(lh, float)
     la = np.asarray(la, float)
+    kappa = P.get("kappa", 1.0)
     T = _transitions(lh, la, P["layer"])
     bh, ba = lh.copy(), la.copy()
     for _ in range(iters):
-        m = _skellam(bh, ba, [-2, -1, 1, 2])            # D = -2, -1, 1, 2
+        ph, pa = base_pmf(bh, kappa), base_pmf(ba, kappa)
+        m = _diff_pmf(ph, pa, [-2, -1, 1, 2])
         add_h = T["eh1"] * m[:, 2] + T["eh2"] * m[:, 3] + T["ta1"] * m[:, 1] + T["ta2"] * m[:, 0]
         add_a = T["ea1"] * m[:, 1] + T["ea2"] * m[:, 0] + T["th1"] * m[:, 2] + T["th2"] * m[:, 3]
         bh = np.maximum(lh - add_h, 0.05)
         ba = np.maximum(la - add_a, 0.05)
-    return bh, ba, T
+    return bh, ba, T, base_pmf(bh, kappa), base_pmf(ba, kappa)
 
 
 def margin_pmf(lh, la, P) -> np.ndarray:
     """Final regulation margin pmf, shape (N, 2*KMAX+1), index k+KMAX."""
-    bh, ba, T = base_rates(lh, la, P)
+    bh, ba, T, ph, pa = base_rates(lh, la, P)
     ks = np.arange(-KMAX, KMAX + 1)
-    M = _skellam(bh, ba, ks)
+    M = _diff_pmf(ph, pa, ks)
     M = M / M.sum(1, keepdims=True)
     o = KMAX
     Mp = M.copy()
-    # home leads by 1 (+1): -> 0 (away ties) or +2 (home EN)
     for k, tk, ek, ta, ea in ((1, "th1", "eh1", "ta1", "ea1"), (2, "th2", "eh2", "ta2", "ea2")):
+        # home leads by k: -> k-1 (away scores) or k+1 (home empty-netter)
         mv_t = T[tk] * M[:, o + k]
         mv_e = T[ek] * M[:, o + k]
         Mp[:, o + k] -= mv_t + mv_e
@@ -272,12 +331,10 @@ def reg_probs(lh, la, P):
 
 def reg_joint(lh, la, P, K: int = 16) -> np.ndarray:
     """Joint pmf of regulation goals (home, away), shape (N, K, K)."""
-    from scipy.stats import poisson
-    bh, ba, T = base_rates(lh, la, P)
+    bh, ba, T, ph, pa = base_rates(lh, la, P)
+    ph, pa = ph[:, :K], pa[:, :K]
+    J = ph[:, :, None] * pa[:, None, :]
     x = np.arange(K)
-    px = poisson.pmf(x[None, :], bh[:, None])
-    py = poisson.pmf(x[None, :], ba[:, None])
-    J = px[:, :, None] * py[:, None, :]
     D = x[:, None] - x[None, :]
     Jp = J.copy()
     for k, tk, ek, ta, ea in ((1, "th1", "eh1", "ta1", "ea1"), (2, "th2", "eh2", "ta2", "ea2")):
@@ -297,6 +354,37 @@ def reg_joint(lh, la, P, K: int = 16) -> np.ndarray:
         Jp[:, 1:, :] += t[:, :-1, :]
         Jp[:, :, 1:] += e[:, :, :-1]
     return Jp
+
+
+def reg_score_prob(lh, la, x, y, P) -> np.ndarray:
+    """Probability of the observed regulation score (x, y) for each game
+    (O(N) after the base pmfs; used for fitting and goal log-likelihood)."""
+    bh, ba, T, ph, pa = base_rates(lh, la, P)
+    n = len(ph)
+    r = np.arange(n)
+    x = np.clip(np.asarray(x, int), 0, NX - 1)
+    y = np.clip(np.asarray(y, int), 0, NX - 1)
+
+    def base(xx, yy):
+        ok = (xx >= 0) & (yy >= 0) & (xx < NX) & (yy < NX)
+        v = ph[r, np.clip(xx, 0, NX - 1)] * pa[r, np.clip(yy, 0, NX - 1)]
+        return np.where(ok, v, 0.0)
+
+    d = x - y
+    out = base(x, y)
+    # outflow from the observed cell itself
+    for k, tk, ek, ta, ea in ((1, "th1", "eh1", "ta1", "ea1"), (2, "th2", "eh2", "ta2", "ea2")):
+        out = out - np.where(d == k, (T[tk] + T[ek]) * base(x, y), 0.0)
+        out = out - np.where(d == -k, (T[ta] + T[ea]) * base(x, y), 0.0)
+        # inflow: away scored from (x, y-1) where home led by k (d+1 == k)
+        out = out + np.where(d + 1 == k, T[tk] * base(x, y - 1), 0.0)
+        # home empty-netter from (x-1, y) where home led by k (d-1 == k)
+        out = out + np.where(d - 1 == k, T[ek] * base(x - 1, y), 0.0)
+        # home scored from (x-1, y) where away led by k (d-1 == -k)
+        out = out + np.where(d - 1 == -k, T[ta] * base(x - 1, y), 0.0)
+        # away empty-netter from (x, y-1) where away led by k (d+1 == -k)
+        out = out + np.where(d + 1 == -k, T[ea] * base(x, y - 1), 0.0)
+    return np.maximum(out, 1e-15)
 
 
 # ---------------------------------------------------------------------------
@@ -345,14 +433,74 @@ def p_home_win(lh, la, P) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Sampling (season simulation)
 # ---------------------------------------------------------------------------
-def sample(lh, la, P, rng: np.random.Generator, chunk: int = 2_000_000) -> dict:
-    """Draw complete game results. Returns int arrays:
+def _draw(pm, u):
+    """Inverse-CDF draws from row pmfs (N, NX) with uniforms u (N,)."""
+    c = np.cumsum(pm, axis=1)
+    return (u[:, None] > c[:, :-1]).sum(1)
+
+
+_GRID_LO, _GRID_HI, _GRID_N = np.log(0.4), np.log(9.0), 161
+_CDF_LO, _CDF_HI, _CDF_N = np.log(0.03), np.log(10.0), 6001
+
+
+def _pkey(P):
+    L = P["layer"]
+    return (round(float(P.get("kappa", 1.0)), 8),) + tuple(
+        round(float(L[k]), 8) for k in ("a1", "b1", "a2", "b2", "g"))
+
+
+@functools.lru_cache(maxsize=16)
+def _base_grid(key):
+    """Exact mean-preserving base means on a (log lh, log la) grid."""
+    kappa, a1, b1, a2, b2, g = key
+    P = {"kappa": kappa, "layer": {"a1": a1, "b1": b1, "a2": a2, "b2": b2, "g": g}}
+    gr = np.linspace(_GRID_LO, _GRID_HI, _GRID_N)
+    LH, LA = np.meshgrid(np.exp(gr), np.exp(gr), indexing="ij")
+    bh, ba, _, _, _ = base_rates(LH.ravel(), LA.ravel(), P, iters=6)
+    return bh.reshape(LH.shape), ba.reshape(LH.shape)
+
+
+@functools.lru_cache(maxsize=16)
+def _cdf_table(kappa):
+    """CDF rows of the base distribution on a fine grid of log means."""
+    m = np.exp(np.linspace(_CDF_LO, _CDF_HI, _CDF_N))
+    return np.cumsum(base_pmf(m, kappa), axis=1)[:, :-1].astype(np.float32)
+
+
+def _fast_base(lh, la, P):
+    """Bilinear interpolation (in log rates) of the exact base means."""
+    bhg, bag = _base_grid(_pkey(P))
+    step = (_GRID_HI - _GRID_LO) / (_GRID_N - 1)
+    fx = np.clip((np.log(lh) - _GRID_LO) / step, 0, _GRID_N - 1 - 1e-9)
+    fy = np.clip((np.log(la) - _GRID_LO) / step, 0, _GRID_N - 1 - 1e-9)
+    i, j = fx.astype(int), fy.astype(int)
+    u, v = fx - i, fy - j
+
+    def bil(G):
+        return ((1 - u) * (1 - v) * G[i, j] + u * (1 - v) * G[i + 1, j]
+                + (1 - u) * v * G[i, j + 1] + u * v * G[i + 1, j + 1])
+    return bil(bhg), bil(bag)
+
+
+def _fast_draw(mean, kappa, u):
+    c = _cdf_table(round(float(kappa), 8))
+    step = (_CDF_HI - _CDF_LO) / (_CDF_N - 1)
+    k = np.clip(np.rint((np.log(mean) - _CDF_LO) / step).astype(int), 0, _CDF_N - 1)
+    return (u[:, None] > c[k]).sum(1)
+
+
+def sample(lh, la, P, rng: np.random.Generator, chunk: int = 1_000_000,
+           exact: bool = False) -> dict:
+    """Draw complete game results. Returns int16 arrays:
       reg_h, reg_a  regulation goals (incl. empty-netters)
       extra         0 regulation, 1 overtime, 2 shootout
       home_win      1/0
       gf_h, gf_a    final goals, standings convention (OT goal and +1 for a
                     shootout win count)
-    """
+    The default fast path interpolates the exact mean-preserving base means
+    on a 161x161 grid of log rates and draws from tabulated CDFs (6,001 log
+    means): about 0.3 s per million games, indistinguishable from
+    ``exact=True`` (tested in hattrick/tests/test_gamemodel.py)."""
     lh = np.asarray(lh, float).ravel()
     la = np.asarray(la, float).ravel()
     n = len(lh)
@@ -361,24 +509,32 @@ def sample(lh, la, P, rng: np.random.Generator, chunk: int = 2_000_000) -> dict:
     for s in range(0, n, chunk):
         e = min(n, s + chunk)
         a, b = lh[s:e], la[s:e]
-        bh, ba, T = base_rates(a, b, P)
-        x = rng.poisson(bh)
-        y = rng.poisson(ba)
+        m = e - s
+        if exact:
+            bh, ba, T, ph, pa = base_rates(a, b, P)
+            x = _draw(ph, rng.random(m))
+            y = _draw(pa, rng.random(m))
+        else:
+            T = _transitions(a, b, P["layer"])
+            bh, ba = _fast_base(a, b, P)
+            kap = P.get("kappa", 1.0)
+            x = _fast_draw(bh, kap, rng.random(m))
+            y = _fast_draw(ba, kap, rng.random(m))
         d = x - y
-        u = rng.random(e - s)
+        u = rng.random(m)
         for k in (1, 2):
             t, en = T[f"th{k}"], T[f"eh{k}"]
-            m = d == k
-            y = y + (m & (u < t))
-            x = x + (m & (u >= t) & (u < t + en))
+            mk = d == k
+            y = y + (mk & (u < t))
+            x = x + (mk & (u >= t) & (u < t + en))
             t, en = T[f"ta{k}"], T[f"ea{k}"]
-            m = d == -k
-            x = x + (m & (u < t))
-            y = y + (m & (u >= t) & (u < t + en))
+            mk = d == -k
+            x = x + (mk & (u < t))
+            y = y + (mk & (u >= t) & (u < t + en))
         p_dec, p_ot, p_so = ot_probs(a, b, P)
         tie = x == y
-        u1 = rng.random(e - s)
-        u2 = rng.random(e - s)
+        u1 = rng.random(m)
+        u2 = rng.random(m)
         dec = tie & (u1 < p_dec)
         so = tie & ~dec
         hw_ot = dec & (u2 < p_ot)
@@ -445,33 +601,43 @@ def _aggregate(lh, la, margin, w, step=0.02):
     return lh_c, la_c, cnt
 
 
-def fit_layer(lh, la, margin, w=None, x0=None, prior_sd: float = 1.5) -> dict:
-    """ML fit of the end-game layer on observed regulation margins given
-    pregame expected goals. Weak N(logit default, prior_sd) priors on the four
-    transition probabilities keep them identified (a1/b1/a2/b2 trade off
-    against each other when only margins are observed).
-    Returns {'a1','b1','a2','b2','g'}."""
+def fit_layer(lh, la, reg_h, reg_a, w=None, x0=None, prior_sd: float = 1.5,
+              fit_kappa: bool = True, max_games: int = 12000, seed: int = 0) -> dict:
+    """Joint ML fit of the base dispersion kappa and the end-game layer on
+    observed regulation scores given expected regulation goals.
+
+    Maximises sum_i w_i log P(reg_h_i, reg_a_i | lh_i, la_i) (the full joint,
+    so kappa is identified by each team's goal dispersion and the layer by
+    the margins). Weak N(logit default, prior_sd) priors on the four
+    transition probabilities keep them identified. Uses at most
+    ``max_games`` games (a seeded subsample, weights kept).
+    Returns {'layer': {...}, 'kappa': float}."""
     lh, la = np.asarray(lh, float), np.asarray(la, float)
+    reg_h, reg_a = np.asarray(reg_h), np.asarray(reg_a)
     w = np.ones(len(lh)) if w is None else np.asarray(w, float)
-    lh_c, la_c, cnt = _aggregate(lh, la, margin, w)
-    ntot = cnt.sum()
+    if len(lh) > max_games:
+        idx = np.random.default_rng(seed).choice(len(lh), max_games, replace=False)
+        lh, la, reg_h, reg_a, w = lh[idx], la[idx], reg_h[idx], reg_a[idx], w[idx]
     L0 = DEFAULT["layer"] if x0 is None else x0
     lg = lambda p: np.log(p / (1 - p))
     z_prior = np.array([lg(DEFAULT["layer"][k]) for k in ("a1", "b1", "a2", "b2")])
 
     def unpack(z):
-        return {"a1": float(expit(z[0])), "b1": float(expit(z[1])),
-                "a2": float(expit(z[2])), "b2": float(expit(z[3])), "g": float(z[4])}
+        L = {"a1": float(expit(z[0])), "b1": float(expit(z[1])),
+             "a2": float(expit(z[2])), "b2": float(expit(z[3])), "g": float(z[4])}
+        return L, (float(1.0 + np.exp(z[5])) if fit_kappa else 1.0)
 
     def f(z):
-        B = _binned(margin_pmf(lh_c, la_c, {"layer": unpack(z)}))
-        ll = np.sum(cnt * np.log(np.clip(B, 1e-12, None)))
-        pen = 0.5 * np.sum(((z[:4] - z_prior) / prior_sd) ** 2) + 0.5 * (z[4] / 1.0) ** 2
-        return -(ll - pen) / ntot
+        L, kap = unpack(z)
+        p = reg_score_prob(lh, la, reg_h, reg_a, {"layer": L, "kappa": kap})
+        pen = 0.5 * np.sum(((z[:4] - z_prior) / prior_sd) ** 2) + 0.5 * z[4] ** 2
+        return -(np.sum(w * np.log(p)) - pen) / w.sum()
 
-    z0 = np.array([lg(L0["a1"]), lg(L0["b1"]), lg(L0["a2"]), lg(L0["b2"]), L0["g"]])
+    z0 = np.array([lg(L0["a1"]), lg(L0["b1"]), lg(L0["a2"]), lg(L0["b2"]), L0["g"],
+                   np.log(max(DEFAULT["kappa"] - 1.0, 1e-3))])
     r = minimize(f, z0, method="L-BFGS-B")
-    return unpack(r.x)
+    L, kap = unpack(r.x)
+    return {"layer": L, "kappa": kap, "nll": float(r.fun)}
 
 
 def fit_ot(lh, la, extra, home_win, w=None, prior_sd=None) -> dict:

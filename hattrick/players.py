@@ -59,6 +59,7 @@ ONICE = ("oi_xgf", "oi_xga", "off_xgf", "off_xga")     # 5v5 on/off-ice xG
 MAX_LAGS = 4
 FIRST_SEASON = 2009                                    # MoneyPuck coverage
 ERA_SKIP = {2021}          # never the reference level for a later season
+LEAGUE_RULE = "last_intact"   # or "mean2_intact" (round-2 test, see ledger)
 AGE_LO, AGE_HI = 19.0, 38.0
 # Aging groups: which counting stats share one age multiplier.
 AGE_GROUPS = {"g": ("g",), "a": ("a1", "a2"), "shot": ("sog", "ixg"),
@@ -85,9 +86,36 @@ class Params:
     age_curve: bool = True
     eb_window: int = 8             # seasons used to estimate EB constants
     prior_window: int = 5          # seasons used to fit the usage prior
+    # --- deployment (hattrick.deploy)
+    dress_noise: float = 2.0       # SD (min/game) of coaches' depth-chart noise
+    q_scale: float = 1.0           # calibration of absence-spell injury rates
+    # --- Monte Carlo intervals (calibrated on 2011-17 coverage)
+    spell_len: float = 5.2         # mean injury spell (games): matches the
+                                   # games-weighted spell length 9.4 of 2015-19
+    usage_sd: float = 0.10         # season-level log-SD of min/game vs projection
+    sd_scale: float = 1.0          # multiplier on posterior talent SDs
+    team_sd: float = 0.04          # team-season shooting-luck log-SD
+    rho_ga: float = 0.6            # goal/assist talent correlation
+    # --- thin NHL records (fitted on the 2011-17 strict window, unconditional)
+    rk_gp_mult: float = 1.0        # rookies (no NHL games): expected games
+    rk_rate_mult: float = 1.0      # rookies: scoring rates (g, a1, a2)
+    thin_gp_mult: float = 1.0      # 1-81 NHL games: expected games
+    thin_rate_mult: float = 1.0    # 1-81 NHL games: scoring rates
+    # --- forecast averaging of season totals (weights; HatTrick gets the rest)
+    blend_marcel: float = 0.0      # Marcel-style 5/4/3 baseline
+    blend_lastgp: float = 0.0      # HatTrick per-game x last season's games
+
+    RATE_FIELDS = ("rate_decay", "toi_decay", "kappa", "fin_weight", "k_toi_games",
+                   "prosp_alpha", "age_curve", "eb_window", "prior_window")
 
     def key(self) -> str:
-        return json.dumps(asdict(self), sort_keys=True)
+        """Cache key of everything the RATE/usage projection depends on."""
+        return json.dumps({k: getattr(self, k) for k in self.RATE_FIELDS}, sort_keys=True)
+
+    def mc(self) -> dict:
+        return {"noise_sd": self.dress_noise, "spell_len": self.spell_len,
+                "usage_sd": self.usage_sd, "sd_scale": self.sd_scale,
+                "team_sd": self.team_sd, "rho_ga": self.rho_ga}
 
 
 def load_params() -> Params:
@@ -128,6 +156,7 @@ def _panel_cols() -> list[str]:
     cols += [f"{s}_{k}" for s in SIT_STATS for k in SITS]
     cols += [f"{s}_all" for s in PERIPH]
     cols += [f"{s}_ev" for s in ONICE]
+    cols += ["oi_xga_sh", "oi_xgf_pp"]
     return cols
 
 
@@ -211,6 +240,10 @@ def project_league(V: int) -> pd.Series:
             if y in lv.index and y not in ERA_SKIP]
     if not prev:
         raise ValueError(f"no league history before {V}")
+    if LEAGUE_RULE == "mean2_intact" and len(prev) >= 2:
+        out = (lv.loc[prev[0]] + lv.loc[prev[1]]) / 2.0
+        out.name = prev[0]
+        return out
     return lv.loc[prev[0]]
 
 
@@ -496,6 +529,36 @@ def onice_rel(P: Panel, V: int, prm: Params) -> dict:
     return out
 
 
+def special_teams_onice(P: Panel, V: int, prm: Params) -> dict:
+    """Shrunk on-ice xGF/60 on the power play and xGA/60 on the penalty
+    kill, relative to the league's PP/PK rate (the same for everyone on the
+    ice, so the prior is the league rate and K comes from the MoM)."""
+    lv_rate = {}
+    idx, w = _weights(P, V, prm.rate_decay)
+    out = {}
+    for col, sit in (("oi_xgf_pp", "pp"), ("oi_xga_sh", "sh")):
+        js = [P.j(y) for y in range(V - prm.eb_window, V) if P.seasons[0] <= y <= P.seasons[-1]]
+        num_l = P.x[col][:, js].sum(0)
+        den_l = P.x[f"toi_{sit}"][:, js].sum(0)
+        ell = num_l / np.maximum(den_l, 1e-9)                   # per minute by season
+        t = P.x[f"toi_{sit}"][:, js]
+        r = np.where(t > 0, P.x[col][:, js] / np.maximum(t, 1e-9), 0) / ell - 1.0
+        ok = t > 30
+        wp = np.where(ok[:, :-1] & ok[:, 1:], 2 / (1 / np.maximum(t[:, :-1], 1e-9) + 1 / np.maximum(t[:, 1:], 1e-9)), 0)
+        tau2 = max(float((wp * r[:, :-1] * r[:, 1:]).sum() / max(wp.sum(), 1e-9)), 1e-5)
+        sig2 = max(float(np.mean((r[ok] ** 2 - tau2) * t[ok])), 1e-5)
+        k = prm.kappa * sig2 / tau2
+        lvl = {y: v for y, v in zip([P.seasons[j] for j in js], ell)}
+        ellV = lvl[max(lvl)]
+        ti = P.x[f"toi_{sit}"][:, idx]
+        ri = np.where(ti > 0, P.x[col][:, idx] / np.maximum(ti, 1e-9), 0)
+        ells = np.array([lvl.get(P.seasons[j], ellV) for j in idx])
+        rel = ((ri / ells - 1.0) * ti * w).sum(1) / ((ti * w).sum(1) + k)
+        out[f"{sit}_onice_rel"] = rel
+        out[f"{sit}_onice_60"] = (1 + rel) * ellV * 60.0
+    return out
+
+
 @functools.lru_cache(maxsize=None)
 def _onice_stats(V: int, side: str, eb_window: int) -> tuple:
     P = panel()
@@ -616,6 +679,9 @@ def _aging_cached(V: int, pkey: str) -> dict:
     out = {}
     for grp, d in rows.items():
         for pos in "FD":
+            if not d[pos][0]:                   # no earlier season: no aging
+                out[(grp, pos)] = np.zeros(2 + len(AGE_KNOTS))
+                continue
             a, y, e = (np.concatenate(v) for v in d[pos])
             out[(grp, pos)] = _fit_age_curve(a, y, e)
     return out
@@ -689,6 +755,8 @@ def project(V: int, prm: Params | None = None, ids=None,
     df["fin"] = rel["fin"]
     oi = onice_rel(P, V, prm)
     for c, v in oi.items():
+        df[c] = v
+    for c, v in special_teams_onice(P, V, prm).items():
         df[c] = v
     df["score"] = sum(df[f"tpg_{k}"] for k in SITS)
     df["pr_prosp"] = raw["pr_prosp"]
@@ -794,7 +862,7 @@ def _pick_table() -> pd.Series:
 def draft_pick(ids, names=None) -> np.ndarray:
     """Overall draft pick (UNDRAFTED_PICK if none): by id, else by name."""
     t = _pick_table()
-    out = pd.Series(list(ids)).map(t).to_numpy(float)
+    out = pd.Series(list(ids)).map(t).to_numpy(float).copy()
     if names is not None:
         import unicodedata
         def norm(z):
@@ -931,4 +999,340 @@ def project_extra(V: int, prm: Params, ex: pd.DataFrame) -> pd.DataFrame:
             * float(tgt["ixg_ev"]) * 60.0
     df["score"] = sum(df[f"tpg_{k}"] for k in SITS)
     df["pr_prosp"] = rk["pr"]
+    df["pp_onice_rel"] = 0.0
+    df["sh_onice_rel"] = 0.0
     return df
+
+
+# ---------------------------------------------------------------------------
+# Season pipeline (backtests, team components and the freeze share it)
+# ---------------------------------------------------------------------------
+SCORING = ("g", "a1", "a2")
+
+
+def thin_group(proj: pd.DataFrame) -> pd.Series:
+    """'rookie' (no NHL games before V), 'thin' (1-81), else 'est'."""
+    g = proj.nhl_gp.fillna(0.0)
+    return pd.Series(np.where(g <= 0, "rookie", np.where(g < THIN_GP, "thin", "est")),
+                     index=proj.index)
+
+
+def calibrate_thin_rates(proj: pd.DataFrame, prm: Params) -> pd.DataFrame:
+    """Multiply rookies' / thin-record players' scoring rates by the factors
+    fitted on the tuning window (their priors were biased there)."""
+    proj = proj.copy()
+    grp = thin_group(proj)
+    mult = np.where(grp == "rookie", prm.rk_rate_mult,
+                    np.where(grp == "thin", prm.thin_rate_mult, 1.0))
+    for c in [c for c in proj.columns if c.startswith(("r60_", "sd60_"))
+              and c.split("_")[1] in SCORING]:
+        proj[c] = proj[c] * mult
+    return proj
+
+
+def pipeline(V: int, prm: Params, roster: pd.DataFrame, games: int, kind: str,
+             games_out=None, games_out_range=None, extra=None, eval_ids=(),
+             sims: int = 0, stack: bool = True, neurhl_budget: bool = False):
+    """Projection -> deployment -> totals (-> intervals) -> forecast averaging.
+
+    roster: player_id, team (skaters). kind: 'opening' (depth-chart games
+    with call-up coverage) or 'expost' (team-agnostic games). eval_ids:
+    extra players to project (not deployed). Returns (totals, projection).
+    """
+    from hattrick import deploy as DP
+    ids = set(roster.player_id) | set(eval_ids)
+    proj = calibrate_thin_rates(project(V, prm, ids=ids, extra=extra), prm)
+    ros = roster[roster.player_id.isin(proj.player_id)]
+    gmap = DP.league_gp_map(V, prm) if kind == "expost" else None
+    cover = DP.coverage(V, "opening") if kind == "opening" else None
+    kw = dict(games_out=games_out, games_out_range=games_out_range)
+    dep = DP.deploy(proj, ros, V, games, prm.dress_noise, prm.q_scale, gp_map=gmap,
+                    cover=cover, **kw)
+    gs = DP.apply_stack(dep, V, prm, kind, games) if stack else \
+        dep.set_index("player_id").gp.to_dict()
+    grp = dict(zip(proj.player_id, thin_group(proj)))
+    gm = {"rookie": prm.rk_gp_mult, "thin": prm.thin_gp_mult, "est": 1.0}
+    cap = dict(zip(dep.player_id, games - dep.games_out))
+    gs = {k: min(v * gm[grp.get(k, "est")], cap.get(k, games)) for k, v in gs.items()}
+    dep = DP.deploy(proj, ros, V, games, prm.dress_noise, prm.q_scale, gp_override=gs,
+                    cover=cover, **kw)
+    if neurhl_budget:
+        g = DP.neurhl_gp_budget(dep.set_index("player_id").gp, dep.team.nunique(), games)
+        dep = DP.deploy(proj, ros, V, games, prm.dress_noise, prm.q_scale,
+                        gp_override=g.to_dict(), **kw)
+    tot = DP.add_totals(dep, proj)
+    if sims:
+        q = DP.simulate(tot, proj, V, games, prm.mc(), S=sims)
+        tot = tot.merge(q, on="player_id", how="left")
+    tot = blend_paths(tot, V, prm, games)
+    return tot.copy(), proj
+
+
+MARCEL_W = (5.0, 4.0, 3.0)
+MARCEL_REG_GP = 30.0        # games of positional league PPG added
+
+
+@functools.lru_cache(maxsize=None)
+def marcel_baseline(V: int) -> pd.DataFrame:
+    """Marcel-style baseline (82-game basis): 5/4/3-weighted goals and
+    assists per game over V-1..V-3, each season restated to the scoring level
+    of the last intact season before V; regressed with 30 games of the
+    positional league average; age factor +1%/yr below 27, -1.5%/yr above
+    29; games = 0.5 GP(V-1) + 0.1 GP(V-2) + 25 (per 82, capped at 82)."""
+    P = panel()
+    lv = league_levels()
+    ptot = lambda y: sum(lv.loc[y, f"{s}_{k}"] for s in ("g", "a1", "a2") for k in SITS)
+    ref = project_league(V).name
+    num = {s: 0.0 for s in "ga"}
+    den = 0.0
+    for w, lag in zip(MARCEL_W, (1, 2, 3)):
+        y = V - lag
+        if y < P.seasons[0]:
+            continue
+        j = P.j(y)
+        era = ptot(ref) / ptot(y)
+        num["g"] = num["g"] + w * sum(P.x[f"g_{k}"][:, j] for k in SITS) * era
+        num["a"] = num["a"] + w * sum(P.x[f"a1_{k}"][:, j] + P.x[f"a2_{k}"][:, j]
+                                      for k in SITS) * era
+        den = den + w * P.x["gp"][:, j]
+    out = pd.DataFrame({"player_id": P.ids, "pos": P.pos})
+    age = ages(P, V)
+    af = np.where(age < 27, 1 + 0.01 * (27 - age), np.where(age > 29, 1 - 0.015 * (age - 29), 1.0))
+    for s in "ga":
+        lg = {p: num[s][P.pos == p].sum() / max(den[P.pos == p].sum(), 1) for p in "FD"}
+        prior = np.where(P.pos == "D", lg["D"], lg["F"])
+        out[f"{s}_pg"] = (num[s] + MARCEL_REG_GP * prior) / (den + MARCEL_REG_GP) * af
+    gp = 0.0
+    for lag, w in ((1, 0.5), (2, 0.1)):
+        y = V - lag
+        gp = gp + w * P.x["gp"][:, P.j(y)] * 82.0 / float(lv.loc[y, "games"])
+    out["gp"] = np.minimum(gp + 25.0, 82.0)
+    out["g"] = out.g_pg * out.gp
+    out["a"] = out.a_pg * out.gp
+    out["p"] = out.g + out.a
+    out["gp1"] = P.x["gp"][:, P.j(V - 1)] * 82.0 / float(lv.loc[V - 1, "games"])
+    out = out[np.asarray(den) > 0]
+    return out[["player_id", "gp", "g", "a", "p", "gp1"]].reset_index(drop=True)
+
+
+def blend_paths(tot: pd.DataFrame, V: int, prm: Params, games: int,
+                w_marcel: float | None = None, w_last: float | None = None) -> pd.DataFrame:
+    """Forecast averaging of season goals and assists (points follow):
+
+      final = (1 - wm - wl) * HatTrick + wm * Marcel + wl * LastGP
+
+    Marcel = the 5/4/3 baseline scaled to `games`; LastGP = HatTrick's
+    per-game goals/assists x last season's games (per 82, scaled). Players
+    a path cannot price (no history in the last three seasons / no games
+    last season) keep the weights of the paths that can. Games, ice time
+    and every other stat stay HatTrick's (they carry the conservation
+    laws); interval columns of g/a/p are rescaled with their mean."""
+    wm = prm.blend_marcel if w_marcel is None else w_marcel
+    wl = prm.blend_lastgp if w_last is None else w_last
+    if wm <= 0 and wl <= 0:
+        return tot
+    t = tot.copy()
+    m = marcel_baseline(V).set_index("player_id")
+    f = games / 82.0
+    ids = t.player_id
+    mg, ma = ids.map(m.g * f), ids.map(m.a * f)
+    gp1 = ids.map(m.gp1).fillna(0.0) * f
+    per = t.gp.clip(lower=1e-6)
+    lg, la = t.g / per * gp1, t.a / per * gp1
+    has_m, has_l = mg.notna(), gp1 > 0
+    wm_i = np.where(has_m, wm, 0.0)
+    wl_i = np.where(has_l, wl, 0.0)
+    wh = 1.0 - wm_i - wl_i
+    new_g = wh * t.g + wm_i * mg.fillna(0) + wl_i * lg
+    new_a = wh * t.a + wm_i * ma.fillna(0) + wl_i * la
+    rg = np.where(t.g > 1e-9, new_g / t.g.clip(lower=1e-9), 1.0)
+    ra = np.where(t.a > 1e-9, new_a / t.a.clip(lower=1e-9), 1.0)
+    rp = np.where(t.p > 1e-9, (new_g + new_a) / t.p.clip(lower=1e-9), 1.0)
+    for s, r in (("g", rg), ("a", ra), ("p", rp)):
+        for c in [c for c in t.columns if c.startswith(f"{s}_p") or c == f"{s}_sd"]:
+            t[c] = t[c] * r
+    for c, r in (("a1", ra), ("a2", ra), ("ppg", rg), ("ppa", ra)):
+        if c in t:
+            t[c] = t[c] * r
+    t["g_hattrick"], t["a_hattrick"] = t.g, t.a
+    t["g"], t["a"] = new_g, new_a
+    t["p"] = t.g + t.a
+    return t
+
+
+# ---------------------------------------------------------------------------
+# 2026-27 freeze
+# ---------------------------------------------------------------------------
+def roster_2027() -> pd.DataFrame:
+    """Opening rosters (2026-09-29) plus injured players the clubs carried
+    off the 23-man roster (non-roster / injured reserve): they return during
+    the season, so they belong in the depth chart with games out.
+
+    Sources for the additions: the raw availability table (MoneyPuck injured
+    flag, DailyFaceoff IR statuses, NeurHL's researched overrides) and the
+    injury research file. A player's team is the roster file's when listed,
+    else the research file's (it records moves up to the cutoff, e.g.
+    Merzlikins CBJ -> TOR on 9/28), else the availability table's.
+    """
+    from hattrick import deploy as DP
+    r = D.rosters_2027()[["player_id", "team", "name", "grp", "birth", "pos_raw"]].copy()
+    r["on_opening_roster"] = True
+    av = D.availability_raw_2027()
+    flagged = av[(av.injured.astype(str) == "True")
+                 | av.df_status.isin(["ir:out", "ir:ir"])
+                 | (av.override_games_out.fillna(0) > 0)]
+    flagged = flagged[flagged.team.notna() & ~flagged.player_id.isin(r.player_id)]
+    add = flagged[["player_id", "team", "name"]].drop_duplicates("player_id").copy()
+    if DP.RESEARCH_FILE.exists():
+        res = pd.read_csv(DP.RESEARCH_FILE)
+        res = res[pd.to_datetime(res.report_date) <= pd.Timestamp(DP.RESEARCH_CUTOFF)]
+        res["nn"] = res.name.map(DP._norm_name)
+        avn = av.dropna(subset=["name"]).assign(nn=lambda d: d.name.map(DP._norm_name))
+        rr = res.merge(avn[["nn", "player_id"]].drop_duplicates("nn"), on="nn")
+        rr = rr[~rr.player_id.isin(r.player_id)]
+        tm = dict(zip(rr.player_id, rr.team))
+        add = pd.concat([add, rr[["player_id", "team", "name"]]]).drop_duplicates("player_id")
+        add["team"] = add.player_id.map(tm).fillna(add.team)
+    # positions and births for the additions
+    s = D.skater_seasons().sort_values("season_end").drop_duplicates("player_id", keep="last")
+    pos = dict(zip(s.player_id, s.pos))
+    g = D.goalie_seasons()
+    gids = set(g.player_id)
+    b = D.bios().drop_duplicates("player_id").set_index("player_id")
+    add["grp"] = [("G" if p in gids else pos.get(p, "F")) for p in add.player_id]
+    add["birth"] = add.player_id.map(b.birth)
+    add["pos_raw"] = add.player_id.map(b.position)
+    add["on_opening_roster"] = False
+    out = pd.concat([r, add], ignore_index=True)
+    out = out[out.team.isin(C.TEAMS_2027)]
+    return out.reset_index(drop=True)
+
+
+def run_freeze(V: int = C.TARGET_SEASON, sims: int = 2000) -> pd.DataFrame:
+    """Write freeze_<V>/player_rates_<V>.csv and goalie_rates_<V>.csv."""
+    from hattrick import deploy as DP
+    from hattrick import goalies as GL
+    assert V == C.TARGET_SEASON, "the freeze uses the 2026-27 rosters and injuries"
+    games = C.GAMES_PER_TEAM.get(V, C.DEFAULT_GAMES)
+    prm = load_params()
+    out_dir = C.OUT / f"freeze_{V}"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    ros = roster_2027()
+    sk = ros[ros.grp != "G"].copy()
+    extra = sk.assign(pos=np.where(sk.grp == "D", "D", "F"))[["player_id", "pos", "birth", "name"]]
+    go, rng_, src = DP.games_out_2027(sk, games, with_range=True)
+    tot, proj = pipeline(V, prm, sk[["player_id", "team"]], games, "opening",
+                         games_out=go, games_out_range=rng_, extra=extra, sims=sims)
+    keep = [c for c in proj.columns if c not in tot.columns or c == "player_id"]
+    tot = tot.merge(proj[keep], on="player_id")
+    tot["games_out_source"] = tot.player_id.map(src)
+    tot = tot.merge(ros[["player_id", "name", "on_opening_roster"]].rename(
+        columns={"name": "roster_name"}), on="player_id", how="left")
+    tot["name"] = tot.roster_name.fillna(tot.name)
+    # last season (for the sanity print and the regression-slope check)
+    P = panel()
+    j = P.j(V - 1)
+    last = pd.DataFrame({"player_id": P.ids, "gp_last": P.x["gp"][:, j],
+                         "p_last": sum(P.x[f"{s}_{k}"][:, j] for s in ("g", "a1", "a2") for k in SITS)})
+    tot = tot.merge(last, on="player_id", how="left")
+    lead = ["player_id", "name", "team", "pos", "age", "on_opening_roster", "has_hist",
+            "nhl_gp", "q", "games_out", "games_out_min", "games_out_max", "games_out_source",
+            "score", "gp", "gp_p10", "gp_p90", "toi", "toi_p10", "toi_p90",
+            *[f"toi_{k}" for k in SITS], *[f"tpg_{k}_n" for k in SITS],
+            "g", "g_p10", "g_p90", "g_sd", "a", "a_p10", "a_p90", "a_sd",
+            "p", "p_p10", "p_p50", "p_p90", "p_sd", "a1", "a2", "ppg", "ppa",
+            "sog", "sog_p10", "sog_p90", "ixg", "hits", "blk", "pim", "fow", "fol",
+            "tk", "gv", "fin", "rel_xgf60", "rel_xgf60_sd", "rel_xga60", "rel_xga60_sd",
+            "pr_prosp", "gp_last", "p_last"]
+    rest = [c for c in tot.columns if c.startswith(("r60_", "sd60_", "tpg_")) and c not in lead]
+    tot = tot[lead + rest].sort_values("p", ascending=False)
+    tot.round(4).to_csv(out_dir / f"player_rates_{V}.csv", index=False)
+    gl = GL.run_2027(out_dir, games=games)
+    export_params(V, prm)
+    return tot, gl
+
+
+def export_params(V: int, prm: Params) -> dict:
+    """Write every constant fitted for season V next to the tuned knobs in
+    hattrick/output/params/players.json (key 'fitted_<V>')."""
+    from hattrick import deploy as DP
+    pri = rate_priors(V, prm.prior_window, prm.eb_window)
+    tgt = project_league(V)
+    eb = {}
+    for c in ("g_ev", "g_pp", "a1_ev", "a2_ev", "a1_pp", "a2_pp", "sog_ev", "ixg_ev",
+              "hits_all", "blk_all", "pim_all", "fow_all", "tk_all", "gv_all"):
+        for pos in ("F", "D"):
+            e = pri[(c, pos)]
+            # K at the positional mean usage, minutes of prior (before kappa)
+            X = np.array([1.0, 15.5 if pos == "F" else 19.0, 1.5, 1.0])
+            prr = float(max(X @ e["beta"], 1e-3))
+            eb[f"{c}_{pos}"] = {"prior_beta_[1,ev,pp,sh]": [round(float(b), 4) for b in e["beta"]],
+                                "tau2": e["tau2"], "phi": e["phi"],
+                                "K_minutes_at_mean_usage": prm.kappa * e["phi"] * prr / (float(tgt[c]) * e["tau2"])}
+    ages_ = np.arange(19, 39)
+    aging = {f"{g}_{pos}": dict(zip(ages_.tolist(), np.round(age_multiplier(
+        V, prm, g, np.array([pos] * len(ages_)), ages_ + 0.5), 3).tolist()))
+        for g in (*AGE_GROUPS, "toi") for pos in "FD"}
+    f = nhle_factors(V)
+    top = {k: round(v, 3) for k, v in sorted(f.items(), key=lambda kv: -kv[1])
+           if k in ("pooled", "AHL", "KHL", "SHL", "Liiga", "NL", "NCAA", "OHL", "WHL",
+                    "QMJHL", "USHL", "Czechia", "DEL", "HockeyAllsvenskan", "VHL", "MHL")}
+    pm = prospect_model(V)
+    out = {
+        "league_level_used": {"season": int(tgt.name),
+                              **{k: round(float(tgt[k]) * 60, 4) for k in ("g_ev", "g_pp", "a1_ev", "a2_ev", "g_oth")},
+                              **{k: round(float(tgt[k]), 3) for k in tgt.index if k.startswith("sk_min_")}},
+        "eb_constants": eb,
+        "finishing": finishing_prior(V, prm.eb_window),
+        "aging_multipliers": aging,
+        "nhle_factors_selected": top,
+        "prospect_model": {"features": ["1", "log NHLe score", "has score", "log pick", "is D", "age-21"],
+                           "points_ratio_coef": [round(float(b), 4) for b in pm["b_pr"]],
+                           "log_toi_coef": [round(float(b), 4) for b in pm["b_toi"]], "n": pm["n"]},
+        "fringe_tpg": {f"{p}_{k}": round(v, 3) for (p, k), v in usage_prior_tpg(V).items()},
+        "health_prior": DP.health_prior(V),
+        "coverage_opening": DP.coverage(V, "opening"),
+        "gp_stack_opening_[1,struct,gp1,gp2]": [round(float(b), 4) for b in DP.gp_stack(V, prm, "opening")],
+    }
+    prev = json.loads(PARAMS_PATH.read_text()) if PARAMS_PATH.exists() else {}
+    prev[f"fitted_{V}"] = out
+    D.write_json(prev, PARAMS_PATH)
+    return out
+
+
+def _sanity_print(tot: pd.DataFrame, gl: pd.DataFrame, V: int) -> None:
+    print(f"\nTop 30 projected point scorers, {V} ({C.GAMES_PER_TEAM.get(V, 82)} games)")
+    print(f"{'#':>3} {'name':<24}{'tm':>4}{'pos':>4}{'age':>5}{'GP':>6}{'TOI/g':>6}"
+          f"{'G':>6}{'A':>6}{'P':>7}{'p10':>6}{'p90':>6}{'last P':>7}{'last GP':>8}")
+    for i, r in enumerate(tot.head(30).itertuples(), 1):
+        print(f"{i:>3} {str(r.name)[:23]:<24}{r.team:>4}{r.pos:>4}{r.age:>5.1f}{r.gp:>6.1f}"
+              f"{r.toi / max(r.gp, 1e-9):>6.1f}{r.g:>6.1f}{r.a:>6.1f}{r.p:>7.1f}{r.p_p10:>6.0f}"
+              f"{r.p_p90:>6.0f}{(r.p_last if r.p_last == r.p_last else float('nan')):>7.0f}"
+              f"{(r.gp_last if r.gp_last == r.gp_last else float('nan')):>8.0f}")
+    t = tot.groupby("team").agg(toi=("toi", "sum"), g=("g", "sum"), gp=("gp", "sum"),
+                                ppg=("ppg", "sum"))
+    lg = project_league(V)
+    games = C.GAMES_PER_TEAM.get(V, 82)
+    budget = games * sum(lg[f"sk_min_{p}_{k}"] for p in ("F", "D") for k in SITS)
+    print(f"\nPer-team skater TOI (budget {budget:,.0f} min incl. call-ups) and goals")
+    print(t.assign(toi_share=t.toi / budget, g_per_game=t.g / games).round(2).to_string())
+    reg = tot[(tot.gp_last >= 60) & (tot.gp > 1)]
+    b = np.polyfit(reg.p_last / reg.gp_last, reg.p / reg.gp, 1)[0]
+    print(f"\nslope of projected P/GP on last season's P/GP (regulars, n={len(reg)}): {b:.3f}")
+    print(f"goalies: {len(gl)} rows; top starts:")
+    print(gl.sort_values("starts", ascending=False).head(12)[
+        ["name", "team", "starts", "starts_p10", "starts_p90", "gsax60", "sv_pct"]].round(3).to_string())
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--season", type=int, default=C.TARGET_SEASON)
+    ap.add_argument("--sims", type=int, default=2000)
+    a = ap.parse_args()
+    tot, gl = run_freeze(a.season, a.sims)
+    _sanity_print(tot, gl, a.season)
+    print("->", C.OUT / f"freeze_{a.season}")
+
+
+if __name__ == "__main__":
+    main()
