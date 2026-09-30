@@ -57,6 +57,6 @@
  {
   "check": "every live forecast committed before its game's start",
   "pass": true,
-  "detail": "2 files"
+  "detail": "6 files"
  }
 ]

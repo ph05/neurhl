@@ -12,6 +12,10 @@
 
 m scales stat-sheet goal means only; the win probability never changes.
 State: neurhl/configs/live_goal_calibration.json.
+
+NeurHL 1.2 (PLAN_NeurHL_1_2 R3): the prior becomes m0 = L / M_full, M_full the engine's mean over
+every scheduled game (configs/live_goal_calibration_1_2.json, from the 1.2 season set), and
+forecasts made by earlier engines are converted to the live engine's units before pooling.
 """
 import argparse
 import datetime as dt
@@ -27,7 +31,21 @@ sys.path.insert(0, str(ROOT))
 from common import CONFIGS, NOUT  # noqa: E402
 
 STATE = CONFIGS / "live_goal_calibration.json"
+STATE_1_2 = CONFIGS / "live_goal_calibration_1_2.json"     # NeurHL 1.2 prior (PLAN_NeurHL_1_2 R3)
 K = 300.0
+
+
+def bundle_m() -> dict:
+    """First-14-days mean projected regulation goals of each engine that made live forecasts
+    (the frozen state for the live engine, configs/live_goal_calibration_<bundle>.json for earlier
+    ones). Same window and lineups for every engine, so their ratios convert raw goals between
+    engines (PLAN_NeurHL_1_2 R3)."""
+    out = {}
+    for f in sorted(CONFIGS.glob("live_goal_calibration_g*.json")) + [STATE]:
+        st = json.loads(f.read_text())
+        if "bundle" in st and "M" in st:
+            out[st["bundle"]] = float(st["M"])
+    return out
 
 
 def freeze(first_days: int = 14):
@@ -81,8 +99,12 @@ def freeze(first_days: int = 14):
 
 
 def current() -> float:
-    """m for a forecast made now: m0 shrunk toward completed 2026-27 games."""
-    st = json.loads(STATE.read_text())
+    """m for a forecast made now: m0 shrunk toward completed 2026-27 games. From NeurHL 1.2 the
+    prior is L / M_full (STATE_1_2) and every forecast's raw goals are expressed in the live
+    engine's units (M_live / M_engine) before pooling; forecasts by an engine with no recorded
+    M are left out."""
+    live = json.loads(STATE.read_text())
+    st = json.loads(STATE_1_2.read_text()) if STATE_1_2.exists() else live
     res_p = NOUT / "live" / "results_2027.csv"
     base = NOUT / "live" / "2027"
     if not res_p.exists() or not base.exists():
@@ -100,15 +122,23 @@ def current() -> float:
             continue
         d = pd.read_csv(f)
         if "goals_home_raw" in d:
-            preds.append(d[["game_id", "forecast", "goals_home_raw", "goals_away_raw"]])
+            if "bundle" not in d:
+                d["bundle"] = live.get("bundle")
+            preds.append(d[["game_id", "forecast", "goals_home_raw", "goals_away_raw", "bundle"]])
     if not preds:
         return float(st["m0"])
     p = pd.concat(preds, ignore_index=True)
     p = p.sort_values("forecast", key=lambda x: x.map({"pregame": 0, "morning": 1})) \
          .drop_duplicates("game_id")
     j = p.merge(res[["game_id", "reg_h", "reg_a"]], on="game_id")
+    if STATE_1_2.exists():
+        bm = bundle_m()
+        conv = j.bundle.map(lambda b: bm[live["bundle"]] / bm[b] if b in bm else np.nan)
+        j = j.assign(conv=conv)[conv.notna()]
+    else:
+        j = j.assign(conv=1.0)
     A = float(j.reg_h.sum() + j.reg_a.sum())
-    P = float(j.goals_home_raw.sum() + j.goals_away_raw.sum())
+    P = float(((j.goals_home_raw + j.goals_away_raw) * j.conv).sum())
     return float((A + st["k"] * st["L"]) / (P + st["k"] * st["M"]))
 
 

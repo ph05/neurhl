@@ -8,6 +8,7 @@ rookies up to 2025-26).
 Writes neurhl/configs/rookie_priors_2027.csv:
   player_id, pos, age, pre_gp, tg, ta, pred_g, pred_a, base_g, base_a, name, team
 """
+import argparse
 import sys
 from pathlib import Path
 
@@ -24,9 +25,15 @@ OUT = ROOT / "configs" / "rookie_priors_2027.csv"
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--rosters-date", required=True, help="the season set's roster snapshot (YYYY-MM-DD)")
+    a = ap.parse_args()
+    import sim.availability_2027 as AV
     d = RP.load()
-    rost = pd.read_csv(ROOT.parent / "data" / "raw" / "rosters" / "2026-09-28" / "rosters.csv")
-    av = pd.read_csv(ROOT / "output" / "neurhl_1_0" / "availability_2027.csv")
+    rday, rost = AV._live("fetch_rosters").latest_rosters(a.rosters_date)
+    # every skater the season set can dress: rosters, injured and reserves (PLAN_NeurHL_1_2 R4)
+    R = AV.load(a.rosters_date)
+    av = pd.concat([R[t].skaters[["player_id", "name", "team"]] for t in R], ignore_index=True)
     ids = set(rost.player_id) | set(av.player_id)
     nhl_gp = d[(d.lg == "NHL") & (d.season_end < V)].groupby("player_id").gp.sum()
     bio = d.groupby("player_id").agg(pos=("pos", "first"), pick=("pick", "first"))
@@ -45,14 +52,14 @@ def main():
     pr = RP.fit_predict(tr, te)
     nm = dict(zip(rost.player_id, rost["first"] + " " + rost["last"]))
     tm = dict(zip(rost.player_id, rost.team))
-    if "name" in av:
-        for p, n in zip(av.player_id, av.name):
-            nm.setdefault(p, n)
+    for p, n, t in zip(av.player_id, av.name, av.team):
+        nm.setdefault(p, n)
+        tm.setdefault(p, t)
     pr["name"] = pr.player_id.map(nm)
     pr["team"] = pr.player_id.map(tm)
     pr = pr[["player_id", "pos", "age", "pre_gp", "tg", "ta", "pred_g", "pred_a", "base_g", "base_a", "name", "team"]]
     pr.sort_values("pred_g", ascending=False).to_csv(OUT, index=False, float_format="%.4f")
-    print(f"{len(pr)} rookies -> {OUT}")
+    print(f"{len(pr)} rookies (rosters {rday}) -> {OUT}")
     print(pr.assign(pts82=82 * (pr.pred_g + pr.pred_a)).sort_values("pts82", ascending=False)
           .head(15)[["name", "team", "age", "pre_gp", "pred_g", "pred_a", "pts82"]].round(3).to_string(index=False))
 

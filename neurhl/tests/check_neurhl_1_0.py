@@ -82,7 +82,14 @@ def main():
 
     print("\nPLAYERS")
     tol = 0.02
-    for s_col, t_col in (("goals", "goals_for"), ("sog", "sog_for")):
+    xt = "so_goals_for" in t          # NeurHL 1.2 R2: totals include goals past regulation
+    if xt:
+        d = (t.goals_for - t.goals_for_reg - t.ot_goals_for - t.so_goals_for).abs().max()
+        check("team goals_for = regulation + overtime + shootout-deciding goals", d < tol, f"max |diff| {d:.4f}")
+        d = (sk.groupby("team").goals.sum() - (t.goals_for - t.so_goals_for)).abs().max()
+        check("team goals_for less shootout-deciding goals = sum of its skaters' goals", d < tol,
+              f"max |diff| {d:.4f}")
+    for s_col, t_col in ((() if xt else (("goals", "goals_for"),)) + (("sog", "sog_for"),)):
         d = (sk.groupby("team")[s_col].sum() - t[t_col]).abs().max()
         check(f"team {t_col} = sum of its skaters' {s_col}", d < tol, f"max |diff| {d:.4f}")
     for c in ("hits", "blocks", "giveaways", "takeaways", "pim", "fo_won"):
@@ -93,8 +100,9 @@ def main():
     check("skater games = 18 x team games", d < tol, f"max |diff| {d:.4f}")
     d = (gl.groupby("team").starts.sum() - t.index.map(gp_team).to_series(index=t.index)).abs().max()
     check("goalie starts = team games", d < tol, f"max |diff| {d:.4f}")
-    d = (gl.groupby("team").ga.sum() - t.goals_against).abs().max()
-    check("goalie goals against sum to the team's", d < tol, f"max |diff| {d:.4f}")
+    d = (gl.groupby("team").ga.sum() - (t.goals_against - (t.so_goals_against if xt else 0))).abs().max()
+    check("goalie goals against sum to the team's" + (" (less shootout-deciding goals)" if xt else ""),
+          d < tol, f"max |diff| {d:.4f}")
     d = (gl.groupby("team").wins.sum() - t.exp_wins_from_games).abs().max()
     check("goalie wins sum to the team's expected wins", d < tol, f"max |diff| {d:.4f}")
 
@@ -107,7 +115,8 @@ def main():
     check("18 skaters dressed per team-game", (dress - 18).abs().max() < 1e-3, f"max |diff| {(dress - 18).abs().max():.1e}")
     goals_pg = tg.g.sum().unstack()
     gi = g.set_index("game_id")
-    d = max((goals_pg[0] - gi.goals_home).abs().max(), (goals_pg[1] - gi.goals_away).abs().max())
+    so_h, so_a = (gi.so_goals_home, gi.so_goals_away) if "so_goals_home" in gi else (0, 0)
+    d = max((goals_pg[0] - (gi.goals_home - so_h)).abs().max(), (goals_pg[1] - (gi.goals_away - so_a)).abs().max())
     check("per team-game skater goals = the game file's team goals", d < 1e-3, f"max |diff| {d:.1e}")
     toi = tg.toi.sum()
     check("skater ice time per team-game within the budget [280, 300] minutes",
@@ -121,6 +130,26 @@ def main():
         src = {"goals": "g", "assists": "a", "gp": "dress"}.get(c, c)
         d = (pg.groupby("player_id")[src].sum() - sk.groupby("player_id")[c].sum()).abs().max()
         check(f"season {c} = sum of the player-game rows", d < 1e-2, f"max |diff| {d:.1e}")
+
+    run = json.loads((OUT / "run_2027.json").read_text()) if (OUT / "run_2027.json").exists() else {}
+    if "level_ratios" in run:               # NeurHL 1.2 checks (PLAN_NeurHL_1_2 R1, R4)
+        print("\nNEURHL 1.2")
+        ppo = t.pp_opps_for.sum() / (2 * N)
+        check("league power-play opportunities per team-game in [2.5, 3.3]", 2.5 <= ppo <= 3.3, f"{ppo:.3f}")
+        share = t.pp_goals_for.sum() / t.goals_for.sum()
+        check("power-play goals share of all goals in [0.15, 0.25]", 0.15 <= share <= 0.25, f"{share:.3f}")
+        if run.get("rookie_priors"):
+            sys.path.insert(0, str(ROOT / "eval"))
+            import rookie_priors as RP
+            d_ = RP.load()
+            nhl = d_[(d_.lg == "NHL") & (d_.season_end < 2027)].groupby("player_id").gp.sum()
+            recent = set(d_[(d_.lg != "NHL") & d_.season_end.isin([2025, 2026]) & (d_.gp > 0)].player_id)
+            table = set(pd.read_csv(ROOT.parent / run["rookie_priors"]).player_id) \
+                if (ROOT.parent / run["rookie_priors"]).exists() else set(pd.read_csv(run["rookie_priors"]).player_id)
+            dressed = set(pg[pg.dress > 0].player_id)
+            miss = sorted(p_ for p_ in dressed if nhl.get(p_, 0) < 20 and p_ in recent and p_ not in table)
+            check("every dressed rookie with a recent pre-NHL record is in the rookie table", not miss,
+                  f"{len(miss)} missing {miss[:5]}")
 
     prev = ROOT / "output" / "live" / "2027" / "2026-09-29" / "preview.csv"
     run_b = json.loads((OUT / "run_2027.json").read_text()).get("bundle") if (OUT / "run_2027.json").exists() else None

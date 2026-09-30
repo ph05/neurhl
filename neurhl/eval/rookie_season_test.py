@@ -38,8 +38,18 @@ OUT = ROOT / "output" / "neurhl_1_1" / "rookie_season_test.json"
 
 
 def main():
+    import os
     torch.set_num_threads(4)
-    cfg = {**DEFAULT, **json.loads((ROOT / "configs" / "neurhl_g" / "g1.json").read_text())}
+    # NeurHL 1.2 R5: --tag rk tests the shipped engine's recipe (g1rk snapshots snaprk_V_seed.pt,
+    # tensors g_master_rk); writes rookie_season_test_rk.json
+    tag = sys.argv[sys.argv.index("--tag") + 1] if "--tag" in sys.argv else ""
+    global OUT
+    if tag:
+        assert os.environ.get("NEURHL_MASTER_TAG") == tag, f"run with NEURHL_MASTER_TAG={tag}"
+        OUT = ROOT / "output" / "neurhl_1_2" / f"rookie_season_test_{tag}.json"
+    cfg_name = "g1rk" if tag == "rk" else "g1"
+    snap = f"snap{tag}"
+    cfg = {**DEFAULT, **json.loads((ROOT / "configs" / "neurhl_g" / f"{cfg_name}.json").read_text())}
     D = Data("train")
     s_all = D.meta.season_end.to_numpy()
     tidx = json.loads((TENSORS / "maps.json").read_text())["team"]
@@ -58,9 +68,9 @@ def main():
         P = D.prepare((s_all < V) & (s_all >= cfg["train_from"]))
         Q = preseason_arrays(D, P, idx, elo_pre, dict(D.stats))
         acc = []
-        for sd in range(5):
+        for sd in range(3 if tag == "rk" else 5):          # PLAN_NeurHL_1_2 A2: 3 seeds for rk
             m = build(D, cfg)
-            m.load_state_dict(torch.load(SNAP / f"snap_{V}_{sd}.pt"))
+            m.load_state_dict(torch.load(SNAP / f"{snap}_{V}_{sd}.pt"))
             m.eval()
             acc.append(predict(m, Q, np.arange(len(idx))))
         g_ = np.mean([a["g"] for a in acc], 0)

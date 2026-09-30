@@ -1,19 +1,24 @@
 # NeurHL
 
-**NeurHL 1.1** (current release) predicts the 2026-27 NHL season with one model at every level:
+**NeurHL 1.2** (current release) predicts the 2026-27 NHL season with one model at every level:
 every skater's game, every game, and every season total. The same engine
 produces all three, and they are built to agree. A skater's season goals are
 the sum of his projected games, a team's goals are the sum of its skaters',
 and its points are the sum of its games. That agreement is checked
-([`neurhl/tests/check_neurhl_1_0.py`](neurhl/tests/check_neurhl_1_0.py)). NeurHL 1.1
-was issued before the first game on 2026-09-29. It adds four things:
+([`neurhl/tests/check_neurhl_1_0.py`](neurhl/tests/check_neurhl_1_0.py)).
+
+NeurHL 1.2 (2026-09-29, evening) corrects five errors in 1.1's season
+forecast and goal calibration; the engine is unchanged. See
+[NeurHL 1.2 corrections](#neurhl-12-corrections).
+
+NeurHL 1.1 was issued before the first game on 2026-09-29. It added four things:
 - the game engine refit on every season through 2025-26;
 - rookies' records from other leagues;
 - MoneyPuck's injury list, with every undated entry researched;
 - fitted stat-sheet distributions.
 
-The NeurHL 1.0 forecasts, frozen the night before, stay unchanged and are
-scored beside it. Both are scored in public as the season is played.
+The NeurHL 1.0 forecasts, frozen the night before, and the 1.1 files stay
+unchanged and are scored beside 1.2. Both are scored in public as the season is played.
 Releases are numbered 1.1, 1.2 and so on.
 
 **Browse the projections: [ph05.github.io/neurhl](https://ph05.github.io/neurhl/)**
@@ -73,8 +78,11 @@ flowchart LR
 
 ## The 2026-27 season
 
-- **NeurHL 1.1 (current):** every game, team and skater from the refit engine
-  `g2027_v3` ([neurhl/output/neurhl_1_1/season/](neurhl/output/neurhl_1_1/season/)).
+- **NeurHL 1.2 (current):** every game, team and skater from the refit engine
+  `g2027_v3`, with the five corrections below
+  ([neurhl/output/neurhl_1_2/season/](neurhl/output/neurhl_1_2/season/)).
+- **NeurHL 1.1:** the same engine before the corrections
+  ([neurhl/output/neurhl_1_1/season/](neurhl/output/neurhl_1_1/season/)), unchanged and scored.
   On the formerly sealed 2025-26 seasons, the engine's configuration beat Elo
   by 0.0069 nats per game and the neural player layer by 0.0021 (descriptive:
   its earlier pre-test had failed).
@@ -92,6 +100,48 @@ flowchart LR
   night's results, is published in `neurhl/output/live/standings_1_1_2027.csv`.
 - **Earlier freeze:** the forecasts frozen on 2026-09-25 by an earlier,
   separately built season layer are unchanged and scored as preregistered.
+
+## NeurHL 1.2 corrections
+
+The game engine (`g2027_v3`) and the season layer are unchanged; standings and
+playoff odds move by at most 0.4 points and 0.5 percentage points.
+
+1. **Power plays at the opening-week level.** The season projection builds
+   every game from opening-night inputs, including days into the season and
+   games played. The engine has learned that the first weeks have more power
+   plays, so every game carried that rate. On eleven past seasons this
+   overstated power-play opportunities by 33% and power-play time by 24%.
+   Opportunities, power-play time and expected goals are now scaled by ratios
+   estimated on 2011-12 to 2017-18 (0.776, 0.826, 0.961) and checked on
+   2018-19 to 2023-24
+   ([`eval/season_convention_1_2.py`](neurhl/eval/season_convention_1_2.py)).
+2. **Goals past regulation.** The engine predicts regulation goals. Team
+   goals now include overtime goals and one goal per shootout win (as in the
+   standings); skater and goalie totals include overtime goals.
+3. **Goal level.** The goal multiplier compared last season's full-season
+   scoring with the engine's first two weeks, which run high. It now uses
+   the whole schedule (m0 1.0107 to 1.0055). The in-season update converts
+   forecasts made by earlier engine versions to the live engine's scale
+   before pooling them.
+4. **Rookie table.** It had been built from the previous day's rosters and
+   missed two rookies (Cruz Lucius, Lukas Cormier). It is rebuilt from the
+   release rosters, and a check now requires every dressed rookie with a
+   recent pre-NHL record to be in it.
+5. **Rookie weights.** 1.1 replaced rookies' goals and assists with their
+   translated pre-NHL records, a weight chosen against an engine without
+   rookie inputs. Retested with walk-forward snapshots of the released
+   engine's recipe, rookies' goals are 75% translated and 25% engine;
+   assists stay fully translated.
+
+| Per team-game | 1.1 | 1.2 | 2025-26 |
+|---|---|---|---|
+| Power-play opportunities | 3.73 | 2.89 | 2.88 |
+| Power-play minutes | 5.82 | 4.80 | 4.84 |
+| Power-play goals / goals | 24.2% | 20.6% | 19.6% |
+| Goals (with extra time) | 3.02 | 3.12 | 3.13 |
+
+Open item: projected shots per team-game (30.0) remain above 2025-26 (27.8);
+the season setup accounts for about 2% of the gap in history.
 
 ## Findings
 
@@ -138,7 +188,9 @@ governs.
 
 | File | Contents |
 |---|---|
-| `neurhl/output/neurhl_1_1/season/` | NeurHL 1.1, the current release: games, teams (with points percentiles and playoff odds), skaters, goalies and every player-game, in the same layout as the 1.0 files |
+| `neurhl/output/neurhl_1_2/season/` | NeurHL 1.2, the current release: games, teams, skaters, goalies and every player-game, in the same layout as the 1.0 files; team goals include goals past regulation |
+| `neurhl/output/neurhl_1_2/season_convention.json`, `rookie_season_test_rk.json` | NeurHL 1.2: the historical tests behind the power-play ratios and the rookie weights |
+| `neurhl/output/neurhl_1_1/season/` | NeurHL 1.1: games, teams (with points percentiles and playoff odds), skaters, goalies and every player-game, in the same layout as the 1.0 files |
 | `neurhl/output/neurhl_1_0/games_2027.csv` | NeurHL 1.0: every game's home-win probability, four-way outcome, goals, shots, xG and power plays, with Elo and the earlier freeze beside it |
 | `neurhl/output/neurhl_1_0/teams_2027.csv` | NeurHL 1.0: team points (mean, 10th, 50th and 90th percentiles), record, goals, shots, xG, playoff, division, Presidents' Trophy and Cup odds |
 | `neurhl/output/neurhl_1_0/skaters_2027.csv`, `goalies_2027.csv` | NeurHL 1.0: season totals for every skater and goalie, with intervals for goals, assists and points |

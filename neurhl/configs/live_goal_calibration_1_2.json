@@ -1,0 +1,11 @@
+{
+ "m0": 1.005487294729405,
+ "L": 3.0026676829268295,
+ "M": 2.986281078504232,
+ "k": 300.0,
+ "bundle": "g2027_v3",
+ "bundle_sha": "f188b4bb67334412",
+ "source": "neurhl/output/neurhl_1_2/season/run_2027.json (M_full: every scheduled game)",
+ "rule": "PLAN_NeurHL_1_2 R3",
+ "created_utc": "2026-09-30T01:40:02+00:00"
+}

@@ -21,8 +21,8 @@ DOCS = PROJ / "docs"
 UNI = NOUT / "neurhl_1_0"          # NeurHL 1.0, the unified model (PLAN_NeurHL_1_0.md)
 # PLAN_NeurHL4 A5: the season set of the engine refit on all seasons is the primary forecast
 # once it exists and its consistency check has passed; otherwise the frozen 1.0 files
-_REL = NOUT / "neurhl_1_1" / "season"                        # NeurHL 1.1 release, once built and checked
-_CANDS = ([_REL] if _REL.exists() else []) + sorted(UNI.glob("v*_20*"), reverse=True)
+_RELS = [NOUT / "neurhl_1_2" / "season", NOUT / "neurhl_1_1" / "season"]   # newest release first
+_CANDS = [r for r in _RELS if r.exists()] + sorted(UNI.glob("v*_20*"), reverse=True)
 for _v in _CANDS:                                          # newest dated set that passed its check
     if (_v / "checks_2027.json").exists() and json.loads((_v / "checks_2027.json").read_text()).get("pass"):
         UNI = _v

@@ -425,6 +425,20 @@ def main():
                                             "(configs/rookie_priors_2027.csv; PLAN_NeurHL_1_1 A15)")
     ap.add_argument("--out-dir", help="write the season files here instead of output/neurhl_1_0 "
                                       "(a dated file set, e.g. output/neurhl_1_0/v2_20260929)")
+    ap.add_argument("--rookie-weight", type=float, default=1.0,
+                    help="weight of the translated record in rookies' goals and assists "
+                         "(w x translated + (1 - w) x engine; PLAN_NeurHL_1_2 R5)")
+    ap.add_argument("--rookie-weight-a", type=float, help="the assists weight, when it differs (R5 chooses "
+                                                          "per statistic); default: --rookie-weight")
+    ap.add_argument("--level-ratios", help="season-level ratios for the opening-night convention "
+                                           "(output/neurhl_1_2/season_convention.json; PLAN_NeurHL_1_2 R1)")
+    ap.add_argument("--extra-time", action="store_true",
+                    help="add overtime and shootout-deciding goals to season totals (PLAN_NeurHL_1_2 R2)")
+    ap.add_argument("--goal-state", help="goal-level state file with m0 (default: the live state; "
+                                         "PLAN_NeurHL_1_2 R3)")
+    ap.add_argument("--goal-level-full", action="store_true",
+                    help="m0 = L / M_full: L from the goal state, M_full the engine's mean regulation goals "
+                         "over every scheduled game (PLAN_NeurHL_1_2 R3)")
     a = ap.parse_args()
     t0 = time.time()
     OUT.mkdir(parents=True, exist_ok=True)
@@ -438,7 +452,9 @@ def main():
     sc = sched_ctx(load_schedule(), SEASON).set_index("game_id")
     days0 = float(sc.days_in.min())
     gc = _live("goal_calibration")
-    m0 = float(json.loads(gc.STATE.read_text())["m0"])
+    m0 = float(json.loads((Path(a.goal_state) if a.goal_state else gc.STATE).read_text())["m0"])
+    ratios = (json.loads(Path(a.level_ratios).read_text())["decision"]["ratios"] if a.level_ratios else {})
+    r_ppo, r_ppm, r_xg, r_sog = (float(ratios.get(k, 1.0)) for k in ("pp_opps", "pp_m", "xgf", "sogf"))
     av, av_src = availability(games, a.rosters_date)
     expected = av.expected(games)
     elo = GL.elo_logits(games)
@@ -487,8 +503,7 @@ def main():
             gk_parts.append(pd.DataFrame({
                 "game_id": gid, "side": side, "player_id": A["GKID"][:, side],
                 "sa": o["sogf"][:, opp].astype(float), "ga": o["goals"][:, opp].astype(float),
-                "win": p if side == 0 else 1 - p,
-                "shutout": np.exp(-o["goals"][:, opp].astype(float) * m0)}))
+                "win": p if side == 0 else 1 - p}))
         # conservation inside every evaluation: team totals equal the sum of the skaters
         for key, tkey in (("g", "goals"), ("isog", "sogf"), ("ixg", "xgf")):
             diff = np.abs(np.nansum(np.where(m, o[key], 0), -1) - o[tkey]).max()
@@ -498,6 +513,11 @@ def main():
     for key in acc:
         acc[key] = acc[key] / K
     p, o4 = acc["p"], acc["o4"]
+    M_full = float(acc["goals"].mean())
+    if a.goal_level_full:
+        L_ = float(json.loads((Path(a.goal_state) if a.goal_state else gc.STATE).read_text())["L"])
+        m0 = L_ / M_full
+        print(f"[unified] goal level: L {L_:.4f} / M_full {M_full:.4f} = m0 {m0:.4f}", flush=True)
     kg = sensitivity(bundle, acc["goals"])
 
     # ---- player-games: expectations over the draws (zero when not dressed)
@@ -510,6 +530,22 @@ def main():
     gsz = games.set_index("game_id")
     pg["team"] = np.where(pg.side == 0, pg.game_id.map(gsz.home), pg.game_id.map(gsz.away))
     pg["date"] = pg.game_id.map(gsz.date)
+    if ratios:
+        # R1: every game carries opening-night season-progress inputs, which overstate power
+        # plays for a whole season (history: +33% opportunities, +24% PP minutes). PP and SH
+        # minutes are scaled; the clock time freed goes to even strength in proportion to each
+        # player's even-strength minutes. Shots and xG take their own ratios.
+        keys = [pg.game_id, pg.side]
+        d_pp = pg.toi_pp.groupby(keys).transform("sum") * (1 - r_ppm) / 5.0     # clock minutes
+        d_sh = pg.toi_sh.groupby(keys).transform("sum") * (1 - r_ppm) / 4.0
+        ev_tot = pg.toi_ev.groupby(keys).transform("sum")
+        pg["toi_ev"] = pg.toi_ev + pg.toi_ev / ev_tot.clip(lower=1e-9) * 5.0 * (d_pp + d_sh)
+        pg["toi_pp"] *= r_ppm
+        pg["toi_sh"] *= r_ppm
+        for c in ("ixg", "oi_xgf", "oi_xga"):
+            pg[c] *= r_xg
+        for c in ("sog", "att"):
+            pg[c] *= r_sog
     pg["toi"] = pg.toi_ev + pg.toi_pp + pg.toi_sh
     if a.rookie_priors:
         # A15: a rookie's goals and assists per game come from his translated pre-NHL record
@@ -520,7 +556,9 @@ def main():
         keys = [pg.game_id, pg.side]
         for st, col in (("g", "pred_g"), ("a", "pred_a")):
             new = pg[st].to_numpy().copy()
-            new[isr] = pg.loc[isr, "player_id"].map(rp[col]).to_numpy() * pg.loc[isr, "dress"].to_numpy()
+            tr_ = pg.loc[isr, "player_id"].map(rp[col]).to_numpy() * pg.loc[isr, "dress"].to_numpy()
+            w_ = a.rookie_weight_a if (st == "a" and a.rookie_weight_a is not None) else a.rookie_weight
+            new[isr] = w_ * tr_ + (1 - w_) * new[isr]     # R5 blend
             tot = pg[st].groupby(keys).transform("sum").to_numpy()
             r_new = pd.Series(np.where(isr, new, 0.0)).groupby(keys).transform("sum").to_numpy()
             nr_old = pd.Series(np.where(isr, 0.0, pg[st].to_numpy())).groupby(keys).transform("sum").to_numpy()
@@ -568,6 +606,7 @@ def main():
     # ---- goalie-games
     gk = pd.concat(gk_parts, ignore_index=True)
     gk = gk[gk.player_id > 0]
+    gk["shutout"] = np.exp(-gk.ga * m0)          # per draw, at the final goal level
     gk["starts"] = 1.0
     gk = gk.groupby(["game_id", "side", "player_id"], as_index=False)[
         ["starts", "sa", "ga", "win", "shutout"]].sum()
@@ -585,13 +624,43 @@ def main():
     gm["p_home_win_h"] = p_h
     for key, lab in (("goals", "goals"), ("sogf", "sog"), ("xgf", "xgf"), ("pp_opps", "pp_opps"),
                      ("attf", "attempts")):
-        mult = m0 if key == "goals" else 1.0
+        mult = {"goals": m0, "sogf": r_sog, "attf": r_sog, "xgf": r_xg, "pp_opps": r_ppo}[key]
         gm[f"{lab}_home"] = acc[key][:, 0] * mult
         gm[f"{lab}_away"] = acc[key][:, 1] * mult
+    # strength split of xG: with R1 ratios, PP and SH xG follow the scaled PP minutes and
+    # even-strength xG the freed clock time (pp_clock: the scaled PP minutes per team-game)
+    xs = {k: acc[k].astype(float).copy() for k in ("xgf_ev", "xgf_pp", "xgf_sh")}
+    if ratios:
+        clk = pg.assign(pp=pg.toi_pp / 5.0, sh=pg.toi_sh / 4.0).groupby(["game_id", "side"])[["pp", "sh"]].sum()
+        for j in (0, 1):
+            c = clk.xs(j, level="side").reindex(gm.game_id)
+            new_st = (c.pp + c.sh).to_numpy()
+            old_st = new_st / r_ppm
+            xs["xgf_pp"][:, j] *= r_ppm
+            xs["xgf_sh"][:, j] *= r_ppm
+            xs["xgf_ev"][:, j] *= (60.0 - new_st) / np.maximum(60.0 - old_st, 1e-9)
     # power-play goals: each team's goals split by strength in proportion to its xG
     for j, side in ((0, "home"), (1, "away")):
-        share = acc["xgf_pp"][:, j] / np.maximum(acc["xgf"][:, j], 1e-9)
+        share = xs["xgf_pp"][:, j] / np.maximum(xs["xgf_ev"][:, j] + xs["xgf_pp"][:, j] + xs["xgf_sh"][:, j], 1e-9)
         gm[f"pp_goals_{side}"] = gm[f"goals_{side}"] * share
+    if a.extra_time:
+        # R2: the engine's goals are regulation goals. A game won past regulation adds one goal
+        # to the winner's GF (overtime or shootout, as in the standings); only overtime goals
+        # count for skaters and goalies. Skater goals and assists in the team-game grow by the
+        # same factor (the team's overtime goals over its regulation goals).
+        for side, j in (("home", 2), ("away", 3)):
+            gm[f"goals_{side}_reg"] = gm[f"goals_{side}"]
+            gm[f"ot_goals_{side}"] = o4[:, j] * (1 - P_SO_GIVEN_TIE)
+            gm[f"so_goals_{side}"] = o4[:, j] * P_SO_GIVEN_TIE
+            gm[f"goals_{side}"] = gm[f"goals_{side}_reg"] + gm[f"ot_goals_{side}"] + gm[f"so_goals_{side}"]
+        g_ix = gm.set_index("game_id")
+        ot_for = np.where(pg.side == 0, pg.game_id.map(g_ix.ot_goals_home), pg.game_id.map(g_ix.ot_goals_away))
+        reg_for = np.where(pg.side == 0, pg.game_id.map(g_ix.goals_home_reg), pg.game_id.map(g_ix.goals_away_reg))
+        f_ = 1 + ot_for / np.maximum(reg_for, 1e-9)
+        pg["g"] *= f_
+        pg["a"] *= f_
+        ot_against = np.where(gk.side == 0, gk.game_id.map(g_ix.ot_goals_away), gk.game_id.map(g_ix.ot_goals_home))
+        gk["ga"] = gk.ga + gk.starts * ot_against
     gm["rate_sensitivity"] = kg
     old = pd.read_csv(NOUT / "games_2027.csv").set_index("game_id")
     gm["p_home_win_0925"] = gm.game_id.map(old.p_home_win)
@@ -621,6 +690,17 @@ def main():
     for col in ("goals", "sog", "xgf", "pp_opps", "attempts", "pp_goals"):
         tm[f"{col}_for"] = tm.team.map(side_sum(col))
         tm[f"{col}_against"] = tm.team.map(side_against(col))
+    if a.extra_time:
+        for col in ("goals_reg", "ot_goals", "so_goals"):
+            src = "goals" if col == "goals_reg" else col
+            if col == "goals_reg":
+                tm["goals_for_reg"] = tm.team.map(gm.groupby("home").goals_home_reg.sum().add(
+                    gm.groupby("away").goals_away_reg.sum(), fill_value=0))
+                tm["goals_against_reg"] = tm.team.map(gm.groupby("home").goals_away_reg.sum().add(
+                    gm.groupby("away").goals_home_reg.sum(), fill_value=0))
+            else:
+                tm[f"{col}_for"] = tm.team.map(side_sum(src))
+                tm[f"{col}_against"] = tm.team.map(side_against(src))
     tm["pp_pct"] = 100 * tm.pp_goals_for / tm.pp_opps_for
     tm["pk_pct"] = 100 * (1 - tm.pp_goals_against / tm.pp_opps_against)
     tm["shooting_pct"] = 100 * tm.goals_for / tm.sog_for
@@ -693,6 +773,8 @@ def main():
     cons = {"engine_conservation_max": max(c["max_abs_team_minus_players"] for c in checks),
             "lineup_players_without_state": int(n_missing)}
     team_goals = tm.set_index("team").goals_for
+    if a.extra_time:        # skaters score overtime goals, not shootout-deciding ones
+        team_goals = team_goals - tm.set_index("team").so_goals_for
     player_goals = sk.groupby("team").goals.sum()
     cons["team_goals_minus_player_goals_max"] = float((team_goals - player_goals).abs().max())
     team_sog = tm.set_index("team").sog_for
@@ -730,6 +812,9 @@ def main():
                           capture_output=True, text=True).stdout.strip()
     run = {"rosters_date": a.rosters_date, "draws": K, "sims": a.sims, "seed": a.seed,
            "team_sigma": TEAM_SIGMA, "goal_mult_m0": m0, "days_in_opening": days0,
+           "goal_state": a.goal_state, "M_full": M_full, "goal_level_full": bool(a.goal_level_full), "level_ratios": ratios, "extra_time": bool(a.extra_time),
+           "rookie_priors": a.rookie_priors, "rookie_weight": ({"g": a.rookie_weight, "a": a.rookie_weight if a.rookie_weight_a is None else a.rookie_weight_a}
+                             if a.rookie_priors else None),
            "bundle": bundle, "bundle_sha": sha(ROOT / "checkpoints" / "g" / bundle / "bundle.json")[:16],
            "availability": av_src, "home_edge_rating": float(hedge), "code": code,
            "created_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),

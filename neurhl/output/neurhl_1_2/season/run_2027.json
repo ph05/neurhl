@@ -1,0 +1,30 @@
+{
+ "rosters_date": "2026-09-29",
+ "draws": 64,
+ "sims": 20000,
+ "seed": 711,
+ "team_sigma": 0.07,
+ "goal_mult_m0": 1.005487294729405,
+ "days_in_opening": 0.0,
+ "goal_state": null,
+ "M_full": 2.986281078504232,
+ "goal_level_full": true,
+ "level_ratios": {
+  "pp_opps": 0.7758829079050531,
+  "pp_m": 0.8259054017238869,
+  "xgf": 0.9610157313754054
+ },
+ "extra_time": true,
+ "rookie_priors": "neurhl/configs/rookie_priors_2027.csv",
+ "rookie_weight": {
+  "g": 0.75,
+  "a": 1.0
+ },
+ "bundle": "g2027_v3",
+ "bundle_sha": "f188b4bb67334412",
+ "availability": "sim/availability_2027.py",
+ "home_edge_rating": 0.1360272271992778,
+ "code": "b001285",
+ "created_utc": "2026-09-30T01:39:59+00:00",
+ "seconds": 339.0
+}
