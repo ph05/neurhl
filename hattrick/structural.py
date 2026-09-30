@@ -168,12 +168,14 @@ def _long(g: pd.DataFrame, target: str, goalie: pd.DataFrame | None = None):
 
 
 def fit_glm(g: pd.DataFrame, target: str = "reg", season_w: dict | None = None,
-            goalie: pd.DataFrame | None = None, ridge_sd: float = 0.2) -> dict:
+            goalie: pd.DataFrame | None = None, ridge_sd: float = 1.0) -> dict:
     """Poisson GLM: log E[y] = mu_s + h_s*home + o_ts + d_ts' + sum_k beta_k x_k.
 
     target 'reg' (regulation goals) or 'sh' (shots on goal).
-    Team-season effects get a N(0, ridge_sd^2) prior (only for identification
-    and stability; 82 games leave them essentially unshrunk).
+    Team-season effects get a N(0, ridge_sd^2) prior, only for identification
+    (ridge_sd = 1 shrinks an 82-game effect by ~0.4%). A tight ridge would
+    shrink the realised-strength targets of the preseason regression and so
+    compress every preseason rating (0.2 compressed them by ~9%).
     Returns dict: beta, mu (by season), h (by season), fe (DataFrame
     team, season_end, o, d), lam (fitted per game, home/away), dispersion.
     """
@@ -248,10 +250,34 @@ def recency_weights(V: int, first: int, halflife: float) -> dict:
     return {s: 0.5 ** ((V - 1 - s) / halflife) for s in range(first, V)}
 
 
+STRUCT_VERSION = "s4"            # bump when the structural fits change
+STRUCT_CACHE = C.CACHE / "structural"
+
+
 @functools.lru_cache(maxsize=None)
 def structural(V: int, window: int = 8, h_halflife: float = 3.0,
                ctx_halflife: float = 6.0, layer_halflife: float = 3.0,
                goalie_key: tuple = (3000.0, -0.002, 1.0, 12.0)) -> dict:
+    """Disk-cached wrapper of ``_structural`` (hattrick/cache/structural/)."""
+    import hashlib
+    import pickle
+    key = repr((STRUCT_VERSION, V, window, h_halflife, ctx_halflife, layer_halflife,
+                tuple(float(x) for x in goalie_key)))
+    f = STRUCT_CACHE / (hashlib.sha1(key.encode()).hexdigest()[:16] + ".pkl")
+    if f.exists() and _DISK_CACHE:
+        return pickle.loads(f.read_bytes())
+    out = _structural(V, window, h_halflife, ctx_halflife, layer_halflife, goalie_key)
+    if _DISK_CACHE:
+        STRUCT_CACHE.mkdir(parents=True, exist_ok=True)
+        f.write_bytes(pickle.dumps(out))
+    return out
+
+
+_DISK_CACHE = True      # tests that corrupt data switch this off
+
+
+def _structural(V: int, window: int, h_halflife: float, ctx_halflife: float,
+                layer_halflife: float, goalie_key: tuple) -> dict:
     """Data-estimated parameters for target season V from seasons < V.
 
       ctx      rest/travel coefficients, no-goalie variant (goals GLM)
@@ -260,7 +286,8 @@ def structural(V: int, window: int = 8, h_halflife: float = 3.0,
       h0, mu0  prior mean home ice and league level for V (recency weighted)
       h_sd     season-to-season SD of home ice around its recency mean
       shots    shots GLM: beta (ctx, margin, extra), mu0/h0 priors, dispersion
-      layer    end-game layer, fitted on the GLM's in-sample expected goals
+      layer    end-game layer and base dispersion kappa, fitted jointly (ML on
+               the regulation score) on the GLM's in-sample expected goals
       disp_g   goals dispersion (Pearson)
     """
     g = game_frame()
@@ -307,7 +334,9 @@ def structural(V: int, window: int = 8, h_halflife: float = 3.0,
     era_lo = THREE_ON_THREE if V > THREE_ON_THREE + 1 else lo
     m = (gw.season_end >= era_lo).to_numpy()
     wl = np.array([0.5 ** ((V - 1 - s) / layer_halflife) for s in gw.season_end[m]])
-    out["layer"] = GM.fit_layer(glm["lam_h"][m], glm["lam_a"][m], gw.margin.to_numpy()[m], wl)
+    fl = GM.fit_layer(glm["lam_h"][m], glm["lam_a"][m], gw.reg_h.to_numpy()[m],
+                      gw.reg_a.to_numpy()[m], wl)
+    out["layer"], out["kappa"] = fl["layer"], fl["kappa"]
     return out
 
 

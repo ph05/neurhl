@@ -1,0 +1,35 @@
+{
+ "hp": {
+  "prior_scale": 1.5,
+  "q_s": 5e-05,
+  "q_f": 3e-05,
+  "phi_g": 1.25,
+  "phi_s": 0.6,
+  "use_shots": true,
+  "mu_sd": 0.06,
+  "h_sd_scale": 0.5,
+  "q_mu": 2e-06,
+  "integrate": false,
+  "ridge": 0.2,
+  "goalie": [
+   6000.0,
+   -0.002,
+   1.0,
+   12.0
+  ],
+  "gk_scale": 1.0,
+  "window": 12,
+  "h_halflife": 6.0
+ },
+ "tuned_on": [
+  2012,
+  2014,
+  2015,
+  2016,
+  2017
+ ],
+ "tuning_ll": 0.6726257834946192,
+ "tuning_ll_frozen": 0.6789507835086559,
+ "goalie_variant_ll": 0.6724689518875098,
+ "frozen_utc": "2026-09-30T23:09:01+00:00"
+}

@@ -15,12 +15,16 @@ import pandas as pd
 from hattrick import config as C
 from hattrick import teams as T
 
-ID_COLS = {"team", "season_end", "roster_proxy", "n_players"}
+# Projected (preseason) components only. The historical table also carries the
+# season's ACTUAL outcomes (act_*) for evaluation; they must never be features.
+COMPONENTS = ["ev_xgf_impact", "ev_xga_impact", "pp_xgf60", "pk_xga60",
+              "finishing_pg", "gf_pg_skaters", "goalie_gsax60"]
 
 
 def component_cols(hist: pd.DataFrame) -> list[str]:
-    return [c for c in hist.columns if c not in ID_COLS
-            and pd.api.types.is_numeric_dtype(hist[c]) and hist[c].notna().mean() > 0.9]
+    cols = [c for c in COMPONENTS if c in hist.columns]
+    assert not any(c.startswith("act_") for c in cols)
+    return cols
 
 
 def _within_season(hist, cols):

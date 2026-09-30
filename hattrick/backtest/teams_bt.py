@@ -54,7 +54,7 @@ def section_a(bu) -> dict:
                "neurhl2_mae": neur.get(V)}
         if bu is not None:
             q = p.merge(bu[bu.season_end == V], on=["team", "season_end"], how="left")
-            if q.bu_rel82.notna().all():
+            if q.bu_rel82.notna().all() and V >= 2014:
                 w = _fit_td_bu(bu, V)
                 pred = w[0] * q.td_rel82 + w[1] * q.bu_rel82
                 row["hattrick_td_bu_mae"] = float((pred - q.act).abs().mean())
@@ -72,7 +72,7 @@ def section_a(bu) -> dict:
 
 def _fit_td_bu(bu, V):
     """Weights for top-down and bottom-up from seasons before V (NNLS)."""
-    f = T.blend_frame([s for s in range(2011, V) if s not in C.BROKEN_SEASONS],
+    f = T.blend_frame([s for s in range(2012, V) if s not in C.BROKEN_SEASONS],
                       extra=bu[["team", "season_end", "bu_rel82"]])
     return T.fit_blend(f, ["td_rel82", "bu_rel82"])
 

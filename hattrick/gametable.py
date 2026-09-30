@@ -62,14 +62,20 @@ def schedule_context(sched: pd.DataFrame, season_end: int) -> pd.DataFrame:
     """Rest days and travel for every game of a schedule.
 
     ``sched`` needs date, home, away (one season, regular season only).
-    Returns the schedule with rest_h, rest_a, km_h, km_a, km3d_h, km3d_a,
-    dtz_h, dtz_a, reproducing data/processed/travel_games.csv conventions
+    Returns the schedule (same rows, same order, same index) with rest_h,
+    rest_a, km_h, km_a, km3d_h, km3d_a, dtz_h, dtz_a, reproducing data/processed/travel_games.csv conventions
     (first game of a season, or after a >30-day gap: rest 9, no travel).
     """
     ar = pd.read_csv(snap("data/raw/arenas.csv"))
-    ar = ar[(ar.start_end <= season_end) & (ar.end_end >= season_end)]
-    ar = ar.drop_duplicates("team").set_index("team")
-    s = sched.sort_values("date", kind="stable").reset_index(drop=True)
+    # the arena in use that season; for seasons past the table's last year
+    # (arenas.csv ends at 2025-26) the most recent arena of each team
+    ar = ar[ar.start_end <= season_end].copy()
+    ar["_cur"] = ar.end_end >= season_end
+    ar = (ar.sort_values(["team", "_cur", "end_end"]).drop_duplicates("team", keep="last")
+          .set_index("team"))
+    order = np.argsort(pd.to_datetime(sched["date"]).to_numpy(), kind="stable")
+    s = sched.iloc[order].reset_index(drop=True)
+    s["date"] = pd.to_datetime(s["date"])
     state: dict = {}
     out = {k: np.zeros(len(s)) for k in
            ("rest_h", "rest_a", "km_h", "km_a", "km3d_h", "km3d_a", "dtz_h", "dtz_a")}
@@ -93,7 +99,9 @@ def schedule_context(sched: pd.DataFrame, season_end: int) -> pd.DataFrame:
             state[t] = (d, vlat, vlon, vutc, legs + [(d, km)])
     for k, v in out.items():
         s[k] = v
-    return s
+    # return rows in the caller's order (same index as ``sched``)
+    s.index = sched.index[order]
+    return s.loc[sched.index]
 
 
 # ---------------------------------------------------------------------------
