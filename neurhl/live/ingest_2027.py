@@ -144,7 +144,9 @@ class Ctx:
             raise RuntimeError(f"refusing to write through symlink {p}")
         if p.resolve().parent != self.out and self.cache not in p.resolve().parents:
             raise RuntimeError(f"refusing to write outside {self.out}: {p}")
-        if self.real and f"_{self.S}" not in p.name:
+        # season files carry _S in their name; the driver's own cache (_ingest_S/) is
+        # season-scoped by its directory (roster.parquet, games.parquet, state.json)
+        if self.real and f"_{self.S}" not in p.name and self.cache not in p.resolve().parents:
             raise RuntimeError(f"refusing to write non-{self.S} file {p}")
 
     def write(self, df: pd.DataFrame, fam: str, sources=(), cfg=None) -> Path:
