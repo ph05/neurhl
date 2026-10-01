@@ -440,10 +440,10 @@ def add_backup_b2b(adj, sch, P, GM, log) -> pd.DataFrame:
     """Team-specific backup-on-back-to-back effect: a team whose backup is far
     below its starter loses more on the second night of a back-to-back.
     The starter-minus-backup gap is in the scoring model's own fitted goalie
-    units (gamemodel.team_gap_2027)."""
+    units (structural.team_gap_2027)."""
+    from hattrick import structural as ST
     g = pd.read_csv(OUT / f"goalie_rates_{V}.csv")
-    g = g[g.p_present > 0.5]
-    gap = GM.team_gap_2027(g)
+    gap = ST.team_gap_2027(g)
     log["b2b_goalie_gap"] = {k: float(v) for k, v in gap.items()}
     sf = GM.schedule_features(sch, V)
     a = adj.copy()

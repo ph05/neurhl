@@ -140,6 +140,26 @@ def test_blend_identity():
     assert (b[["g", "a", "p"]] >= 0).all().all()
 
 
+def test_deterministic_common_random_numbers():
+    """Depth-chart noise is per player and seeded without hash(): a
+    teammate's draws do not change when the roster changes, and repeated
+    deployments are identical."""
+    a = DP.player_normals([8478402, 8477934, 8471675], 16, 2016, "x")
+    b = DP.player_normals([8477934, 8471675], 16, 2016, "x")
+    assert np.array_equal(a[:, 1:], b)
+    assert DP.stable_seed("WPG", 2027) == DP.stable_seed("WPG", 2027)
+    prm, proj, d1 = _deploy_2016()
+    _, _, d2 = _deploy_2016()
+    assert np.array_equal(d1.gp.to_numpy(), d2.gp.to_numpy())
+
+
+def test_research_cutoff():
+    r = DP.research_rows()
+    if len(r):
+        assert (pd.to_datetime(r.report_date) < pd.Timestamp(DP.RESEARCH_BEFORE)).all()
+        assert pd.Timestamp(DP.RESEARCH_BEFORE) <= pd.Timestamp(C.CUTOFF_UTC.date())
+
+
 def test_goalie_starts_identity():
     """Rostered goalies' starts plus call-up starts fill every game."""
     r = D.opening_rosters(V_TEST)

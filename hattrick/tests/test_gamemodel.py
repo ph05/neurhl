@@ -107,6 +107,41 @@ def test_schedule_features_keep_order():
     assert set(f.rest_h.unique()) <= set(range(1, 10))
 
 
+def test_known_starter_offsets():
+    """Unknown starters reproduce ctx_offsets exactly. A known home starter
+    switches the HOME team's rest/travel terms to ctx_gk and adds
+    goalie_offset(diff) to the AWAY team's goals only."""
+    from hattrick import data as D
+    P = GM.load_params()
+    sch = GM.schedule_features(D.schedule_2027().head(60), 2027)
+    n = len(sch)
+    nan = np.full(n, np.nan)
+    h0, a0 = GM.ctx_offsets(P, sch)
+    h1, a1 = GM.known_starter_offsets(P, sch, nan, nan)
+    assert np.allclose(h0, h1) and np.allclose(a0, a1)
+    d = np.full(n, 0.004)
+    h2, a2 = GM.known_starter_offsets(P, sch, d, nan)
+    fh = GM.ctx_features(sch.rest_h, sch.km_h, sch.dtz_h)
+    c0, c1 = P["ctx"], P["ctx_gk"]
+    dh_own = sum((c1[f"{k}_o"] - c0[f"{k}_o"]) * fh[k] for k in GM.CTX_FEATURES)
+    dh_opp = sum((c1[f"{k}_d"] - c0[f"{k}_d"]) * fh[k] for k in GM.CTX_FEATURES)
+    assert np.allclose(h2, h0 + dh_own)
+    assert np.allclose(a2, a0 + dh_opp + GM.goalie_offset(P, d))
+    assert np.all(GM.goalie_offset(P, d) < 0)          # better starter, fewer goals against
+
+
+def test_goalie_units():
+    """Talents and gaps are in the fitted units: league-typical gaps are of
+    the order of the historical avg_gap, not GSAx/FA x 1.4."""
+    from hattrick import structural as S
+    t = S.goalie_talent_2027()
+    assert len(t) > 80 and abs(t.median()) < 0.005 and t.std() < 0.005
+    g = pd.DataFrame({"player_id": t.index[:4], "team": ["AAA", "AAA", "BBB", "BBB"],
+                      "start_share": [0.7, 0.3, 0.6, 0.4]})
+    gap = S.team_gap_2027(g, t)
+    assert np.isclose(gap["AAA"], t.iloc[0] - t.iloc[1])
+
+
 # ---------------------------------------------------------------------------
 # Walk-forward guarantees
 # ---------------------------------------------------------------------------
