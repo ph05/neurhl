@@ -1,11 +1,19 @@
 {
  "date": "2026-10-01",
- "created_utc": "2026-10-01T00:42:19+00:00",
- "code": "974e00a",
+ "created_utc": "2026-10-01T01:24:55+00:00",
+ "code": "439340e",
  "results_through": "2026-09-29 00:00:00",
  "n_results": 5,
  "sims": 20000,
  "seed": 20260929,
+ "missing_results_before_date": [
+  2026020006,
+  2026020007,
+  2026020008
+ ],
+ "rho_od": -0.7846549635742643,
+ "sd_anchor": 0.8602405472597555,
+ "home_ice": 0.06702787061785931,
  "inputs": {
   "results": {
    "path": "/home/user/neurhl/hattrick/output/live/results_2027.csv",
