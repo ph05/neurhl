@@ -94,3 +94,23 @@
   4. Run all test suites.
   5. Update `inseason.py` so the 2026-27 daily forecasts use ORR 1.1 from its adoption date, and update `RESULTS.md` with every item's outcome.
 - **Accept if** the combined loop improves on the current shipped loop (same variant) with a 95% CI that excludes 0. Otherwise ship only the individually accepted items that do not hurt in combination.
+
+## X3r. Revision of X3 (added 2026-10-01 after X3's result, before any of this ran)
+
+X3 failed for one reason. ORR 1.1 beat the shipped loop with a CI below 0 when the update used shots, but not on goals alone (−0.00120, CI −0.00250 to +0.00007). The live loop runs on goals alone only because this build container cannot reach the NHL API for shot counts. The revision does not loosen X3's rule and does not re-test on the gate games. It changes two things.
+
+**A. Remove the cause.** A daily GitHub Actions job (`.github/workflows/orr_daily.yml`) runs on GitHub's runners, which can reach the NHL API. It:
+1. ingests results with shots on goal (`orr.ingest`);
+2. runs the ORR 1.1 daily forecast with NeurHL's committed pregame lineups (`orr.inseason`);
+3. rebuilds `docs/orr/`;
+4. commits.
+
+The live loop then runs the goals-and-shots variant, the one that passed. Scheduled jobs run from the default branch, so this takes effect once the branch is merged.
+
+**B. Confirm on data no experiment has touched.**
+- **Data.** Box-score lineups also exist for 2010-11 (1,230 games) and 2020-21 (868 games). No experiment, including X1's tuning and confirmation, has used them. Neither season has market lines, so both arms start from the team-history prior. X1 also tested that start on the gate games: −0.00139, CI −0.00266 to −0.00013.
+- **Comparison.** ORR 1.1 (the fixed X1 configuration: lineup offsets plus known starters) against ORR 1.0 (neither), in the same walk-forward filter. Each arm takes its OT/SO parameters from its own run, as in X3. Paired bootstrap 95% CIs use `games_bt.paired`.
+- **Primary metric.** Pooled 2010-11 and 2020-21 log loss, goals-and-shots variant. Secondary: goals only, per season, and an inverse-variance combination of this result with X3's gate result. The combination is reported but not used to decide.
+- **Accept X3r if** the primary difference has a 95% CI that excludes 0, below zero.
+- **Power, stated in advance.** About 2,100 games give a CI half-width near 0.0022, while the gate effect was about 0.0013, so an inconclusive result is the most likely outcome. An inconclusive result is reported as "not confirmed". It does not count as a pass, and X1 keeps shipping only under the original fallback clause.
+- **Run.** Once, with `python3 -m orr.backtest.inseason_bt_x3r`. The script refuses to overwrite its output.
