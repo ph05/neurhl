@@ -18,7 +18,7 @@ matched  Reproduces the information AND budget conventions of NeurHL's
          Remaining difference: actual stats come from MoneyPuck season files,
          not NeurHL's gitignored player-game tensors (sample sizes agree
          within 0-2).
-strict   Nothing from season V: the roster is an opening-roster proxy (every
+strict   Nothing from season V beyond the evaluation population: the roster is an opening-roster proxy (every
          skater who dressed in any of his team's first 10 games, fastRhockey
          boxes, 2011-2024). For 2025-2026 the boxes are missing and the roster
          falls back to each player's season-V main team ('season_team', which
@@ -113,21 +113,23 @@ def roster_strict(V: int) -> tuple[pd.DataFrame, str]:
 
 
 def reserve_gp(V: int) -> float:
-    """Mean GP (per 82) of skaters with NHL history who played in s but were
-    on no opening roster, over proxy seasons s < V (walk-forward)."""
+    """Preseason expected GP (per 82) of a skater on no opening roster: over
+    proxy seasons s < V (walk-forward), the mean season-s GP of every skater
+    who played in s-1 but was on no opening roster in s, INCLUDING those who
+    did not play in s (zeros). Conditioning on having played in s would use
+    season-V participation, which a preseason projection cannot know."""
     vals = []
     for s in range(2011, V):
-        if s in C.BROKEN_SEASONS:
+        if s in C.BROKEN_SEASONS or (s - 1) in C.BROKEN_SEASONS:
             continue
         try:
             r = D.opening_rosters(s)
         except FileNotFoundError:
             continue
-        a = actuals(s)
-        P = PL.panel()
-        hist = set(P.ids[PL._hist_gp(P, s) > 0])
-        m = a[a.player_id.isin(hist) & ~a.player_id.isin(r.player_id)]
-        vals.append(m.act_gp.to_numpy() * 82.0 / a.act_gp.max())
+        a, prev = actuals(s), actuals(s - 1)
+        cand = sorted(set(prev.player_id) - set(r.player_id))
+        gp = a.set_index("player_id").act_gp.reindex(cand).fillna(0.0)
+        vals.append(gp.to_numpy() * 82.0 / a.act_gp.max())
     return float(np.concatenate(vals).mean()) if vals else RESERVE_GP_DEFAULT
 
 
