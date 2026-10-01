@@ -1,14 +1,14 @@
 {
- "as_of": "2026-09-30",
+ "as_of": "2026-10-01",
  "status": "interim",
  "note": "interim: descriptive only; inference is made once, after the last regular-season game (2027-04-10)",
  "primary": "pregame",
- "games_completed": 5,
+ "games_completed": 8,
  "counts": {
-  "games_completed": 5,
+  "games_completed": 8,
   "valid": {
-   "pregame": 5,
-   "morning": 5
+   "pregame": 8,
+   "morning": 8
   },
   "missed": {
    "pregame": 0,
@@ -26,26 +26,27 @@
    "pregame": {
     "games": {
      "DF_CONFIRMED": 1,
-     "DF_PROJECTED": 4
+     "DF_PROJECTED": 7
     },
     "sides": {
-     "DF_CONFIRMED": 3,
-     "DF_PROJECTED": 7
+     "DF_CONFIRMED": 5,
+     "DF_PROJECTED": 11
     }
    },
    "morning": {
     "games": {
-     "DF_PROJECTED": 4,
-     "FALLBACK": 1
+     "DF_PROJECTED": 6,
+     "FALLBACK": 2
     },
     "sides": {
-     "DF_PROJECTED": 9,
-     "FALLBACK": 1
+     "DF_CONFIRMED": 1,
+     "DF_PROJECTED": 13,
+     "FALLBACK": 2
     }
    }
   },
   "forecast_files": {
-   "committed": 6,
+   "committed": 10,
    "uncommitted": 0,
    "edited_after_add": 0,
    "deleted_after_add": 0
@@ -58,53 +59,53 @@
  "pregame": {
   "forecast": "pregame",
   "role": "primary",
-  "n_games": 5,
-  "home_win_rate": 0.4,
+  "n_games": 8,
+  "home_win_rate": 0.5,
   "models": {
    "neurhl_g": {
-    "n": 5,
-    "log_loss": 0.7494483392320482,
-    "brier": 0.27545524897999996
+    "n": 8,
+    "log_loss": 0.7210588328880572,
+    "brier": 0.26276889157499994
    },
    "neurhl_h": {
-    "n": 5,
-    "log_loss": 0.7491188116987979,
-    "brier": 0.27686708006,
+    "n": 8,
+    "log_loss": 0.7076146343590302,
+    "brier": 0.2572053533,
     "missing_game_ids": []
    },
    "elo": {
-    "n": 5,
-    "log_loss": 0.7390857931273624,
-    "brier": 0.27196018408
+    "n": 8,
+    "log_loss": 0.6915459626721006,
+    "brier": 0.2490911605
    },
    "neurhl_1p0": {
-    "n": 5,
-    "log_loss": 0.8564248581831535,
-    "brier": 0.328972873,
+    "n": 8,
+    "log_loss": 0.7245708757280201,
+    "brier": 0.26458751408750003,
     "missing_game_ids": []
    }
   },
   "paired": {
    "g_minus_elo": {
-    "n": 5,
-    "log_loss": 0.010362546104685667,
-    "brier": 0.003495064899999953,
+    "n": 8,
+    "log_loss": 0.029512870215956624,
+    "brier": 0.013677731074999965,
     "weeks": 1,
     "ci95": null,
     "ci95_brier": null
    },
    "g_minus_h": {
-    "n": 5,
-    "log_loss": 0.00032952753325019566,
-    "brier": -0.0014118310800000588,
+    "n": 8,
+    "log_loss": 0.013444198529026959,
+    "brier": 0.00556353827499995,
     "weeks": 1,
     "ci95": null,
     "ci95_brier": null
    },
    "h_minus_elo": {
-    "n": 5,
-    "log_loss": 0.01003301857143547,
-    "brier": 0.004906895980000011,
+    "n": 8,
+    "log_loss": 0.016068671686929666,
+    "brier": 0.008114192800000015,
     "weeks": 1,
     "ci95": null,
     "ci95_brier": null
@@ -144,78 +145,93 @@
     }
    },
    "DF_PROJECTED": {
-    "n": 4,
+    "n": 7,
     "log_loss": {
-     "neurhl_g": 0.7721433085041345,
-     "neurhl_h": 0.7753521139956766,
-     "elo": 0.7838576511324015,
-     "neurhl_1p0": 0.8599161767922031
+     "neurhl_g": 0.7299717429943934,
+     "neurhl_h": 0.7166759246229939,
+     "elo": 0.710338477181371,
+     "neurhl_1p0": 0.7077296317253152
     },
     "brier": {
-     "neurhl_g": 0.28612714832499997,
-     "neurhl_h": 0.28969897305,
-     "elo": 0.29398501407500005,
-     "neurhl_1p0": 0.330176235625
+     "neurhl_g": 0.26705478299999996,
+     "neurhl_h": 0.26172904547142856,
+     "elo": 0.2584097742714286,
+     "neurhl_1p0": 0.2560772414571429
     },
     "paired": {
      "g_minus_elo": {
-      "n": 4,
-      "log_loss": -0.011714342628266858,
-      "brier": -0.007857865750000057
+      "n": 7,
+      "log_loss": 0.019633265813022462,
+      "brier": 0.00864500872857139
      },
      "g_minus_h": {
-      "n": 4,
-      "log_loss": -0.0032088054915421493,
-      "brier": -0.0035718247250000543
+      "n": 7,
+      "log_loss": 0.013295818371399442,
+      "brier": 0.0053257375285713825
      },
      "h_minus_elo": {
-      "n": 4,
-      "log_loss": -0.008505537136724708,
-      "brier": -0.004286041025000003
+      "n": 7,
+      "log_loss": 0.00633744744162302,
+      "brier": 0.0033192712000000074
      }
     }
    }
   },
   "stat_sheet": {
    "goals_reg": {
-    "n_team_games": 10,
-    "mae": 1.5948999999999998,
-    "mean_pred": 3.1945,
-    "mean_actual": 2.5,
-    "mae_raw": 1.6156000000000001,
-    "mean_pred_raw": 3.1864
+    "n_team_games": 16,
+    "mae": 2.022,
+    "mean_pred": 3.1652500000000003,
+    "mean_actual": 2.9375,
+    "mae_raw": 2.035,
+    "mean_pred_raw": 3.162375
    },
    "sog": {
-    "available": false
+    "available": true,
+    "n_team_games": 16,
+    "mae": 5.66675,
+    "mean_pred": 28.619500000000002,
+    "mean_actual": 26.6875
    },
    "xgf": {
-    "available": false
+    "available": true,
+    "n_team_games": 16,
+    "mae": 0.7583977298736573,
+    "mean_pred": 3.2471875,
+    "mean_actual": 2.757435828447342
    },
    "players": {
-    "available": false
+    "available": true,
+    "n_skater_games": 285,
+    "not_dressed": 2,
+    "mae": {
+     "toi": 1.9325847953216373,
+     "sog": 1.0188350877192982,
+     "goals": 0.28710877192982454,
+     "assists": 0.41884561403508763,
+     "points": 0.5795087719298245
+    }
    },
    "goal_mult": {
-    "n": 5,
+    "n": 8,
     "min": 0.9722,
     "max": 1.0107,
-    "latest": [
-     0.9722,
-     1.0107
-    ],
+    "latest": 0.9982,
     "by_date": {
      "2026-09-29": [
       0.9722,
       1.0107
-     ]
+     ],
+     "2026-09-30": 0.9982
     }
    }
   },
   "start_sources": {
-   "api": 5
+   "api": 8
   },
   "stamps": {
-   "with_stamp": 5,
-   "stamp_before_start": 5,
+   "with_stamp": 8,
+   "stamp_before_start": 8,
    "stamp_late_game_ids": [],
    "without_stamp": 0
   }
@@ -223,53 +239,53 @@
  "morning": {
   "forecast": "morning",
   "role": "secondary",
-  "n_games": 5,
-  "home_win_rate": 0.4,
+  "n_games": 8,
+  "home_win_rate": 0.5,
   "models": {
    "neurhl_g": {
-    "n": 5,
-    "log_loss": 0.7329748042790778,
-    "brier": 0.26867686512
+    "n": 8,
+    "log_loss": 0.7086884230830742,
+    "brier": 0.25753406486249997
    },
    "neurhl_h": {
-    "n": 5,
-    "log_loss": 0.7508799770539958,
-    "brier": 0.27775704216,
+    "n": 8,
+    "log_loss": 0.7076543310311885,
+    "brier": 0.257179623225,
     "missing_game_ids": []
    },
    "elo": {
-    "n": 5,
-    "log_loss": 0.7390857931273624,
-    "brier": 0.27196018408
+    "n": 8,
+    "log_loss": 0.6915459626721006,
+    "brier": 0.2490911605
    },
    "neurhl_1p0": {
-    "n": 5,
-    "log_loss": 0.8564248581831535,
-    "brier": 0.328972873,
+    "n": 8,
+    "log_loss": 0.7245708757280201,
+    "brier": 0.26458751408750003,
     "missing_game_ids": []
    }
   },
   "paired": {
    "g_minus_elo": {
-    "n": 5,
-    "log_loss": -0.006110988848284693,
-    "brier": -0.003283318959999984,
+    "n": 8,
+    "log_loss": 0.017142460410973795,
+    "brier": 0.008442904362500017,
     "weeks": 1,
     "ci95": null,
     "ci95_brier": null
    },
    "g_minus_h": {
-    "n": 5,
-    "log_loss": -0.017905172774917943,
-    "brier": -0.009080177039999995,
+    "n": 8,
+    "log_loss": 0.00103409205188576,
+    "brier": 0.0003544416375000064,
     "weeks": 1,
     "ci95": null,
     "ci95_brier": null
    },
    "h_minus_elo": {
-    "n": 5,
-    "log_loss": 0.01179418392663325,
-    "brier": 0.005796858080000011,
+    "n": 8,
+    "log_loss": 0.016108368359088035,
+    "brier": 0.00808846272500001,
     "weeks": 1,
     "ci95": null,
     "ci95_brier": null
@@ -277,104 +293,122 @@
   },
   "by_lineup_source": {
    "DF_PROJECTED": {
-    "n": 4,
+    "n": 6,
     "log_loss": {
-     "neurhl_g": 0.8367965617143006,
-     "neurhl_h": 0.8546373638217356,
-     "elo": 0.8270111036693779,
-     "neurhl_1p0": 0.9840407942388336
+     "neurhl_g": 0.8236164467470082,
+     "neurhl_h": 0.8212401252595255,
+     "elo": 0.7877438662392563,
+     "neurhl_1p0": 0.8309780620484156
     },
     "brier": {
-     "neurhl_g": 0.317326954175,
-     "neurhl_h": 0.326851559475,
-     "elo": 0.314162687875,
-     "neurhl_1p0": 0.38983287835
+     "neurhl_g": 0.31216847751666665,
+     "neurhl_h": 0.31137952048333334,
+     "elo": 0.29543813245,
+     "neurhl_1p0": 0.31550106185000004
     },
     "paired": {
      "g_minus_elo": {
-      "n": 4,
-      "log_loss": 0.009785458044922563,
-      "brier": 0.00316426630000001
+      "n": 6,
+      "log_loss": 0.03587258050775168,
+      "brier": 0.016730345066666676
      },
      "g_minus_h": {
-      "n": 4,
-      "log_loss": -0.01784080210743505,
-      "brier": -0.009524605299999996
+      "n": 6,
+      "log_loss": 0.002376321487482569,
+      "brier": 0.0007889570333333429
      },
      "h_minus_elo": {
-      "n": 4,
-      "log_loss": 0.027626260152357612,
-      "brier": 0.012688871600000005
+      "n": 6,
+      "log_loss": 0.03349625902026911,
+      "brier": 0.015941388033333333
      }
     }
    },
    "FALLBACK": {
-    "n": 1,
+    "n": 2,
     "log_loss": {
-     "neurhl_g": 0.3176877745381869,
-     "neurhl_h": 0.33585042998303644,
-     "elo": 0.38738455095930063,
-     "neurhl_1p0": 0.34596111396043266
+     "neurhl_g": 0.3639043520912727,
+     "neurhl_h": 0.36689694834617737,
+     "elo": 0.40295225197063256,
+     "neurhl_1p0": 0.4053493167668342
     },
     "brier": {
-     "neurhl_g": 0.07407650890000002,
-     "neurhl_h": 0.08137897290000001,
-     "elo": 0.10315016889999998,
-     "neurhl_1p0": 0.08553285160000003
+     "neurhl_g": 0.09363082690000002,
+     "neurhl_h": 0.09457993145000002,
+     "elo": 0.11005024464999996,
+     "neurhl_1p0": 0.11184687080000003
     },
     "paired": {
      "g_minus_elo": {
-      "n": 1,
-      "log_loss": -0.06969677642111372,
-      "brier": -0.02907365999999996
+      "n": 2,
+      "log_loss": -0.03904789987935986,
+      "brier": -0.016419417749999957
      },
      "g_minus_h": {
-      "n": 1,
-      "log_loss": -0.018162655444849518,
-      "brier": -0.007302463999999995
+      "n": 2,
+      "log_loss": -0.002992596254904667,
+      "brier": -0.0009491045500000031
      },
      "h_minus_elo": {
-      "n": 1,
-      "log_loss": -0.0515341209762642,
-      "brier": -0.021771195999999965
+      "n": 2,
+      "log_loss": -0.03605530362445519,
+      "brier": -0.015470313199999954
      }
     }
    }
   },
   "stat_sheet": {
    "goals_reg": {
-    "n_team_games": 10,
-    "mae": 1.6235,
-    "mean_pred": 3.1212999999999997,
-    "mean_actual": 2.5,
-    "mae_raw": 1.7173999999999996,
-    "mean_pred_raw": 3.382
+    "n_team_games": 16,
+    "mae": 2.042375,
+    "mean_pred": 3.1206250000000004,
+    "mean_actual": 2.9375,
+    "mae_raw": 2.1011875,
+    "mean_pred_raw": 3.2856875
    },
    "sog": {
-    "available": false
+    "available": true,
+    "n_team_games": 16,
+    "mae": 5.960125,
+    "mean_pred": 28.60725,
+    "mean_actual": 26.6875
    },
    "xgf": {
-    "available": false
+    "available": true,
+    "n_team_games": 16,
+    "mae": 0.759240031003952,
+    "mean_pred": 3.261125,
+    "mean_actual": 2.757435828447342
    },
    "players": {
-    "available": false
+    "available": true,
+    "n_skater_games": 280,
+    "not_dressed": 7,
+    "mae": {
+     "toi": 1.9630357142857147,
+     "sog": 1.025475,
+     "goals": 0.2889,
+     "assists": 0.42265357142857146,
+     "points": 0.5835285714285714
+    }
    },
    "goal_mult": {
-    "n": 5,
+    "n": 8,
     "min": 0.9229,
-    "max": 0.9229,
-    "latest": 0.9229,
+    "max": 0.9982,
+    "latest": 0.9982,
     "by_date": {
-     "2026-09-29": 0.9229
+     "2026-09-29": 0.9229,
+     "2026-09-30": 0.9982
     }
    }
   },
   "start_sources": {
-   "api": 5
+   "api": 8
   },
   "stamps": {
-   "with_stamp": 5,
-   "stamp_before_start": 5,
+   "with_stamp": 8,
+   "stamp_before_start": 8,
    "stamp_late_game_ids": [],
    "without_stamp": 0
   }
@@ -382,13 +416,13 @@
  "late_forecasts": [],
  "start_check": {
   "rows_by_source": {
-   "api": 10
+   "api": 16
   },
   "mismatches": []
  },
  "stamps": {
   "status": "ok",
-  "cached": 6
+  "cached": 10
  },
  "files": {
   "uncommitted": [],
