@@ -1,0 +1,120 @@
+{
+ "2026020009": {
+  "game_id": 2026020009,
+  "date": "2026-10-01",
+  "start_utc": "2026-10-01T23:00:00+00:00",
+  "as_of": "2026-10-01T21:50:10.946130+00:00",
+  "roster_snapshot": "2026-09-29",
+  "notes": [],
+  "home": {
+   "team": "NJD",
+   "forwards": [
+    8477511,
+    8481559,
+    8479407,
+    8478414,
+    8480002,
+    8482146,
+    8481721,
+    8478542,
+    8482110,
+    8483695,
+    8479996,
+    8476474
+   ],
+   "defense": [
+    8482684,
+    8477488,
+    8478399,
+    8476462,
+    8475455,
+    8480990
+   ],
+   "skaters": [
+    8477511,
+    8481559,
+    8479407,
+    8478414,
+    8480002,
+    8482146,
+    8481721,
+    8478542,
+    8482110,
+    8483695,
+    8479996,
+    8476474,
+    8482684,
+    8477488,
+    8478399,
+    8476462,
+    8475455,
+    8480990
+   ],
+   "goalie": 8474596,
+   "lineup_source": "DF_CONFIRMED",
+   "goalie_source": "DF_CONFIRMED",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Connor Brown, Johnathan Kovacevic, Nick Bjugstad, Seamus Casey",
+    "DF lines 2026-10-01 'Mike Morreale' updated 10-01 14:40Z"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  },
+  "away": {
+   "team": "PHI",
+   "forwards": [
+    8480015,
+    8481533,
+    8485406,
+    8482159,
+    8477989,
+    8478439,
+    8483731,
+    8480220,
+    8484387,
+    8479336,
+    8476461,
+    8478569
+   ],
+   "defense": [
+    8477948,
+    8477499,
+    8481546,
+    8482142,
+    8476372,
+    8481122
+   ],
+   "skaters": [
+    8480015,
+    8481533,
+    8485406,
+    8482159,
+    8477989,
+    8478439,
+    8483731,
+    8480220,
+    8484387,
+    8479336,
+    8476461,
+    8478569,
+    8477948,
+    8477499,
+    8481546,
+    8482142,
+    8476372,
+    8481122
+   ],
+   "goalie": 8479361,
+   "lineup_source": "DF_CONFIRMED",
+   "goalie_source": "DF_CONFIRMED",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Denver Barkey, Nikita Grebenkin, Helge Grans",
+    "DF lines 2026-10-01 'Last Game (2026-09-30)' updated 10-01 13:22Z"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  }
+ }
+}
