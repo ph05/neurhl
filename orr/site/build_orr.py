@@ -2,7 +2,7 @@
 with this project's forecasts. ORR (Odds, Ratings & Rosters) is the public
 name of the ORR model.
 
-    python3 -m orr.site.build_orr   ->  orr/output/orr/index.html
+    python3 -m orr.site.build_orr   ->  docs/orr/index.html (GitHub Pages)
 
 Reads only committed outputs: the 2026-27 freeze, the latest daily forecast,
 the scorecard and the backtest files behind each accuracy row. HOWE and the
@@ -23,7 +23,7 @@ from orr import config as C
 F = C.OUT / "freeze_2027"
 BT = C.OUT / "backtest"
 SITE = Path(__file__).resolve().parent
-OUT = C.OUT / "orr" / "index.html"
+OUT = C.ROOT / "docs" / "orr" / "index.html"     # GitHub Pages: ph05.github.io/neurhl/orr/
 HASHED = ["teams_2027.csv", "games_2027.csv", "skaters_2027.csv", "goalies_2027.csv"]
 
 

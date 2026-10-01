@@ -112,7 +112,7 @@ for t in test_season test_players test_gamemodel test_freeze test_inseason; do p
 The game table (`orr/cache/gametable.parquet`) is built on first use.
 
 - **Backtests:** `python3 -m orr.backtest.{players_bt,goalies_bt,games_bt,teams_bt,gamefile_bt}`.
-- **Dashboard:** `python3 -m orr.site.build_dashboard`, written to `output/dashboard.html`.
+- **Website (GitHub Pages):** `python3 -m orr.site.build_orr` and `python3 -m orr.site.build_dashboard` write `docs/orr/index.html` and `docs/orr/compare.html`. Once on the Pages branch they are served at [ph05.github.io/neurhl/orr/](https://ph05.github.io/neurhl/orr/), beside NeurHL's site.
 
 Results and the head-to-head with NeurHL are in [`RESULTS.md`](RESULTS.md).
 
