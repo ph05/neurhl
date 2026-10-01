@@ -277,23 +277,37 @@ def blend_frame(seasons, extra: pd.DataFrame | None = None, alpha: float = 8.0) 
     return pd.concat(rows, ignore_index=True)
 
 
-def fit_blend(frame: pd.DataFrame, cols) -> np.ndarray:
-    """Non-negative least-squares weights (no intercept: every view is already
-    relative to the league mean)."""
-    from scipy.optimize import nnls
+def fit_blend(frame: pd.DataFrame, cols, convex: bool = True) -> np.ndarray:
+    """Least-squares blend weights, no intercept (every view is already
+    relative to the league mean).
+
+    convex=True (the default and what the freeze uses) constrains the weights
+    to be non-negative and sum to one: a forecast combination is an average of
+    forecasts, so it can never be more spread out than its widest input. On
+    the historical (October) lines an unconstrained fit would stretch the
+    market by ~8%, but the 2026-27 line is an earlier (August) vintage and the
+    out-of-sample gain from stretching is within noise, so the combination is
+    kept convex. convex=False gives plain non-negative least squares."""
+    from scipy.optimize import minimize, nnls
     f = frame.dropna(subset=list(cols) + ["act_rel82"])
-    w, _ = nnls(f[list(cols)].to_numpy(float), f.act_rel82.to_numpy(float))
-    return w
+    X, y = f[list(cols)].to_numpy(float), f.act_rel82.to_numpy(float)
+    if not convex:
+        return nnls(X, y)[0]
+    k = len(cols)
+    r = minimize(lambda w: ((X @ w - y) ** 2).sum(), np.full(k, 1.0 / k),
+                 jac=lambda w: 2 * X.T @ (X @ w - y), bounds=[(0, 1)] * k,
+                 constraints=[{"type": "eq", "fun": lambda w: w.sum() - 1.0}], method="SLSQP")
+    return r.x
 
 
-def loso_blend(frame: pd.DataFrame, cols) -> pd.DataFrame:
+def loso_blend(frame: pd.DataFrame, cols, convex: bool = True) -> pd.DataFrame:
     """Leave-one-season-out: weights fitted on the other seasons, scored on the
     held-out one. Returns per-season MAE/RMSE of the blend and of each view."""
     out = []
     for V in sorted(frame.season_end.unique()):
         tr, te = frame[frame.season_end != V], frame[frame.season_end == V].dropna(
             subset=list(cols) + ["act_rel82"])
-        w = fit_blend(tr, cols)
+        w = fit_blend(tr, cols, convex)
         pred = te[list(cols)].to_numpy(float) @ w
         e = pred - te.act_rel82.to_numpy()
         row = {"season_end": V, "n": len(te), "blend_mae": np.abs(e).mean(),

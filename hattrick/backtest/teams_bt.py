@@ -138,7 +138,8 @@ def section_b(bu) -> dict:
         views += [(["tdr_rel82"], CLEAN), (["mkt_rel82", "tdr_rel82"], CLEAN),
                   (["mkt_rel82", "td_rel82", "tdr_rel82"], CLEAN)]
     if bu is not None:
-        views += [(["bu_rel82"], CLEAN), (["mkt_rel82", "bu_rel82"], CLEAN)]
+        views += [(["bu_rel82"], CLEAN), (["mkt_rel82", "bu_rel82"], CLEAN),
+                  (["mkt_rel82", "td_rel82", "bu_rel82"], CLEAN)]
     for cols, seasons in views:
         g = f[f.season_end.isin(seasons)]
         l = T.loso_blend(g, cols)
