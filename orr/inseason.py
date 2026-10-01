@@ -65,6 +65,13 @@ LIVE = C.OUT / "live"
 
 # model versions: ORR 1.1 = 1.0 + the accepted pre-registered item X1
 MODELS = {
+    "1.6": {"version": "ORR 1.6", "past_starters": True, "lineups": True, "player_update": True,
+            "box_first": True, "goalie_update": True, "player_calibration": True,
+            "standings_drift": True, "start_share_update": True, "absence": True, "standings_sharp": True,
+            "sog_dist": True, "sos": True, "ros_file": True,
+            "accepted_items": ["X1", "1.2: in-season skater rates", "1.3: box-score lineups, goalie talent",
+                               "1.4: standings drift, start shares", "1.5: shot distributions",
+                               "1.6: remaining SOS, rest-of-season player file"]},
     "1.5": {"version": "ORR 1.5", "past_starters": True, "lineups": True, "player_update": True,
             "box_first": True, "goalie_update": True, "player_calibration": True,
             "standings_drift": True, "start_share_update": True, "absence": True, "standings_sharp": True, "sog_dist": True,
@@ -85,7 +92,7 @@ MODELS = {
     "1.0": {"version": "ORR 1.0", "past_starters": False, "lineups": False,
             "accepted_items": []},
 }
-DEFAULT_MODEL = "1.5"
+DEFAULT_MODEL = "1.6"
 
 
 def _sha(p: Path) -> str:
@@ -163,11 +170,67 @@ def update_start_shares_live(goalies: pd.DataFrame, day: pd.Timestamp,
         return goalies
     starts = b.groupby(["team", "player_id"]).size().rename("n").reset_index()
     games = b.groupby("team").game_id.nunique()
-    sh = update_shares(goalies[["team", "player_id", "start_share"]].rename(columns={"start_share": "share"}),
+    seen = set(starts.team)          # only teams with observed starts change (as in the backtest)
+    g_seen = goalies[goalies.team.isin(seen)]
+    sh = update_shares(g_seen[["team", "player_id", "start_share"]].rename(columns={"start_share": "share"}),
                        starts, games, alpha)
-    out = goalies.drop(columns="start_share").merge(sh.rename(columns={"share": "start_share"}),
-                                                    on=["team", "player_id"], how="outer")
+    upd = g_seen.drop(columns="start_share").merge(sh.rename(columns={"share": "start_share"}),
+                                                   on=["team", "player_id"], how="outer")
+    out = pd.concat([goalies[~goalies.team.isin(seen)], upd], ignore_index=True)
     return out.fillna({"start_share": 0.0, "p_present": 1.0})
+
+
+def remaining_sos(sch: pd.DataFrame, done: pd.DataFrame, cur: pd.DataFrame) -> pd.DataFrame:
+    """ORR 1.6: each team's remaining strength of schedule, the mean net
+    rating (o - d, log goal-rate units) of its opponents in the games not yet
+    played, and the number of those games."""
+    left = sch[~sch.game_id.isin(set(done.game_id))]
+    net = (cur.o - cur.d).set_axis(cur.team)
+    opp = pd.concat([pd.DataFrame({"team": left.home, "opp": left.away}),
+                     pd.DataFrame({"team": left.away, "opp": left.home})])
+    opp["net"] = opp.opp.map(net)
+    return opp.groupby("team").agg(sos_remaining=("net", "mean"), games_left=("net", "size")).reset_index()
+
+
+def players_ros(fz: dict, day: pd.Timestamp, results: pd.DataFrame, n0: dict | None = None) -> pd.DataFrame:
+    """ORR 1.6: season-to-date and rest-of-season skater lines.
+
+    Season to date from the box scores (orr.ingest). Rest of season: expected
+    games = the player's preseason games share times his team's games left;
+    goals, assists and points from 1.2's updated rates. The 80% interval of
+    rest-of-season points is the conjugate predictive (negative binomial) of
+    the Gamma posterior on his points rate (prior weight n0 games), for the
+    expected games; games-played uncertainty is not included."""
+    from scipy import stats
+    sk = pd.read_csv(FREEZE / "skaters_2027.csv")
+    n0 = n0 or PU.load_n0()
+    k = n0["g"]
+    td = None
+    if PU.BOXES_LIVE.exists():
+        b = pd.read_csv(PU.BOXES_LIVE)
+        b = b[(b.pos != "G") & (b.toi > 0) & (pd.to_datetime(b.date) < day)]
+        td = PU.totals(b).set_index("player_id") if len(b) else None
+    played = (pd.concat([results.home, results.away]).value_counts() if len(results) else pd.Series(dtype=float))
+    total = C.GAMES_PER_TEAM[C.TARGET_SEASON]
+    n_td = td.n.reindex(sk.player_id).fillna(0).to_numpy() if td is not None else np.zeros(len(sk))
+    g_td = td.g.reindex(sk.player_id).fillna(0).to_numpy() if td is not None else np.zeros(len(sk))
+    a_td = td.a.reindex(sk.player_id).fillna(0).to_numpy() if td is not None else np.zeros(len(sk))
+    gp = sk.gp.clip(lower=1).to_numpy()
+    g0, a0 = sk.g.to_numpy() / gp, sk.a.to_numpy() / gp
+    g_r = (k * g0 + g_td) / (k + n_td)
+    a_r = (n0["a"] * a0 + a_td) / (n0["a"] + n_td)
+    left = np.clip(total - sk.team.map(played).fillna(0).to_numpy(), 0, None)
+    games = np.clip(sk.gp.to_numpy() / total, 0, 1) * left
+    shape = k * (g0 + a0) + g_td + a_td
+    p = (k + n_td) / (k + n_td + np.maximum(games, 1e-9))
+    lo, hi = stats.nbinom.ppf(0.1, np.maximum(shape, 1e-9), p), stats.nbinom.ppf(0.9, np.maximum(shape, 1e-9), p)
+    return pd.DataFrame({"player_id": sk.player_id, "name": sk.name, "team": sk.team, "pos": sk.pos,
+                         "gp_td": n_td, "g_td": g_td, "a_td": a_td, "p_td": g_td + a_td,
+                         "games_left": games, "g_ros": g_r * games, "a_ros": a_r * games,
+                         "p_ros": (g_r + a_r) * games, "p_ros_p10": lo, "p_ros_p90": hi,
+                         "p_season": g_td + a_td + (g_r + a_r) * games,
+                         "p_season_p10": g_td + a_td + lo, "p_season_p90": g_td + a_td + hi}
+                        ).sort_values("p_season", ascending=False)
 
 
 def merge_starters(file_st: pd.DataFrame | None, lineup_st: pd.DataFrame | None) -> pd.DataFrame | None:
@@ -320,12 +383,17 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     sim = S.simulate(sch, sim_r, model, n_sims=sims, seed=seed, completed=done,
                      game_adj=sim_adj, drift_sd=fz.get("drift_sd", 0.05) * np.sqrt(left) * k_drift, rho_od=rho)
     standings = S.summarise(sim)
+    if cfg.get("sos"):          # ORR 1.6: remaining strength of schedule
+        standings = standings.merge(remaining_sos(sch, done, cur), on="team", how="left")
+    ros = players_ros(fz, day, res) if cfg.get("ros_file") else None
 
     outdir = LIVE / date
     outdir.mkdir(parents=True, exist_ok=True)
     games_out.to_csv(outdir / f"games_{date}.csv", index=False, float_format="%.5f")
     players_out.to_csv(outdir / f"players_{date}.csv", index=False, float_format="%.4f")
     standings.to_csv(outdir / f"standings_{date}.csv", index=False, float_format="%.4f")
+    if ros is not None:
+        ros.to_csv(outdir / f"players_ros_{date}.csv", index=False, float_format="%.3f")
     cur.to_csv(outdir / f"ratings_{date}.csv", index=False, float_format="%.5f")
     run_meta = {"date": date, "created_utc": created, "code": _code_commit(),
                 "results_through": str(res.date.max()) if len(res) else None,

@@ -55,7 +55,7 @@ jobs:
           today="$(date -u +%F)"
           python -m orr.ingest --through "$(date -u -d yesterday +%F)"
           python -m orr.inseason --date "$today" --lineup-dir neurhl/output/live/2027
-          python -m orr.score
+          python -m orr.score --neurhl-live neurhl/output/live/2027
           python -m orr.site.build_orr
           python -m orr.site.build_dashboard
           echo "date=$today" >> "$GITHUB_ENV"

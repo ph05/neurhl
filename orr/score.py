@@ -49,6 +49,9 @@ GAME_FILES = {
 }
 FIRST_PUCK_DROP = pd.Timestamp("2026-09-29T21:00:00Z")
 LIVE_DEADLINE = pd.Timedelta(hours=15)
+# NeurHL's committed live forecasts. ORR 1.6: --neurhl-live points this at an
+# extract of upstream's files (git archive origin/main neurhl/output/live).
+NEURHL_LIVE = C.ROOT / "neurhl/output/live/2027"
 
 
 @functools.lru_cache(maxsize=1)
@@ -149,7 +152,7 @@ def score_games(res: pd.DataFrame) -> dict:
                                         if later else {"n": 0})
         out[name] = row
     # game-day forecasts
-    live = C.ROOT / "neurhl/output/live/2027"
+    live = NEURHL_LIVE
     rows = []
     for f in sorted(live.glob("*/pregame_*.csv")):
         if f.name.endswith(("_players.csv", "_lineups.csv")):
@@ -208,7 +211,7 @@ def eligible_probs(res: pd.DataFrame) -> pd.DataFrame:
             if published is None or published.tz_convert(None) < _game_deadline(gid, dates[gid]):
                 rows.append((name, gid, dates[gid], float(g.at[gid, col]), int(y[gid])))
     pre = []
-    for f in sorted((C.ROOT / "neurhl/output/live/2027").glob("*/pregame_*.csv")):
+    for f in sorted(NEURHL_LIVE.glob("*/pregame_*.csv")):
         if not f.name.endswith(("_players.csv", "_lineups.csv")):
             pre.append(pd.read_csv(f))
     if pre:
@@ -321,7 +324,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", default=str(RESULTS_DEFAULT))
     ap.add_argument("--out", default=str(C.OUT / "scorecard_2027.json"))
+    ap.add_argument("--neurhl-live", default=None,
+                    help="NeurHL's live/2027 folder (default: this checkout's neurhl/output/live/2027)")
     a = ap.parse_args()
+    global NEURHL_LIVE
+    if a.neurhl_live:
+        NEURHL_LIVE = Path(a.neurhl_live)
     res = load_results(a.results)
     ep = eligible_probs(res)
     card = {"through": str(res.date.max()), "games_played": int(len(res)),

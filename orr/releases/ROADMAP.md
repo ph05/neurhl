@@ -2,6 +2,15 @@
 
 A version ships every cycle. Each cycle opens with a brainstorm, and every feature considered there is planned into the next version. A feature that fails its backtest still ships, but behind a switch with the result documented; it is not silently dropped. Release notes are in this folder.
 
+## 1.7 (planned): what you see is current
+
+Brainstorm, held after 1.6 shipped. Every item is planned into 1.7:
+
+1. **In-season standings on the website by default.** The projected standings, playoff odds and team-stat tables show the latest daily run, with its date. The frozen preseason file stays one click away (a toggle) and in the comparison page.
+2. **Calibrated rest-of-season player intervals.** Backtest the 80% interval of rest-of-season points (1.6) at 25%, 50% and 75% of 2021-23 (test, once). Tune on ≤2017 a games-played variance term (each remaining team game is a Bernoulli dress with the player's rate) and a rate-variance multiplier, by coverage and interval score.
+3. **Rest and travel on the Today table.** Rest days, back-to-back flags and kilometres travelled for both teams, from the schedule features the game model already uses.
+4. **Version stamps.** Each daily file shows which ORR version produced it (from its run JSON), and the website gets a version history table linking every release note.
+
 ## 1.6 (planned): the full picture
 
 Brainstorm, held after 1.5 shipped. Every item is planned into 1.6:
