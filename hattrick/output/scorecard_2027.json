@@ -4,8 +4,8 @@
  "games": {
   "hattrick_freeze": {
    "n": 5,
-   "log_loss": 0.7611649399967393,
-   "brier": 0.28230832358,
+   "log_loss": 0.7767400883805906,
+   "brier": 0.2893043151,
    "accuracy": 0.4,
    "published_before_first_game": true
   },
@@ -66,8 +66,8 @@
  "teams_interim": {
   "hattrick_freeze": {
    "teams": 10,
-   "mae_points_so_far": 0.835239,
-   "rmse_points_so_far": 0.8911556020976359
+   "mae_points_so_far": 0.8498439999999998,
+   "rmse_points_so_far": 0.9048830419230985
   },
   "neurhl_0925_freeze": {
    "teams": 10,

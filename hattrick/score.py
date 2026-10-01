@@ -30,7 +30,7 @@ import pandas as pd
 
 from hattrick import config as C
 
-RESULTS_DEFAULT = C.ROOT / "neurhl/output/live/results_2027.csv"
+RESULTS_DEFAULT = C.OUT / "live" / "results_2027.csv"
 FREEZE = C.OUT / "freeze_2027"
 
 GAME_FILES = {
