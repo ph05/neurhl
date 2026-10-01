@@ -27,8 +27,9 @@ Steps
     A pre-declared list of view combinations is scored leave-one-season-out on
     the seasons that have both a preseason line and a clean (first-10-games)
     roster proxy: 2019, 2020, 2022, 2023, 2024. The combination with the lowest
-    out-of-sample RMSE is used, its non-negative weights refitted on those
-    seasons.
+    out-of-sample RMSE is used, its weights refitted on those seasons. Weights
+    are convex (non-negative, summing to one; teams.fit_blend), so the blend
+    is never more spread out than its inputs.
  3. Targets -> offence/defence ratings on the actual schedule (calibrate); the
     rating SD is the blend's out-of-sample error net of the game luck the
     scoring model itself implies.
@@ -272,7 +273,8 @@ def team_targets(log: dict) -> pd.DataFrame:
     # pre-declared candidate view sets; the one with the lowest leave-one-
     # season-out RMSE is used, with weights refitted on the same seasons
     candidates = [["mkt_rel82"], ["mkt_rel82", "td_rel82"], ["mkt_rel82", "tdr_rel82"],
-                  ["mkt_rel82", "td_rel82", "tdr_rel82"], ["mkt_rel82", "bu_rel82"]]
+                  ["mkt_rel82", "td_rel82", "tdr_rel82"], ["mkt_rel82", "bu_rel82"],
+                  ["mkt_rel82", "td_rel82", "bu_rel82"]]
     scored = []
     for cand in candidates:
         l = T.loso_blend(hist, cand)
