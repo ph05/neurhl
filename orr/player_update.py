@@ -85,3 +85,20 @@ def live_rates(skaters: pd.DataFrame, n0: dict | None = None, path: Path = BOXES
     prior = pd.DataFrame({"player_id": skaters.player_id, "g_pg": skaters.g / gp,
                           "a_pg": skaters.a / gp, "sog_pg": skaters.sog / gp})
     return posterior(prior, totals(b), n0 or load_n0())
+
+
+CAL_PARAMS = C.PARAMS / "player_prob.json"
+
+
+def load_calibration() -> dict | None:
+    """Platt parameters for per-game P(goal) and P(point), or None when the
+    calibration backtest (orr/backtest/player_prob_bt.py) did not adopt them."""
+    if not CAL_PARAMS.exists():
+        return None
+    d = json.loads(CAL_PARAMS.read_text())
+    return {"goal": d["goal"], "point": d["point"]} if d.get("adopted") else None
+
+
+def platt(p: np.ndarray, w) -> np.ndarray:
+    x = np.log(p / (1 - p))
+    return 1 / (1 + np.exp(-(w[0] + w[1] * x)))

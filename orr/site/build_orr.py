@@ -174,10 +174,28 @@ def main():
 
     s = sk[sk.gp >= 1]
     fo = s.fow + s.fol
+    # ORR 1.3: season to date from the box scores, and rest of season from the updated rates
+    td = None
+    bp = C.OUT / "live" / f"boxes_{C.TARGET_SEASON}.csv"
+    if bp.exists():
+        from orr import player_update as PU
+        b = pd.read_csv(bp)
+        b = b[(b.pos != "G") & (b.toi > 0)]
+        if len(b):
+            tot_td = PU.totals(b).set_index("player_id")
+            upd = PU.live_rates(s).set_index("player_id")
+            team_gp = pd.read_csv(rp) if rp.exists() else None
+            played = (pd.concat([team_gp.home, team_gp.away]).value_counts() if team_gp is not None
+                      else pd.Series(dtype=float))
+            left = 1 - s.team.map(played).fillna(0).to_numpy() / C.GAMES_PER_TEAM[C.TARGET_SEASON]
+            ros = (upd.g_pg + upd.a_pg).reindex(s.player_id).to_numpy() * s.gp.to_numpy() * left
+            td = {"gp": tot_td.n.reindex(s.player_id).fillna(0).to_numpy(),
+                  "p": (tot_td.g + tot_td.a).reindex(s.player_id).fillna(0).to_numpy(), "ros": ros}
     skx = [[r.name, r.team, r.pos, _r(r.gp), _r(r.toi / max(r.gp, 1e-9)), _r(r.g), _r(r.a), _r(r.p),
             _r(r.p_p10), _r(r.p_p90), _r(r.sog), _r(r.ixg), _r(100 * r.g / r.sog) if r.sog > 0 else None,
             _r(r.pim), _r(r.hits), _r(r.blk), _r(100 * r.fow / f) if f > 50 else None]
-           for r, f in zip(s.itertuples(), fo)]
+           + ([_r(td["gp"][i], 0), _r(td["p"][i], 0), _r(td["ros"][i])] if td is not None else [])
+           for i, (r, f) in enumerate(zip(s.itertuples(), fo))]
     gx = [[r.name, r.team, _r(r.starts), _r(r.wins), _r(r.sa), _r(r.ga), _r(r.sv_pct, 4),
            _r(r.ga / r.gp, 2) if r.gp > 0 else None, _r(r.gsax)]
           for r in gl[gl.starts >= 1].itertuples()]
@@ -197,7 +215,7 @@ def main():
                      "tests": "7/7"},
             "live": {"as_of": card.get("through", "")[:10], "games_played": card.get("games_played", 0), "rows": live_rows},
             "teams": teams, "teams_x": tx, "tonight": tonight(g.set_index("game_id").p_home_win, elo),
-            "games": games, "skaters_x": skx, "goalies": gx, "evidence": evidence(),
+            "games": games, "skaters_x": skx, "has_td": td is not None, "goalies": gx, "evidence": evidence(),
             "sha256": {f"orr/output/freeze_2027/{f}": hashlib.sha256((F / f).read_bytes()).hexdigest() for f in HASHED}}
     blob = json.dumps(data, separators=(",", ":"), default=lambda o: None if isinstance(o, float) and np.isnan(o) else o)
     html = (SITE / "orr_template.html").read_text().replace("__ORR_DATA__", blob.replace("</", "<\\/"))

@@ -223,12 +223,14 @@
 
   // ---- skaters
   const S = (D.skaters_x || []).map(r => ({ name: r[0], team: r[1], pos: r[2], gp: r[3], toi: r[4], g: r[5], a: r[6], p: r[7],
-    p10: r[8], p90: r[9], sog: r[10], ixg: r[11], sh: r[12], pim: r[13], hit: r[14], blk: r[15], fo: r[16] }));
+    p10: r[8], p90: r[9], sog: r[10], ixg: r[11], sh: r[12], pim: r[13], hit: r[14], blk: r[15], fo: r[16],
+    gptd: r[17], ptd: r[18], ros: r[19] }));
   const scols = [{ k: "_rk", h: "Rk", f: (v, x, i) => i + 1 }, { k: "name", h: "Player", l: 1 }, { k: "team", h: "Team", l: 1 }, { k: "pos", h: "Pos", l: 1 },
     { k: "gp", h: "GP", f: f1 }, { k: "toi", h: "TOI/GP", f: f1 }, { k: "g", h: "G", f: f1 }, { k: "a", h: "A", f: f1 }, { k: "p", h: "PTS", f: f1 },
     { k: "p10", h: "P10", f: f0 }, { k: "p90", h: "P90", f: f0 }, { k: "sog", h: "SOG", f: f0 }, { k: "ixg", h: "ixG", f: f1 },
     { k: "sh", h: "SH%", f: f1 }, { k: "pim", h: "PIM", f: f0 }, { k: "hit", h: "HIT", f: f0 }, { k: "blk", h: "BLK", f: f0 },
-    { k: "fo", h: "FO%", f: f1 }];
+    { k: "fo", h: "FO%", f: f1 }].concat(D.has_td ? [{ k: "gptd", h: "GP so far", f: f0 },
+    { k: "ptd", h: "PTS so far", f: f0 }, { k: "ros", h: "PTS rest", f: f1, t: "Projected points in the team's remaining games, from rates updated with this season's games" }] : []);
   const ssel = () => { const q = $("s_q").value.toLowerCase(), tm = $("s_team").value, ps = $("s_pos").value, mg = +$("s_gp").value || 0;
     return S.filter(s => s.gp >= mg && (!tm || s.team === tm) && (!ps || s.pos === ps) && (!q || s.name.toLowerCase().includes(q))); };
   const st = table($("t_sk"), scols, ssel(), { sort: "p", limit: () => $("s_all").checked ? 100000 : 100 });

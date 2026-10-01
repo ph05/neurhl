@@ -16,6 +16,7 @@ production forecast.
 from __future__ import annotations
 
 import functools
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -500,3 +501,27 @@ def usual_starter_talent(goalies: pd.DataFrame, talent: pd.Series | None = None)
     g["t"] = g.player_id.map(t).fillna(goalie_talent_default())
     w = g.start_share.clip(lower=0)
     return (g.assign(wt=w * g.t).groupby("team").wt.sum() / w.groupby(g.team).sum()).rename("ref")
+
+
+def goalie_talent_live(before, path=None, goalie_key: tuple | None = None) -> pd.Series:
+    """ORR 1.3: 2026-27 save talent updated with this season's box scores, by
+    the same rule goalie_game_talent applies in every backtest: the preseason
+    prior (numerator, denominator) plus w_in * (saves - league_sv * shots) and
+    w_in * shots over the goalie's games dated strictly before ``before``.
+    With no box scores it equals goalie_talent_2027()."""
+    n0, m0, w_in, _ = goalie_key or _frozen_goalie_key()
+    prior, sv = goalie_prior(C.TARGET_SEASON, n0, m0)
+    num = {pid: a for pid, (a, b) in prior.items()}
+    den = {pid: b for pid, (a, b) in prior.items()}
+    path = path or C.OUT / "live" / f"boxes_{C.TARGET_SEASON}.csv"
+    if Path(path).exists():
+        b = pd.read_csv(path)
+        b = b[(b.pos == "G") & b.shots_against.notna() & b.goals_against.notna()
+              & (pd.to_datetime(b.date) < pd.Timestamp(before))]
+        if len(b):
+            ev = (b.shots_against - b.goals_against - sv * b.shots_against).groupby(b.player_id).sum()
+            sh = b.shots_against.groupby(b.player_id).sum()
+            for pid in ev.index:
+                num[pid] = num.get(pid, n0 * m0) + w_in * ev[pid]
+                den[pid] = den.get(pid, n0) + w_in * sh[pid]
+    return pd.Series({pid: num[pid] / den[pid] for pid in num}, name="talent")
