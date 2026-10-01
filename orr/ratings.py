@@ -521,7 +521,8 @@ GH_W = GH_W / GH_W.sum()
 
 
 def run_filter(hp: HP, seasons: range | list, use_goalie: bool = False,
-               first: int = 2008, pre_override: dict | None = None) -> pd.DataFrame:
+               first: int = 2008, pre_override: dict | None = None,
+               lineup: pd.DataFrame | None = None) -> pd.DataFrame:
     """Walk-forward filter over seasons ``first`` .. max(seasons).
 
     Returns one row per regular-season game of ``seasons`` (gid) with the
@@ -536,6 +537,11 @@ def run_filter(hp: HP, seasons: range | list, use_goalie: bool = False,
     ``pre_override``: {V: (ratings, mu)} replaces season V's starting team
     strengths (team, o, d, o_sd, d_sd; e.g. the freeze pipeline's market-
     anchored ratings) and league level, exactly as ``InSeasonFilter`` does live.
+    ``lineup`` (ORR 1.1, item X1): a frame (gid, lo_h, lo_a) of log offsets on
+    home / away regulation goals for the dressed lineups
+    (``orr.lineups.backtest_offsets``); they are added to the goal offsets
+    after the starters', so they enter both the pregame prediction and the
+    goal rows of the update (not the shot rows). Games not in it get 0.
     """
     g = S.game_frame()
     gt = S.goalie_game_talent(*hp.goalie) if use_goalie else None
@@ -564,6 +570,10 @@ def run_filter(hp: HP, seasons: range | list, use_goalie: bool = False,
             ka = _ctx(st["ctx_gk"], gv, "a") + b * np.nan_to_num(gm.gdiff_h.to_numpy())
             cg_h = np.where(known, kh, cg_h)
             cg_a = np.where(known, ka, cg_a)
+        if lineup is not None:          # ORR 1.1 (X1): dressed-lineup offsets
+            lu = gv[["gid"]].merge(lineup[["gid", "lo_h", "lo_a"]], on="gid", how="left")
+            cg_h = cg_h + lu.lo_h.fillna(0.0).to_numpy()
+            cg_a = cg_a + lu.lo_a.fillna(0.0).to_numpy()
         sh = st.get("shots") if hp.use_shots else None
         if sh is not None:
             cs_h = _ctx(sh["beta"], gv, "h") + sh["beta"]["margin"] * np.clip(gv.margin, -3, 3) \
@@ -750,6 +760,15 @@ class InSeasonFilter:
     ``gadj_h`` / ``gadj_a``: known starters' offsets (gamemodel.goalie_offset
     of the starter's talent minus the team's usual mix) -- the home starter's
     offset multiplies AWAY goals, as in the backtests.
+    ORR 1.1 (item X1) columns, all optional:
+    ``gdiff_h`` / ``gdiff_a``: the starters' save talent minus the team's
+    usual starter, in the fitted goalie units (``inseason.starter_diffs``).
+    Where both are known the game is treated exactly as ``run_filter(...,
+    use_goalie=True)`` does: the goalie-aware rest/travel coefficients
+    (struct['ctx_gk']) plus beta_gk * gk_scale * the opponent's diff, in place
+    of struct['ctx'] + gadj.
+    ``lo_h`` / ``lo_a``: dressed-lineup log offsets on home / away goals
+    (``orr.lineups.live_offsets``), added to the goal rows only.
     ``state()`` folds the filter's league-level drift into o and d (half each)
     relative to params['P']['mu'], so gamemodel.rates(P, o_h, d_h, o_a, d_a)
     reproduces the filter's expected goals; ``levels()`` gives mu and h.
@@ -817,10 +836,38 @@ class InSeasonFilter:
             g[f"f_{f}_h"], g[f"f_{f}_a"] = fh[f], fa[f]
         g["margin"] = g.reg_h - g.reg_a
         g["went_extra"] = (g.get("extra", "REG") != "REG").astype(float)
-        for c in ("gadj_h", "gadj_a", "sh_h", "sh_a"):
+        for c in ("gadj_h", "gadj_a", "lo_h", "lo_a"):
+            g[c] = g[c].fillna(0.0).astype(float) if c in g else 0.0
+        for c in ("sh_h", "sh_a", "gdiff_h", "gdiff_a"):
             if c not in g:
-                g[c] = 0.0 if c.startswith("gadj") else np.nan
+                g[c] = np.nan
         return g
+
+    def _goal_offsets(self, g: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+        """Log offsets on home and away regulation goals for prepared games:
+        rest/travel context, starters, lineups (as run_filter)."""
+        ch = _ctx(self.st["ctx"], g, "h") + g.gadj_a.to_numpy(float)
+        ca = _ctx(self.st["ctx"], g, "a") + g.gadj_h.to_numpy(float)
+        known = (g.gdiff_h.notna() & g.gdiff_a.notna()).to_numpy()
+        if known.any() and self.st.get("ctx_gk") is not None:
+            b = self.st["beta_gk"] * self.hp.gk_scale
+            kh = _ctx(self.st["ctx_gk"], g, "h") + b * np.nan_to_num(g.gdiff_a.to_numpy(float))
+            ka = _ctx(self.st["ctx_gk"], g, "a") + b * np.nan_to_num(g.gdiff_h.to_numpy(float))
+            ch = np.where(known, kh, ch)
+            ca = np.where(known, ka, ca)
+        return ch + g.lo_h.to_numpy(float), ca + g.lo_a.to_numpy(float)
+
+    def predict_eta(self, games: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+        """Pregame linear predictors (log expected regulation goals) of home
+        and away for games from the CURRENT state, without updating; the same
+        offsets as ``update_day``. Pass the games' date so that process noise
+        is not needed (eta depends on the mean only)."""
+        g = self._prep(games.reset_index(drop=True))
+        Hg, _ = self._rows(g)
+        ch, ca = self._goal_offsets(g)
+        eta = Hg @ self.x + np.r_[ch, ca]
+        k = len(g)
+        return eta[:k], eta[k:]
 
     def update(self, row) -> None:
         """Update with ONE finished game (namedtuple, Series or dict)."""
@@ -834,8 +881,8 @@ class InSeasonFilter:
         self._advance(g.date.max() if "date" in g else self.last)
         k = len(g)
         Hg, Hs = self._rows(g)
-        cg = np.r_[_ctx(self.st["ctx"], g, "h") + g.gadj_a.to_numpy(),
-                   _ctx(self.st["ctx"], g, "a") + g.gadj_h.to_numpy()]
+        ch, ca = self._goal_offsets(g)
+        cg = np.r_[ch, ca]
         eta = Hg @ self.x + cg
         m = np.exp(eta)
         y = np.r_[g.reg_h.to_numpy(float), g.reg_a.to_numpy(float)]

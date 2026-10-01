@@ -1,0 +1,716 @@
+{
+ "created_utc": "2026-10-01T03:14:36+00:00",
+ "protocol": "L1 task 4: the single test run (configuration fixed in ledger.json[\"chosen\"]).\n\nProtocol = orr/backtest/inseason_bt.py, per arm: a team-history-start run\ngives the walk-forward OT/SO parameters; the shipped run starts each clean\nmarket season (2019, 2020, 2022-24) from the preseason pipeline's ratings\n(gamefile_bt.game_file_season, views mkt+td) and uses those OT/SO parameters.\nScored on NeurHL-G's gate games 2019-24 (n = 6289).\n\nArms (offset sources of lfilter.run_filter_gk):\n  mix     the start-share mix                    (inseason_bt no_starters; lower bound)\n  actual  actual starters, prediction + update   (inseason_bt known_starters; upper bound)\n  pred    the choice model's expected starter, prediction + update (L1)\n  hybrid  expected starter for the prediction, actual starter in the update\nfor goals + shots (frozen HP; PRIMARY) and goals only (use_shots=False).\n\nPrimary: pred vs mix, goals + shots, paired bootstrap 95% CI.\nRun once: python3 -m orr.experiments.L1.test   (refuses to overwrite its output)\n",
+ "config": {
+  "choice_model": {
+   "feats": [
+    "lsh_s",
+    "lsh_l",
+    "last",
+    "last_b2b",
+    "lstreak",
+    "app_yday",
+    "lgsa",
+    "pulled",
+    "relief",
+    "home_l",
+    "tgap"
+   ],
+   "hs": 3.0,
+   "hl": 15.0,
+   "lam": 1.0
+  },
+  "offsets": {
+   "ctx_kind": "ctx",
+   "lam": 0.5,
+   "ref_kind": "mix"
+  }
+ },
+ "n": 6289,
+ "coverage": {
+  "pooled": 0.7921768166640165,
+  "2019": 1.0,
+  "2020": 0.8391866913123844,
+  "2022": 1.0,
+  "2023": 1.0,
+  "2024": 0.1364329268292683
+ },
+ "choice_model_by_season": {
+  "2012": {
+   "n_train": 1860,
+   "m_other": -0.002174258225800043,
+   "converged": true,
+   "choice": {
+    "n": 2460,
+    "logloss": 0.710646791479022,
+    "acc": 0.6865853658536586,
+    "p_other_actual": 0.011788617886178862
+   }
+  },
+  "2013": {
+   "n_train": 4320,
+   "m_other": -0.0020401634599328056,
+   "converged": true,
+   "choice": {
+    "n": 1440,
+    "logloss": 0.7213447124334995,
+    "acc": 0.70625,
+    "p_other_actual": 0.014583333333333334
+   }
+  },
+  "2014": {
+   "n_train": 4320,
+   "m_other": -0.0020401634599328056,
+   "converged": true,
+   "choice": {
+    "n": 2460,
+    "logloss": 0.7702376206474146,
+    "acc": 0.6650406504065041,
+    "p_other_actual": 0.019105691056910568
+   }
+  },
+  "2015": {
+   "n_train": 6780,
+   "m_other": -0.001853152483076813,
+   "converged": true,
+   "choice": {
+    "n": 2460,
+    "logloss": 0.7089326978428964,
+    "acc": 0.7105691056910569,
+    "p_other_actual": 0.014227642276422764
+   }
+  },
+  "2016": {
+   "n_train": 9240,
+   "m_other": -0.0019184086666366729,
+   "converged": true,
+   "choice": {
+    "n": 2458,
+    "logloss": 0.7204499256331512,
+    "acc": 0.6696501220504475,
+    "p_other_actual": 0.012611879576891782
+   }
+  },
+  "2017": {
+   "n_train": 11698,
+   "m_other": -0.0019273055448872027,
+   "converged": true,
+   "choice": {
+    "n": 2460,
+    "logloss": 0.7145552543325072,
+    "acc": 0.6955284552845529,
+    "p_other_actual": 0.015040650406504066
+   }
+  },
+  "2018": {
+   "n_train": 14158,
+   "m_other": -0.0019021255748682838,
+   "converged": true,
+   "choice": {
+    "n": 2542,
+    "logloss": 0.7426170293827815,
+    "acc": 0.6880409126671911,
+    "p_other_actual": 0.014555468135326514
+   }
+  },
+  "2019": {
+   "n_train": 16700,
+   "m_other": -0.001901075504815541,
+   "converged": true,
+   "choice": {
+    "n": 2542,
+    "logloss": 0.7350462125681745,
+    "acc": 0.6640440597954367,
+    "p_other_actual": 0.016129032258064516
+   }
+  },
+  "2020": {
+   "n_train": 19242,
+   "m_other": -0.001957488401787575,
+   "converged": true,
+   "choice": {
+    "n": 1816,
+    "logloss": 0.7539227323902964,
+    "acc": 0.6486784140969163,
+    "p_other_actual": 0.01817180616740088
+   }
+  },
+  "2021": {
+   "n_train": 21058,
+   "m_other": -0.0019224430494127382,
+   "converged": true,
+   "choice": {
+    "n": 1736,
+    "logloss": 0.83506532977955,
+    "acc": 0.6336405529953917,
+    "p_other_actual": 0.020737327188940093
+   }
+  },
+  "2022": {
+   "n_train": 22794,
+   "m_other": -0.001955847170468614,
+   "converged": true,
+   "choice": {
+    "n": 2624,
+    "logloss": 0.8352733581198468,
+    "acc": 0.6425304878048781,
+    "p_other_actual": 0.025152439024390245
+   }
+  },
+  "2023": {
+   "n_train": 25418,
+   "m_other": -0.0019420349408079314,
+   "converged": true,
+   "choice": {
+    "n": 2624,
+    "logloss": 0.8123546866961523,
+    "acc": 0.640625,
+    "p_other_actual": 0.019435975609756097
+   }
+  },
+  "2024": {
+   "n_train": 28042,
+   "m_other": -0.0019707558735094265,
+   "converged": true,
+   "choice": {
+    "n": 358,
+    "logloss": 0.9526754962894749,
+    "acc": 0.5949720670391061,
+    "p_other_actual": 0.036312849162011177
+   }
+  }
+ },
+ "reproduction": {
+  "goals_shots_mix": {
+   "this_run": 0.6613087083076611,
+   "published": 0.66131
+  },
+  "goals_shots_actual": {
+   "this_run": 0.6606174580468237,
+   "published": 0.66062
+  },
+  "goals_only_mix": {
+   "this_run": 0.6633717660619765,
+   "published": 0.66337
+  }
+ },
+ "modes": {
+  "goals_shots": [
+   {
+    "season": 2019,
+    "n": 1271,
+    "mix": 0.6761122370687095,
+    "mix_teamhist": 0.6765067150033227,
+    "actual": 0.674464690900241,
+    "actual_teamhist": 0.6747743509477924,
+    "pred": 0.6761122370687095,
+    "pred_teamhist": 0.6765067150033227,
+    "hybrid": 0.6757038393075138,
+    "hybrid_teamhist": 0.6762753285830203,
+    "neurhl_g": 0.674907588163759,
+    "neurhl_elo": 0.6771748848792372,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": 2020,
+    "n": 1082,
+    "mix": 0.6766774789155373,
+    "mix_teamhist": 0.6781743879613418,
+    "actual": 0.6757440171896463,
+    "actual_teamhist": 0.6769537134097965,
+    "pred": 0.6766774789155373,
+    "pred_teamhist": 0.6781743879613418,
+    "hybrid": 0.6766561907181127,
+    "hybrid_teamhist": 0.6782353435194999,
+    "neurhl_g": 0.6773879615636428,
+    "neurhl_elo": 0.6788116950881894,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": 2022,
+    "n": 1312,
+    "mix": 0.6449102721771574,
+    "mix_teamhist": 0.6427608185426223,
+    "actual": 0.6437172161497687,
+    "actual_teamhist": 0.6415376727700318,
+    "pred": 0.6449102721771574,
+    "pred_teamhist": 0.6427608185426223,
+    "hybrid": 0.6449626340214301,
+    "hybrid_teamhist": 0.642842130216841,
+    "neurhl_g": 0.6431464484722776,
+    "neurhl_elo": 0.6531558355943523,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": 2023,
+    "n": 1312,
+    "mix": 0.6540460046214336,
+    "mix_teamhist": 0.654614041793466,
+    "actual": 0.6545778041890986,
+    "actual_teamhist": 0.655197466600923,
+    "pred": 0.6540460046214336,
+    "pred_teamhist": 0.654614041793466,
+    "hybrid": 0.6537996930085644,
+    "hybrid_teamhist": 0.6544115491792603,
+    "neurhl_g": 0.6549759666198932,
+    "neurhl_elo": 0.6614578637292134,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": 2024,
+    "n": 1312,
+    "mix": 0.6579543794864242,
+    "mix_teamhist": 0.6566541729206419,
+    "actual": 0.6576680474378636,
+    "actual_teamhist": 0.6563506556761516,
+    "pred": 0.6579543794864242,
+    "pred_teamhist": 0.6566541729206419,
+    "hybrid": 0.6579332156793637,
+    "hybrid_teamhist": 0.6566455505020964,
+    "neurhl_g": 0.6534033368672669,
+    "neurhl_elo": 0.6603586547542591,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": "all",
+    "n": 6289,
+    "mix": 0.6613087083076611,
+    "mix_teamhist": 0.6610448106497416,
+    "actual": 0.6606174580468237,
+    "actual_teamhist": 0.6602879123971773,
+    "pred": 0.6613087083076611,
+    "pred_teamhist": 0.6610448106497416,
+    "hybrid": 0.6611776323980803,
+    "hybrid_teamhist": 0.6609814555483468,
+    "neurhl_g": 0.6600640969214153,
+    "neurhl_elo": 0.6656586518233483,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "d_pred_vs_actual": {
+     "diff": 0.0006912502608374428,
+     "se": 0.00037802652887239694,
+     "ci95": [
+      -2.0937594045836078e-05,
+      0.0014585404509642199
+     ]
+    },
+    "d_actual_vs_mix": {
+     "diff": -0.0006912502608374428,
+     "se": 0.00037802652887239694,
+     "ci95": [
+      -0.0014484352443923881,
+      5.3503738401392574e-05
+     ]
+    },
+    "d_hybrid_vs_mix": {
+     "diff": -0.0001310759095810409,
+     "se": 6.777377645187037e-05,
+     "ci95": [
+      -0.00026134648731193026,
+      1.179536240980726e-06
+     ]
+    },
+    "d_pred_vs_neurhl_g": {
+     "diff": 0.001244611386245801,
+     "se": 0.0011671435707180618,
+     "ci95": [
+      -0.0010450466026332619,
+      0.003457084395286002
+     ]
+    },
+    "d_pred_vs_neurhl_elo": {
+     "diff": -0.004349943515687161,
+     "se": 0.0016525448016634747,
+     "ci95": [
+      -0.00760594703018576,
+      -0.0010197858398617436
+     ]
+    },
+    "d_pred_vs_mix_teamhist": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": "covered",
+    "n": 4982,
+    "mix": 0.6627116082586252,
+    "mix_teamhist": 0.6628219572362178,
+    "actual": 0.6618509820252365,
+    "actual_teamhist": 0.6618704874400291,
+    "pred": 0.6627116082586252,
+    "pred_teamhist": 0.6628219572362178,
+    "hybrid": 0.6625599466498329,
+    "hybrid_teamhist": 0.6627474299644168,
+    "neurhl_g": 0.6621245236201333,
+    "neurhl_elo": 0.6672055597005572,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "d_pred_vs_actual": {
+     "diff": 0.000860626233388718,
+     "se": 0.00047674913690929537,
+     "ci95": [
+      -5.974179721822857e-05,
+      0.0018412419417087188
+     ]
+    },
+    "d_actual_vs_mix": {
+     "diff": -0.000860626233388718,
+     "se": 0.00047674913690929537,
+     "ci95": [
+      -0.001754960956059256,
+      6.149494069669524e-05
+     ]
+    },
+    "d_hybrid_vs_mix": {
+     "diff": -0.00015166160879226954,
+     "se": 8.307236429328345e-05,
+     "ci95": [
+      -0.00030653891550548416,
+      9.79472994300639e-06
+     ]
+    },
+    "d_pred_vs_neurhl_g": {
+     "diff": 0.0005870846384918657,
+     "se": 0.0013290173331487207,
+     "ci95": [
+      -0.0019012062887043075,
+      0.0033000712073512533
+     ]
+    },
+    "d_pred_vs_neurhl_elo": {
+     "diff": -0.00449395144193193,
+     "se": 0.0018569972083005057,
+     "ci95": [
+      -0.008009942742668889,
+      -0.0009436994320276868
+     ]
+    },
+    "d_pred_vs_mix_teamhist": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   }
+  ],
+  "goals_only": [
+   {
+    "season": 2019,
+    "n": 1271,
+    "mix": 0.6761967374369752,
+    "mix_teamhist": 0.6769684514910441,
+    "actual": 0.6744507901147988,
+    "actual_teamhist": 0.6751678964588542,
+    "pred": 0.6761967374369752,
+    "pred_teamhist": 0.6769684514910441,
+    "hybrid": 0.6757161397170506,
+    "hybrid_teamhist": 0.6766595392151329,
+    "neurhl_g": 0.674907588163759,
+    "neurhl_elo": 0.6771748848792372,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": 2020,
+    "n": 1082,
+    "mix": 0.675912464754873,
+    "mix_teamhist": 0.678226674406332,
+    "actual": 0.6751876091751585,
+    "actual_teamhist": 0.6771986221615374,
+    "pred": 0.675912464754873,
+    "pred_teamhist": 0.678226674406332,
+    "hybrid": 0.6757776324821604,
+    "hybrid_teamhist": 0.6782489150635372,
+    "neurhl_g": 0.6773879615636428,
+    "neurhl_elo": 0.6788116950881894,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": 2022,
+    "n": 1312,
+    "mix": 0.6492506572879497,
+    "mix_teamhist": 0.6494132217813178,
+    "actual": 0.6481580153675571,
+    "actual_teamhist": 0.6482446696329183,
+    "pred": 0.6492506572879497,
+    "pred_teamhist": 0.6494132217813178,
+    "hybrid": 0.6492034136793403,
+    "hybrid_teamhist": 0.6494491406504728,
+    "neurhl_g": 0.6431464484722776,
+    "neurhl_elo": 0.6531558355943523,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": 2023,
+    "n": 1312,
+    "mix": 0.65645907787863,
+    "mix_teamhist": 0.6570938591092982,
+    "actual": 0.6568957660779472,
+    "actual_teamhist": 0.6575427940696694,
+    "pred": 0.65645907787863,
+    "pred_teamhist": 0.6570938591092982,
+    "hybrid": 0.6562119915634633,
+    "hybrid_teamhist": 0.6569002675929769,
+    "neurhl_g": 0.6549759666198932,
+    "neurhl_elo": 0.6614578637292134,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": 2024,
+    "n": 1312,
+    "mix": 0.6616391189619277,
+    "mix_teamhist": 0.6620288108115818,
+    "actual": 0.6613024285566769,
+    "actual_teamhist": 0.6616864522938468,
+    "pred": 0.6616391189619277,
+    "pred_teamhist": 0.6620288108115818,
+    "hybrid": 0.6616156345070885,
+    "hybrid_teamhist": 0.6620241468577874,
+    "neurhl_g": 0.6534033368672669,
+    "neurhl_elo": 0.6603586547542591,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": "all",
+    "n": 6289,
+    "mix": 0.6633717660619765,
+    "mix_teamhist": 0.6641735178034746,
+    "actual": 0.6626871195557786,
+    "actual_teamhist": 0.6634112074042471,
+    "pred": 0.6633717660619765,
+    "pred_teamhist": 0.6641735178034746,
+    "hybrid": 0.6631851385081773,
+    "hybrid_teamhist": 0.6640810470240109,
+    "neurhl_g": 0.6600640969214153,
+    "neurhl_elo": 0.6656586518233483,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "d_pred_vs_actual": {
+     "diff": 0.0006846465061977576,
+     "se": 0.0003755453045479417,
+     "ci95": [
+      -6.5459114645690464e-06,
+      0.0014106958666448366
+     ]
+    },
+    "d_actual_vs_mix": {
+     "diff": -0.0006846465061977576,
+     "se": 0.0003755453045479417,
+     "ci95": [
+      -0.0014155698763530311,
+      6.587585149613974e-05
+     ]
+    },
+    "d_hybrid_vs_mix": {
+     "diff": -0.00018662755379911188,
+     "se": 9.25063672934073e-05,
+     "ci95": [
+      -0.0003643145777528222,
+      -4.695263128456858e-06
+     ]
+    },
+    "d_pred_vs_neurhl_g": {
+     "diff": 0.003307669140561092,
+     "se": 0.0012055164151012706,
+     "ci95": [
+      0.0009248551204520659,
+      0.005516888635317567
+     ]
+    },
+    "d_pred_vs_neurhl_elo": {
+     "diff": -0.002286885761371869,
+     "se": 0.0010980151013334043,
+     "ci95": [
+      -0.004499654965347367,
+      -0.00018453736198707234
+     ]
+    },
+    "d_pred_vs_mix_teamhist": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   {
+    "season": "covered",
+    "n": 4982,
+    "mix": 0.6642325360384256,
+    "mix_teamhist": 0.6654367343767246,
+    "actual": 0.6633917574216596,
+    "actual_teamhist": 0.6644822695376653,
+    "pred": 0.6642325360384256,
+    "pred_teamhist": 0.6654367343767246,
+    "hybrid": 0.6640205008912281,
+    "hybrid_teamhist": 0.6653288345586512,
+    "neurhl_g": 0.6621245236201333,
+    "neurhl_elo": 0.6672055597005572,
+    "d_pred_vs_mix": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "d_pred_vs_actual": {
+     "diff": 0.0008407786167660778,
+     "se": 0.0004732154048036295,
+     "ci95": [
+      -0.00011831676935682217,
+      0.0017758958616503873
+     ]
+    },
+    "d_actual_vs_mix": {
+     "diff": -0.0008407786167660778,
+     "se": 0.0004732154048036295,
+     "ci95": [
+      -0.0017597904608164132,
+      7.695551080232936e-05
+     ]
+    },
+    "d_hybrid_vs_mix": {
+     "diff": -0.00021203514719749525,
+     "se": 0.00011331287723119105,
+     "ci95": [
+      -0.00043641185883190847,
+      1.1080979044736162e-05
+     ]
+    },
+    "d_pred_vs_neurhl_g": {
+     "diff": 0.0021080124182922236,
+     "se": 0.0013577244185675455,
+     "ci95": [
+      -0.0005172686641717638,
+      0.004608226038565257
+     ]
+    },
+    "d_pred_vs_neurhl_elo": {
+     "diff": -0.002973023662131573,
+     "se": 0.0012323228541638084,
+     "ci95": [
+      -0.005243021637076787,
+      -0.0005753861633032465
+     ]
+    },
+    "d_pred_vs_mix_teamhist": {
+     "diff": 0.0,
+     "se": 0.0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   }
+  ]
+ },
+ "primary": {
+  "pred_vs_mix_goals_shots": {
+   "diff": 0.0,
+   "se": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ]
+  },
+  "accepted": false,
+  "rule": "Accept if the improvement over the mix has a 95% CI that excludes 0 (primary variant; the CI's upper end below 0)"
+ },
+ "secs": 130
+}

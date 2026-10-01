@@ -1,0 +1,86 @@
+  1 start (current goals-only)   ll 0.674431  gnll 0.168744  {'q_mult': 1.0, 'phi_g': 1.5, 'prior_scale': 1.0, 'q_mu': 2e-06}
+  2 check: q_s/q_f swapped       ll 0.674431  gnll 0.168744  {'q_mult': 1.0, 'phi_g': 1.5, 'prior_scale': 1.0, 'q_mu': 2e-06}
+  3 r0 q_mult=0.25               ll 0.674742  gnll 0.169504  {'q_mult': 0.25, 'phi_g': 1.5, 'prior_scale': 1.0, 'q_mu': 2e-06}
+  4 r0 q_mult=0.5                ll 0.674473  gnll 0.168787  {'q_mult': 0.5, 'phi_g': 1.5, 'prior_scale': 1.0, 'q_mu': 2e-06}
+  5 r0 q_mult=0.75               ll 0.674394  gnll 0.168603  {'q_mult': 0.75, 'phi_g': 1.5, 'prior_scale': 1.0, 'q_mu': 2e-06}
+  6 r0 q_mult=1.5                ll 0.674703  gnll 0.169571  {'q_mult': 1.5, 'phi_g': 1.5, 'prior_scale': 1.0, 'q_mu': 2e-06}
+  7 r0 q_mult=2                  ll 0.675110  gnll 0.170768  {'q_mult': 2.0, 'phi_g': 1.5, 'prior_scale': 1.0, 'q_mu': 2e-06}
+  8 r0 q_mult=3                  ll 0.676073  gnll 0.173555  {'q_mult': 3.0, 'phi_g': 1.5, 'prior_scale': 1.0, 'q_mu': 2e-06}
+  9 r0 phi_g=1                   ll 0.674479  gnll 0.168983  {'q_mult': 0.75, 'phi_g': 1.0, 'prior_scale': 1.0, 'q_mu': 2e-06}
+ 10 r0 phi_g=1.25                ll 0.674382  gnll 0.168647  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 1.0, 'q_mu': 2e-06}
+ 11 r0 phi_g=1.75                ll 0.674458  gnll 0.168700  {'q_mult': 0.75, 'phi_g': 1.75, 'prior_scale': 1.0, 'q_mu': 2e-06}
+ 12 r0 phi_g=2                   ll 0.674548  gnll 0.168866  {'q_mult': 0.75, 'phi_g': 2.0, 'prior_scale': 1.0, 'q_mu': 2e-06}
+ 13 r0 phi_g=2.5                 ll 0.674752  gnll 0.169275  {'q_mult': 0.75, 'phi_g': 2.5, 'prior_scale': 1.0, 'q_mu': 2e-06}
+ 14 r0 prior_scale=0.6           ll 0.674464  gnll 0.168741  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 0.6, 'q_mu': 2e-06}
+ 15 r0 prior_scale=0.8           ll 0.674412  gnll 0.168677  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 0.8, 'q_mu': 2e-06}
+ 16 r0 prior_scale=1.25          ll 0.674369  gnll 0.168649  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 2e-06}
+ 17 r0 prior_scale=1.5           ll 0.674380  gnll 0.168688  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 2e-06}
+ 18 r0 prior_scale=2             ll 0.674450  gnll 0.168846  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 2.0, 'q_mu': 2e-06}
+ 19 r0 q_mu=0                    ll 0.674370  gnll 0.168657  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 0.0}
+ 20 r0 q_mu=5e-07                ll 0.674370  gnll 0.168654  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 5e-07}
+ 21 r0 q_mu=1e-06                ll 0.674370  gnll 0.168652  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 1e-06}
+ 22 r0 q_mu=4e-06                ll 0.674369  gnll 0.168650  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 4e-06}
+ 23 r0 q_mu=1e-05                ll 0.674366  gnll 0.168670  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 1e-05}
+extend q_mu -> 2e-05
+ 24 r1 q_mult=0.25               ll 0.674429  gnll 0.168868  {'q_mult': 0.25, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 1e-05}
+ 25 r1 q_mult=0.5                ll 0.674311  gnll 0.168511  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 1e-05}
+ 26 r1 q_mult=1.5                ll 0.674995  gnll 0.170485  {'q_mult': 1.5, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 1e-05}
+ 27 r1 q_mult=2                  ll 0.675564  gnll 0.172121  {'q_mult': 2.0, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 1e-05}
+ 28 r1 q_mult=3                  ll 0.676780  gnll 0.175597  {'q_mult': 3.0, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 1e-05}
+ 29 r1 phi_g=1                   ll 0.674320  gnll 0.168584  {'q_mult': 0.5, 'phi_g': 1.0, 'prior_scale': 1.25, 'q_mu': 1e-05}
+ 30 r1 phi_g=1.75                ll 0.674489  gnll 0.168854  {'q_mult': 0.5, 'phi_g': 1.75, 'prior_scale': 1.25, 'q_mu': 1e-05}
+ 31 r1 phi_g=2                   ll 0.674609  gnll 0.169099  {'q_mult': 0.5, 'phi_g': 2.0, 'prior_scale': 1.25, 'q_mu': 1e-05}
+ 32 r1 phi_g=2.5                 ll 0.674852  gnll 0.169601  {'q_mult': 0.5, 'phi_g': 2.5, 'prior_scale': 1.25, 'q_mu': 1e-05}
+ 33 r1 prior_scale=0.6           ll 0.674535  gnll 0.168874  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 0.6, 'q_mu': 1e-05}
+ 34 r1 prior_scale=0.8           ll 0.674433  gnll 0.168711  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 0.8, 'q_mu': 1e-05}
+ 35 r1 prior_scale=1.5           ll 0.674289  gnll 0.168477  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 1e-05}
+ 36 r1 prior_scale=2             ll 0.674315  gnll 0.168523  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 2.0, 'q_mu': 1e-05}
+ 37 r1 q_mu=0                    ll 0.674295  gnll 0.168481  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 0.0}
+ 38 r1 q_mu=5e-07                ll 0.674294  gnll 0.168475  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 5e-07}
+ 39 r1 q_mu=1e-06                ll 0.674294  gnll 0.168471  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 1e-06}
+ 40 r1 q_mu=4e-06                ll 0.674292  gnll 0.168461  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 4e-06}
+ 41 r1 q_mu=2e-05                ll 0.674285  gnll 0.168527  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 2e-05}
+ 42 r2 q_mult=0.25               ll 0.674349  gnll 0.168759  {'q_mult': 0.25, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 2e-05}
+ 43 r2 q_mult=0.75               ll 0.674373  gnll 0.168759  {'q_mult': 0.75, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 2e-05}
+ 44 r2 q_mult=1.5                ll 0.675043  gnll 0.170666  {'q_mult': 1.5, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 2e-05}
+ 45 r2 q_mult=2                  ll 0.675623  gnll 0.172323  {'q_mult': 2.0, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 2e-05}
+ 46 r2 q_mult=3                  ll 0.676846  gnll 0.175813  {'q_mult': 3.0, 'phi_g': 1.25, 'prior_scale': 1.5, 'q_mu': 2e-05}
+ 47 r2 phi_g=1                   ll 0.674345  gnll 0.168712  {'q_mult': 0.5, 'phi_g': 1.0, 'prior_scale': 1.5, 'q_mu': 2e-05}
+ 48 r2 phi_g=1.75                ll 0.674405  gnll 0.168740  {'q_mult': 0.5, 'phi_g': 1.75, 'prior_scale': 1.5, 'q_mu': 2e-05}
+ 49 r2 phi_g=2                   ll 0.674508  gnll 0.168949  {'q_mult': 0.5, 'phi_g': 2.0, 'prior_scale': 1.5, 'q_mu': 2e-05}
+ 50 r2 phi_g=2.5                 ll 0.674730  gnll 0.169405  {'q_mult': 0.5, 'phi_g': 2.5, 'prior_scale': 1.5, 'q_mu': 2e-05}
+ 51 r2 prior_scale=0.6           ll 0.674531  gnll 0.168927  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 0.6, 'q_mu': 2e-05}
+ 52 r2 prior_scale=0.8           ll 0.674429  gnll 0.168763  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 0.8, 'q_mu': 2e-05}
+ 53 r2 prior_scale=1.25          ll 0.674307  gnll 0.168562  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 1.25, 'q_mu': 2e-05}
+ 54 r2 prior_scale=2             ll 0.674311  gnll 0.168572  {'q_mult': 0.5, 'phi_g': 1.25, 'prior_scale': 2.0, 'q_mu': 2e-05}
+{
+ "selected_utc": "2026-10-01T03:36:23+00:00",
+ "rule": "lowest pooled tuning-window log loss among all logged configurations",
+ "n_configs": 54,
+ "tag": "r1 q_mu=2e-05",
+ "i": 41,
+ "coords": {
+  "q_mult": 0.5,
+  "phi_g": 1.25,
+  "prior_scale": 1.5,
+  "q_mu": 2e-05
+ },
+ "tuning_ll": 0.6742852317534118,
+ "tuning_ll_start": 0.6744311834218212,
+ "tuning_gain": 0.0001459516684093609,
+ "by_season": {
+  "2012": 0.6751335589370019,
+  "2014": 0.6771896035003624,
+  "2015": 0.6681210151604402,
+  "2016": 0.681152653292596,
+  "2017": 0.6698293278766586
+ },
+ "by_season_start": {
+  "2012": 0.6753149578066887,
+  "2014": 0.6779261254169177,
+  "2015": 0.6679454117478582,
+  "2016": 0.680801463135727,
+  "2017": 0.6701679590019144
+ }
+}
+done in 67s (54 configurations)

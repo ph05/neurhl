@@ -1,0 +1,56 @@
+{
+ "selected_utc": "2026-10-01T03:36:23+00:00",
+ "rule": "lowest pooled tuning-window log loss among all logged configurations",
+ "n_configs": 54,
+ "tag": "r1 q_mu=2e-05",
+ "i": 41,
+ "coords": {
+  "q_mult": 0.5,
+  "phi_g": 1.25,
+  "prior_scale": 1.5,
+  "q_mu": 2e-05
+ },
+ "hp": {
+  "prior_scale": 1.5,
+  "q_s": 2.5e-05,
+  "q_f": 1.5e-05,
+  "phi_g": 1.25,
+  "phi_s": 0.6,
+  "use_shots": false,
+  "mu_sd": 0.015,
+  "h_sd_scale": 0.5,
+  "q_mu": 2e-05,
+  "integrate": false,
+  "ridge": 1.0,
+  "goalie": [
+   20000.0,
+   -0.002,
+   3.0,
+   30.0
+  ],
+  "gk_scale": 1.25,
+  "window": 8,
+  "h_halflife": 6.0,
+  "use_roster": false,
+  "pre_sp": true,
+  "pace_prior": 0.25,
+  "pace_q": 1.0
+ },
+ "tuning_ll": 0.6742852317534118,
+ "tuning_ll_start": 0.6744311834218212,
+ "tuning_gain": 0.0001459516684093609,
+ "by_season": {
+  "2012": 0.6751335589370019,
+  "2014": 0.6771896035003624,
+  "2015": 0.6681210151604402,
+  "2016": 0.681152653292596,
+  "2017": 0.6698293278766586
+ },
+ "by_season_start": {
+  "2012": 0.6753149578066887,
+  "2014": 0.6779261254169177,
+  "2015": 0.6679454117478582,
+  "2016": 0.680801463135727,
+  "2017": 0.6701679590019144
+ }
+}

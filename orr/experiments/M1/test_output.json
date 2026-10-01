@@ -1,0 +1,375 @@
+{
+ "created_utc": "2026-10-01T03:47:15+00:00",
+ "protocol": "M1 single test run: the tuned goals-only filter on NeurHL-G's gate games 2019-24.\n\nMirrors the ``goals_only_live`` mode of orr/backtest/inseason_bt.py exactly:\nfor each clean market season (2019, 2020, 2022-24) the preseason pipeline's\nratings are rebuilt with the FROZEN HP (as gamefile_bt / inseason_bt do; the\npublished preseason pipeline is not part of M1) and passed to\nratings.run_filter as pre_override; OT/SO parameters come from the same arm's\nteam-history run. No starters, use_shots=False.\n\nArms: 'current' = frozen HP with use_shots=False (the live goals-only loop),\n'candidate' = orr/experiments/M1/config.json. NeurHL-G (p_stack) and NeurHL\nElo (p_elo) from neurhl/output/preds/g_gate_games.csv. Paired bootstrap CIs\nfrom orr.backtest.games_bt.paired.\n\nRuns once: refuses to run when test_output.json exists.\nRun: python3 -m orr.experiments.M1.test\n",
+ "config": {
+  "selected_utc": "2026-10-01T03:36:23+00:00",
+  "rule": "lowest pooled tuning-window log loss among all logged configurations",
+  "n_configs": 54,
+  "tag": "r1 q_mu=2e-05",
+  "i": 41,
+  "coords": {
+   "q_mult": 0.5,
+   "phi_g": 1.25,
+   "prior_scale": 1.5,
+   "q_mu": 2e-05
+  },
+  "hp": {
+   "prior_scale": 1.5,
+   "q_s": 2.5e-05,
+   "q_f": 1.5e-05,
+   "phi_g": 1.25,
+   "phi_s": 0.6,
+   "use_shots": false,
+   "mu_sd": 0.015,
+   "h_sd_scale": 0.5,
+   "q_mu": 2e-05,
+   "integrate": false,
+   "ridge": 1.0,
+   "goalie": [
+    20000.0,
+    -0.002,
+    3.0,
+    30.0
+   ],
+   "gk_scale": 1.25,
+   "window": 8,
+   "h_halflife": 6.0,
+   "use_roster": false,
+   "pre_sp": true,
+   "pace_prior": 0.25,
+   "pace_q": 1.0
+  },
+  "tuning_ll": 0.6742852317534118,
+  "tuning_ll_start": 0.6744311834218212,
+  "tuning_gain": 0.0001459516684093609,
+  "by_season": {
+   "2012": 0.6751335589370019,
+   "2014": 0.6771896035003624,
+   "2015": 0.6681210151604402,
+   "2016": 0.681152653292596,
+   "2017": 0.6698293278766586
+  },
+  "by_season_start": {
+   "2012": 0.6753149578066887,
+   "2014": 0.6779261254169177,
+   "2015": 0.6679454117478582,
+   "2016": 0.680801463135727,
+   "2017": 0.6701679590019144
+  }
+ },
+ "seasons": [
+  2019,
+  2020,
+  2022,
+  2023,
+  2024
+ ],
+ "rows": [
+  {
+   "season": 2019,
+   "n": 1271,
+   "candidate": 0.6775408882596007,
+   "current": 0.6761967374369752,
+   "neurhl_g": 0.674907588163759,
+   "neurhl_elo": 0.6771748848792372,
+   "teamhist_candidate": 0.6770722529895334,
+   "teamhist_current": 0.6769684514910441,
+   "d_candidate_vs_current": {
+    "diff": 0.001344150822625393,
+    "se": 0.0005666376414032019,
+    "ci95": [
+     0.00017766411742307814,
+     0.0024286178829285732
+    ]
+   },
+   "d_candidate_vs_neurhl_g": {
+    "diff": 0.0026333000958416713,
+    "se": 0.002646241859367066,
+    "ci95": [
+     -0.00259090931347693,
+     0.00765256526971641
+    ]
+   },
+   "d_current_vs_neurhl_g": {
+    "diff": 0.001289149273216278,
+    "se": 0.002459765237497759,
+    "ci95": [
+     -0.003318321541115681,
+     0.006054932265442759
+    ]
+   },
+   "d_candidate_vs_neurhl_elo": {
+    "diff": 0.0003660033803634689,
+    "se": 0.0022122143291544655,
+    "ci95": [
+     -0.004257366006479133,
+     0.004609878733402881
+    ]
+   },
+   "d_teamhist_candidate_vs_current": {
+    "diff": 0.00010380149848941197,
+    "se": 0.00040949088585331685,
+    "ci95": [
+     -0.000716556598059165,
+     0.0008861953319179942
+    ]
+   }
+  },
+  {
+   "season": 2020,
+   "n": 1082,
+   "candidate": 0.6771657769258796,
+   "current": 0.675912464754873,
+   "neurhl_g": 0.6773879615636428,
+   "neurhl_elo": 0.6788116950881894,
+   "teamhist_candidate": 0.6780560815318031,
+   "teamhist_current": 0.678226674406332,
+   "d_candidate_vs_current": {
+    "diff": 0.0012533121710067692,
+    "se": 0.0006960702999381723,
+    "ci95": [
+     -4.1875248461659485e-05,
+     0.002606795905237077
+    ]
+   },
+   "d_candidate_vs_neurhl_g": {
+    "diff": -0.00022218463776304127,
+    "se": 0.0030814303690071187,
+    "ci95": [
+     -0.006456164817468819,
+     0.005656223023082896
+    ]
+   },
+   "d_current_vs_neurhl_g": {
+    "diff": -0.001475496808769811,
+    "se": 0.002801007572981434,
+    "ci95": [
+     -0.006860823067661558,
+     0.004061300668663327
+    ]
+   },
+   "d_candidate_vs_neurhl_elo": {
+    "diff": -0.0016459181623097508,
+    "se": 0.0028380602172980176,
+    "ci95": [
+     -0.007167032001454107,
+     0.003946145019501808
+    ]
+   },
+   "d_teamhist_candidate_vs_current": {
+    "diff": -0.00017059287452891782,
+    "se": 0.00048606469524973455,
+    "ci95": [
+     -0.001127511947191421,
+     0.0007770486221767436
+    ]
+   }
+  },
+  {
+   "season": 2022,
+   "n": 1312,
+   "candidate": 0.6486211470207632,
+   "current": 0.6492506572879497,
+   "neurhl_g": 0.6431464484722776,
+   "neurhl_elo": 0.6531558355943523,
+   "teamhist_candidate": 0.6485825755230668,
+   "teamhist_current": 0.6494132217813178,
+   "d_candidate_vs_current": {
+    "diff": -0.0006295102671865246,
+    "se": 0.0006074513113494492,
+    "ci95": [
+     -0.0017759204611446228,
+     0.0005392961109357212
+    ]
+   },
+   "d_candidate_vs_neurhl_g": {
+    "diff": 0.005474698548485662,
+    "se": 0.002334960400810066,
+    "ci95": [
+     0.001088154079312545,
+     0.009956231758836058
+    ]
+   },
+   "d_current_vs_neurhl_g": {
+    "diff": 0.006104208815672187,
+    "se": 0.0023874931567436633,
+    "ci95": [
+     0.0014316129419306173,
+     0.010786417639607682
+    ]
+   },
+   "d_candidate_vs_neurhl_elo": {
+    "diff": -0.0045346885735890255,
+    "se": 0.0025414452285358684,
+    "ci95": [
+     -0.009400801557641173,
+     0.0006818122789749388
+    ]
+   },
+   "d_teamhist_candidate_vs_current": {
+    "diff": -0.0008306462582511103,
+    "se": 0.0005190176852887663,
+    "ci95": [
+     -0.0018077685445013858,
+     0.00015803075243053992
+    ]
+   }
+  },
+  {
+   "season": 2023,
+   "n": 1312,
+   "candidate": 0.6563493261408504,
+   "current": 0.65645907787863,
+   "neurhl_g": 0.6549759666198932,
+   "neurhl_elo": 0.6614578637292134,
+   "teamhist_candidate": 0.6565488176215794,
+   "teamhist_current": 0.6570938591092982,
+   "d_candidate_vs_current": {
+    "diff": -0.00010975173777964722,
+    "se": 0.0006358856962937904,
+    "ci95": [
+     -0.0013322528391656362,
+     0.0011188836444438399
+    ]
+   },
+   "d_candidate_vs_neurhl_g": {
+    "diff": 0.0013733595209572832,
+    "se": 0.003279330996176707,
+    "ci95": [
+     -0.005011778780138911,
+     0.007801820215440437
+    ]
+   },
+   "d_current_vs_neurhl_g": {
+    "diff": 0.0014831112587369295,
+    "se": 0.003143417792004818,
+    "ci95": [
+     -0.004805384384807252,
+     0.007480720903275229
+    ]
+   },
+   "d_candidate_vs_neurhl_elo": {
+    "diff": -0.005108537588363059,
+    "se": 0.002944491685653522,
+    "ci95": [
+     -0.010913389802269578,
+     0.0006601566485338941
+    ]
+   },
+   "d_teamhist_candidate_vs_current": {
+    "diff": -0.0005450414877188284,
+    "se": 0.0004663933907906592,
+    "ci95": [
+     -0.0014049212659875679,
+     0.00036555548958671643
+    ]
+   }
+  },
+  {
+   "season": 2024,
+   "n": 1312,
+   "candidate": 0.6622383129088125,
+   "current": 0.6616391189619277,
+   "neurhl_g": 0.6534033368672669,
+   "neurhl_elo": 0.6603586547542591,
+   "teamhist_candidate": 0.6615666452897485,
+   "teamhist_current": 0.6620288108115818,
+   "d_candidate_vs_current": {
+    "diff": 0.0005991939468848248,
+    "se": 0.0007681122028287481,
+    "ci95": [
+     -0.0008744946139495333,
+     0.002218073216829081
+    ]
+   },
+   "d_candidate_vs_neurhl_g": {
+    "diff": 0.008834976041545642,
+    "se": 0.0028586991087561856,
+    "ci95": [
+     0.0029858431667402234,
+     0.014540638651194303
+    ]
+   },
+   "d_current_vs_neurhl_g": {
+    "diff": 0.008235782094660816,
+    "se": 0.0026025533840802564,
+    "ci95": [
+     0.002952893505485561,
+     0.013215729998376564
+    ]
+   },
+   "d_candidate_vs_neurhl_elo": {
+    "diff": 0.00187965815455343,
+    "se": 0.0026628461263238034,
+    "ci95": [
+     -0.003332224039841994,
+     0.007341979129601098
+    ]
+   },
+   "d_teamhist_candidate_vs_current": {
+    "diff": -0.0004621655218332491,
+    "se": 0.0006083021634943554,
+    "ci95": [
+     -0.0016990058923809336,
+     0.0006623845787755606
+    ]
+   }
+  },
+  {
+   "season": "all",
+   "n": 6289,
+   "candidate": 0.6638298246042541,
+   "current": 0.6633717660619765,
+   "neurhl_g": 0.6600640969214153,
+   "neurhl_elo": 0.6656586518233483,
+   "teamhist_candidate": 0.6637817363957758,
+   "teamhist_current": 0.6641735178034746,
+   "d_candidate_vs_current": {
+    "diff": 0.00045805854227754374,
+    "se": 0.0002946671059319455,
+    "ci95": [
+     -0.00010261748209163567,
+     0.0010398748298982919
+    ]
+   },
+   "d_candidate_vs_neurhl_g": {
+    "diff": 0.0037657276828386354,
+    "se": 0.0012761781642302579,
+    "ci95": [
+     0.0011894447775761036,
+     0.006296792484962205
+    ]
+   },
+   "d_current_vs_neurhl_g": {
+    "diff": 0.003307669140561092,
+    "se": 0.0012055164151012706,
+    "ci95": [
+     0.0009009568177434606,
+     0.005726388962414249
+    ]
+   },
+   "d_candidate_vs_neurhl_elo": {
+    "diff": -0.001828827219094326,
+    "se": 0.0011856049440964645,
+    "ci95": [
+     -0.004077019098985865,
+     0.0004383168580996024
+    ]
+   },
+   "d_teamhist_candidate_vs_current": {
+    "diff": -0.0003917814076988438,
+    "se": 0.00022610084893000135,
+    "ci95": [
+     -0.0008364448632220791,
+     6.90206701530207e-05
+    ]
+   }
+  }
+ ],
+ "gain": -0.00045805854227754374,
+ "gap_to_neurhl_g": 0.0033076691405611314,
+ "gap_closed_fraction": -0.1384837850498663,
+ "accept_rule": "pooled gate log loss improves on the current goals-only filter with a 95% CI that excludes 0 and the gain is at least 0.0010",
+ "accepted": false,
+ "secs": 63.3
+}

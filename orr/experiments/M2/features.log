@@ -1,0 +1,10 @@
+market-anchored priors built (45s)
+variant gs done (53s)
+variant go done (57s)
+identity check vs games_bt_preds: {'n': 15298, 'max_abs_in': 0.003796453119933041, 'max_abs_pre': 0.0030519117505671267, 'max_abs_elo': 4.999198898736346e-06}
+               min   max   size
+variant src                    
+go      ht    2012  2024  15298
+        ship  2019  2024   6289
+gs      ht    2012  2024  15298
+        ship  2019  2024   6289

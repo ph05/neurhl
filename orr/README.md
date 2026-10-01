@@ -34,6 +34,11 @@ Start from the strongest cheap signal, add what it misses, and never be more con
   - The season simulator applies the exact NHL tiebreakers and playoff bracket.
 - **Player lines** come from exposure-regressed, age-adjusted per-60 rates, a depth-chart model of who dresses, and ice time conserved within each team. Player goals are reconciled to team goals, and goalie goals-against to team goals-against, so the three outputs agree.
 - **In-season.** A Kalman-style filter updates the ratings after every result, from goals, and from shots when the results file carries them. Its home-ice estimate replaces the preseason one, and its uncertainty is anchored to the freeze's on day 0. The daily forecast uses plug-in probabilities (the backtested rule) and known starting goalies where given.
+- **In-season, ORR 1.1** (from 2026-10-01; `--model 1.0` restores the original loop). It adds the one pre-registered 1.1 item that passed its rule, X1 (`orr/PLAN_1_1.md`, `orr/lineups.py`):
+  - every game's dressed skaters enter both the update and the forecast, through their projected 5v5 on-ice xG value and ice time, measured against the team's expected lineup;
+  - so do its starting goalies.
+
+  Lineups and starters come from NeurHL's committed pregame lineup files. The other eight items failed their rules and are not in the model; see RESULTS.
 
 ## Pipeline
 
@@ -100,18 +105,25 @@ python3 -m orr.freeze --sims 40000  # refuses to run with uncommitted model code
 
 # in-season, each day
 python3 -m orr.ingest               # NHL API, with shots; or --add "id,date,home,away,hg,ag,REG|OT|SO[,source,shots_h,shots_a]"
-python3 -m orr.inseason --date 2026-10-02 [--goalies starters.csv]
+python3 -m orr.inseason --date 2026-10-02 [--goalies starters.csv] [--model 1.1|1.0] [--lineup-dir DIR]
 python3 -m orr.score                # scorecard against NeurHL
 
 # tests
 for t in test_season test_players test_gamemodel test_freeze test_inseason; do python3 -m orr.tests.$t; done
 ```
 
-**Shots matter in-season.** Run `ingest` where the NHL API is reachable, so results carry shots on goal. The filter updated on goals and shots ties NeurHL-G in the backtest (0.6606 vs 0.6601). On goals alone it is significantly worse (0.6634); see RESULTS.
+**Shots matter in-season.** Run `ingest` where the NHL API is reachable, so that results carry shots on goal. These are the backtest results:
+
+| Updated on | ORR 1.1 | NeurHL-G | Verdict |
+|---|---|---|---|
+| Goals and shots | 0.6600 | 0.6601 | Tie |
+| Goals alone | 0.6622 | 0.6601 | Worse by 0.0021, not significant |
+
+ORR 1.0 scored 0.6634 on goals alone, significantly worse than NeurHL-G. See RESULTS.
 
 The game table (`orr/cache/gametable.parquet`) is built on first use.
 
-- **Backtests:** `python3 -m orr.backtest.{players_bt,goalies_bt,games_bt,teams_bt,gamefile_bt}`.
+- **Backtests:** `python3 -m orr.backtest.{players_bt,goalies_bt,games_bt,teams_bt,gamefile_bt,inseason_bt}`. The ORR 1.1 hindcast, `orr.backtest.inseason_bt_1_1`, was run once and refuses to overwrite its output. The nine pre-registered 1.1 experiments are in `orr/experiments/<ID>/`.
 - **Website (GitHub Pages):** `python3 -m orr.site.build_orr` and `python3 -m orr.site.build_dashboard` write `docs/orr/index.html` and `docs/orr/compare.html`. Once on the Pages branch they are served at [ph05.github.io/neurhl/orr/](https://ph05.github.io/neurhl/orr/), beside NeurHL's site.
 
 Results and the head-to-head with NeurHL are in [`RESULTS.md`](RESULTS.md).

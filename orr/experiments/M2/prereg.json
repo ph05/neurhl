@@ -1,0 +1,76 @@
+{
+ "item": "M2",
+ "written": "2026-10-01, before any feature was built, any configuration was tuned or any test number was computed",
+ "hypothesis": "A walk-forward logistic stack of ORR's in-season logit, ORR's preseason logit and an Elo logit (ratings.elo_run) beats ORR's in-season probability alone.",
+ "features": {
+  "x_in": "logit of the in-season filter's pregame P(home win) (ratings.run_filter + ratings.predict_probs, no starters)",
+  "x_pre": "logit of the preseason-frozen P(home win) from the SAME filter run (predict_probs frozen=True: the season's starting prior, no in-season updates)",
+  "x_elo": "logit of ratings.elo_run pregame P(home win) with the frozen orr/output/params/elo_hp.json (K=6, H=30, carry=0.7, MOV, playoffs)",
+  "variants": {
+   "gs": "frozen ratings_hp.json (use_shots=True), goals and shots in the update",
+   "go": "same with use_shots=False (goals-only, what the live loop runs while results carry no shots)"
+  },
+  "sources": {
+   "ht": "filter started from the team-history preseason table (games_bt), every season 2012-2024",
+   "ship": "filter started from the shipped market-anchored preseason ratings (inseason_bt: gamefile_bt.game_file_season, views mkt_rel82+td_rel82), seasons 2019, 2020, 2022-24; OT/SO parameters shared with the ht run of the same variant exactly as inseason_bt does"
+  }
+ },
+ "model": "P(home win) = sigmoid(a + b_in x_in + b_pre x_pre + b_elo x_elo); intercept a unpenalised; minimise mean training log loss + lambda * penalty",
+ "regularisation_grid": {
+  "family": {
+   "to_base": "penalty (b_in-1)^2 + b_pre^2 + b_elo^2 (shrinks to the in-season probability alone, intercept free)",
+   "to_zero": "penalty b_in^2 + b_pre^2 + b_elo^2 (ordinary ridge)"
+  },
+  "lambda": [
+   0,
+   0.0001,
+   0.0003,
+   0.001,
+   0.003,
+   0.01,
+   0.03,
+   0.1,
+   0.3,
+   1.0
+  ],
+  "n_configs_per_variant": 19,
+  "note": "lambda = 0 is the same model in both families and is counted once"
+ },
+ "walk_forward": "the stack for season V is fitted on every season from 2012 to V-1 except 2013, ht features of the same variant",
+ "tuning": {
+  "seasons_scored": [
+   2014,
+   2015,
+   2016,
+   2017
+  ],
+  "criterion": "pooled log loss of the walk-forward stack over 2014-2017 games, chosen per variant; ties within 1e-6 go to the more regularised configuration",
+  "baseline_logged": "in-season probability alone (x_in) on the same games"
+ },
+ "confirm": {
+  "season": 2018,
+  "rule": "reported once with the fixed configuration; does not change it. 2019 is NOT used to confirm because it is part of the gate test window."
+ },
+ "test": {
+  "games": "NeurHL-G gate games 2019-24 (neurhl/output/preds/g_gate_games.csv, n = 6289)",
+  "primary": "stack applied to the ship features (the loop as live) vs ship x_in alone, same variant, paired bootstrap 95% CI (orr.backtest.games_bt.paired); stack weights for test season V fitted on ht features of 2012..V-1 (2013 excluded), 2018 and 2021 included",
+  "secondary_reported_not_for_acceptance": [
+   "the same stack applied to the ht features vs ht x_in alone (games_bt setting)",
+   "stack trained on ship features where they exist (2019, 2020, 2022, 2023) and ht otherwise, applied to ship",
+   "context: NeurHL-G p_stack and NeurHL Elo p_elo on the same games"
+  ],
+  "runs": "once, after the configuration is fixed"
+ },
+ "acceptance": "PLAN_1_1 M2: accept if the stack improves on the same variant without it, with a 95% CI that excludes 0, for at least the goals-only variant. Evaluated on the primary comparison. If accepted, the stack is integrated for the goals-only loop; for goals-and-shots only if its own primary CI also excludes 0.",
+ "amendment_1": {
+  "written": "2026-10-01, after stage-1 tuning on 2014-2017 and before any confirmation or test number",
+  "reason": "In stage 1 every configuration was worse than the in-season probability alone on 2014-2017 (best +0.00040 gs, +0.00037 go). Even at lambda = 1 (slopes at (1,0,0)) the unpenalised intercept, fitted on earlier seasons, costs about 0.0004: it carries last seasons' home-win residual (+0.06 for 2014 trained on 2012 alone, -0.02 to -0.05 later), while the filter already tracks home ice in-season.",
+  "added_families": {
+   "to_base_noint": "intercept fixed at 0, penalty lambda * ((b_in-1)^2 + b_pre^2 + b_elo^2)",
+   "to_base_int": "penalty lambda * (a^2 + (b_in-1)^2 + b_pre^2 + b_elo^2)"
+  },
+  "lambda": "same grid; lambda = 0 counted for to_base_noint, not for to_base_int (it equals to_base lambda = 0)",
+  "selection": "unchanged rule, over the union of stage 1 and stage 2 (19 + 19 = 38 configurations per variant, 76 in all)",
+  "unchanged": "features, walk-forward, tuning seasons, confirmation, test protocol and acceptance rule"
+ }
+}
