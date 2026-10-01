@@ -4,10 +4,10 @@
  "games": {
   "hattrick_preseason": {
    "n": 5,
-   "log_loss": 0.7767400883805906,
-   "brier": 0.2893043151,
+   "log_loss": 0.7502941710251846,
+   "brier": 0.27710758606,
    "accuracy": 0.4,
-   "published_utc": "2026-09-30 23:57:45+00:00",
+   "published_utc": "2026-10-01 00:37:30+00:00",
    "published_before_first_game": false,
    "after_publication": {
     "n": 0
@@ -93,8 +93,8 @@
  "teams_interim": {
   "hattrick_preseason": {
    "teams": 10,
-   "mae_points_so_far": 0.8498439999999998,
-   "rmse_points_so_far": 0.9048830419230985
+   "mae_points_so_far": 0.8247620000000001,
+   "rmse_points_so_far": 0.8794434142569947
   },
   "neurhl_0925_freeze": {
    "teams": 10,
