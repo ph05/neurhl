@@ -1,0 +1,6 @@
+{
+ "drift_k": 0.5,
+ "absence": false,
+ "absence_n": 20,
+ "source": "orr/backtest/standings_inseason_bt.py"
+}

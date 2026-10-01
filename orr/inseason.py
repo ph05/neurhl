@@ -65,6 +65,11 @@ LIVE = C.OUT / "live"
 
 # model versions: ORR 1.1 = 1.0 + the accepted pre-registered item X1
 MODELS = {
+    "1.4": {"version": "ORR 1.4", "past_starters": True, "lineups": True, "player_update": True,
+            "box_first": True, "goalie_update": True, "player_calibration": True,
+            "standings_drift": True, "start_share_update": True, "absence": True,
+            "accepted_items": ["X1", "1.2: in-season skater rates", "1.3: box-score lineups, goalie talent",
+                               "1.4: standings drift, start shares, absences (per params)"]},
     "1.3": {"version": "ORR 1.3", "past_starters": True, "lineups": True, "player_update": True,
             "box_first": True, "goalie_update": True, "player_calibration": True,
             "accepted_items": ["X1", "1.2: in-season skater rates", "1.3: box-score lineups, goalie talent"]},
@@ -75,7 +80,7 @@ MODELS = {
     "1.0": {"version": "ORR 1.0", "past_starters": False, "lineups": False,
             "accepted_items": []},
 }
-DEFAULT_MODEL = "1.3"
+DEFAULT_MODEL = "1.4"
 
 
 def _sha(p: Path) -> str:
@@ -128,6 +133,36 @@ def starter_diffs(fz: dict, games: pd.DataFrame, starters: pd.DataFrame | None,
             t = gid.map(tal).fillna(ST.goalie_talent_default()).where(gid.notna())
             out.loc[rows, col] = (t - s.loc[rows, side].map(mix)).to_numpy()
     return out
+
+
+def standings_params() -> dict:
+    p = C.PARAMS / "standings_inseason.json"
+    return json.loads(p.read_text()) if p.exists() else {}
+
+
+def update_start_shares_live(goalies: pd.DataFrame, day: pd.Timestamp,
+                             path=None) -> pd.DataFrame:
+    """ORR 1.4: each team's goalie start shares updated with this season's
+    box-score starts before ``day`` (Dirichlet posterior mean, alpha from
+    params/start_share.json, tuned by backtest/start_share_bt.py)."""
+    from orr.backtest.start_share_bt import update_shares
+    path = path or C.OUT / "live" / f"boxes_{C.TARGET_SEASON}.csv"
+    pf = C.PARAMS / "start_share.json"
+    if not Path(path).exists() or not pf.exists():
+        return goalies
+    alpha = json.loads(pf.read_text())["alpha"]
+    alpha = float("inf") if alpha is None else float(alpha)
+    b = pd.read_csv(path)
+    b = b[(b.pos == "G") & (b.starter.astype(str).str.lower() == "true") & (pd.to_datetime(b.date) < day)]
+    if not len(b):
+        return goalies
+    starts = b.groupby(["team", "player_id"]).size().rename("n").reset_index()
+    games = b.groupby("team").game_id.nunique()
+    sh = update_shares(goalies[["team", "player_id", "start_share"]].rename(columns={"start_share": "share"}),
+                       starts, games, alpha)
+    out = goalies.drop(columns="start_share").merge(sh.rename(columns={"share": "start_share"}),
+                                                    on=["team", "player_id"], how="outer")
+    return out.fillna({"start_share": 0.0, "p_present": 1.0})
 
 
 def merge_starters(file_st: pd.DataFrame | None, lineup_st: pd.DataFrame | None) -> pd.DataFrame | None:
@@ -186,6 +221,8 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     if cfg.get("goalie_update"):          # ORR 1.3: in-season goalie talent, as of each game's date
         from orr import structural as ST
         tal_fn = ST.goalie_talent_live
+    if cfg.get("start_share_update") and fz.get("goalies") is not None:     # ORR 1.4
+        fz["goalies"] = update_start_shares_live(fz["goalies"], day)
     starters = merge_starters(file_st, lu_gk) if cfg["past_starters"] else file_st
     lo = (LU.live_offsets(lu_sk, LU.X1) if cfg["lineups"]
           else pd.DataFrame(columns=["game_id", "lo_h", "lo_a", "known_h", "known_a"]))
@@ -257,8 +294,22 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     done = res[["game_id", "home_g", "away_g", "extra"]]
     left = 1.0 - len(done) / len(sch)
     rho = float(np.clip((cur.od_cov / (cur.o_sd * cur.d_sd)).mean(), -0.95, 0.95))
+    sp = standings_params() if cfg.get("standings_drift") or cfg.get("absence") else {}
+    k_drift = float(sp.get("drift_k", 1.0)) if cfg.get("standings_drift") else 1.0
+    sim_adj, n_absent = adj, 0
+    if cfg.get("absence") and sp.get("absence") and lu_sk is not None and len(lu_sk) and len(res):
+        past = lu_sk[pd.to_datetime(lu_sk.date) < day]
+        tg = {}
+        for col in ("home", "away"):
+            for tm, x in res.sort_values(["date", "game_id"]).groupby(col):
+                tg.setdefault(tm, []).extend(x.game_id.tolist())
+        tg = {tm: sorted(v) for tm, v in tg.items()}
+        off = LU.absence_offsets(past, tg, LU.live_values(C.TARGET_SEASON, past),
+                                 LU.league_xg_pg(C.TARGET_SEASON), int(sp.get("absence_n", 10)))
+        sim_adj = LU.apply_team_offsets(adj, sch, off)
+        n_absent = int(off.n_out.sum()) if len(off) else 0
     sim = S.simulate(sch, cur, model, n_sims=sims, seed=seed, completed=done,
-                     game_adj=adj, drift_sd=fz.get("drift_sd", 0.05) * np.sqrt(left), rho_od=rho)
+                     game_adj=sim_adj, drift_sd=fz.get("drift_sd", 0.05) * np.sqrt(left) * k_drift, rho_od=rho)
     standings = S.summarise(sim)
 
     outdir = LIVE / date
@@ -272,6 +323,8 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
                 "n_results": int(len(res)), "sims": sims, "seed": seed,
                 "missing_results_before_date": sorted(map(int, set(sch[sch.date < day].game_id) - set(res.game_id))),
                 "rho_od": rho, "sd_anchor": k_sd, "home_ice": P["h"],
+                "orr_1_4": {"drift_k": k_drift, "absent_players": n_absent,
+                            "start_shares_updated": bool(cfg.get("start_share_update"))},
                 "model": cfg["version"],
                 "settings": {**cfg, "lineup_hp": LU.settings(LU.X1) if cfg["lineups"] else None},
                 "orr_1_1": {"results_with_both_starters": int(rr.gdiff_h.notna().mul(rr.gdiff_a.notna()).sum())

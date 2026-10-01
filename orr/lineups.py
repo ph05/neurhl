@@ -380,3 +380,59 @@ def prefer_box(live_sk, live_gk, box_sk, box_gk):
     sk = pd.concat([live_sk[~live_sk.game_id.isin(covered)], box_sk], ignore_index=True)
     gk = pd.concat([live_gk[~live_gk.game_id.isin(covered)], box_gk], ignore_index=True)
     return sk, gk
+
+
+REPL_TOI = {"F": 11.0, "D": 15.0}     # minutes per game of a replacement-level call-up
+
+
+def absence_offsets(dressed_sk: pd.DataFrame, team_games: dict, values: pd.DataFrame, xg_pg: float,
+                    n_missed: int, hp: LineupHP = X1, min_games: int = 10) -> pd.DataFrame:
+    """ORR 1.4: team offsets for the REST of the season from long-term absences.
+
+    dressed_sk: game key ('gid' or 'game_id'), team, player_id, pos for the
+    season's played games; team_games: team -> list of its played game keys in
+    order. A player is treated as out for the rest of the season when he
+    dressed for the team in >= min_games games, missed its last ``n_missed``
+    games, and has not dressed for another team since (a trade is not an
+    absence). His X1 lineup value, weighted by the share of the team's games
+    he played (the team rating already reflects the games he missed), is
+    removed and replaced by a call-up of zero on-ice value and replacement ice
+    time. Returns team, s (log offset on the team's own goals) and c (on its
+    opponents' goals): for a game, lo_home = s_home + c_away."""
+    key = "gid" if "gid" in dressed_sk else "game_id"
+    v = values.set_index("player_id")
+    rows = []
+    last_team = dressed_sk.sort_values(key).groupby("player_id").team.last()
+    for team, games in team_games.items():
+        if len(games) < n_missed + min_games:
+            continue
+        mine = dressed_sk[dressed_sk.team == team]
+        recent = set(mine[mine[key].isin(games[-n_missed:])].player_id)
+        cnt = mine.groupby("player_id").size()
+        pos = mine.groupby("player_id").pos.first()
+        out = [p for p, n in cnt.items() if n >= min_games and p not in recent and last_team.get(p) == team]
+        dx = dg = dt = 0.0
+        for p in out:
+            if p not in v.index:
+                continue
+            w = cnt[p] / len(games)
+            dx -= w * v.at[p, "v_xgf"]
+            dg -= w * v.at[p, "v_xga"]
+            dt -= w * (v.at[p, "toi"] - REPL_TOI.get(pos[p], 12.0))
+        s = hp.beta_x * dx / xg_pg + hp.beta_t * dt / hp.toi_scale
+        c = hp.beta_x * dg / xg_pg - hp.beta_t * dt / hp.toi_scale
+        rows.append((team, s, c, len(out)))
+    return pd.DataFrame(rows, columns=["team", "s", "c", "n_out"])
+
+
+def apply_team_offsets(adj: pd.DataFrame, schedule: pd.DataFrame, off: pd.DataFrame) -> pd.DataFrame:
+    """Add team offsets (absence_offsets) to per-game log adjustments
+    (game_id, adj_h, adj_a) for the games in ``schedule``."""
+    if off is None or not len(off):
+        return adj
+    o = off.set_index("team")
+    m = schedule[["game_id", "home", "away"]].merge(adj, on="game_id", how="left").fillna({"adj_h": 0.0, "adj_a": 0.0})
+    s, c = o.s.to_dict(), o.c.to_dict()
+    m["adj_h"] = m.adj_h + m.home.map(s).fillna(0) + m.away.map(c).fillna(0)
+    m["adj_a"] = m.adj_a + m.away.map(s).fillna(0) + m.home.map(c).fillna(0)
+    return m[["game_id", "adj_h", "adj_a"]]

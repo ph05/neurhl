@@ -2,6 +2,17 @@
 
 A version ships every cycle. Each cycle opens with a brainstorm, and every feature considered there is planned into the next version. A feature that fails its backtest still ships, but behind a switch with the result documented; it is not silently dropped. Release notes are in this folder.
 
+## 1.5 (planned): calibration everywhere
+
+Brainstorm, held after 1.4 shipped. Every item is planned into 1.5:
+
+1. **In-season standings sharpness.** Test coverage of the in-season 80% intervals is 0.86, so they are too wide. Tune a multiplier on the filter's rating uncertainty used in the rest-of-season simulation, on ≤2017 by CRPS. Test once on 2021-23, aiming for coverage closer to 0.80 and lower CRPS.
+2. **Shots-on-goal distributions for player lines.** Fit a negative-binomial dispersion for skater shots per game, on ≤2017 box scores, around 1.2's updated shot rates. Publish P(≥2), P(≥3) and P(≥4) shots per player-game. Test calibration (log loss, reliability) once on 2021-23 against the Poisson.
+3. **Live accuracy panel.** A website section that scores the daily forecasts as games are played:
+   - running log loss by date for ORR and every NeurHL file, eligible games only;
+   - a reliability table of ORR's daily game probabilities by probability bin.
+4. **Biggest movers.** A website panel with the teams whose playoff odds moved most since the previous committed forecast, with the games that moved them.
+
 ## 1.4 (planned): the standings race
 
 Brainstorm, held after 1.3 shipped. Every item is planned into 1.4:
