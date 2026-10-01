@@ -8,19 +8,19 @@ Inputs
 - The preseason freeze (hattrick/output/freeze_2027/): ratings, scoring-model
   parameters, schedule, goalie talent table.
 - Results for games BEFORE --date: game_id, date, home, away, home_g, away_g,
-  last_period (REG/OT/SO), optional shots_home/shots_away, optional
-  goalie_home/goalie_away (starting goalie NHL ids).
+  last_period (REG/OT/SO), optional shots_home/shots_away (shots on goal).
 - Optional confirmed or projected starters for --date: game_id, goalie_home,
   goalie_away (NHL ids). Unknown starters fall back to each team's start-share
   mix, which is exactly what the preseason file assumed.
 
 What happens
 1. Team ratings are filtered game by game from the preseason prior
-   (hattrick.ratings.InSeasonFilter), using goals and, when present, shots;
-   a known starting goalie's talent is removed from the team's defence so the
-   filter learns about the skaters, not about who happened to be in net.
-2. Every game on --date is forecast with the current ratings, rest/travel
-   context and starter information.
+   (hattrick.ratings.InSeasonFilter), using goals and, when the results file
+   carries them, shots. Past games' starting goalies are not used in the
+   update (the backtest's known-starter variant does use them; inseason_bt).
+   The filter's home-ice estimate replaces the preseason one.
+2. Every game on --date is forecast with the current ratings (plug-in means,
+   as backtested), rest/travel context and starter information.
 3. The rest of the season is simulated from the current standings with the
    current ratings and their uncertainty.
 
@@ -114,9 +114,24 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     filt = R.InSeasonFilter(fz["ratings"][["team", "o", "d", "o_sd", "d_sd"]], fp,
                             start_date=sch.date.min())
     rr = res.merge(ctx, on="game_id", how="left")
+    # shots on goal enter the update when the results file carries them
+    rr = rr.rename(columns={"shots_home": "sh_h", "shots_away": "sh_a"})
     for _, day_games in rr.groupby("date", sort=True):
         filt.update_day(day_games)
-    cur = filt.state()[["team", "o", "d", "o_sd", "d_sd"]]
+    cur = filt.state()[["team", "o", "d", "o_sd", "d_sd", "od_cov"]]
+    # Anchor the uncertainty to the freeze: the filter's prior split inflates
+    # the net-strength SD; scale it so that, before any result, the filter
+    # reproduces the freeze's calibrated net SD (its own shrinkage then applies).
+    st0 = R.InSeasonFilter(fz["ratings"][["team", "o", "d", "o_sd", "d_sd"]], fp,
+                           start_date=sch.date.min()).state()
+    net = lambda x: np.sqrt(np.maximum(x.o_sd ** 2 + x.d_sd ** 2 - 2 * x.od_cov, 1e-12)).mean()
+    fr = fz["ratings"]
+    k_sd = float(np.sqrt(fr.o_sd ** 2 + fr.d_sd ** 2).mean() / net(st0))
+    cur = cur.assign(o_sd=cur.o_sd * k_sd, d_sd=cur.d_sd * k_sd, od_cov=cur.od_cov * k_sd ** 2)
+    # the filter's home-ice estimate, as in the backtest (state() folds only
+    # the league level into o and d)
+    P["h"] = P["h"] + (filt.levels()["h"] - fp["P"]["h"])
+    model = S.FittedModel(P, C.TARGET_SEASON)
 
     # 2. forecast today's games
     today = sch[sch.date == day].copy()
@@ -131,15 +146,19 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     known = t.diff_h.notna() | t.diff_a.notna()
     if known.any():
         ctx = GM.schedule_features(sch, C.TARGET_SEASON).set_index("game_id").loc[t.game_id[known]]
-        ah, aa = GM.known_starter_offsets(P, ctx.reset_index(), t.diff_h[known].fillna(0).to_numpy(),
-                                          t.diff_a[known].fillna(0).to_numpy())
+        gap = fz["b2b_goalie_gap"]
+        ah, aa = GM.known_starter_offsets(P, ctx.reset_index(), t.diff_h[known].to_numpy(float),
+                                          t.diff_a[known].to_numpy(float),
+                                          gap_h=t.home[known].map(gap).fillna(0).to_numpy(),
+                                          gap_a=t.away[known].map(gap).fillna(0).to_numpy())
         t.loc[known, "adj_h"] = ah
         t.loc[known, "adj_a"] = aa
     r = cur.set_index("team")
     lh, la = model.rates(r.o.reindex(t.home).to_numpy(), r.d.reindex(t.home).to_numpy(),
                          r.o.reindex(t.away).to_numpy(), r.d.reindex(t.away).to_numpy(),
                          t.adj_h.fillna(0).to_numpy(), t.adj_a.fillna(0).to_numpy())
-    p = integrate_rating_uncertainty(model, cur, t, lh, la)
+    # plug-in probabilities at the filtered means: the rule inseason_bt validated
+    p = model.probs(lh, la)
     created = datetime.now(timezone.utc).isoformat(timespec="seconds")
     games_out = t[["game_id", "date", "home", "away"]].assign(
         p_home_win=p["p_home"], p_home_reg=p["hreg"], p_away_reg=p["areg"],
@@ -150,13 +169,14 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
                      if starters is not None else np.nan),
         created_utc=created)
 
-    players_out = player_lines(fz, games_out, res)
+    players_out = player_lines(fz, games_out, day)
 
     # 3. re-simulate the rest of the season from the current standings
     done = res[["game_id", "home_g", "away_g", "extra"]]
     left = 1.0 - len(done) / len(sch)
+    rho = float(np.clip((cur.od_cov / (cur.o_sd * cur.d_sd)).mean(), -0.95, 0.95))
     sim = S.simulate(sch, cur, model, n_sims=sims, seed=seed, completed=done,
-                     game_adj=adj, drift_sd=fz.get("drift_sd", 0.05) * np.sqrt(left))
+                     game_adj=adj, drift_sd=fz.get("drift_sd", 0.05) * np.sqrt(left), rho_od=rho)
     standings = S.summarise(sim)
 
     outdir = LIVE / date
@@ -168,6 +188,8 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     run_meta = {"date": date, "created_utc": created, "code": _code_commit(),
                 "results_through": str(res.date.max()) if len(res) else None,
                 "n_results": int(len(res)), "sims": sims, "seed": seed,
+                "missing_results_before_date": sorted(map(int, set(sch[sch.date < day].game_id) - set(res.game_id))),
+                "rho_od": rho, "sd_anchor": k_sd, "home_ice": P["h"],
                 "inputs": {"results": {"path": str(results_path), "sha256": _sha(results_path)},
                            **({"goalies": {"path": goalies_path, "sha256": _sha(goalies_path)}}
                               if goalies_path else {}),
@@ -176,7 +198,7 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     return games_out, standings
 
 
-def player_lines(fz: dict, games: pd.DataFrame, results: pd.DataFrame) -> pd.DataFrame:
+def player_lines(fz: dict, games: pd.DataFrame, day: pd.Timestamp) -> pd.DataFrame:
     """Per-game lines for every skater likely to dress: expected goals, points
     and shots, P(at least one goal) and P(at least one point).
 
@@ -185,9 +207,13 @@ def player_lines(fz: dict, games: pd.DataFrame, results: pd.DataFrame) -> pd.Dat
     to score in THIS game relative to its season average, and multiplied by
     the probability that he dresses (zero while a known absence lasts)."""
     sk = pd.read_csv(FREEZE / "skaters_2027.csv")
-    tm = pd.read_csv(FREEZE / "teams_2027.csv").set_index("team")
-    base = (tm.gf / tm.gp).rename("gf_pg")
-    played = pd.concat([results.home, results.away]).value_counts() if len(results) else pd.Series(dtype=float)
+    # season-average expected REGULATION goals per game (the units of lam)
+    gz = pd.read_csv(FREEZE / "games_2027.csv")
+    base = pd.concat([pd.Series(gz.exp_reg_goals_home.to_numpy(), index=gz.home),
+                      pd.Series(gz.exp_reg_goals_away.to_numpy(), index=gz.away)]).groupby(level=0).mean()
+    # games already scheduled before today (whether or not their results are in)
+    s0 = fz["schedule"][fz["schedule"].date < day]
+    played = pd.concat([s0.home, s0.away]).value_counts()
     rows = []
     for g in games.itertuples(index=False):
         for team, lam in ((g.home, g.exp_goals_home), (g.away, g.exp_goals_away)):
@@ -222,24 +248,6 @@ def player_lines(fz: dict, games: pd.DataFrame, results: pd.DataFrame) -> pd.Dat
                                              "p_goal", "p_point"]])
     out = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
     return out.sort_values(["game_id", "team", "exp_points"], ascending=[True, True, False])
-
-
-def integrate_rating_uncertainty(model, cur, t, lh, la, n: int = 64, seed: int = 7):
-    """Average outcome probabilities over the ratings' posterior uncertainty.
-
-    Plugging posterior MEANS into a non-linear win-probability function makes
-    forecasts too confident; averaging over draws of (o, d) does not."""
-    rng = np.random.default_rng(seed)
-    r = cur.set_index("team")
-    sd_h = np.hypot(r.o_sd.reindex(t.home).to_numpy(), r.d_sd.reindex(t.away).to_numpy())
-    sd_a = np.hypot(r.o_sd.reindex(t.away).to_numpy(), r.d_sd.reindex(t.home).to_numpy())
-    acc = None
-    for _ in range(n):
-        eh = np.exp(rng.standard_normal(len(t)) * sd_h)
-        ea = np.exp(rng.standard_normal(len(t)) * sd_a)
-        p = model.probs(lh * eh, la * ea)
-        acc = p if acc is None else {k: acc[k] + p[k] for k in acc}
-    return {k: v / n for k, v in acc.items()}
 
 
 def main():

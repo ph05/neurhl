@@ -22,6 +22,7 @@ from hattrick import config as C
 
 PATH = C.OUT / "live" / "results_2027.csv"
 COLS = ["game_id", "date", "home", "away", "home_g", "away_g", "last_period", "source"]
+OPTIONAL = ["shots_home", "shots_away"]          # used by the in-season filter when present
 SCORE_URL = "https://api-web.nhle.com/v1/score/{d}"
 
 
@@ -44,8 +45,9 @@ def validate(rows: pd.DataFrame) -> pd.DataFrame:
 
 def save(new: pd.DataFrame) -> pd.DataFrame:
     new = validate(new.copy())
-    out = (pd.concat([load(), new[COLS]]).drop_duplicates("game_id", keep="last")
-           .sort_values(["date", "game_id"]))
+    keep = COLS + [c for c in OPTIONAL if c in new.columns or c in load().columns]
+    out = (pd.concat([load(), new.reindex(columns=keep)]).drop_duplicates("game_id", keep="last")
+           .sort_values(["date", "game_id"]))[keep]
     PATH.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(PATH, index=False)
     return out
@@ -53,12 +55,12 @@ def save(new: pd.DataFrame) -> pd.DataFrame:
 
 def fetch_api(through: dt.date) -> pd.DataFrame:
     import requests
-    have = load()
-    done = set(have.date.astype(str))
+    have_ids = set(load().game_id)
     sch = pd.read_csv(C.OUT / f"freeze_{C.TARGET_SEASON}" / f"schedule_{C.TARGET_SEASON}.csv")
     rows = []
     for ds in sorted(set(sch.date.astype(str))):
-        if ds > through.isoformat() or ds in done:
+        # skip a date only when every one of its games is already stored
+        if ds > through.isoformat() or set(sch[sch.date.astype(str) == ds].game_id) <= have_ids:
             continue
         js = requests.get(SCORE_URL.format(d=ds), timeout=30).json()
         for g in js.get("games", []):
@@ -67,9 +69,10 @@ def fetch_api(through: dt.date) -> pd.DataFrame:
                              "away": g["awayTeam"]["abbrev"], "home_g": g["homeTeam"]["score"],
                              "away_g": g["awayTeam"]["score"],
                              "last_period": (g.get("gameOutcome") or {}).get("lastPeriodType", "REG"),
-                             "source": "api-web.nhle.com"})
+                             "source": "api-web.nhle.com",
+                             "shots_home": g["homeTeam"].get("sog"), "shots_away": g["awayTeam"].get("sog")})
         time.sleep(0.4)
-    return pd.DataFrame(rows, columns=COLS)
+    return pd.DataFrame(rows, columns=COLS + OPTIONAL)
 
 
 def main():

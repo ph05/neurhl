@@ -98,9 +98,8 @@
  },
  "teams_interim": {
   "hattrick_preseason": {
-   "teams": 10,
-   "mae_points_so_far": 0.8247620000000001,
-   "rmse_points_so_far": 0.8794434142569947
+   "teams": 0,
+   "note": "no games after publication"
   },
   "neurhl_0925_freeze": {
    "teams": 10,
@@ -118,14 +117,12 @@
    "rmse_points_so_far": 0.8510624360351008
   },
   "neurhl_1.2": {
-   "teams": 10,
-   "mae_points_so_far": 0.795562,
-   "rmse_points_so_far": 0.8528868638219257
+   "teams": 0,
+   "note": "no games after publication"
   },
   "neurhl_1.3": {
-   "teams": 10,
-   "mae_points_so_far": 0.795562,
-   "rmse_points_so_far": 0.8528868638219257
+   "teams": 0,
+   "note": "no games after publication"
   }
  },
  "teams_final": {

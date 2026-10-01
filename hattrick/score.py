@@ -25,6 +25,7 @@ Run: python3 -m hattrick.score [--results path] [--out path]
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 from pathlib import Path
 
@@ -50,13 +51,32 @@ FIRST_PUCK_DROP = pd.Timestamp("2026-09-29T21:00:00Z")
 LIVE_DEADLINE = pd.Timedelta(hours=15)
 
 
+@functools.lru_cache(maxsize=1)
+def _first_start_by_date() -> dict:
+    """Earliest scheduled regular-season start (UTC, naive) per date, from
+    the NHL club schedules in data/raw (e.g. a Global Series game in Europe
+    starts at 13:00 UTC)."""
+    starts = {}
+    for f in sorted((C.ROOT / "data" / "raw").glob("nhl_sched_*_20262027.json")):
+        for g in json.loads(f.read_text()).get("games", []):
+            if g.get("gameType") == 2 and g.get("startTimeUTC"):
+                t = pd.Timestamp(g["startTimeUTC"]).tz_convert(None)
+                d = pd.Timestamp(g["gameDate"])
+                starts[d] = min(starts.get(d, t), t)
+    return starts
+
+
 def _deadline(date) -> pd.Timestamp:
-    """Latest publication (UTC, naive) that still precedes every game on `date`."""
+    """Latest publication (UTC, naive) that still precedes every game on
+    `date`: the earlier of 15:00 UTC and that date's first scheduled start."""
     d = pd.Timestamp(date)
     first = FIRST_PUCK_DROP.tz_convert(None)
-    return first if d == first.normalize() else d + LIVE_DEADLINE
+    if d == first.normalize():
+        return first
+    return min(d + LIVE_DEADLINE, _first_start_by_date().get(d, d + LIVE_DEADLINE))
 # A game counts as "after publication" when the file was published before
-# 15:00 UTC (11:00 ET) on the game's date, earlier than any NHL start.
+# 15:00 UTC (11:00 ET) on the game's date and before that date's first
+# scheduled start (see _deadline).
 TEAM_FILES = {
     "hattrick_preseason": FREEZE / "teams_2027.csv",
     "neurhl_1.0": C.ROOT / "neurhl/output/neurhl_1_0/teams_2027.csv",
@@ -136,12 +156,14 @@ def score_games(res: pd.DataFrame) -> dict:
         rows = [pd.read_csv(f) for f in sorted(hl.glob("*/games_*.csv"))]
         if rows:
             d = pd.concat(rows)
-            # a forecast counts only if created before 15:00 UTC (11:00 ET) on its
-            # game's date, earlier than any NHL start; the pushed commit time is
-            # the external evidence (git log)
+            # a forecast counts only if created before its game date's deadline
+            # (_deadline); created_utc is the file's own stamp, and the pushed
+            # commit time (git log) is the external evidence that it held
             d = d[pd.to_datetime(d.created_utc).dt.tz_convert(None)
                   < pd.to_datetime(d.date).map(_deadline)]
-            d = d.sort_values("created_utc").drop_duplicates("game_id", keep="first").set_index("game_id")
+            # the LATEST forecast made before the deadline counts (all candidates
+            # precede the game, so this is the best-informed pre-game forecast)
+            d = d.sort_values("created_utc").drop_duplicates("game_id", keep="last").set_index("game_id")
             common = y.index.intersection(d.index)
             if len(common):
                 p = d.loc[common, "p_home_win"].to_numpy(float)
@@ -163,14 +185,18 @@ def _team_points_so_far(res):
 
 def score_teams_interim(res: pd.DataFrame) -> dict:
     """Actual points so far vs each model's expected points in those games."""
-    act = _team_points_so_far(res)
     out = {}
-    for name, (path, col, _) in GAME_FILES.items():
+    for name, (path, col, pub_s) in GAME_FILES.items():
         if not Path(path).exists():
             continue
         g = pd.read_csv(path)
         g = g[g.game_id.isin(res.game_id)]
+        published = _published(name, pub_s)
+        if published is not None:      # only games that started after publication
+            pub = published.tz_convert(None)
+            g = g[[pub < _deadline(d) for d in g.date]]
         if not len(g):
+            out[name] = {"teams": 0, "note": "no games after publication"}
             continue
         if {"p_home_reg", "p_away_reg"}.issubset(g.columns):
             p_tie = 1 - g.p_home_reg - g.p_away_reg
@@ -181,6 +207,7 @@ def score_teams_interim(res: pd.DataFrame) -> dict:
             e_a = 2 * (1 - g.p_home_win) + 0.11
         e = pd.concat([pd.Series(e_h.to_numpy(), index=g.home),
                        pd.Series(e_a.to_numpy(), index=g.away)]).groupby(level=0).sum()
+        act = _team_points_so_far(res[res.game_id.isin(g.game_id)])
         d = act.pts - e.reindex(act.index)
         out[name] = {"teams": int(d.notna().sum()), "mae_points_so_far": float(d.abs().mean()),
                      "rmse_points_so_far": float(np.sqrt((d ** 2).mean()))}
