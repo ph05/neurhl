@@ -1,0 +1,110 @@
+{
+ "created_utc": "2026-10-01T11:58:59+00:00",
+ "protocol": "X3r: confirmation of ORR 1.1 on seasons no experiment has used (orr/PLAN_1_1.md).\n\nORR 1.1 (the fixed X1 configuration: dressed-skater lineup offsets plus known\nstarting goalies, in the filter's prediction and update) against ORR 1.0\n(neither), in the same walk-forward in-season filter, on 2010-11 and 2020-21.\nBoth seasons have box-score lineups and were used by no ORR 1.1 experiment;\nneither has market lines, so both arms start from the team-history prior.\nEach arm takes its OT/SO parameters from its own run, as in X3.\n\nPrimary: pooled log-loss difference, goals-and-shots variant, paired bootstrap\n95% CI (games_bt.paired). Secondary: goals-only, per season, and an\ninverse-variance combination with X3's gate result (reported, not decisive).\n\nRun ONCE: python3 -m orr.backtest.inseason_bt_x3r   (refuses to overwrite)\nWrites orr/output/backtest/inseason_bt_x3r.json and inseason_bt_x3r_preds.csv.gz.\n",
+ "seasons": [
+  2011,
+  2021
+ ],
+ "n": 2098,
+ "lineup_known_share": 1.0,
+ "lineup_settings": {
+  "beta_x": 0.45,
+  "beta_st": 0.0,
+  "beta_t": 0.6,
+  "toi_scale": 300.0,
+  "halflife": 10.0,
+  "use_goalie": true
+ },
+ "variants": {
+  "goals_shots": {
+   "pooled": {
+    "orr_1_1": 0.6701878336600772,
+    "orr_1_0": 0.6725035353259121,
+    "d": {
+     "diff": -0.0023157016658348732,
+     "se": 0.0010844595865869217,
+     "ci95": [
+      -0.0043751370881579986,
+      -0.0001856263253294261
+     ]
+    }
+   },
+   "2011": {
+    "n": 1230,
+    "orr_1_1": 0.6816387420939272,
+    "orr_1_0": 0.6831949509830941,
+    "d": {
+     "diff": -0.0015562088891670721,
+     "se": 0.001360807721490722,
+     "ci95": [
+      -0.0041035831378403685,
+      0.0012517305199174554
+     ]
+    }
+   },
+   "2021": {
+    "n": 868,
+    "orr_1_1": 0.653961315948516,
+    "orr_1_0": 0.6573532573785228,
+    "d": {
+     "diff": -0.003391941430006987,
+     "se": 0.0017757510244920383,
+     "ci95": [
+      -0.00689538081337426,
+      5.2901677501307836e-05
+     ]
+    }
+   }
+  },
+  "goals_only": {
+   "pooled": {
+    "orr_1_1": 0.6716077691814404,
+    "orr_1_0": 0.6739050814972822,
+    "d": {
+     "diff": -0.0022973123158418185,
+     "se": 0.0010839568636738114,
+     "ci95": [
+      -0.004357544143456898,
+      -0.00022191996830390402
+     ]
+    }
+   },
+   "2011": {
+    "n": 1230,
+    "orr_1_1": 0.6816387420939272,
+    "orr_1_0": 0.6831949509830941,
+    "d": {
+     "diff": -0.0015562088891670721,
+     "se": 0.001360807721490722,
+     "ci95": [
+      -0.004206766283676746,
+      0.0011157602275156794
+     ]
+    }
+   },
+   "2021": {
+    "n": 868,
+    "orr_1_1": 0.6573933720819489,
+    "orr_1_0": 0.6607408655208438,
+    "d": {
+     "diff": -0.0033474934388947426,
+     "se": 0.001773986421694978,
+     "ci95": [
+      -0.006712254239833245,
+      0.00012064701155524031
+     ]
+    }
+   }
+  }
+ },
+ "accepted": true,
+ "combined_with_gate": {
+  "diff": -0.001563217635966109,
+  "se": 0.0005549125918407961,
+  "ci95": [
+   -0.002650846315974069,
+   -0.0004755889559581487
+  ],
+  "note": "inverse-variance combination; reported, not decisive"
+ }
+}
