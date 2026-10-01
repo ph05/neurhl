@@ -1,0 +1,20 @@
+# ORR changelog
+
+ORR (Odds, Ratings & Rosters) is versioned by what it forecasts in-season. The scored 2026-27 preseason forecast (`orr/output/freeze_2027/`, ORR 1.0) is frozen; later versions change the daily in-season forecasts from the day they ship, and each forecast counts only for games after its publication. Release notes with evidence are in `orr/releases/`.
+
+## 1.2 (2026-10-01): player-level in-season
+
+- **In-season skater rates.** Each skater's goals, assists and shots per game are updated with his own games so far, as a Gamma-Poisson posterior mean with a prior weight of 40 games for goals and assists and 20 for shots. On held-out 2021-22 and 2022-23, rest-of-season points error falls from 4.48 to 4.07 (−0.41, CI −0.49 to −0.34) and shots error from 10.71 to 9.23.
+- **Box-score ingest.** `orr.ingest` stores every finished game's per-player box score (`orr/output/live/boxes_2027.csv`) from the NHL API. The daily player lines use them.
+- **CI.** `.github/workflows/orr_tests.yml` runs every test suite on each push that touches `orr/`.
+- **Changelog page** at `docs/orr/changelog.html`, linked from the projections page.
+
+## 1.1 (2026-10-01): lineup-aware in-season forecasts
+
+- **Lineup-aware forecasts (X1).** Both teams' ratings are adjusted for who dresses and who starts in goal, in the filter's prediction and its update. On the NeurHL-G gate games 2019-24, log loss improves by 0.00130 (CI −0.00255 to −0.00006). On two seasons no experiment had used (X3r), it improves by 0.00232 (CI −0.00438 to −0.00019).
+- **Eight other pre-registered hypotheses were tested and not accepted.** See `orr/PLAN_1_1.md` and `orr/RESULTS.md`.
+- **Daily GitHub Action** (`orr_daily.yml`) for results with shots from the NHL API.
+
+## 1.0 (2026-10-01): first release
+
+- Market-anchored standings, one scoring model for every game, player projections with conserved ice time, and the in-season filter. See `orr/README.md` and `orr/RESULTS.md`.

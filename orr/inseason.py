@@ -57,6 +57,7 @@ import numpy as np
 import pandas as pd
 
 from orr import config as C
+from orr import player_update as PU
 from orr import season as S
 
 FREEZE = C.OUT / "freeze_2027"
@@ -64,12 +65,14 @@ LIVE = C.OUT / "live"
 
 # model versions: ORR 1.1 = 1.0 + the accepted pre-registered item X1
 MODELS = {
+    "1.2": {"version": "ORR 1.2", "past_starters": True, "lineups": True, "player_update": True,
+            "accepted_items": ["X1", "1.2: in-season skater rates"]},
     "1.1": {"version": "ORR 1.1", "past_starters": True, "lineups": True,
             "accepted_items": ["X1"]},
     "1.0": {"version": "ORR 1.0", "past_starters": False, "lineups": False,
             "accepted_items": []},
 }
-DEFAULT_MODEL = "1.1"
+DEFAULT_MODEL = "1.2"
 
 
 def _sha(p: Path) -> str:
@@ -230,7 +233,7 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
         lineup_adj_h=t.lo_h.to_numpy(), lineup_adj_a=t.lo_a.to_numpy(),
         model=cfg["version"], created_utc=created)
 
-    players_out = player_lines(fz, games_out, day)
+    players_out = player_lines(fz, games_out, day, update_rates=bool(cfg.get("player_update")))
 
     # 3. re-simulate the rest of the season from the current standings
     done = res[["game_id", "home_g", "away_g", "extra"]]
@@ -271,7 +274,7 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     return games_out, standings
 
 
-def player_lines(fz: dict, games: pd.DataFrame, day: pd.Timestamp) -> pd.DataFrame:
+def player_lines(fz: dict, games: pd.DataFrame, day: pd.Timestamp, update_rates: bool = False) -> pd.DataFrame:
     """Per-game lines for every skater likely to dress: expected goals, points
     and shots, P(at least one goal) and P(at least one point).
 
@@ -309,8 +312,16 @@ def player_lines(fz: dict, games: pd.DataFrame, day: pd.Timestamp) -> pd.DataFra
                         break
                     p_dress[m] = np.minimum(1.0, p_dress[m] * need / tot)
             scale = lam / base.get(team, lam)
-            per = lambda c: s[c] / s.gp.clip(lower=1)
-            eg, ep, es = per("g") * scale, per("p") * scale, per("sog") * scale
+            rates = PU.live_rates(s, before=day) if update_rates else None   # ORR 1.2
+            if rates is not None:
+                r = rates.set_index("player_id").reindex(s.player_id)
+                upd = {"g": r.g_pg.to_numpy(), "a": r.a_pg.to_numpy(), "sog": r.sog_pg.to_numpy()}
+                per = lambda c: pd.Series(upd[c], index=s.index) if c in upd else s[c] / s.gp.clip(lower=1)
+                per_p = lambda: per("g") + per("a")
+            else:
+                per = lambda c: s[c] / s.gp.clip(lower=1)
+                per_p = lambda: per("p")
+            eg, ep, es = per("g") * scale, per_p() * scale, per("sog") * scale
             s = s.assign(game_id=g.game_id, opponent=g.away if team == g.home else g.home,
                          p_dress=p_dress, exp_goals=eg * p_dress, exp_points=ep * p_dress,
                          exp_sog=es * p_dress,

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORR Changelog</title>
+<style>
+  :root { --fg:#111; --muted:#555; --rule:#ccc; --link:#0645ad; --bg:#fff; --code:#f2f2f2; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --fg:#e6e6e6; --muted:#a3a3a3; --rule:#444; --link:#8ab4f8; --bg:#121212; --code:#222; color-scheme: dark; } }
+  :root[data-theme="dark"] { --fg:#e6e6e6; --muted:#a3a3a3; --rule:#444; --link:#8ab4f8; --bg:#121212; --code:#222; color-scheme: dark; }
+  html { background: var(--bg); }
+  body { margin: 0 auto; max-width: 860px; padding: 12px 16px 40px; color: var(--fg); background: var(--bg);
+         font: 13px/1.55 Verdana, Geneva, "DejaVu Sans", Arial, sans-serif; }
+  a { color: var(--link); } h1 { font-size: 20px; } h2 { font-size: 16px; margin-top: 26px; padding-bottom: 3px; border-bottom: 2px solid var(--fg); }
+  p, li { max-width: 88ch; } code { background: var(--code); padding: 0 3px; font-size: 12px; }
+  nav { font-size: 12px; margin: 6px 0; padding: 5px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  nav a { margin-right: 14px; }
+</style>
+</head>
+<body>
+<nav><a href="index.html">Projections</a><a href="compare.html">ORR vs NeurHL</a><a href="changelog.html">Changelog</a></nav>
+<h1>ORR changelog</h1>
+<p>ORR (Odds, Ratings &amp; Rosters) is versioned by what it forecasts in-season. The scored 2026-27 preseason forecast (<code>orr/output/freeze_2027/</code>, ORR 1.0) is frozen; later versions change the daily in-season forecasts from the day they ship, and each forecast counts only for games after its publication. Release notes with evidence are in <code>orr/releases/</code>.</p>
+<h2>1.2 (2026-10-01): player-level in-season</h2>
+<ul>
+<li><b>In-season skater rates.</b> Each skater&#x27;s goals, assists and shots per game are updated with his own games so far, as a Gamma-Poisson posterior mean with a prior weight of 40 games for goals and assists and 20 for shots. On held-out 2021-22 and 2022-23, rest-of-season points error falls from 4.48 to 4.07 (−0.41, CI −0.49 to −0.34) and shots error from 10.71 to 9.23.</li>
+<li><b>Box-score ingest.</b> <code>orr.ingest</code> stores every finished game&#x27;s per-player box score (<code>orr/output/live/boxes_2027.csv</code>) from the NHL API. The daily player lines use them.</li>
+<li><b>CI.</b> <code>.github/workflows/orr_tests.yml</code> runs every test suite on each push that touches <code>orr/</code>.</li>
+<li><b>Changelog page</b> at <code>docs/orr/changelog.html</code>, linked from the projections page.</li>
+</ul>
+<h2>1.1 (2026-10-01): lineup-aware in-season forecasts</h2>
+<ul>
+<li><b>Lineup-aware forecasts (X1).</b> Both teams&#x27; ratings are adjusted for who dresses and who starts in goal, in the filter&#x27;s prediction and its update. On the NeurHL-G gate games 2019-24, log loss improves by 0.00130 (CI −0.00255 to −0.00006). On two seasons no experiment had used (X3r), it improves by 0.00232 (CI −0.00438 to −0.00019).</li>
+<li><b>Eight other pre-registered hypotheses were tested and not accepted.</b> See <code>orr/PLAN_1_1.md</code> and <code>orr/RESULTS.md</code>.</li>
+<li><b>Daily GitHub Action</b> (<code>orr_daily.yml</code>) for results with shots from the NHL API.</li>
+</ul>
+<h2>1.0 (2026-10-01): first release</h2>
+<ul>
+<li>Market-anchored standings, one scoring model for every game, player projections with conserved ice time, and the in-season filter. See <code>orr/README.md</code> and <code>orr/RESULTS.md</code>.</li>
+</ul>
+</body>
+</html>

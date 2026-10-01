@@ -1,0 +1,8 @@
+{
+ "n0": {
+  "g": 40.0,
+  "a": 40.0,
+  "sog": 20.0
+ },
+ "source": "orr/backtest/player_update_bt.py (tuned 2012, 2014-2017)"
+}
