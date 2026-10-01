@@ -46,7 +46,11 @@ def main():
     gate = pd.read_csv(PREDS / "g_gate_games.csv")
     res = {"created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
            "protocol": __doc__, "seasons": GB.SEASONS, "season_logs": logs, "modes": {}}
-    for tag, gk in (("no_starters", False), ("known_starters", True)):
+    import dataclasses
+    modes = (("no_starters", False, hp), ("known_starters", True, hp),
+             # what the live loop runs while results carry no shots
+             ("goals_only_live", False, dataclasses.replace(hp, use_shots=False)))
+    for tag, gk, hp in modes:
         base = R.run_filter(hp, GB.SEASONS, use_goalie=gk)
         ot = {}
         pb = R.predict_probs(base, hp, ot_params=ot)
