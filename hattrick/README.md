@@ -31,7 +31,7 @@ Start from the strongest cheap signal, add what it misses, and never be more con
   - Preseason game probabilities are averaged over joint draws of both teams' ratings.
   - The season simulator applies the exact NHL tiebreakers and playoff bracket.
 - **Player lines** come from exposure-regressed, age-adjusted per-60 rates, a depth-chart model of who dresses, and ice time conserved within each team. Player goals are reconciled to team goals, and goalie goals-against to team goals-against, so the three outputs agree.
-- **In-season.** A Kalman-style filter updates the ratings from goals and shots after every result. The daily forecast uses known starting goalies where given.
+- **In-season.** A Kalman-style filter updates the ratings after every result, from goals, and from shots when the results file carries them. Its home-ice estimate replaces the preseason one, and its uncertainty is anchored to the freeze's on day 0. The daily forecast uses plug-in probabilities (the backtested rule) and known starting goalies where given.
 
 ## Pipeline
 
@@ -72,7 +72,7 @@ The review lists NeurHL's strengths, and HatTrick keeps them:
 
 It drops these NeurHL practices:
 
-- backtests that know each player's actual season team, lineup or starter;
+- backtests that rely by default on each player's actual season team or dressed lineup. HatTrick uses the season team only on 2025-26, where no box scores exist, and reports known-starter game results as a separate variant;
 - a neural stack that ties Elo;
 - post-hoc level multipliers;
 - a fixed team shock borrowed from an older layer;

@@ -1,6 +1,6 @@
 # HatTrick vs NeurHL: results
 
-*Written 2026-10-01. Backtest outputs are in `hattrick/output/backtest/`. The 2026-27 forecast is in `hattrick/output/freeze_2027/`. Its `manifest_2027.json` records the SHA-256 of every input and of the code, and every repository input is read from commit `9580606` (2026-09-29 16:53 EDT), the last commit before the cutoff. Each number below names the file it comes from. Where HatTrick loses or ties, the tables say so.*
+*Written 2026-10-01. Backtest outputs are in `hattrick/output/backtest/`. The 2026-27 forecast is in `hattrick/output/freeze_2027/`. Its `manifest_2027.json` records the SHA-256 of every snapshot input and of the code, and every repository input is read from commit `9580606` (2026-09-29 16:53 EDT), the last commit before the cutoff. `fitted_inputs_2027.json` adds the hashes of the fitted parameter files and hand-collected data the freeze read. Each number below names the file it comes from. Where HatTrick loses or ties, the tables say so.*
 
 **Timing, stated plainly.**
 
@@ -14,19 +14,19 @@
 | Layer | Test (same games or players, same population) | HatTrick | NeurHL | Verdict |
 |---|---|---|---|---|
 | **Standings** | NeurHL's 2019-24 judge window: 158 team-seasons, raw points over games played; MAE / CRPS | **9.23 / 6.70** (market + team history, convex weights, leave-one-season-out) | 9.42 / 6.80 (frozen engine layer); Elo 9.47 / 6.87 | HatTrick better. The market alone (9.32 / 6.71) already beats NeurHL. |
-| | NeurHL's own backtest seasons 2012, 2014-17, points-per-82 MAE | **8.96** (team-history view) | 9.99 (shipped NeurHL-2 layer); 9.17 (its v1 Elo + xG) | HatTrick better in 4 of 5 seasons; 2012 lost, 7.20 vs 6.98 |
+| | NeurHL's own backtest seasons 2012, 2014-17, raw points-per-82 MAE (NeurHL's scale) | **9.02** (team-history view; 8.96 centred) | 9.99 (shipped NeurHL-2 layer); 9.17 (its v1 Elo + xG) | HatTrick better in 4 of 5 seasons (2017 by 0.01); 2012 lost, 7.21 vs 6.98 |
 | **Games, preseason file** | Shipped game-file pipeline rebuilt for 2019-24 (6,289 games), log loss | **0.6674** | NeurHL has no historical preseason game file. A preseason-frozen Elo scores 0.6718. | −0.0044 vs Elo (95% CI −0.0067 to −0.0024). Also −0.0033 vs HatTrick's own team-history table (0.6707). |
 | **Games, in-season** | NeurHL's 11,052 restatement games, 2017-18 to 2025-26 | 0.6641 with no lineups; **0.6635** with starters where known | 0.6645 (NeurHL-H, given actual dressed lineups and starters) | Tie, with far less information |
 | | Same games vs NeurHL's own Elo baseline | 0.6641 | Elo 0.6691 | HatTrick −0.0050 (CI −0.0072 to −0.0029) |
 | | NeurHL-G gate games, 2019-24 (n = 6,289) | 0.6610 / 0.6603 | **0.6601** (G stack) | NeurHL slightly better; not significant |
 | | NeurHL seal games, 2024-25 and 2025-26 (n = 2,624) | **0.6712** | 0.6715 | Tie |
-| | The shipped in-season loop (filter started from the market-anchored preseason ratings, as live), NeurHL-G gate games 2019-24 | 0.6613 with no starters; 0.6606 with known starters | 0.6601 (NeurHL-G); NeurHL Elo 0.6657 | Tie with NeurHL-G (+0.0006, CI −0.0019 to +0.0029); beats Elo |
-| **Skaters** | NeurHL's headline protocol: points MAE for players with ≥40 GP ("sample A"), held-out 2022-26 | **9.41** | 9.54 | HatTrick better (details and caveats below) |
-| | Same, 2022-24 only (HatTrick's roster = first 10 games; NeurHL's = each player's actual season team) | **9.49** | 9.74 | HatTrick better by 0.25 |
+| | The in-season loop started from the market-anchored preseason ratings (as live), updated on goals and shots, NeurHL-G gate games 2019-24 | 0.6613 with no starters; 0.6606 with past starters in the update | 0.6601 (NeurHL-G); NeurHL Elo 0.6657 | Tie with NeurHL-G (+0.0006, CI −0.0019 to +0.0029); beats Elo. Live results so far carry no shots and past starters are not used, so the live loop currently runs a goals-only variant that has not been backtested. |
+| **Skaters** | NeurHL's headline protocol: points MAE for players with ≥40 GP ("sample A"), held-out 2022-26 | 9.41 as backtested; about 9.50 with reserves projected unconditionally (see the reserve note below) | 9.54 | Roughly level. HatTrick wins 2022 (9.69 vs 10.47) and 2023; NeurHL wins 2024 and 2026; 2025 tied. Without 2022, NeurHL is ahead (9.31 vs 9.34). |
+| | Same, 2022-24 only (HatTrick's roster = first 10 games; NeurHL's = each player's actual season team) | 9.49; about 9.64 with reserves projected unconditionally | 9.74 | HatTrick better by about 0.10, mostly 2022 |
 | | Same, 2025-26 only (both use the actual season team; no box scores for a proxy) | 9.30 | **9.24** | NeurHL better by 0.05 |
 | | NeurHL v2's per-82 restatement ("sample B"), 2022-26 | 9.22 | **9.08** | NeurHL better by 0.14 (tie on 2022-24, 9.30 vs 9.28) |
-| | Regression toward the mean: slope of projected P/GP on last season's P/GP, 2027 file | 0.83 | 0.96 (1.3) | HatTrick regresses; NeurHL barely does |
-| | 80% interval coverage of points, held out | 0.81 pooled (0.77 on 2022-24, 0.88 on 2025-26) | none published; intervals ~1.1× Poisson width | HatTrick near nominal |
+| | Regression toward the mean: slope of projected P/GP on 2025-26 P/GP, skaters with ≥60 GP in 2025-26 (n ≈ 460), 2027 file | 0.86 | 0.96 (1.3) | HatTrick regresses; NeurHL barely does |
+| | 80% interval coverage of points, held out, every rostered skater (the unconditional sample) | 0.84 pooled (0.79 on 2022-24, 0.91 on 2025-26) | none published; intervals ~1.1× Poisson width | HatTrick near nominal pooled; too wide on 2025-26 |
 | **Goalies** | GSAx/60 MAE, held-out 2022-26, goalies with ≥1,000 shots (n = 178) | 0.237 | n/a | Ties league average (0.241); beats last season (0.335) |
 | **Live 2026-27** | 5 opening-night games, log loss | 0.750 (published after these games; not eligible) | 0.726 (1.0), 0.739 (1.1) | Noise (n = 5); eligible from 2026-10-01 |
 
@@ -34,8 +34,8 @@
 
 - **Standings:** HatTrick beats NeurHL on NeurHL's own judge window and on its backtest seasons. Most of the 2019-24 gain comes from using the sportsbook line, which is allowed new data; HatTrick's own modelling adds about 0.1 points of MAE on top.
 - **Games:** HatTrick ties NeurHL's best in-season models with no lineup information and no neural network. Its shipped preseason pipeline beats a frozen Elo with a confidence interval that excludes zero.
-- **Skaters:** HatTrick wins NeurHL's headline protocol, while NeurHL's backtest uses a future-roster leak that HatTrick's does not. HatTrick loses the per-82 restatement and the two most recent seasons.
-- **Calibration:** HatTrick's projections are calibrated where NeurHL's are not: regression slope, interval coverage, and team spread versus the market.
+- **Skaters:** roughly level with NeurHL. HatTrick's pooled lead on the headline protocol is mostly one season (2022, when NeurHL under-projected league scoring). It shrinks to about 0.04 once reserves are projected without season-V information. HatTrick loses the per-82 restatement and 2024 and 2026. On 2022-24 HatTrick uses first-10-game rosters where NeurHL uses each player's actual season team. On 2025-26 (40% of the pooled sample) both use the season team.
+- **Calibration:** HatTrick's projections regress toward the mean (slope 0.86 vs 0.96) and its intervals cover near nominal pooled. Its team means track the market far more closely (correlation 0.988 vs 0.884). In spread, both models miss the market by similar amounts in opposite directions: HatTrick is 7% narrower, NeurHL 10% wider.
 
 ## The 2026-27 forecast
 
@@ -68,7 +68,7 @@
   | DET | −1.4 | Edvinsson and Bryson on no NHL roster at the cutoff |
   | FLA | −1.0 | Marchand on IR (09-17); two depth departures |
 
-  A "departure" is a player with 50+ NHL games in 2025-26 who was removed from a club after 08-17 and is on no NHL roster or injured list at the cutoff. Injuries come from 46 researched timelines with sources dated on or before 2026-09-29. Five long-known injuries (Terry, Bedard, Jarvis, Demko's hip, Sandin) predate the line and are not counted as news.
+  A "departure" is a player with 50+ NHL games in 2025-26 who was removed from a club after 08-17 and is on no NHL roster or injured list at the cutoff. Injuries come from researched timelines; rows dated 2026-09-29 are excluded, because a date-only report may postdate the cutoff. One kept row, Frederik Andersen's (dated 09-28), takes its 31-game estimate from a 09-29 morning coach quote. That quote precedes the 21:00 UTC cutoff, but it is not covered by the date rule; without it his absence would default to 5 games, a few tenths of a point for EDM. Hellebuyck's 10% chance of playing for Winnipeg and his 12-game delay are judgments hard-coded in `goalies.py`, not fitted quantities. The trade request (08-27) and suspension (09-17) are pre-cutoff facts. The 12-game figure, however, matches a research row dated 09-29 that the date rule excludes elsewhere, so it is not strictly covered by that rule. Five long-known injuries (Terry, Bedard, Jarvis, Demko's hip, Sandin) predate the line and are not counted as news.
 - **Largest disagreements with NeurHL 1.3:**
 
   | Team | HatTrick | NeurHL 1.3 | Market line |
@@ -137,8 +137,9 @@
 **Skaters** (`players_bt.json`, `players_search_ledger.json`):
 
 - **Tuning** used only 2011-2017 (76 configurations, all logged). 2018-19 confirm; 2022-26 is the held-out test.
-- **Rosters.** "Strict" uses opening rosters from each team's first 10 games and nothing else from season V. It is available through 2024. That proxy itself knows who dressed in those 10 games, a far smaller leak than NeurHL's full-season team. For 2025-26 no box scores exist, so both models use the season team, and that window is reported separately above.
-- **Accuracy.** Pooled points MAE 9.41 sits beside goals MAE 4.31 and assists MAE 6.36; correlation is 0.845.
+- **Rosters.** "Strict" uses opening rosters from each team's first 10 games. It is available through 2024. That proxy itself knows who dressed in those 10 games, a far smaller leak than NeurHL's full-season team. For 2025-26 no box scores exist, so both models use the season team, and that window is reported separately above.
+- **Reserves.** One more piece of season-V information enters the strict protocol. The evaluation sample, like NeurHL's, is players who played in season V. Players on no opening roster who nonetheless played ("reserves") are projected at the average games of past reserves who played at least once: about 19.5 GP per 82. Projected without that conditioning (8.8 GP per 82, the average including those who never played), the 24-30 sample-A reserves per season would raise sample-A MAE by about 0.15 on 2022-24 and 0.09 pooled. The table quotes both.
+- **Accuracy.** Pooled points MAE 9.41 as backtested sits beside goals MAE 4.31 and assists MAE 6.36; correlation is 0.845.
 - **Final projection.** An average of HatTrick (0.6), Marcel (0.3) and HatTrick's rates times last season's GP (0.1). Rookies are calibrated by draft slot.
 
 **Goalies** (`goalies_bt.json`):
@@ -149,7 +150,11 @@
 
 ## Where HatTrick does not win
 
-- **Skaters on the per-82 protocol and on 2025-26.** NeurHL's A/B blend is 0.14 points better pooled and 0.33 better on 2025-26. HatTrick's skater advantage is on NeurHL's headline protocol, and it is largest where NeurHL's future-roster leak helps it most.
+- **Skaters.**
+  - NeurHL's A/B blend is 0.14 points better pooled on the per-82 protocol, and 0.33 better on 2025-26.
+  - On the headline protocol NeurHL wins 2024 (9.17 vs 9.29) and 2026 (9.39 vs 9.53).
+  - Most of HatTrick's pooled lead is 2022, when NeurHL under-projected league scoring (league ratio 0.88).
+  - With reserves projected unconditionally, the pooled lead is about 0.04 points.
 - **In-season games on NeurHL's gate window.** NeurHL-G is 0.0002 better than HatTrick's filter with known starters, and 0.0006 better than the shipped loop. Neither difference is significant. The market-anchored start that wins preseason adds nothing once games are played.
 - **Standings, 2012.** NeurHL-2 beats HatTrick's team-history view (6.98 vs 7.20).
 - **Standings, own modelling.** On 2019-24 the sportsbook line does most of the work. HatTrick's own contribution over the market alone is about 0.1 points of MAE, smaller than the noise across seasons.

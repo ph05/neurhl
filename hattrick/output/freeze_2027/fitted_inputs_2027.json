@@ -1,0 +1,42 @@
+{
+ "note": "Fitted and hand-collected inputs the 2026-27 freeze read, as stored at the commit that wrote the freeze outputs. Supplements manifest_2027.json, whose 'files' cover the pre-cutoff snapshot only. Last-commit times are of the input file at or before that commit.",
+ "freeze_commit": "974e00a38ff0950e6c1c4a51a5f929525af6c6dc",
+ "files": {
+  "hattrick/output/params/gamemodel.json": {
+   "sha256": "7b5a7a543315489b2eaeeef94327ffe6694b24d93817771754dfafd0af738517",
+   "last_commit": "2026-09-30T23:59:12+00:00"
+  },
+  "hattrick/output/params/goalies.json": {
+   "sha256": "a4f9cd67a6faabf0dd2e8f288c46b574ca3a1fe09d604d9ad8723e53ca582c41",
+   "last_commit": "2026-10-01T00:22:27+00:00"
+  },
+  "hattrick/output/params/players.json": {
+   "sha256": "741c063037e8b3532ce400a8358de15c342157148219fd6510094ce379b91aaf",
+   "last_commit": "2026-10-01T00:22:27+00:00"
+  },
+  "hattrick/output/params/ratings_hp.json": {
+   "sha256": "f4020b8cc947bb8ad1c0502b8ca365d4ac17921f0a8be79d62194584e1416a31",
+   "last_commit": "2026-09-30T23:59:12+00:00"
+  },
+  "hattrick/output/params/elo_hp.json": {
+   "sha256": "a655678155af25e5f5224c73c6ef3c0fe7a4604fd8e227fb5e2284d8a8817c8e",
+   "last_commit": "2026-09-30T23:27:48+00:00"
+  },
+  "hattrick/output/backtest/team_components_hist.csv": {
+   "sha256": "b2bde47f496b1e96dc5a079b0420c05fffbc4b7162cbb7e2ebaf182db6f84642",
+   "last_commit": "2026-10-01T00:29:05+00:00"
+  },
+  "hattrick/output/backtest/roster_delta_hist.csv": {
+   "sha256": "82acd951523edd21add9b547d536a0c8fc7b116926e9a6c7097219236af7b482",
+   "last_commit": "2026-10-01T00:34:50+00:00"
+  },
+  "hattrick/data_market_history.csv": {
+   "sha256": "72531b9ad8dc86082e5845fdbd3700aa8a71df5c5d3031b178db3da034cd4efa",
+   "last_commit": "2026-09-30T22:46:32+00:00"
+  },
+  "hattrick/data_injuries_2027.csv": {
+   "sha256": "105629225933301f2b590d19143e9ff58d57a219e2a0d9bf5ea20b11d54a50d9",
+   "last_commit": "2026-09-30T22:46:32+00:00"
+  }
+ }
+}

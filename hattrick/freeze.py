@@ -394,7 +394,9 @@ def main():
 def _dirty_code() -> list[str]:
     out = subprocess.run(["git", "-C", str(C.ROOT), "status", "--porcelain", "--", "hattrick"],
                          capture_output=True, text=True).stdout.splitlines()
-    return [l for l in out if l.strip().endswith(".py")]
+    fitted = ("hattrick/output/params/", "hattrick/output/backtest/team_components_hist.csv",
+              "hattrick/output/backtest/roster_delta_hist.csv", "hattrick/data_")
+    return [l for l in out if l.strip().endswith(".py") or any(f in l for f in fitted)]
 
 
 def luck_sd_82(sch, r, model, adj) -> float:
