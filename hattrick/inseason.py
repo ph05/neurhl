@@ -148,6 +148,8 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
                      if starters is not None else np.nan),
         created_utc=created)
 
+    players_out = player_lines(fz, games_out, res)
+
     # 3. re-simulate the rest of the season from the current standings
     done = res[["game_id", "home_g", "away_g", "extra"]]
     left = 1.0 - len(done) / len(sch)
@@ -158,6 +160,7 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     outdir = LIVE / date
     outdir.mkdir(parents=True, exist_ok=True)
     games_out.to_csv(outdir / f"games_{date}.csv", index=False, float_format="%.5f")
+    players_out.to_csv(outdir / f"players_{date}.csv", index=False, float_format="%.4f")
     standings.to_csv(outdir / f"standings_{date}.csv", index=False, float_format="%.4f")
     cur.to_csv(outdir / f"ratings_{date}.csv", index=False, float_format="%.5f")
     run_meta = {"date": date, "created_utc": created, "code": _code_commit(),
@@ -169,6 +172,54 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
                            "freeze_state": _sha(FREEZE / "state_2027.json")}}
     (outdir / f"run_{date}.json").write_text(json.dumps(run_meta, indent=1))
     return games_out, standings
+
+
+def player_lines(fz: dict, games: pd.DataFrame, results: pd.DataFrame) -> pd.DataFrame:
+    """Per-game lines for every skater likely to dress: expected goals, points
+    and shots, P(at least one goal) and P(at least one point).
+
+    A player's per-game rates are his preseason season line divided by his
+    expected games; they are scaled by how many goals his team is expected
+    to score in THIS game relative to its season average, and multiplied by
+    the probability that he dresses (zero while a known absence lasts)."""
+    sk = pd.read_csv(FREEZE / "skaters_2027.csv")
+    tm = pd.read_csv(FREEZE / "teams_2027.csv").set_index("team")
+    base = (tm.gf / tm.gp).rename("gf_pg")
+    played = pd.concat([results.home, results.away]).value_counts() if len(results) else pd.Series(dtype=float)
+    rows = []
+    for g in games.itertuples(index=False):
+        for team, lam in ((g.home, g.exp_goals_home), (g.away, g.exp_goals_away)):
+            s = sk[sk.team == team].copy()
+            if not len(s):
+                continue
+            gp_left = 84 - played.get(team, 0)
+            out_now = s.games_out.fillna(0) > played.get(team, 0)
+            p_dress = np.where(out_now, 0.0,
+                               np.clip(s.gp / np.maximum(84 - s.games_out.fillna(0), 1), 0, 1))
+            # exactly 12 forwards and 6 defencemen dress: scale the healthy
+            # players' dress probabilities up to the slots (each capped at 1)
+            p_dress = np.asarray(p_dress, float)
+            for pos, slots in (("F", 12.0), ("D", 6.0)):
+                m = (s.pos.to_numpy() == pos) & (p_dress > 0)
+                need = min(slots, m.sum())
+                for _ in range(20):
+                    tot = p_dress[m].sum()
+                    if tot <= 0 or abs(tot - need) < 1e-6:
+                        break
+                    p_dress[m] = np.minimum(1.0, p_dress[m] * need / tot)
+            scale = lam / base.get(team, lam)
+            per = lambda c: s[c] / s.gp.clip(lower=1)
+            eg, ep, es = per("g") * scale, per("p") * scale, per("sog") * scale
+            s = s.assign(game_id=g.game_id, opponent=g.away if team == g.home else g.home,
+                         p_dress=p_dress, exp_goals=eg * p_dress, exp_points=ep * p_dress,
+                         exp_sog=es * p_dress,
+                         p_goal=p_dress * (1 - np.exp(-eg)), p_point=p_dress * (1 - np.exp(-ep)),
+                         toi_pg=s.toi / s.gp.clip(lower=1))
+            rows.append(s[s.p_dress > 0.05][["game_id", "team", "opponent", "player_id", "name", "pos",
+                                             "p_dress", "toi_pg", "exp_goals", "exp_points", "exp_sog",
+                                             "p_goal", "p_point"]])
+    out = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
+    return out.sort_values(["game_id", "team", "exp_points"], ascending=[True, True, False])
 
 
 def integrate_rating_uncertainty(model, cur, t, lh, la, n: int = 64, seed: int = 7):
@@ -192,7 +243,7 @@ def integrate_rating_uncertainty(model, cur, t, lh, la, n: int = 64, seed: int =
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--date", required=True)
-    ap.add_argument("--results", default=str(C.ROOT / "neurhl/output/live/results_2027.csv"))
+    ap.add_argument("--results", default=str(C.OUT / "live" / "results_2027.csv"))
     ap.add_argument("--goalies", default=None)
     ap.add_argument("--sims", type=int, default=20000)
     ap.add_argument("--seed", type=int, default=C.SEED)
