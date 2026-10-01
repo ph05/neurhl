@@ -53,13 +53,18 @@ def tonight(pre: pd.DataFrame, elo: pd.Series) -> dict:
     pl = pd.read_csv(d / f"players_{d.name}.csv")
     run = _rd(d / f"run_{d.name}.json") or {}
     st = start_times()
+    from orr import gamemodel as GM
+    sf = GM.schedule_features(pd.read_csv(F / "schedule_2027.csv", parse_dates=["date"]), C.TARGET_SEASON)
+    sf = sf.set_index("game_id")
     games = []
     for r in g.itertuples():
         q = pl[pl.game_id == r.game_id]
         sog = q.groupby("team").exp_sog.sum()
         top = q.sort_values("p_goal", ascending=False).head(4)
         games.append({"id": int(r.game_id), "start": st.get(int(r.game_id)), "home": r.home, "away": r.away,
-                      "kind": "daily", "g": _r(r.p_home_win, 4), "pre": _r(pre.get(r.game_id), 4),
+                      "kind": run.get("model", "daily"), "g": _r(r.p_home_win, 4), "pre": _r(pre.get(r.game_id), 4),
+                      "rest": [_r(sf.rest_h.get(r.game_id), 0), _r(sf.rest_a.get(r.game_id), 0)],
+                      "km": [_r(sf.km_h.get(r.game_id), 0), _r(sf.km_a.get(r.game_id), 0)],
                       "elo": _r(elo.get(r.game_id), 4), "ot": _r(r.p_ot, 4),
                       "score": [_r(r.exp_goals_home, 2), _r(r.exp_goals_away, 2)],
                       "sog": [_r(sog.get(r.home), 1), _r(sog.get(r.away), 1)],
@@ -116,6 +121,12 @@ def evidence() -> list:
         rows.append({"c": "In-season goalie start shares vs preseason, rest-of-season starts MAE (1.4)",
                      "w": "2021-22 to 2022-23", "n": t["n"], "d": f"{t['diff']:+.2f}",
                      "ci": f"{t['ci95'][0]:+.2f} to {t['ci95'][1]:+.2f}", "p": ""})
+    ri = _rd(BT / "ros_interval_bt.json")
+    if ri:
+        t = ri["test"]
+        rows.append({"c": "Rest-of-season skater intervals, 80% interval score vs 1.6 (1.7)", "w": "2021-22 to 2022-23",
+                     "n": t["n"], "d": f"{t['diff']:+.2f}", "ci": f"{t['ci95'][0]:+.2f} to {t['ci95'][1]:+.2f}",
+                     "p": f"coverage {t['cover_best']:.2f} vs {t['cover_1_6']:.2f}"})
     gb = _rd(BT / "gamefile_bt.json")
     if gb:
         v = gb["variants"]["mkt+td (shipped)"]["by_season"]
@@ -242,6 +253,18 @@ def main():
         daily_files = [str(f.relative_to(C.ROOT)) for f in sorted(lf[-1].parent.glob("*.csv"))]
     for row in tx:
         row["sos"] = sos.get(row["ab"])
+    teams_live, live_date = {}, None
+    if lf:
+        live_date = lf[-1].parent.name
+        for r in ls.itertuples():
+            teams_live[r.team] = {"pts": _r(r.points), "p10": int(round(r.points_p10)), "p50": int(round(r.points_p50)),
+                                  "p90": int(round(r.points_p90)), "w": _r(r.w), "l": _r(r.l), "otl": _r(r.otl),
+                                  "rw": _r(r.rw), "gf": _r(r.gf), "ga": _r(r.ga), "po": _r(r.playoff_pct),
+                                  "div_p": _r(r.division_pct), "pres": _r(r.presidents_pct), "r2": _r(r.round2_pct),
+                                  "cf": _r(r.conf_final_pct), "fin": _r(r.cup_final_pct), "cup": _r(r.cup_pct)}
+    daily_models = {}
+    for f in sorted((C.OUT / "live").glob("*/run_*.json")):
+        daily_models[f.parent.name] = (_rd(f) or {}).get("model")
 
     card = _rd(C.OUT / "scorecard_2027.json") or {}
     names = {"orr_preseason": "ORR preseason", "orr_inseason": "ORR daily",
@@ -288,7 +311,8 @@ def main():
             "movers": movers,
             "teams": teams, "teams_x": tx, "tonight": tonight(g.set_index("game_id").p_home_win, elo),
             "games": games, "skaters_x": skx, "has_td": td is not None, "odds_history": odds_history, "goalies": gx, "evidence": evidence(),
-            "has_gtd": gtd is not None, "daily_files": daily_files,
+            "has_gtd": gtd is not None, "daily_files": daily_files, "teams_live": teams_live,
+            "live_date": live_date, "daily_models": daily_models,
             "sha256": {f"orr/output/freeze_2027/{f}": hashlib.sha256((F / f).read_bytes()).hexdigest() for f in HASHED}}
     blob = json.dumps(data, separators=(",", ":"), default=lambda o: None if isinstance(o, float) and np.isnan(o) else o)
     html = (SITE / "orr_template.html").read_text().replace("__ORR_DATA__", blob.replace("</", "<\\/"))

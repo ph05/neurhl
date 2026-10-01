@@ -59,7 +59,8 @@ PAGE = """<!DOCTYPE html>
   body { margin: 0 auto; max-width: 860px; padding: 12px 16px 40px; color: var(--fg); background: var(--bg);
          font: 13px/1.55 Verdana, Geneva, "DejaVu Sans", Arial, sans-serif; }
   a { color: var(--link); } h1 { font-size: 20px; } h2 { font-size: 16px; margin-top: 26px; padding-bottom: 3px; border-bottom: 2px solid var(--fg); }
-  p, li { max-width: 88ch; } code { background: var(--code); padding: 0 3px; font-size: 12px; }
+  p, li { max-width: 88ch; }
+  table { border-collapse: collapse; } td, th { padding: 2px 10px 2px 0; text-align: left; border-bottom: 1px solid var(--rule); } code { background: var(--code); padding: 0 3px; font-size: 12px; }
   nav { font-size: 12px; margin: 6px 0; padding: 5px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
   nav a { margin-right: 14px; }
 </style>
@@ -72,9 +73,23 @@ __BODY__
 """
 
 
+def releases_table() -> str:
+    """ORR 1.7: version history, one row per release note in orr/releases/."""
+    import re as _re
+    rows = []
+    for f in sorted((C.PKG / "releases").glob("v*.md"), key=lambda p: [int(x) for x in p.stem[1:].split(".")], reverse=True):
+        first = f.read_text().splitlines()[0].lstrip("# ").strip()
+        title = first.split(":", 1)[1].strip() if ":" in first else first
+        url = f"https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/releases/{f.name}"
+        rows.append(f"<tr><td><a href=\"{url}\">{html.escape(f.stem[1:])}</a></td><td>{html.escape(title)}</td></tr>")
+    return ("<h2>Version history</h2><p>Release notes with the evidence for every change. The 2026-27 preseason file is ORR 1.0 "
+            "and stays frozen; later versions change the daily in-season forecasts.</p><table><thead><tr><th>Version</th>"
+            "<th>Release</th></tr></thead><tbody>" + "".join(rows) + "</tbody></table>")
+
+
 def main():
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(PAGE.replace("__BODY__", render(SRC.read_text())))
+    OUT.write_text(PAGE.replace("__BODY__", releases_table() + render(SRC.read_text())))
     print(f"-> {OUT}")
 
 

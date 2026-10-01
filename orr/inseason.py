@@ -65,6 +65,13 @@ LIVE = C.OUT / "live"
 
 # model versions: ORR 1.1 = 1.0 + the accepted pre-registered item X1
 MODELS = {
+    "1.7": {"version": "ORR 1.7", "past_starters": True, "lineups": True, "player_update": True,
+            "box_first": True, "goalie_update": True, "player_calibration": True,
+            "standings_drift": True, "start_share_update": True, "absence": True, "standings_sharp": True,
+            "sog_dist": True, "sos": True, "ros_file": True, "ros_interval": True,
+            "accepted_items": ["X1", "1.2: in-season skater rates", "1.3: box-score lineups, goalie talent",
+                               "1.4: standings drift, start shares", "1.5: shot distributions",
+                               "1.6: remaining SOS, rest-of-season player file", "1.7: rest-of-season intervals (per params)"]},
     "1.6": {"version": "ORR 1.6", "past_starters": True, "lineups": True, "player_update": True,
             "box_first": True, "goalie_update": True, "player_calibration": True,
             "standings_drift": True, "start_share_update": True, "absence": True, "standings_sharp": True,
@@ -92,7 +99,7 @@ MODELS = {
     "1.0": {"version": "ORR 1.0", "past_starters": False, "lineups": False,
             "accepted_items": []},
 }
-DEFAULT_MODEL = "1.6"
+DEFAULT_MODEL = "1.7"
 
 
 def _sha(p: Path) -> str:
@@ -192,7 +199,16 @@ def remaining_sos(sch: pd.DataFrame, done: pd.DataFrame, cur: pd.DataFrame) -> p
     return opp.groupby("team").agg(sos_remaining=("net", "mean"), games_left=("net", "size")).reset_index()
 
 
-def players_ros(fz: dict, day: pd.Timestamp, results: pd.DataFrame, n0: dict | None = None) -> pd.DataFrame:
+def ros_params() -> dict:
+    p = C.PARAMS / "ros_interval.json"
+    if not p.exists():
+        return {"v": 1.0, "games_var": False}
+    d = json.loads(p.read_text())
+    return {"v": float(d.get("v", 1.0)), "games_var": bool(d.get("games_var", False))}
+
+
+def players_ros(fz: dict, day: pd.Timestamp, results: pd.DataFrame, n0: dict | None = None,
+                interval_cal: bool = False) -> pd.DataFrame:
     """ORR 1.6: season-to-date and rest-of-season skater lines.
 
     Season to date from the box scores (orr.ingest). Rest of season: expected
@@ -222,8 +238,18 @@ def players_ros(fz: dict, day: pd.Timestamp, results: pd.DataFrame, n0: dict | N
     left = np.clip(total - sk.team.map(played).fillna(0).to_numpy(), 0, None)
     games = np.clip(sk.gp.to_numpy() / total, 0, 1) * left
     shape = k * (g0 + a0) + g_td + a_td
-    p = (k + n_td) / (k + n_td + np.maximum(games, 1e-9))
-    lo, hi = stats.nbinom.ppf(0.1, np.maximum(shape, 1e-9), p), stats.nbinom.ppf(0.9, np.maximum(shape, 1e-9), p)
+    ip = ros_params() if interval_cal else {"v": 1.0, "games_var": False}
+    if ip["v"] == 1.0 and not ip["games_var"]:         # 1.6: fixed games, conjugate NB
+        p = (k + n_td) / (k + n_td + np.maximum(games, 1e-9))
+        lo, hi = stats.nbinom.ppf(0.1, np.maximum(shape, 1e-9), p), stats.nbinom.ppf(0.9, np.maximum(shape, 1e-9), p)
+    else:                                              # 1.7: games and rate variance, simulated
+        rng = np.random.default_rng(C.SEED)
+        q = np.clip(sk.gp.to_numpy() / total, 0.01, 1)
+        g_draw = (rng.binomial(left.astype(int)[:, None], q[:, None], size=(len(sk), 400)) if ip["games_var"]
+                  else games[:, None])
+        lam = rng.gamma(np.maximum(shape / ip["v"], 1e-9)[:, None], (ip["v"] / (k + n_td))[:, None], size=(len(sk), 400))
+        pts = rng.poisson(lam * g_draw)
+        lo, hi = np.percentile(pts, 10, axis=1), np.percentile(pts, 90, axis=1)
     return pd.DataFrame({"player_id": sk.player_id, "name": sk.name, "team": sk.team, "pos": sk.pos,
                          "gp_td": n_td, "g_td": g_td, "a_td": a_td, "p_td": g_td + a_td,
                          "games_left": games, "g_ros": g_r * games, "a_ros": a_r * games,
@@ -385,7 +411,7 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     standings = S.summarise(sim)
     if cfg.get("sos"):          # ORR 1.6: remaining strength of schedule
         standings = standings.merge(remaining_sos(sch, done, cur), on="team", how="left")
-    ros = players_ros(fz, day, res) if cfg.get("ros_file") else None
+    ros = players_ros(fz, day, res, interval_cal=bool(cfg.get("ros_interval"))) if cfg.get("ros_file") else None
 
     outdir = LIVE / date
     outdir.mkdir(parents=True, exist_ok=True)

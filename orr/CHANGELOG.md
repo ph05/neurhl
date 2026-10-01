@@ -2,6 +2,13 @@
 
 ORR (Odds, Ratings & Rosters) is versioned by what it forecasts in-season. The scored 2026-27 preseason forecast (`orr/output/freeze_2027/`, ORR 1.0) is frozen; later versions change the daily in-season forecasts from the day they ship, and each forecast counts only for games after its publication. Release notes with evidence are in `orr/releases/`.
 
+## 1.7 (2026-10-01): what you see is current
+
+- **In-season standings and odds** are the website default, with a View selector back to the frozen preseason file.
+- **Rest-of-season player intervals** now simulate games played and inflate rate variance (v = 3). On held-out 2021-23 the interval score is 25.53 vs 28.29 (CI −3.07 to −2.43), and coverage rises from 0.62 to 0.73. Still under 80%.
+- **Rest and travel** for both teams on the Today table.
+- **Version stamps** on daily forecasts, and a version history on the changelog page.
+
 ## 1.6 (2026-10-01): the full picture
 
 - **Upstream NeurHL in the scorer.** `orr.score --neurhl-live` scores NeurHL's committed pregame forecasts; the daily Action uses it.

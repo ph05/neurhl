@@ -2,6 +2,15 @@
 
 A version ships every cycle. Each cycle opens with a brainstorm, and every feature considered there is planned into the next version. A feature that fails its backtest still ships, but behind a switch with the result documented; it is not silently dropped. Release notes are in this folder.
 
+## 1.8 (planned): fix what 1.7 measured
+
+Brainstorm, held after 1.7 shipped. Every item is planned into 1.8:
+
+1. **Rest-of-season intervals, second pass.** 1.7's best v sat at the grid edge (3) with 73% coverage. Extend the tuning grid (v ∈ {3, 4, 6, 9}). Add an injury-spell term: with the player's historical probability of a multi-game absence, a share of the remaining games is removed in a block. Tune on ≤2017; test once on 2021-23.
+2. **Goalie rest-of-season lines.** Mirror the skater file for goalies: season-to-date starts, saves and save %; rest-of-season starts from 1.4's shares × team games left; save % from 1.3's talent. 80% intervals by simulation. Published as `goalies_ros_<date>.csv` and linked.
+3. **Team stat table in-season.** The website's team-statistics table follows the standings View selector. Goals for and against come from the daily run; shots come from rest-of-season player lines plus box-score totals to date.
+4. **Forecast diff.** Each daily run records how each game's probability changed since the previous forecast of that game, and why: ratings, starters or lineups. Shown as a "Changed since last run" column on the Today table.
+
 ## 1.7 (planned): what you see is current
 
 Brainstorm, held after 1.6 shipped. Every item is planned into 1.7:
