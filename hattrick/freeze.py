@@ -523,3 +523,7 @@ def player_lines(teams: pd.DataFrame):
     gl["wins"] = gl.starts * gl.team.map(t.w / t.gp)
     gl = gl.drop(columns=[c for c in ("wins_placeholder",) if c in gl])
     return sk, gl
+
+
+if __name__ == "__main__":
+    main()
