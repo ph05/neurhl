@@ -1,6 +1,6 @@
 """Build the ORR 2026-27 dashboard (one self-contained HTML page).
 
-    python3 -m orr.site.build_dashboard   ->  orr/output/dashboard.html
+    python3 -m orr.site.build_dashboard   ->  docs/orr/compare.html (GitHub Pages)
 
 Data: the preseason freeze (orr/output/freeze_2027/), NeurHL's 1.1 and
 1.3 releases for comparison, the 2026-08-17 market lines, and the scorecard.
@@ -15,7 +15,7 @@ import pandas as pd
 from orr import config as C
 
 F = C.OUT / "freeze_2027"
-OUT = C.OUT / "dashboard.html"
+OUT = C.ROOT / "docs" / "orr" / "compare.html"   # GitHub Pages: ph05.github.io/neurhl/orr/compare.html
 
 
 def _r(x, n=1):
@@ -93,7 +93,12 @@ SUMMARY = [
 ]
 
 
-PAGE = r"""<title>ORR 2026–27</title>
+PAGE = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORR vs NeurHL 2026–27</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -159,13 +164,16 @@ input[type=search], select { font: 14px var(--body); color: var(--ink); backgrou
 .prob span { position: absolute; left: 0; top: 0; bottom: 0; background: var(--bar); }
 footer { color: var(--muted); font-size: 12px; }
 @media (prefers-reduced-motion: no-preference) { tr td { transition: background .12s; } }
+body { margin: 0; }
 </style>
-
+</head>
+<body>
 <div class="wrap">
 <header class="board">
   <h1>ORR <span>2026–27</span></h1>
   <p class="sub">NHL projections from information dated before the first puck drop (2026-09-29, 5:00 pm ET), built after the season began and scored against every NeurHL release only on games after publication. Standings anchor to the sportsbook line, re-price the news it had not seen with the player model, and blend in team history. Games come from one scoring model, players from regressed per-60 rates with conserved ice time.</p>
   <div class="chips" id="chips"></div>
+  <p class="sub"><a href="index.html" style="color: var(--blue)">ORR projections: standings, games, skaters, goalies</a></p>
 </header>
 
 <section aria-labelledby="h-sum">
@@ -294,6 +302,8 @@ $("#sc").innerHTML = `<thead><tr><th>Forecast</th><th class="num">Games</th><th 
 $("#scnote").textContent = `Through ${D.card.through || "—"}: ${D.card.games_played || 0} games. "After publication" counts only games that started after the file was published, the fair comparison. At this sample size the ranking is noise; a season of 1,344 games separates models by about 0.005.`;
 $("#foot").textContent = `Preseason file created ${D.created} from inputs dated before ${D.cutoff}. Built from orr/output/freeze_2027 and NeurHL's published files.`;
 </script>
+</body>
+</html>
 """
 
 
@@ -301,6 +311,7 @@ def main():
     d = data()
     html = PAGE.replace("__DATA__", json.dumps(d, separators=(",", ":"))).replace(
         "__SUMMARY__", json.dumps(SUMMARY, ensure_ascii=False))
+    OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(html)
     print(f"-> {OUT} ({len(html) / 1024:.0f} KB)")
 

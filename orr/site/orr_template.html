@@ -1,3 +1,8 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ORR 2026-27 NHL Projections</title>
 <meta name="description" content="ORR (Odds, Ratings & Rosters): NHL projections for 2026-27. Standings, playoff odds, team and player projections, game probabilities and model accuracy.">
 <style>
@@ -35,13 +40,15 @@
   code { font-family: Menlo, Consolas, monospace; font-size: 11px; }
   dl { margin: 4px 0; } dt { font-weight: bold; margin-top: 6px; } dd { margin: 2px 0 2px 0; max-width: 88ch; }
 </style>
-
+</head>
+<body>
 <h1>ORR: 2026-27 NHL projections</h1>
 <div class="meta" id="meta"></div>
 <nav>
   <a href="#standings">Standings</a><a href="#odds">Playoff odds</a><a href="#teamstats">Team stats</a>
   <a href="#today">Today</a><a href="#games">Games</a><a href="#skaters">Skaters</a><a href="#goalies">Goalies</a>
   <a href="#scoring">Accuracy</a><a href="#method">Methodology</a><a href="#files">Files</a>
+  <a href="compare.html">ORR vs NeurHL</a>
   <a href="https://github.com/ph05/neurhl/tree/claude/gallant-maxwell-rbw7u6/orr">Repository</a>
 </nav>
 
@@ -247,3 +254,5 @@
     Object.entries(sha).map(([f, h]) => `<tr><td class="l"><a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/${f}">${esc(f)}</a></td><td class="l"><code>${h}</code></td></tr>`).join("") + "</tbody></table></div>";
 })();
 </script>
+</body>
+</html>
