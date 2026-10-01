@@ -104,6 +104,18 @@ def evidence() -> list:
         rows.append({"c": "In-season skater rates vs preseason rates, rest-of-season points MAE (1.2)",
                      "w": "2021-22 to 2022-23", "n": t["n"], "d": f"{t['d']['diff']:+.3f}",
                      "ci": f"{t['d']['ci95'][0]:+.3f} to {t['d']['ci95'][1]:+.3f}", "p": "<0.0001"})
+    sb = _rd(BT / "standings_inseason_bt.json")
+    if sb:
+        t = sb["test"]
+        rows.append({"c": "In-season standings vs preseason forecast, final points CRPS (1.4)", "w": "2021-22 to 2022-23",
+                     "n": t["filter_kbest"]["n"], "d": f"{t['filter_kbest']['crps'] - t['preseason']['crps']:+.2f}",
+                     "ci": "", "p": ""})
+    ss = _rd(BT / "start_share_bt.json")
+    if ss:
+        t = ss["test"]
+        rows.append({"c": "In-season goalie start shares vs preseason, rest-of-season starts MAE (1.4)",
+                     "w": "2021-22 to 2022-23", "n": t["n"], "d": f"{t['diff']:+.2f}",
+                     "ci": f"{t['ci95'][0]:+.2f} to {t['ci95'][1]:+.2f}", "p": ""})
     gb = _rd(BT / "gamefile_bt.json")
     if gb:
         v = gb["variants"]["mkt+td (shipped)"]["by_season"]
@@ -211,11 +223,19 @@ def main():
         if ap and ap.get("n"):
             live_rows.append({"name": names[k], "n": ap["n"], "log_loss": ap["log_loss"]})
     from orr.inseason import DEFAULT_MODEL, MODELS
+    # ORR 1.4: playoff odds by date (preseason file, then every committed daily run)
+    hist_dates, hist = ["2026-09-29"], {r.team: [_r(r.playoff_pct)] for r in t.itertuples()}
+    for f in sorted((C.OUT / "live").glob("*/standings_*.csv")):
+        sd = pd.read_csv(f).set_index("team").playoff_pct
+        hist_dates.append(f.parent.name)
+        for tm in hist:
+            hist[tm].append(_r(sd.get(tm)))
+    odds_history = {"dates": hist_dates, "labels": ["Preseason"] + hist_dates[1:], "teams": hist}
     data = {"meta": {"release": f"{MODELS[DEFAULT_MODEL]['version']} in-season (preseason file: ORR 1.0)", "cutoff": "2026-09-29 17:00 ET", "draws": 400, "sims": st.get("sims", 40000),
                      "tests": "7/7"},
             "live": {"as_of": card.get("through", "")[:10], "games_played": card.get("games_played", 0), "rows": live_rows},
             "teams": teams, "teams_x": tx, "tonight": tonight(g.set_index("game_id").p_home_win, elo),
-            "games": games, "skaters_x": skx, "has_td": td is not None, "goalies": gx, "evidence": evidence(),
+            "games": games, "skaters_x": skx, "has_td": td is not None, "odds_history": odds_history, "goalies": gx, "evidence": evidence(),
             "sha256": {f"orr/output/freeze_2027/{f}": hashlib.sha256((F / f).read_bytes()).hexdigest() for f in HASHED}}
     blob = json.dumps(data, separators=(",", ":"), default=lambda o: None if isinstance(o, float) and np.isnan(o) else o)
     html = (SITE / "orr_template.html").read_text().replace("__ORR_DATA__", blob.replace("</", "<\\/"))

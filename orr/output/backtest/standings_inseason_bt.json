@@ -1,0 +1,212 @@
+{
+ "protocol": "In-season standings backtest (ORR 1.4): are the in-season playoff odds calibrated?\n\nFor each season and each checkpoint (25%, 50%, 75% of its games, by date),\nthe in-season filter (ratings.InSeasonFilter, ORR 1.0 configuration, from the\nteam-history prior) is updated with the games so far and the rest of the\nseason is simulated (season.simulate, completed games fixed). Final points\nare scored with sample CRPS and 80% interval coverage, against:\n  * preseason:  the same simulation from the un-updated prior;\n  * pace:       points so far scaled to the full schedule (MAE only).\n\nTuned on 2012 and 2014-2017 only:\n  (1) k, the multiplier on the rest-of-season drift sd\n      (drift_full * sqrt(share of games left) * k), grid K;\n  (2) N for ORR 1.4's long-term-absence offsets (lineups.absence_offsets),\n      grid NS, at the chosen k.\nTest, run once: 2022 and 2023 (the last box-score seasons with lineups).\n\nPre-declared rules: k is adopted as tuned (it is a calibration constant).\nAbsence offsets go live (params/standings_inseason.json \"absence\": true)\nonly if they lower test CRPS at the chosen k; otherwise they ship off.\n\nRun: python3 -m orr.backtest.standings_inseason_bt\n",
+ "tuning": {
+  "by_k": {
+   "0.0": {
+    "n": 450,
+    "crps": 3.908867638333333,
+    "mae": 5.481836666666667,
+    "cover80": 0.8111111111111111
+   },
+   "0.5": {
+    "n": 450,
+    "crps": 3.908686417222222,
+    "mae": 5.480698888888889,
+    "cover80": 0.8155555555555556
+   },
+   "1.0": {
+    "n": 450,
+    "crps": 3.9102156155555554,
+    "mae": 5.483882222222221,
+    "cover80": 0.8111111111111111
+   },
+   "1.5": {
+    "n": 450,
+    "crps": 3.9094152727777782,
+    "mae": 5.4838233333333335,
+    "cover80": 0.8111111111111111
+   },
+   "2.0": {
+    "n": 450,
+    "crps": 3.9106557949999994,
+    "mae": 5.487507777777778,
+    "cover80": 0.8066666666666666
+   },
+   "3.0": {
+    "n": 450,
+    "crps": 3.9156852205555555,
+    "mae": 5.492827777777777,
+    "cover80": 0.8088888888888889
+   }
+  },
+  "by_n": {
+   "5": {
+    "n": 450,
+    "crps": 3.926472455,
+    "mae": 5.517625555555555,
+    "cover80": 0.8177777777777778
+   },
+   "10": {
+    "n": 450,
+    "crps": 3.9306074894444443,
+    "mae": 5.515594444444444,
+    "cover80": 0.8111111111111111
+   },
+   "20": {
+    "n": 450,
+    "crps": 3.914143142777778,
+    "mae": 5.483185555555555,
+    "cover80": 0.8177777777777778
+   }
+  },
+  "k_best": 0.5,
+  "n_best": 20
+ },
+ "test": {
+  "filter_k1": {
+   "n": 192,
+   "crps": 3.844094634114583,
+   "mae": 5.482856770833333,
+   "cover80": 0.859375
+  },
+  "filter_kbest": {
+   "n": 192,
+   "crps": 3.8393201770833336,
+   "mae": 5.473822916666667,
+   "cover80": 0.859375
+  },
+  "preseason": {
+   "n": 192,
+   "crps": 4.988892833333334,
+   "mae": 7.080666666666666,
+   "cover80": 0.6614583333333334
+  },
+  "absence": {
+   "n": 192,
+   "crps": 3.840077109375,
+   "mae": 5.472083333333333,
+   "cover80": 0.8645833333333334
+  },
+  "pace": {
+   "n": 192,
+   "mae": 7.07293614867888
+  },
+  "by_checkpoint": {
+   "0.25": {
+    "filter_k1": 5.187076367187499,
+    "filter_kbest": 5.17716358203125,
+    "preseason": 6.787969589843749,
+    "absence": 5.17716358203125,
+    "pace_mae": 11.097651549871735
+   },
+   "0.5": {
+    "filter_k1": 3.91205383203125,
+    "filter_kbest": 3.9100911484375,
+    "preseason": 4.91263145703125,
+    "absence": 3.91807649609375,
+    "pace_mae": 6.2195314644519035
+   },
+   "0.75": {
+    "filter_k1": 2.433153703125,
+    "filter_kbest": 2.43070580078125,
+    "preseason": 3.266077453125,
+    "absence": 2.4249912499999997,
+    "pace_mae": 3.9016254317130024
+   }
+  },
+  "absent_players_flagged": [
+   0,
+   10,
+   48,
+   0,
+   14,
+   43
+  ],
+  "absence_minus_filter": {
+   "diff": 0.0007569322916666857,
+   "ci95": [
+    -0.009122796451822856,
+    0.010207837695312468
+   ]
+  }
+ },
+ "absence_adopted": false,
+ "ledger": [
+  {
+   "stage": "drift",
+   "k": 0.0,
+   "n": 450,
+   "crps": 3.908867638333333,
+   "mae": 5.481836666666667,
+   "cover80": 0.8111111111111111
+  },
+  {
+   "stage": "drift",
+   "k": 0.5,
+   "n": 450,
+   "crps": 3.908686417222222,
+   "mae": 5.480698888888889,
+   "cover80": 0.8155555555555556
+  },
+  {
+   "stage": "drift",
+   "k": 1.0,
+   "n": 450,
+   "crps": 3.9102156155555554,
+   "mae": 5.483882222222221,
+   "cover80": 0.8111111111111111
+  },
+  {
+   "stage": "drift",
+   "k": 1.5,
+   "n": 450,
+   "crps": 3.9094152727777782,
+   "mae": 5.4838233333333335,
+   "cover80": 0.8111111111111111
+  },
+  {
+   "stage": "drift",
+   "k": 2.0,
+   "n": 450,
+   "crps": 3.9106557949999994,
+   "mae": 5.487507777777778,
+   "cover80": 0.8066666666666666
+  },
+  {
+   "stage": "drift",
+   "k": 3.0,
+   "n": 450,
+   "crps": 3.9156852205555555,
+   "mae": 5.492827777777777,
+   "cover80": 0.8088888888888889
+  },
+  {
+   "stage": "absence",
+   "N": 5,
+   "k": 0.5,
+   "n": 450,
+   "crps": 3.926472455,
+   "mae": 5.517625555555555,
+   "cover80": 0.8177777777777778
+  },
+  {
+   "stage": "absence",
+   "N": 10,
+   "k": 0.5,
+   "n": 450,
+   "crps": 3.9306074894444443,
+   "mae": 5.515594444444444,
+   "cover80": 0.8111111111111111
+  },
+  {
+   "stage": "absence",
+   "N": 20,
+   "k": 0.5,
+   "n": 450,
+   "crps": 3.914143142777778,
+   "mae": 5.483185555555555,
+   "cover80": 0.8177777777777778
+  }
+ ],
+ "secs": 189.0712697505951
+}

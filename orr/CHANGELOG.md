@@ -2,6 +2,13 @@
 
 ORR (Odds, Ratings & Rosters) is versioned by what it forecasts in-season. The scored 2026-27 preseason forecast (`orr/output/freeze_2027/`, ORR 1.0) is frozen; later versions change the daily in-season forecasts from the day they ship, and each forecast counts only for games after its publication. Release notes with evidence are in `orr/releases/`.
 
+## 1.4 (2026-10-01): the standings race
+
+- **In-season playoff odds backtested for the first time** (2021-23, run once). CRPS of final points is 3.84 against 4.99 for the preseason forecast; MAE is 5.47 against 7.07 for points pace. The rest-of-season drift multiplier is tuned (0.5; the surface is flat). 80% coverage is 0.86, slightly wide.
+- **In-season goalie start shares** (Dirichlet update, α = 10 games). Rest-of-season starts error falls from 6.13 to 5.29 (CI −1.12 to −0.56).
+- **Long-term absences in the rest-of-season simulation.** No measurable effect (+0.0008 CRPS, CI ±0.01), so the feature **ships off**.
+- **Playoff odds over time** chart on the website.
+
 ## 1.3 (2026-10-01): the live loop matches the backtest
 
 - **Box-score-first lineups and starters** for past games, ahead of NeurHL's pregame files, as in the X1 backtest (`box_first`).

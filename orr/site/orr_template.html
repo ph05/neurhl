@@ -37,6 +37,14 @@
   .note { color: var(--muted); font-size: 11px; }
   .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(540px, 100%), 1fr)); gap: 4px 24px; }
   .grid4 > div { min-width: 0; }
+  /* playoff-odds history: context lines muted, the selected team in the series blue */
+  :root { --hl:#2a78d6; --ctx:#9aa3ae; --grid:#e6e6e6; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --hl:#3987e5; --ctx:#5b6470; --grid:#2a2a2a; } }
+  :root[data-theme="dark"] { --hl:#3987e5; --ctx:#5b6470; --grid:#2a2a2a; }
+  .oh { position: relative; max-width: 760px; }
+  .oh svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .oh .tip { position: absolute; pointer-events: none; background: var(--bg); border: 1px solid var(--rule);
+             padding: 3px 6px; font-size: 11px; white-space: nowrap; }
   code { font-family: Menlo, Consolas, monospace; font-size: 11px; }
   dl { margin: 4px 0; } dt { font-weight: bold; margin-top: 6px; } dd { margin: 2px 0 2px 0; max-width: 88ch; }
 </style>
@@ -58,6 +66,10 @@
 
 <h2 id="odds">Playoff odds (%)</h2>
 <div class="wrap"><table id="t_odds"></table></div>
+<h3 id="odds_hist">Playoff odds over time</h3>
+<div class="controls"><label>Team <select id="oh_team"></select></label>
+  <span class="note">Grey lines: every other team. One point per committed forecast: the preseason file, then each daily run.</span></div>
+<div class="oh" id="oh"></div>
 
 <h2 id="teamstats">Projected team statistics (season totals)</h2>
 <p class="note">GF and GA include overtime goals and one goal for each shootout win, as in the standings. SF and PPG sum the team's skater projections; SA and SV% come from its goalie projections.</p>
@@ -188,6 +200,48 @@
     { k: "sh", h: "SH%", f: x => x == null ? "" : Number(x).toFixed(1) }, { k: "sv", h: "SV%", f: x => x == null ? "" : Number(x).toFixed(1) },
     { k: "ppg", h: "PPG", f: f0, t: "Power-play goals" }, { k: "rw", h: "RW", f: f1, t: "Regulation wins" }
   ], TX, { sort: "diff" });
+
+  // ---- playoff odds over time
+  (function () {
+    const H = D.odds_history; if (!H || !H.dates || !H.dates.length) return;
+    const sel = $("oh_team"), box = $("oh"), teams = Object.keys(H.teams).sort();
+    teams.forEach(t => sel.add(new Option((T0[t] || {}).name || t, t)));
+    sel.value = TX.slice().sort((a, b) => b.cup - a.cup)[0]?.ab || teams[0];
+    let W = 720; const Ht = 260, m = { l: 40, r: 70, t: 10, b: 28 }, n = H.dates.length;
+    const x = i => m.l + (n === 1 ? (W - m.l - m.r) / 2 : i * (W - m.l - m.r) / (n - 1));
+    const y = v => m.t + (1 - v / 100) * (Ht - m.t - m.b);
+    const path = vs => vs.map((v, i) => v == null ? "" : `${i && vs[i - 1] != null ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+    function draw() {
+      W = Math.max(300, Math.min(760, box.clientWidth || 720));
+      const t = sel.value, vs = H.teams[t], last = vs[vs.length - 1];
+      let g = "";
+      [0, 25, 50, 75, 100].forEach(v => g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)" stroke-width="1"/>` +
+        `<text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}%</text>`);
+      const step = Math.max(1, Math.ceil(n / 6));
+      H.labels.forEach((lb, i) => { if (i % step === 0 || i === n - 1) g += `<text x="${x(i)}" y="${Ht - 8}" text-anchor="middle" font-size="11" fill="var(--muted)">${esc(lb)}</text>`; });
+      teams.filter(o => o !== t).forEach(o => g += `<path d="${path(H.teams[o])}" fill="none" stroke="var(--ctx)" stroke-width="1" opacity="0.45"/>`);
+      g += `<path d="${path(vs)}" fill="none" stroke="var(--hl)" stroke-width="2"/>`;
+      vs.forEach((v, i) => { if (v != null) g += `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="var(--hl)" stroke="var(--bg)" stroke-width="2"/>`; });
+      if (last != null) g += `<text x="${x(n - 1) + 8}" y="${y(last) + 4}" font-size="12" fill="var(--fg)">${esc(t)} ${Number(last).toFixed(0)}%</text>`;
+      g += `<line id="oh_x" y1="${m.t}" y2="${Ht - m.b}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/>` +
+        `<rect id="oh_hit" x="${m.l - 10}" y="0" width="${W - m.l - m.r + 20}" height="${Ht}" fill="transparent"/>`;
+      box.innerHTML = `<svg viewBox="0 0 ${W} ${Ht}" role="img" aria-label="Playoff odds of ${esc(t)} by date">${g}</svg><div class="tip" hidden></div>`;
+      const svg = box.querySelector("svg"), tip = box.querySelector(".tip"), cx = box.querySelector("#oh_x");
+      box.querySelector("#oh_hit").addEventListener("pointermove", ev => {
+        const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * W / r.width;
+        let i = n === 1 ? 0 : Math.round((px - m.l) / ((W - m.l - m.r) / (n - 1)));
+        i = Math.max(0, Math.min(n - 1, i));
+        cx.setAttribute("x1", x(i)); cx.setAttribute("x2", x(i)); cx.setAttribute("visibility", "visible");
+        tip.hidden = false; tip.textContent = `${H.labels[i]}: ${t} ${vs[i] == null ? "n/a" : Number(vs[i]).toFixed(1) + "%"}`;
+        const px0 = x(i) * r.width / W, right = px0 < r.width * 0.6;
+        tip.style.left = right ? `${px0 + 8}px` : ""; tip.style.right = right ? "" : `${r.width - px0 + 8}px`;
+        tip.style.top = `${m.t}px`;
+      });
+      box.querySelector("#oh_hit").addEventListener("pointerleave", () => { cx.setAttribute("visibility", "hidden"); tip.hidden = true; });
+    }
+    sel.onchange = draw; draw();
+    let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(draw, 150); });
+  })();
 
   // ---- today
   const TN = D.tonight || { games: [] };

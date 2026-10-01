@@ -1,0 +1,44 @@
+{
+ "protocol": "In-season goalie start shares (ORR 1.4).\n\nPreseason start shares come from goalies.deploy_goalies on the opening-roster\nproxy (as goalies_bt.starts_check). At checkpoints after 25%, 50% and 75% of\na season (by date), each team's shares are updated with its box-score starts\nso far, as a Dirichlet posterior mean:\n\n    share = (alpha * preseason_share + starts_so_far) / (alpha + team_games_so_far)\n\nand scored against each goalie's share of the team's REMAINING starts:\nerror = |share * games_left - starts_left| per team-goalie (any goalie with a\npreseason share or a start). alpha is chosen on 2012 and 2014-2017 from GRID;\nthe test (2022, 2023) runs once. Baseline: the preseason share (alpha = inf).\n\nRun: python3 -m orr.backtest.start_share_bt   -> orr/output/backtest/start_share_bt.json\n",
+ "ledger": [
+  {
+   "alpha": "2.0",
+   "tune_mae": 5.6953330939998725
+  },
+  {
+   "alpha": "5.0",
+   "tune_mae": 5.622000386498902
+  },
+  {
+   "alpha": "10.0",
+   "tune_mae": 5.601558616403802
+  },
+  {
+   "alpha": "20.0",
+   "tune_mae": 5.67472738361232
+  },
+  {
+   "alpha": "40.0",
+   "tune_mae": 5.858849831381752
+  },
+  {
+   "alpha": "80.0",
+   "tune_mae": 6.136420296719458
+  },
+  {
+   "alpha": "inf",
+   "tune_mae": 6.848492302033225
+  }
+ ],
+ "alpha": 10.0,
+ "test": {
+  "n": 690,
+  "mae_updated": 5.291428420089542,
+  "mae_preseason": 6.125576304473379,
+  "diff": -0.8341478843838367,
+  "ci95": [
+   -1.1226917191607664,
+   -0.5552012910115555
+  ]
+ }
+}
