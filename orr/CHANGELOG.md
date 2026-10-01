@@ -2,6 +2,13 @@
 
 ORR (Odds, Ratings & Rosters) is versioned by what it forecasts in-season. The scored 2026-27 preseason forecast (`orr/output/freeze_2027/`, ORR 1.0) is frozen; later versions change the daily in-season forecasts from the day they ship, and each forecast counts only for games after its publication. Release notes with evidence are in `orr/releases/`.
 
+## 1.8 (2026-10-01): fix what 1.7 measured
+
+- **Rest-of-season intervals reach nominal coverage.** A wider variance grid plus an injury-spell term (v = 6). On held-out 2021-23 the interval score is 25.07 vs 25.53 (CI -0.73 to -0.18), and coverage is 0.80.
+- **Goalie rest-of-season file** with intervals for starts and season save %.
+- **Team statistics follow the in-season view**, with shots from box scores plus rest-of-season lines.
+- **Forecast diff:** each game's change since its previous forecast, and why.
+
 ## 1.7 (2026-10-01): what you see is current
 
 - **In-season standings and odds** are the website default, with a View selector back to the frozen preseason file.

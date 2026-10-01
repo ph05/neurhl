@@ -2,6 +2,15 @@
 
 A version ships every cycle. Each cycle opens with a brainstorm, and every feature considered there is planned into the next version. A feature that fails its backtest still ships, but behind a switch with the result documented; it is not silently dropped. Release notes are in this folder.
 
+## 1.9 (planned): is ORR beating NeurHL?
+
+Brainstorm, held after 1.8 shipped. Every item is planned into 1.9:
+
+1. **Paired live comparison.** On the games where both forecasts are eligible, report ORR daily minus each NeurHL forecast in log loss with a paired bootstrap 95% CI, updated with every scorecard. Shown on the website with a plain verdict ("too few games", "ORR ahead", "level", "NeurHL ahead").
+2. **Live player-forecast reliability.** Score the daily P(goal), P(point) and P(3+ SOG) against box scores as games accumulate: log loss, and predicted vs actual rates by bin. Shown on the website.
+3. **Clinch and elimination flags.** From each daily simulation, flag teams at 100% (clinched) or 0% (eliminated) for playoffs, division and Presidents' Trophy, and compute the magic number of points to clinch a playoff spot against the ninth-placed team.
+4. **Freshness banner.** The website shows the age of the latest results and the latest forecast, and warns when either is older than 36 hours (a missed daily run).
+
 ## 1.8 (planned): fix what 1.7 measured
 
 Brainstorm, held after 1.7 shipped. Every item is planned into 1.8:

@@ -1,6 +1,7 @@
 {
- "v": 3.0,
+ "v": 6.0,
  "games_var": true,
+ "spell": true,
  "adopted": true,
- "source": "orr/backtest/ros_interval_bt.py"
+ "source": "orr/backtest/ros_interval2_bt.py"
 }

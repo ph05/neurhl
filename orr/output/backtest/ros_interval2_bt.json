@@ -1,0 +1,72 @@
+{
+ "protocol": "Rest-of-season skater intervals, second pass (ORR 1.8).\n\n1.7's best rate-variance multiplier (v = 3) sat at the edge of its grid with\n73% test coverage. This pass extends the grid, v in {3, 4, 6, 9}, and adds an\ninjury-spell term. Each player has a historical probability of a long\nabsence: p_spell is the smoothed share of his last three seasons with 15+\ngames missed, (k + 0.5) / (n + 2), or the league mean without history. A\nspell occurs in the remaining games with probability p_spell * (games left /\n82). When it occurs, it removes a uniform 0-60% of the player's remaining\ngames in one block. Setup and scoring as in ros_interval_bt.py (80% interval\nscore, coverage). Tuned on 2012 and 2014-2017; the test (2022, 2023) runs\nonce. Pre-declared rule: adopt the tuned configuration\n(params/ros_interval.json) only if its test interval score beats 1.7's\n(v = 3, games variance, no spells).\n\nRun: python3 -m orr.backtest.ros_interval2_bt\n",
+ "ledger": [
+  {
+   "v": 3.0,
+   "spell": false,
+   "tune_score": 22.951698610688574,
+   "tune_cover80": 0.7405942602170166
+  },
+  {
+   "v": 3.0,
+   "spell": true,
+   "tune_score": 23.006003447926176,
+   "tune_cover80": 0.7486056180914714
+  },
+  {
+   "v": 4.0,
+   "spell": false,
+   "tune_score": 22.68963593955988,
+   "tune_cover80": 0.7727411013081837
+  },
+  {
+   "v": 4.0,
+   "spell": true,
+   "tune_score": 22.77177771017138,
+   "tune_cover80": 0.7775073521955177
+  },
+  {
+   "v": 6.0,
+   "spell": false,
+   "tune_score": 22.659192779636957,
+   "tune_cover80": 0.8234458979819491
+  },
+  {
+   "v": 6.0,
+   "spell": true,
+   "tune_score": 22.63133556434439,
+   "tune_cover80": 0.8245614035087719
+  },
+  {
+   "v": 9.0,
+   "spell": false,
+   "tune_score": 23.193043301896363,
+   "tune_cover80": 0.871006997261941
+  },
+  {
+   "v": 9.0,
+   "spell": true,
+   "tune_score": 23.186603792718795,
+   "tune_cover80": 0.8670520231213873
+  }
+ ],
+ "best": {
+  "v": 6.0,
+  "spell": true,
+  "tune_score": 22.63133556434439,
+  "tune_cover80": 0.8245614035087719
+ },
+ "test": {
+  "n": 4272,
+  "score_best": 25.065987827715354,
+  "cover_best": 0.8012640449438202,
+  "score_1_7": 25.53024344569288,
+  "cover_1_7": 0.7258895131086143,
+  "diff": -0.464255617977527,
+  "ci95": [
+   -0.7271588249063664,
+   -0.17617216760299612
+  ]
+ },
+ "adopted": true
+}
