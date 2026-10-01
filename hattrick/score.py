@@ -47,8 +47,16 @@ GAME_FILES = {
     "neurhl_1.3": (C.ROOT / "neurhl/output/neurhl_1_3/season/games_2027.csv", "p_home_win", "2026-09-30T21:06:08Z"),
 }
 FIRST_PUCK_DROP = pd.Timestamp("2026-09-29T21:00:00Z")
-# A game counts as "after publication" when it falls on a later calendar date
-# than the publication (games start no earlier than ~16:00 UTC).
+LIVE_DEADLINE = pd.Timedelta(hours=15)
+
+
+def _deadline(date) -> pd.Timestamp:
+    """Latest publication (UTC, naive) that still precedes every game on `date`."""
+    d = pd.Timestamp(date)
+    first = FIRST_PUCK_DROP.tz_convert(None)
+    return first if d == first.normalize() else d + LIVE_DEADLINE
+# A game counts as "after publication" when the file was published before
+# 15:00 UTC (11:00 ET) on the game's date, earlier than any NHL start.
 TEAM_FILES = {
     "hattrick_preseason": FREEZE / "teams_2027.csv",
     "neurhl_1.0": C.ROOT / "neurhl/output/neurhl_1_0/teams_2027.csv",
@@ -98,7 +106,8 @@ def score_games(res: pd.DataFrame) -> dict:
                "published_utc": str(published),
                "published_before_first_game": bool(published is not None and published < FIRST_PUCK_DROP)}
         if published is not None:
-            later = [gid for gid in common if dates[gid].date() > published.date()]
+            later = [gid for gid in common
+                     if published.tz_convert(None) < _deadline(dates[gid])]
             row["after_publication"] = (_metrics(g.loc[later, col].to_numpy(float), y.loc[later].to_numpy())
                                         if later else {"n": 0})
         out[name] = row
@@ -127,10 +136,11 @@ def score_games(res: pd.DataFrame) -> dict:
         rows = [pd.read_csv(f) for f in sorted(hl.glob("*/games_*.csv"))]
         if rows:
             d = pd.concat(rows)
-            # a forecast counts only if created before its game's date (UTC);
-            # the pushed commit time is the external evidence (git log)
-            d = d[pd.to_datetime(d.created_utc).dt.tz_convert(None).dt.normalize()
-                  < pd.to_datetime(d.date)]
+            # a forecast counts only if created before 15:00 UTC (11:00 ET) on its
+            # game's date, earlier than any NHL start; the pushed commit time is
+            # the external evidence (git log)
+            d = d[pd.to_datetime(d.created_utc).dt.tz_convert(None)
+                  < pd.to_datetime(d.date).map(_deadline)]
             d = d.sort_values("created_utc").drop_duplicates("game_id", keep="first").set_index("game_id")
             common = y.index.intersection(d.index)
             if len(common):
