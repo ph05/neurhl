@@ -1,83 +1,89 @@
 {
- "through": "2026-09-29",
- "games_played": 5,
+ "through": "2026-09-30",
+ "games_played": 8,
  "games": {
   "orr_preseason": {
-   "n": 5,
-   "log_loss": 0.7502941710251846,
-   "brier": 0.27710758606,
-   "accuracy": 0.4,
+   "n": 8,
+   "log_loss": 0.710333756465236,
+   "brier": 0.2578860799125,
+   "accuracy": 0.5,
    "published_utc": "2026-10-01 00:37:30+00:00",
    "published_before_first_game": false,
    "after_publication": {
-    "n": 0
+    "n": 1,
+    "log_loss": 0.4813962797419874,
+    "brier": 0.14598512639999997,
+    "accuracy": 1.0
    }
   },
   "neurhl_0925_freeze": {
-   "n": 5,
-   "log_loss": 0.8564259576532406,
-   "brier": 0.3289734152902001,
-   "accuracy": 0.2,
+   "n": 8,
+   "log_loss": 0.7245712063774528,
+   "brier": 0.26458769656162506,
+   "accuracy": 0.5,
    "published_utc": "2026-09-25 00:00:00+00:00",
    "published_before_first_game": true,
    "after_publication": {
-    "n": 5,
-    "log_loss": 0.8564259576532406,
-    "brier": 0.3289734152902001,
-    "accuracy": 0.2
-   }
-  },
-  "neurhl_1.0": {
-   "n": 5,
-   "log_loss": 0.7262421961034218,
-   "brier": 0.26530866678,
-   "accuracy": 0.6,
-   "published_utc": "2026-09-29 02:12:11+00:00",
-   "published_before_first_game": true,
-   "after_publication": {
-    "n": 5,
-    "log_loss": 0.7262421961034218,
-    "brier": 0.26530866678,
-    "accuracy": 0.6
-   }
-  },
-  "neurhl_1.1": {
-   "n": 5,
-   "log_loss": 0.7389089214545927,
-   "brier": 0.27065731443999996,
-   "accuracy": 0.6,
-   "published_utc": "2026-09-29 20:53:49+00:00",
-   "published_before_first_game": true,
-   "after_publication": {
-    "n": 5,
-    "log_loss": 0.7389089214545927,
-    "brier": 0.27065731443999996,
-    "accuracy": 0.6
-   }
-  },
-  "neurhl_1.2": {
-   "n": 5,
-   "log_loss": 0.7404883245659482,
-   "brier": 0.27143222086,
-   "accuracy": 0.6,
-   "published_utc": "2026-09-30 01:41:45+00:00",
-   "published_before_first_game": false,
-   "after_publication": {
-    "n": 2,
-    "log_loss": 0.7979816841146685,
-    "brier": 0.29730105745,
+    "n": 8,
+    "log_loss": 0.7245712063774528,
+    "brier": 0.26458769656162506,
     "accuracy": 0.5
    }
   },
+  "neurhl_1.0": {
+   "n": 8,
+   "log_loss": 0.7034757518175232,
+   "brier": 0.25480149791249995,
+   "accuracy": 0.5,
+   "published_utc": "2026-09-29 02:12:11+00:00",
+   "published_before_first_game": true,
+   "after_publication": {
+    "n": 8,
+    "log_loss": 0.7034757518175232,
+    "brier": 0.25480149791249995,
+    "accuracy": 0.5
+   }
+  },
+  "neurhl_1.1": {
+   "n": 8,
+   "log_loss": 0.7147542815543126,
+   "brier": 0.2598502742875,
+   "accuracy": 0.5,
+   "published_utc": "2026-09-29 20:53:49+00:00",
+   "published_before_first_game": true,
+   "after_publication": {
+    "n": 8,
+    "log_loss": 0.7147542815543126,
+    "brier": 0.2598502742875,
+    "accuracy": 0.5
+   }
+  },
+  "neurhl_1.2": {
+   "n": 8,
+   "log_loss": 0.7150542697436746,
+   "brier": 0.2599968688625,
+   "accuracy": 0.5,
+   "published_utc": "2026-09-30 01:41:45+00:00",
+   "published_before_first_game": false,
+   "after_publication": {
+    "n": 5,
+    "log_loss": 0.7227911806697986,
+    "brier": 0.2634831923,
+    "accuracy": 0.4
+   }
+  },
   "neurhl_1.3": {
-   "n": 5,
-   "log_loss": 0.7404883245659482,
-   "brier": 0.27143222086,
-   "accuracy": 0.6,
+   "n": 8,
+   "log_loss": 0.7150542697436746,
+   "brier": 0.2599968688625,
+   "accuracy": 0.5,
    "published_utc": "2026-09-30 21:06:08+00:00",
    "published_before_first_game": false,
    "after_publication": {
-    "n": 0
+    "n": 3,
+    "log_loss": 0.6726641783732187,
+    "brier": 0.24093794886666667,
+    "accuracy": 0.3333333333333333
    }
   },
   "neurhl_G_pregame": {
@@ -101,32 +107,34 @@
  },
  "teams_interim": {
   "orr_preseason": {
-   "teams": 0,
-   "note": "no games after publication"
+   "teams": 2,
+   "mae_points_so_far": 0.77418,
+   "rmse_points_so_far": 0.7824194750260246
   },
   "neurhl_0925_freeze": {
-   "teams": 10,
-   "mae_points_so_far": 0.9103437000000001,
-   "rmse_points_so_far": 0.9694792570920227
+   "teams": 15,
+   "mae_points_so_far": 0.8256564000000001,
+   "rmse_points_so_far": 0.8739442235558667
   },
   "neurhl_1.0": {
-   "teams": 10,
-   "mae_points_so_far": 0.7823239999999999,
-   "rmse_points_so_far": 0.8362410680539433
+   "teams": 15,
+   "mae_points_so_far": 0.7845633333333334,
+   "rmse_points_so_far": 0.855428501867144
   },
   "neurhl_1.1": {
-   "teams": 10,
-   "mae_points_so_far": 0.7937749999999999,
-   "rmse_points_so_far": 0.8510624360351008
+   "teams": 15,
+   "mae_points_so_far": 0.7877806666666667,
+   "rmse_points_so_far": 0.8653788760883872
   },
   "neurhl_1.2": {
-   "teams": 4,
-   "mae_points_so_far": 0.7486675,
-   "rmse_points_so_far": 0.8284994748489585
+   "teams": 10,
+   "mae_points_so_far": 0.881897,
+   "rmse_points_so_far": 0.9323525340610171
   },
   "neurhl_1.3": {
-   "teams": 0,
-   "note": "no games after publication"
+   "teams": 6,
+   "mae_points_so_far": 0.9707166666666667,
+   "rmse_points_so_far": 0.9955875115059784
   }
  },
  "teams_final": {
