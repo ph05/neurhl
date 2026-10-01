@@ -79,19 +79,17 @@ def load_results(path, before: pd.Timestamp) -> pd.DataFrame:
 
 def starter_diffs(fz: dict, games: pd.DataFrame, starters: pd.DataFrame | None) -> pd.DataFrame:
     """Known starters' save talent minus the team's expected start mix, in the
-    scoring model's fitted goalie units (gamemodel.goalie_talent_2027)."""
+    scoring model's fitted goalie units (structural.goalie_talent_2027)."""
     out = pd.DataFrame({"game_id": games.game_id.to_numpy(), "diff_h": np.nan, "diff_a": np.nan})
     g = fz.get("goalies")
     if starters is None or g is None or not len(starters):
         return out
-    from hattrick import gamemodel as GM
-    tal = GM.goalie_talent_2027()
-    g = g.assign(talent=g.player_id.map(tal).fillna(0.0))
-    mix = (g.assign(w=g.start_share * g.talent).groupby("team").w.sum()
-           / g.groupby("team").start_share.sum())
+    from hattrick import structural as ST
+    tal = ST.goalie_talent_2027()
+    mix = ST.usual_starter_talent(g, tal)
     s = games[["game_id", "home", "away"]].merge(starters, on="game_id", how="left")
     for side, col in (("home", "diff_h"), ("away", "diff_a")):
-        t = s[f"goalie_{side}"].map(tal)
+        t = s[f"goalie_{side}"].map(tal).fillna(ST.goalie_talent_default()).where(s[f"goalie_{side}"].notna())
         out[col] = (t - s[side].map(mix)).to_numpy()
     return out
 
