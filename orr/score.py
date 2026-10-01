@@ -66,6 +66,24 @@ def _first_start_by_date() -> dict:
     return starts
 
 
+@functools.lru_cache(maxsize=1)
+def _start_by_game() -> dict:
+    """Scheduled start (UTC, naive) of every 2026-27 regular-season game."""
+    out = {}
+    for f in sorted((C.ROOT / "data" / "raw").glob("nhl_sched_*_20262027.json")):
+        for g in json.loads(f.read_text()).get("games", []):
+            if g.get("gameType") == 2 and g.get("startTimeUTC"):
+                out[int(g["id"])] = pd.Timestamp(g["startTimeUTC"]).tz_convert(None)
+    return out
+
+
+def _game_deadline(gid, date) -> pd.Timestamp:
+    """A forecast counts for a game when published before its scheduled
+    puck drop (the rule NeurHL's pregame forecasts also follow); without a
+    known start time, the date-level rule below."""
+    return _start_by_game().get(int(gid), _deadline(date))
+
+
 def _deadline(date) -> pd.Timestamp:
     """Latest publication (UTC, naive) that still precedes every game on
     `date`: the earlier of 15:00 UTC and that date's first scheduled start."""
@@ -75,8 +93,7 @@ def _deadline(date) -> pd.Timestamp:
         return first
     return min(d + LIVE_DEADLINE, _first_start_by_date().get(d, d + LIVE_DEADLINE))
 # A game counts as "after publication" when the file was published before
-# 15:00 UTC (11:00 ET) on the game's date and before that date's first
-# scheduled start (see _deadline).
+# the game's scheduled puck drop (_game_deadline).
 TEAM_FILES = {
     "orr_preseason": FREEZE / "teams_2027.csv",
     "neurhl_1.0": C.ROOT / "neurhl/output/neurhl_1_0/teams_2027.csv",
@@ -127,7 +144,7 @@ def score_games(res: pd.DataFrame) -> dict:
                "published_before_first_game": bool(published is not None and published < FIRST_PUCK_DROP)}
         if published is not None:
             later = [gid for gid in common
-                     if published.tz_convert(None) < _deadline(dates[gid])]
+                     if published.tz_convert(None) < _game_deadline(gid, dates[gid])]
             row["after_publication"] = (_metrics(g.loc[later, col].to_numpy(float), y.loc[later].to_numpy())
                                         if later else {"n": 0})
         out[name] = row
@@ -160,7 +177,7 @@ def score_games(res: pd.DataFrame) -> dict:
             # (_deadline); created_utc is the file's own stamp, and the pushed
             # commit time (git log) is the external evidence that it held
             d = d[pd.to_datetime(d.created_utc).dt.tz_convert(None)
-                  < pd.to_datetime(d.date).map(_deadline)]
+                  < pd.Series([_game_deadline(i, x) for i, x in zip(d.game_id, d.date)], index=d.index)]
             # the LATEST forecast made before the deadline counts (all candidates
             # precede the game, so this is the best-informed pre-game forecast)
             d = d.sort_values("created_utc").drop_duplicates("game_id", keep="last").set_index("game_id")
@@ -194,7 +211,7 @@ def score_teams_interim(res: pd.DataFrame) -> dict:
         published = _published(name, pub_s)
         if published is not None:      # only games that started after publication
             pub = published.tz_convert(None)
-            g = g[[pub < _deadline(d) for d in g.date]]
+            g = g[[pub < _game_deadline(i, d) for i, d in zip(g.game_id, g.date)]]
         if not len(g):
             out[name] = {"teams": 0, "note": "no games after publication"}
             continue

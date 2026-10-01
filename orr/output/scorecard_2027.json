@@ -63,7 +63,10 @@
    "published_utc": "2026-09-30 01:41:45+00:00",
    "published_before_first_game": false,
    "after_publication": {
-    "n": 0
+    "n": 2,
+    "log_loss": 0.7979816841146685,
+    "brier": 0.29730105745,
+    "accuracy": 0.5
    }
   },
   "neurhl_1.3": {
@@ -117,8 +120,9 @@
    "rmse_points_so_far": 0.8510624360351008
   },
   "neurhl_1.2": {
-   "teams": 0,
-   "note": "no games after publication"
+   "teams": 4,
+   "mae_points_so_far": 0.7486675,
+   "rmse_points_so_far": 0.8284994748489585
   },
   "neurhl_1.3": {
    "teams": 0,

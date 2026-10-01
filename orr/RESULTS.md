@@ -259,7 +259,7 @@ Each item's code, logs and every configuration tried are in `orr/experiments/<ID
   - NeurHL-G, H and Elo pregame forecasts;
   - ORR's in-season forecasts.
 
-  Each preseason file is also scored on the games after its own publication time (`after_publication`). A file or daily forecast counts for a game only if published before 15:00 UTC on the game's date, or before the 21:00 UTC first puck drop on opening night. The pushed commit time is the external evidence.
+  Each preseason file is also scored on the games after its own publication time (`after_publication`). A file or daily forecast counts for a game only if published before that game's scheduled puck drop (from the NHL schedule), the rule NeurHL's pregame forecasts also follow. The pushed commit time is the external evidence.
 - **Interim team scoring** compares points earned with each model's expected points for the games actually played. At season end the scorer reports points MAE, RMSE and CRPS. The output is `orr/output/scorecard_2027.json`.
 - **Daily loop.**
   1. `python3 -m orr.ingest` appends finished games, from the NHL API or by hand with `--add`, each checked against the schedule.
