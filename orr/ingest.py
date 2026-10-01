@@ -2,6 +2,7 @@
 
     python3 -m orr.ingest                       # NHL API, every finished day
     python3 -m orr.ingest --add "2026020006,2026-09-30,PHI,PIT,4,2,REG"   # by hand
+    python3 -m orr.ingest --add "2026020006,2026-09-30,PHI,PIT,4,2,REG,manual,31,27"   # with shots on goal
 
 The NHL score endpoint (api-web.nhle.com/v1/score/<date>) is used where the
 network allows it. Where it does not (this project's build container blocks
@@ -78,13 +79,16 @@ def fetch_api(through: dt.date) -> pd.DataFrame:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--add", action="append", default=[],
-                    help="game_id,date,home,away,home_g,away_g,last_period[,source]")
+                    help="game_id,date,home,away,home_g,away_g,last_period[,source[,shots_home,shots_away]]")
     ap.add_argument("--merge", help="CSV with the same columns")
     ap.add_argument("--through", default=str(dt.date.today() - dt.timedelta(days=1)))
     a = ap.parse_args()
     if a.add or a.merge:
         rows = [r.split(",") for r in a.add]
-        new = pd.DataFrame([r + ["manual"] * (8 - len(r)) for r in rows], columns=COLS)
+        rows = [r + ["manual"] * (8 - len(r)) if len(r) < 8 else r for r in rows]
+        rows = [r + [None, None] if len(r) == 8 else r for r in rows]
+        new = pd.DataFrame(rows, columns=COLS + OPTIONAL)
+        new[OPTIONAL] = new[OPTIONAL].apply(pd.to_numeric, errors="coerce")
         if a.merge:
             m = pd.read_csv(a.merge)
             m["source"] = m.get("source", a.merge)

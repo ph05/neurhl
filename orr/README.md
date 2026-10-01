@@ -99,13 +99,15 @@ python3 -m orr.ratings                     # game-model parameters for 2026-27
 python3 -m orr.freeze --sims 40000  # refuses to run with uncommitted model code unless --allow-dirty
 
 # in-season, each day
-python3 -m orr.ingest               # or: --add "game_id,date,home,away,home_g,away_g,REG|OT|SO"
+python3 -m orr.ingest               # NHL API, with shots; or --add "id,date,home,away,hg,ag,REG|OT|SO[,source,shots_h,shots_a]"
 python3 -m orr.inseason --date 2026-10-02 [--goalies starters.csv]
 python3 -m orr.score                # scorecard against NeurHL
 
 # tests
 for t in test_season test_players test_gamemodel test_freeze test_inseason; do python3 -m orr.tests.$t; done
 ```
+
+**Shots matter in-season.** Run `ingest` where the NHL API is reachable, so results carry shots on goal. The filter updated on goals and shots ties NeurHL-G in the backtest (0.6606 vs 0.6601). On goals alone it is significantly worse (0.6634); see RESULTS.
 
 The game table (`orr/cache/gametable.parquet`) is built on first use.
 

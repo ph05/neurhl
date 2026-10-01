@@ -204,25 +204,25 @@
    "strict": {
     "A": {
      "n": 537,
-     "mae": 8.864903365047049,
-     "rmse": 11.77877780527604,
-     "bias": -1.0516840280565043,
-     "corr": 0.8121119838661234,
-     "mae_g": 3.8294108399156492,
-     "mae_a": 6.043424824961649,
-     "calib_slope": 0.9287526448040034,
-     "cov80_p": 0.7951582867783985,
-     "cov80_g": 0.819366852886406,
-     "cov80_a": 0.8063314711359404
+     "mae": 8.963173336857206,
+     "rmse": 11.895054050243388,
+     "bias": -1.1879141318481903,
+     "corr": 0.8093287623125921,
+     "mae_g": 3.8644210210346626,
+     "mae_a": 6.096508521711958,
+     "calib_slope": 0.916112294102104,
+     "cov80_p": 0.7858472998137802,
+     "cov80_g": 0.8044692737430168,
+     "cov80_a": 0.8007448789571695
     },
     "B": {
      "n": 534,
-     "mae": 8.717000286194676,
-     "rmse": 11.533625674897891,
-     "bias": -0.3499153770470335,
-     "corr": 0.8108006398231535,
-     "mae_g": 3.7813596159567986,
-     "mae_a": 5.927622697324443
+     "mae": 8.811992631097048,
+     "rmse": 11.64603418879608,
+     "bias": -0.4779886664353591,
+     "corr": 0.8080174821301558,
+     "mae_g": 3.8166275257094484,
+     "mae_a": 5.977024695219767
     },
     "all": {
      "n": 623,
@@ -330,25 +330,25 @@
    "strict": {
     "A": {
      "n": 542,
-     "mae": 8.630110970208555,
-     "rmse": 11.564277699698241,
-     "bias": -2.5558545892423608,
-     "corr": 0.805191385974234,
-     "mae_g": 3.903201177413749,
-     "mae_a": 5.943941091533556,
-     "calib_slope": 0.9158545952911135,
-     "cov80_p": 0.8007380073800738,
-     "cov80_g": 0.7896678966789668,
-     "cov80_a": 0.7970479704797048
+     "mae": 8.777879310713468,
+     "rmse": 11.767783945966357,
+     "bias": -2.7084899989347733,
+     "corr": 0.799897240827277,
+     "mae_g": 3.955641024094344,
+     "mae_a": 6.037604191274786,
+     "calib_slope": 0.8991419062483595,
+     "cov80_p": 0.7933579335793358,
+     "cov80_g": 0.7804428044280443,
+     "cov80_a": 0.7841328413284133
     },
     "B": {
      "n": 541,
-     "mae": 8.505031906622722,
-     "rmse": 11.391093288498489,
-     "bias": -2.212736713986392,
-     "corr": 0.8047429150792772,
-     "mae_g": 3.8692877651241555,
-     "mae_a": 5.858392215879602
+     "mae": 8.652494360488923,
+     "rmse": 11.594675138343916,
+     "bias": -2.3656542593713965,
+     "corr": 0.7994551982801544,
+     "mae_g": 3.9215127599524133,
+     "mae_a": 5.952120212538932
     },
     "all": {
      "n": 626,
@@ -456,25 +456,25 @@
    "strict": {
     "A": {
      "n": 555,
-     "mae": 7.940504526943121,
-     "rmse": 10.928645088730734,
-     "bias": -1.7800607766812728,
-     "corr": 0.8133838495474801,
-     "mae_g": 3.7763837959204385,
-     "mae_a": 5.4715409856408215,
-     "calib_slope": 0.9199226707145949,
-     "cov80_p": 0.8342342342342343,
-     "cov80_g": 0.8198198198198198,
-     "cov80_a": 0.8216216216216217
+     "mae": 8.070568424683488,
+     "rmse": 11.154315178980605,
+     "bias": -1.9101246744216398,
+     "corr": 0.806720668371071,
+     "mae_g": 3.821540073658145,
+     "mae_a": 5.548297179572851,
+     "calib_slope": 0.9029380836183099,
+     "cov80_p": 0.8252252252252252,
+     "cov80_g": 0.8108108108108109,
+     "cov80_a": 0.8144144144144144
     },
     "B": {
      "n": 551,
-     "mae": 7.790367260851577,
-     "rmse": 10.66392873759973,
-     "bias": -1.0951239091874188,
-     "corr": 0.8118700143214543,
-     "mae_g": 3.7117827284982834,
-     "mae_a": 5.386746920967012
+     "mae": 7.916160300882343,
+     "rmse": 10.88756391215787,
+     "bias": -1.2209169492181853,
+     "corr": 0.8051570949005185,
+     "mae_g": 3.755507299705306,
+     "mae_a": 5.460259096397513
     },
     "all": {
      "n": 611,
@@ -582,25 +582,25 @@
    "strict": {
     "A": {
      "n": 536,
-     "mae": 8.10234845465758,
-     "rmse": 10.691507110176751,
-     "bias": -1.7279263103477704,
-     "corr": 0.8259895827312843,
-     "mae_g": 3.861379457318409,
-     "mae_a": 5.567351828047271,
-     "calib_slope": 0.9626222176228575,
-     "cov80_p": 0.8097014925373134,
-     "cov80_g": 0.7985074626865671,
-     "cov80_a": 0.8097014925373134
+     "mae": 8.266524095404948,
+     "rmse": 10.951011166445038,
+     "bias": -1.8921019510951367,
+     "corr": 0.8182386445434472,
+     "mae_g": 3.924707445380506,
+     "mae_a": 5.663117330626314,
+     "calib_slope": 0.9406560001999476,
+     "cov80_p": 0.7985074626865671,
+     "cov80_g": 0.7817164179104478,
+     "cov80_a": 0.792910447761194
     },
     "B": {
      "n": 533,
-     "mae": 7.837308106040685,
-     "rmse": 10.304460648850508,
-     "bias": -1.1308487288748332,
-     "corr": 0.8287782368951374,
-     "mae_g": 3.75588665740523,
-     "mae_a": 5.39807162251614
+     "mae": 8.002407812308205,
+     "rmse": 10.5663843928105,
+     "bias": -1.295948435142354,
+     "corr": 0.8209794730234502,
+     "mae_g": 3.819571088176869,
+     "mae_a": 5.494286801380583
     },
     "all": {
      "n": 609,
@@ -708,25 +708,25 @@
    "strict": {
     "A": {
      "n": 537,
-     "mae": 8.548971750031582,
-     "rmse": 11.393718718026653,
-     "bias": -1.5416146133439965,
-     "corr": 0.8006054756577076,
-     "mae_g": 4.083231323657175,
-     "mae_a": 5.78684983031035,
-     "calib_slope": 0.8987224920357877,
-     "cov80_p": 0.7821229050279329,
-     "cov80_g": 0.7988826815642458,
-     "cov80_a": 0.7877094972067039
+     "mae": 8.714567106814004,
+     "rmse": 11.614314236020736,
+     "bias": -1.7148615378581202,
+     "corr": 0.7947611907985704,
+     "mae_g": 4.133221309425932,
+     "mae_a": 5.885434829501876,
+     "calib_slope": 0.8796944279519552,
+     "cov80_p": 0.770949720670391,
+     "cov80_g": 0.7877094972067039,
+     "cov80_a": 0.7783985102420856
     },
     "B": {
      "n": 537,
-     "mae": 8.548971750031582,
-     "rmse": 11.393718718026653,
-     "bias": -1.5416146133439965,
-     "corr": 0.8006054756577076,
-     "mae_g": 4.083231323657175,
-     "mae_a": 5.78684983031035
+     "mae": 8.714567106814004,
+     "rmse": 11.614314236020736,
+     "bias": -1.7148615378581202,
+     "corr": 0.7947611907985704,
+     "mae_g": 4.133221309425932,
+     "mae_a": 5.885434829501876
     },
     "all": {
      "n": 598,
@@ -834,25 +834,25 @@
    "strict": {
     "A": {
      "n": 568,
-     "mae": 9.426875928952787,
-     "rmse": 12.862014441885735,
-     "bias": -4.495331753150052,
-     "corr": 0.8148133903057202,
-     "mae_g": 4.184658903466301,
-     "mae_a": 6.430878680595888,
-     "calib_slope": 1.0227705174869954,
-     "cov80_p": 0.772887323943662,
-     "cov80_g": 0.7746478873239436,
-     "cov80_a": 0.7711267605633803
+     "mae": 9.555057508817404,
+     "rmse": 13.02020753538637,
+     "bias": -4.625569418535739,
+     "corr": 0.8104874742256953,
+     "mae_g": 4.2382348188996435,
+     "mae_a": 6.495069616187587,
+     "calib_slope": 1.0069225844777252,
+     "cov80_p": 0.7693661971830986,
+     "cov80_g": 0.7676056338028169,
+     "cov80_a": 0.7676056338028169
     },
     "B": {
      "n": 568,
-     "mae": 9.426875928952787,
-     "rmse": 12.862014441885735,
-     "bias": -4.495331753150052,
-     "corr": 0.8148133903057202,
-     "mae_g": 4.184658903466301,
-     "mae_a": 6.430878680595888
+     "mae": 9.555057508817404,
+     "rmse": 13.02020753538637,
+     "bias": -4.625569418535739,
+     "corr": 0.8104874742256953,
+     "mae_g": 4.2382348188996435,
+     "mae_a": 6.495069616187587
     },
     "all": {
      "n": 646,
@@ -956,25 +956,25 @@
    "strict": {
     "A": {
      "n": 558,
-     "mae": 9.101505660396057,
-     "rmse": 12.046867073833132,
-     "bias": -2.179628359009113,
-     "corr": 0.8405307649807336,
-     "mae_g": 4.179630734745209,
-     "mae_a": 6.1488349646290565,
-     "calib_slope": 1.0066720259787503,
-     "cov80_p": 0.8046594982078853,
-     "cov80_g": 0.7974910394265233,
-     "cov80_a": 0.7921146953405018
+     "mae": 9.284179261827882,
+     "rmse": 12.311009852484414,
+     "bias": -2.3712835764837106,
+     "corr": 0.8336672289977958,
+     "mae_g": 4.236367388926014,
+     "mae_a": 6.271595316168936,
+     "calib_slope": 0.9845908181236683,
+     "cov80_p": 0.7939068100358423,
+     "cov80_g": 0.7849462365591398,
+     "cov80_a": 0.7795698924731183
     },
     "B": {
      "n": 556,
-     "mae": 8.813461460552567,
-     "rmse": 11.588491124419923,
-     "bias": -1.4836636992752725,
-     "corr": 0.8427478732626799,
-     "mae_g": 4.063613371556746,
-     "mae_a": 5.967771228509961
+     "mae": 8.995507474733635,
+     "rmse": 11.855046941871418,
+     "bias": -1.6760083240069727,
+     "corr": 0.8358736539620527,
+     "mae_g": 4.119954594037962,
+     "mae_a": 6.090116706357193
     },
     "all": {
      "n": 626,
@@ -1078,25 +1078,25 @@
    "strict": {
     "A": {
      "n": 589,
-     "mae": 9.68760369849858,
-     "rmse": 13.282653352246385,
-     "bias": -5.007852758102055,
-     "corr": 0.8404870719506011,
-     "mae_g": 4.409119937674036,
-     "mae_a": 6.404085008217253,
-     "calib_slope": 1.0626789543445143,
-     "cov80_p": 0.7640067911714771,
-     "cov80_g": 0.7640067911714771,
-     "cov80_a": 0.7792869269949066
+     "mae": 9.856083610285578,
+     "rmse": 13.500502795843506,
+     "bias": -5.179546863464026,
+     "corr": 0.8349713185402626,
+     "mae_g": 4.471610203915458,
+     "mae_a": 6.4979383612406565,
+     "calib_slope": 1.0434236442389513,
+     "cov80_p": 0.7589134125636672,
+     "cov80_g": 0.7572156196943973,
+     "cov80_a": 0.7758913412563667
     },
     "B": {
      "n": 589,
-     "mae": 9.68760369849858,
-     "rmse": 13.282653352246385,
-     "bias": -5.007852758102055,
-     "corr": 0.8404870719506011,
-     "mae_g": 4.409119937674036,
-     "mae_a": 6.404085008217253
+     "mae": 9.856083610285578,
+     "rmse": 13.500502795843506,
+     "bias": -5.179546863464026,
+     "corr": 0.8349713185402626,
+     "mae_g": 4.471610203915458,
+     "mae_a": 6.4979383612406565
     },
     "all": {
      "n": 686,
@@ -1204,25 +1204,25 @@
    "strict": {
     "A": {
      "n": 603,
-     "mae": 9.484579278918785,
-     "rmse": 12.842565231513591,
-     "bias": -3.009018232403313,
-     "corr": 0.8454304333330867,
-     "mae_g": 4.218751053760572,
-     "mae_a": 6.549122015947117,
-     "calib_slope": 1.000505383435769,
-     "cov80_p": 0.7744610281923715,
-     "cov80_g": 0.8109452736318408,
-     "cov80_a": 0.7844112769485904
+     "mae": 9.620306975506507,
+     "rmse": 13.034416231750576,
+     "bias": -3.144745928991035,
+     "corr": 0.8410282707098021,
+     "mae_g": 4.263498092746139,
+     "mae_a": 6.63894479942378,
+     "calib_slope": 0.9864978257025007,
+     "cov80_p": 0.7661691542288557,
+     "cov80_g": 0.802653399668325,
+     "cov80_a": 0.7744610281923715
     },
     "B": {
      "n": 600,
-     "mae": 9.038895924998894,
-     "rmse": 12.112795860450978,
-     "bias": -1.9196606177355247,
-     "corr": 0.84879497910082,
-     "mae_g": 4.036154610364988,
-     "mae_a": 6.240461561138698
+     "mae": 9.175302260069554,
+     "rmse": 12.30778424558306,
+     "bias": -2.056066952806185,
+     "corr": 0.8443678239104393,
+     "mae_g": 4.081007737486658,
+     "mae_a": 6.330733458532744
     },
     "all": {
      "n": 672,
@@ -1330,25 +1330,25 @@
    "strict": {
     "A": {
      "n": 594,
-     "mae": 9.28556925719908,
-     "rmse": 12.237646870890632,
-     "bias": -2.2592810618760697,
-     "corr": 0.8575934806339519,
-     "mae_g": 4.365973413757377,
-     "mae_a": 6.193072408953262,
-     "calib_slope": 0.9958909178847002,
-     "cov80_p": 0.7760942760942761,
-     "cov80_g": 0.7946127946127947,
-     "cov80_a": 0.7946127946127947
+     "mae": 9.453057541466888,
+     "rmse": 12.467612730400012,
+     "bias": -2.4341277630924116,
+     "corr": 0.8525760948584052,
+     "mae_g": 4.4232964947219955,
+     "mae_a": 6.299611754099723,
+     "calib_slope": 0.9794101685052826,
+     "cov80_p": 0.765993265993266,
+     "cov80_g": 0.7794612794612794,
+     "cov80_a": 0.7794612794612794
     },
     "B": {
      "n": 589,
-     "mae": 9.177937777343397,
-     "rmse": 12.066873461007287,
-     "bias": -1.9087958399610168,
-     "corr": 0.8562943990799475,
-     "mae_g": 4.33354291281426,
-     "mae_a": 6.127317449752031
+     "mae": 9.342429919719338,
+     "rmse": 12.29759961703148,
+     "bias": -2.0807906859677137,
+     "corr": 0.8512584516036682,
+     "mae_g": 4.389696575096662,
+     "mae_a": 6.232315111929148
     },
     "all": {
      "n": 656,
@@ -1706,25 +1706,25 @@
   "strict": {
    "A": {
     "n": 3247,
-    "mae": 8.45836371576803,
-    "rmse": 11.335861739090419,
-    "bias": -1.6102295797220423,
-    "corr": 0.8120617202242247,
-    "mae_g": 3.8721198100928294,
-    "mae_a": 5.775287141947024,
-    "calib_slope": 0.9172590539562092,
-    "cov80_p": 0.8090545118570989,
-    "cov80_g": 0.8096704650446566,
-    "cov80_a": 0.8047428395441947
+    "mae": 8.576001451737962,
+    "rmse": 11.506955547663283,
+    "bias": -1.736223162395279,
+    "corr": 0.8073327500872239,
+    "mae_g": 3.9131031862139647,
+    "mae_a": 5.844933426762287,
+    "calib_slope": 0.9027026774307306,
+    "cov80_p": 0.8010471204188482,
+    "cov80_g": 0.7995072374499538,
+    "cov80_a": 0.7961194949183862
    },
    "B": {
     "n": 3230,
-    "mae": 8.328764389208374,
-    "rmse": 11.141185765347572,
-    "bias": -1.1784733742954527,
-    "corr": 0.8117076762998071,
-    "mae_g": 3.826637976779573,
-    "mae_a": 5.6906872647982
+    "mae": 8.445401514536293,
+    "rmse": 11.31191395638876,
+    "bias": -1.3027653976850126,
+    "corr": 0.8069582020860957,
+    "mae_g": 3.8674947720440245,
+    "mae_a": 5.75936081174297
    },
    "all": {
     "n": 3684,
@@ -1806,25 +1806,25 @@
   "strict": {
    "A": {
     "n": 1126,
-    "mae": 9.265635600485066,
-    "rmse": 12.458060417575476,
-    "bias": -3.34776293083154,
-    "corr": 0.8275578797095012,
-    "mae_g": 4.182167146675565,
-    "mae_a": 6.291109236981774,
-    "calib_slope": 1.0147927570415238,
-    "cov80_p": 0.7886323268206039,
-    "cov80_g": 0.7859680284191829,
-    "cov80_a": 0.7815275310834814
+    "mae": 9.4208212194567,
+    "rmse": 12.668757884356806,
+    "bias": -3.5084366477852664,
+    "corr": 0.8219744219724379,
+    "mae_g": 4.237309396230651,
+    "mae_a": 6.384324803212092,
+    "calib_slope": 0.9958558654496934,
+    "cov80_p": 0.7815275310834814,
+    "cov80_g": 0.7761989342806395,
+    "cov80_a": 0.7735346358792184
    },
    "B": {
     "n": 1124,
-    "mae": 9.123443149210331,
-    "rmse": 12.232050950327912,
-    "bias": -3.005574246073204,
-    "corr": 0.8286315153271343,
-    "mae_g": 4.124782288037731,
-    "mae_a": 6.201797058389682
+    "mae": 9.278269413665646,
+    "rmse": 12.443846957099614,
+    "bias": -3.1665338593204417,
+    "corr": 0.8230450506789113,
+    "mae_g": 4.179726095569488,
+    "mae_a": 6.294754831609564
    },
    "all": {
     "n": 1272,
@@ -1906,25 +1906,25 @@
   "strict": {
    "A": {
     "n": 2958,
-    "mae": 9.41077040140748,
-    "rmse": 12.647437660146998,
-    "bias": -3.0980779870018655,
-    "corr": 0.844517836294315,
-    "mae_g": 4.309370404844989,
-    "mae_a": 6.355502956312852,
-    "calib_slope": 0.9829712716481779,
-    "cov80_p": 0.8144016227180527,
-    "cov80_g": 0.8204868154158215,
-    "cov80_a": 0.8248816768086545
+    "mae": 9.505620472381118,
+    "rmse": 12.776105407263353,
+    "bias": -3.195045725211164,
+    "corr": 0.8415145874872816,
+    "mae_g": 4.342446517562189,
+    "mae_a": 6.413896172805147,
+    "calib_slope": 0.9729721167811355,
+    "cov80_p": 0.8096686950642326,
+    "cov80_g": 0.8144016227180527,
+    "cov80_a": 0.8191345503718729
    },
    "B": {
     "n": 2938,
-    "mae": 9.221263851644327,
-    "rmse": 12.34948760761075,
-    "bias": -2.523727136742018,
-    "corr": 0.8443643784436013,
-    "mae_g": 4.237924896679272,
-    "mae_a": 6.231730330451098
+    "mae": 9.315873906424578,
+    "rmse": 12.479237117228246,
+    "bias": -2.6204856777217813,
+    "corr": 0.8413448941221423,
+    "mae_g": 4.270870148610358,
+    "mae_a": 6.290030666186134
    },
    "all": {
     "n": 3649,
@@ -2006,25 +2006,25 @@
   "strict": {
    "A": {
     "n": 1786,
-    "mae": 9.485346037166822,
-    "rmse": 12.786512822163969,
-    "bias": -3.4188556659662335,
-    "corr": 0.847845444667034,
-    "mae_g": 4.330496492989649,
-    "mae_a": 6.382873267846759,
-    "calib_slope": 1.019474723149048,
-    "cov80_p": 0.7715565509518477,
-    "cov80_g": 0.79003359462486,
-    "cov80_a": 0.786114221724524
+    "mae": 9.642438147995499,
+    "rmse": 12.999614275674707,
+    "bias": -3.579455089047479,
+    "corr": 0.8428714189272778,
+    "mae_g": 4.385277647198764,
+    "mae_a": 6.479584989226495,
+    "calib_slope": 1.002913972814943,
+    "cov80_p": 0.7637178051511758,
+    "cov80_g": 0.7799552071668533,
+    "cov80_a": 0.776595744680851
    },
    "B": {
     "n": 1778,
-    "mae": 9.299854603076636,
-    "rmse": 12.485123064835207,
-    "bias": -2.9390902108551535,
-    "corr": 0.8485271506735013,
-    "mae_g": 4.258223388726996,
-    "mae_a": 6.25718390575204
+    "mae": 9.456190002932862,
+    "rmse": 12.699523548106415,
+    "bias": -3.098975808942073,
+    "corr": 0.8435376990781995,
+    "mae_g": 4.312662730781852,
+    "mae_a": 6.353520456027368
    },
    "all": {
     "n": 2014,
@@ -2165,5 +2165,5 @@
   "neurhl_A_pooled": 9.243,
   "neurhl_v2_blend_pooled": 8.77645
  },
- "protocol_notes": "Walk-forward backtests of the skater layer, on NeurHL's protocol and on a\nstrict preseason protocol.\n\nProtocols\n---------\nmatched  Reproduces the information AND budget conventions of NeurHL's\n         published player backtests (neurhl/sim/project_players.py::backtest,\n         player_season_v2.py::backtest, models/player_proj.py::to_totals):\n         the population is every skater with NHL history who played in V,\n         placed on the team he played for most IN season V; each team's\n         ice-time budget is shared over those players (rookies excluded, as\n         in NeurHL), and expected games are scaled league-wide to\n         18 x 82 x teams x 0.968 with a 78-game cap. HatTrick's own games\n         model here is team-agnostic (an isotonic map from projected usage\n         to games share, fitted walk-forward on earlier seasons' players who\n         played), because a traded player's games cannot be placed on one\n         team's depth chart without knowing when he moved.\n         Remaining difference: actual stats come from MoneyPuck season files,\n         not NeurHL's gitignored player-game tensors (sample sizes agree\n         within 0-2).\nstrict   Nothing from season V: the roster is an opening-roster proxy (every\n         skater who dressed in any of his team's first 10 games, fastRhockey\n         boxes, 2011-2024). For 2025-2026 the boxes are missing and the roster\n         falls back to each player's season-V main team ('season_team', which\n         leaks like matched). Skaters in the evaluation sample who were on no\n         opening roster are projected as reserves: their per-game projection\n         times the mean games such players played in earlier seasons.\n\nSamples (identical to NeurHL's)\n-------------------------------\nA  player_backtest.json: skaters with NHL history before V and >= 40 GP in V;\n   actual raw points; projections for 82 games.\nB  player_season_v2.json: >= 40*sched/82 GP with sched = the season's max GP\n   of any skater, actual points restated x 82/sched (NeurHL's own quirk: in\n   2023 a traded skater's 85 GP deflates every actual by 82/85).\nall  every rostered skater with NHL history (unconditional; used for bias and\n   interval coverage, since conditioning on >=40 GP selects on the outcome).\n\nTuning uses ONLY V in 2011, 2012, 2014-2017 (strict protocol, sample A).\n2018-2019 are reported as a confirmation window, 2022-2026 as the held-out\ntest; 2013, 2020 and 2021 are shortened seasons and never scored.\n\nRun:  python3 -m hattrick.backtest.players_bt            (final report)\n      python3 -m hattrick.backtest.players_bt --tune     (search + ledger)\n"
+ "protocol_notes": "Walk-forward backtests of the skater layer, on NeurHL's protocol and on a\nstrict preseason protocol.\n\nProtocols\n---------\nmatched  Reproduces the information AND budget conventions of NeurHL's\n         published player backtests (neurhl/sim/project_players.py::backtest,\n         player_season_v2.py::backtest, models/player_proj.py::to_totals):\n         the population is every skater with NHL history who played in V,\n         placed on the team he played for most IN season V; each team's\n         ice-time budget is shared over those players (rookies excluded, as\n         in NeurHL), and expected games are scaled league-wide to\n         18 x 82 x teams x 0.968 with a 78-game cap. ORR's own games\n         model here is team-agnostic (an isotonic map from projected usage\n         to games share, fitted walk-forward on earlier seasons' players who\n         played), because a traded player's games cannot be placed on one\n         team's depth chart without knowing when he moved.\n         Remaining difference: actual stats come from MoneyPuck season files,\n         not NeurHL's gitignored player-game tensors (sample sizes agree\n         within 0-2).\nstrict   Nothing from season V beyond the evaluation population: the roster is an opening-roster proxy (every\n         skater who dressed in any of his team's first 10 games, fastRhockey\n         boxes, 2011-2024). For 2025-2026 the boxes are missing and the roster\n         falls back to each player's season-V main team ('season_team', which\n         leaks like matched). Skaters in the evaluation sample who were on no\n         opening roster are projected as reserves: their per-game projection\n         times the mean games such players played in earlier seasons.\n\nSamples (identical to NeurHL's)\n-------------------------------\nA  player_backtest.json: skaters with NHL history before V and >= 40 GP in V;\n   actual raw points; projections for 82 games.\nB  player_season_v2.json: >= 40*sched/82 GP with sched = the season's max GP\n   of any skater, actual points restated x 82/sched (NeurHL's own quirk: in\n   2023 a traded skater's 85 GP deflates every actual by 82/85).\nall  every rostered skater with NHL history (unconditional; used for bias and\n   interval coverage, since conditioning on >=40 GP selects on the outcome).\n\nTuning uses ONLY V in 2011, 2012, 2014-2017 (strict protocol, sample A).\n2018-2019 are reported as a confirmation window, 2022-2026 as the held-out\ntest; 2013, 2020 and 2021 are shortened seasons and never scored.\n\nRun:  python3 -m orr.backtest.players_bt            (final report)\n      python3 -m orr.backtest.players_bt --tune     (search + ledger)\n"
 }

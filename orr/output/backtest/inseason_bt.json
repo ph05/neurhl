@@ -1,6 +1,6 @@
 {
- "created_utc": "2026-10-01T00:53:58+00:00",
- "protocol": "Backtest of the SHIPPED in-season loop: the preseason pipeline's ratings\n(market-anchored, as frozen for 2026-27) updated game by game by the filter.\n\nLive, hattrick/inseason.py starts ratings.InSeasonFilter from the freeze's\nratings and league level. games_bt.py validated the filter started from the\nteam-history table instead (ratings.preseason_table). This script rebuilds,\nfor each clean market season (2019, 2020, 2022-24), the preseason ratings\nexactly as gamefile_bt.py does (shipped views mkt+td, convex weights fitted\nleave-one-season-out, ratings solved on the actual schedule) and runs the\nwalk-forward filter from them (ratings.run_filter with pre_override). Every\nprediction uses only games before its date. OT/SO parameters are taken from\nthe team-history run so that the starting prior is the only difference.\n\nCompared on the same games with: the team-history start (games_bt), NeurHL-G\n(its gate games, the in-season stack) and NeurHL's Elo, with paired\nbootstrap CIs. Without starters and with known starters (use_goalie).\n\nRun: python3 -m hattrick.backtest.inseason_bt\nWrites hattrick/output/backtest/inseason_bt.json.\n",
+ "created_utc": "2026-10-01T02:32:05+00:00",
+ "protocol": "Backtest of the SHIPPED in-season loop: the preseason pipeline's ratings\n(market-anchored, as frozen for 2026-27) updated game by game by the filter.\n\nLive, orr/inseason.py starts ratings.InSeasonFilter from the freeze's\nratings and league level. games_bt.py validated the filter started from the\nteam-history table instead (ratings.preseason_table). This script rebuilds,\nfor each clean market season (2019, 2020, 2022-24), the preseason ratings\nexactly as gamefile_bt.py does (shipped views mkt+td, convex weights fitted\nleave-one-season-out, ratings solved on the actual schedule) and runs the\nwalk-forward filter from them (ratings.run_filter with pre_override). Every\nprediction uses only games before its date. OT/SO parameters are taken from\nthe team-history run so that the starting prior is the only difference.\n\nCompared on the same games with: the team-history start (games_bt), NeurHL-G\n(its gate games, the in-season stack) and NeurHL's Elo, with paired\nbootstrap CIs. Without starters and with known starters (use_goalie).\n\nRun: python3 -m orr.backtest.inseason_bt\nWrites orr/output/backtest/inseason_bt.json.\n",
  "seasons": [
   2019,
   2020,
@@ -435,6 +435,200 @@
      "ci95": [
       -0.008332005231111085,
       -0.0015334386201043932
+     ]
+    }
+   }
+  ],
+  "goals_only_live": [
+   {
+    "season": 2019,
+    "n": 1271,
+    "shipped": 0.6761967374369752,
+    "teamhist": 0.6769684514910441,
+    "neurhl_g": 0.674907588163759,
+    "neurhl_elo": 0.6771748848792372,
+    "d_shipped_vs_teamhist": {
+     "diff": -0.0007717140540688841,
+     "se": 0.0017133386710122924,
+     "ci95": [
+      -0.0040521326041678615,
+      0.0028353895829972007
+     ]
+    },
+    "d_shipped_vs_neurhl_g": {
+     "diff": 0.001289149273216278,
+     "se": 0.002459765237497759,
+     "ci95": [
+      -0.003531401678096465,
+      0.006160158357865544
+     ]
+    },
+    "d_shipped_vs_neurhl_elo": {
+     "diff": -0.0009781474422619243,
+     "se": 0.002034212073536123,
+     "ci95": [
+      -0.004948667910888495,
+      0.0030110119176252562
+     ]
+    }
+   },
+   {
+    "season": 2020,
+    "n": 1082,
+    "shipped": 0.675912464754873,
+    "teamhist": 0.678226674406332,
+    "neurhl_g": 0.6773879615636428,
+    "neurhl_elo": 0.6788116950881894,
+    "d_shipped_vs_teamhist": {
+     "diff": -0.002314209651459072,
+     "se": 0.0018739672196021323,
+     "ci95": [
+      -0.005950132565345691,
+      0.0014334040626466282
+     ]
+    },
+    "d_shipped_vs_neurhl_g": {
+     "diff": -0.001475496808769811,
+     "se": 0.002801007572981434,
+     "ci95": [
+      -0.007014391034284894,
+      0.004006768256791889
+     ]
+    },
+    "d_shipped_vs_neurhl_elo": {
+     "diff": -0.0028992303333165203,
+     "se": 0.002541751476847071,
+     "ci95": [
+      -0.007830635073200936,
+      0.002281411302393901
+     ]
+    }
+   },
+   {
+    "season": 2022,
+    "n": 1312,
+    "shipped": 0.6492506572879497,
+    "teamhist": 0.6494132217813178,
+    "neurhl_g": 0.6431464484722776,
+    "neurhl_elo": 0.6531558355943523,
+    "d_shipped_vs_teamhist": {
+     "diff": -0.00016256449336801137,
+     "se": 0.0015022680239958211,
+     "ci95": [
+      -0.003147952891598966,
+      0.002881693851928867
+     ]
+    },
+    "d_shipped_vs_neurhl_g": {
+     "diff": 0.006104208815672187,
+     "se": 0.0023874931567436633,
+     "ci95": [
+      0.0012018774201852515,
+      0.010867524023276858
+     ]
+    },
+    "d_shipped_vs_neurhl_elo": {
+     "diff": -0.003905178306402501,
+     "se": 0.0024823041372513243,
+     "ci95": [
+      -0.008584558552826521,
+      0.0008755419897564446
+     ]
+    }
+   },
+   {
+    "season": 2023,
+    "n": 1312,
+    "shipped": 0.65645907787863,
+    "teamhist": 0.6570938591092982,
+    "neurhl_g": 0.6549759666198932,
+    "neurhl_elo": 0.6614578637292134,
+    "d_shipped_vs_teamhist": {
+     "diff": -0.0006347812306680814,
+     "se": 0.0011279108656674795,
+     "ci95": [
+      -0.002743349485605918,
+      0.0016274789343432227
+     ]
+    },
+    "d_shipped_vs_neurhl_g": {
+     "diff": 0.0014831112587369295,
+     "se": 0.003143417792004818,
+     "ci95": [
+      -0.004696632916021183,
+      0.007581137596607058
+     ]
+    },
+    "d_shipped_vs_neurhl_elo": {
+     "diff": -0.004998785850583411,
+     "se": 0.0027143959920510868,
+     "ci95": [
+      -0.010294006600770421,
+      0.00033357101316298547
+     ]
+    }
+   },
+   {
+    "season": 2024,
+    "n": 1312,
+    "shipped": 0.6616391189619277,
+    "teamhist": 0.6620288108115818,
+    "neurhl_g": 0.6534033368672669,
+    "neurhl_elo": 0.6603586547542591,
+    "d_shipped_vs_teamhist": {
+     "diff": -0.0003896918496540114,
+     "se": 0.001202153858463579,
+     "ci95": [
+      -0.0026509851066546858,
+      0.001907152255751431
+     ]
+    },
+    "d_shipped_vs_neurhl_g": {
+     "diff": 0.008235782094660816,
+     "se": 0.0026025533840802564,
+     "ci95": [
+      0.0034349862556559674,
+      0.013475616520919503
+     ]
+    },
+    "d_shipped_vs_neurhl_elo": {
+     "diff": 0.0012804642076686054,
+     "se": 0.002427681505155429,
+     "ci95": [
+      -0.003590374685788348,
+      0.005958501747996576
+     ]
+    }
+   },
+   {
+    "season": "all",
+    "n": 6289,
+    "shipped": 0.6633717660619765,
+    "teamhist": 0.6641735178034746,
+    "neurhl_g": 0.6600640969214153,
+    "neurhl_elo": 0.6656586518233483,
+    "d_shipped_vs_teamhist": {
+     "diff": -0.000801751741498121,
+     "se": 0.0006634208624949303,
+     "ci95": [
+      -0.00214476343595354,
+      0.0005169913860678543
+     ]
+    },
+    "d_shipped_vs_neurhl_g": {
+     "diff": 0.003307669140561092,
+     "se": 0.0012055164151012706,
+     "ci95": [
+      0.0009324126168368074,
+      0.005644551083677792
+     ]
+    },
+    "d_shipped_vs_neurhl_elo": {
+     "diff": -0.002286885761371869,
+     "se": 0.0010980151013334043,
+     "ci95": [
+      -0.004462537094836762,
+      -0.0001841399224896038
      ]
     }
    }

@@ -86,8 +86,13 @@ def evidence() -> list:
         a = [r for r in ib["modes"]["known_starters"] if r["season"] == "all"][0]
         for key, name in (("d_shipped_vs_neurhl_g", "NeurHL-G stack"), ("d_shipped_vs_neurhl_elo", "NeurHL's Elo")):
             x = a[key]
-            rows.append(_ev(f"In-season ORR vs {name}, log loss per game", "2018-19 to 2023-24 (excl. 2020-21)",
+            rows.append(_ev(f"In-season ORR (goals and shots) vs {name}, log loss per game", "2018-19 to 2023-24 (excl. 2020-21)",
                             a["n"], x["diff"], x.get("se"), x["ci95"]))
+        if "goals_only_live" in ib["modes"]:
+            a = [r for r in ib["modes"]["goals_only_live"] if r["season"] == "all"][0]
+            x = a["d_shipped_vs_neurhl_g"]
+            rows.append(_ev("In-season ORR (goals only, as live until results carry shots) vs NeurHL-G stack",
+                            "2018-19 to 2023-24 (excl. 2020-21)", a["n"], x["diff"], x.get("se"), x["ci95"]))
     gb = _rd(BT / "gamefile_bt.json")
     if gb:
         v = gb["variants"]["mkt+td (shipped)"]["by_season"]
@@ -104,8 +109,11 @@ def evidence() -> list:
                         ship["judge_raw_mae"] - nj["engine_layer_mae"], fmt=2))
         rows.append(_ev("Standings vs NeurHL engine layer, points CRPS", "2018-19 to 2023-24 (judge window)", 158,
                         ship["judge_raw_crps"] - nj["engine_layer_crps"], fmt=2))
-    rows.append({"c": "Skaters vs NeurHL, points MAE, players with 40+ GP", "w": "2021-22 to 2025-26", "n": 2958,
-                 "d": "-0.13 (about -0.04 with reserves projected unconditionally)", "ci": "", "p": ""})
+    pb = _rd(BT / "players_bt.json")
+    if pb:
+        a = pb["pooled_test"]["strict"]["A"]
+        rows.append({"c": "Skaters vs NeurHL, points MAE, players with 40+ GP", "w": "2021-22 to 2025-26", "n": a["n"],
+                     "d": f"{a['mae'] - 9.543:+.2f}", "ci": "", "p": ""})
     gl = _rd(BT / "goalies_bt.json")
     if gl:
         t = gl["pooled_test"]
