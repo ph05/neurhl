@@ -65,6 +65,15 @@ LIVE = C.OUT / "live"
 
 # model versions: ORR 1.1 = 1.0 + the accepted pre-registered item X1
 MODELS = {
+    "1.8": {"version": "ORR 1.8", "past_starters": True, "lineups": True, "player_update": True,
+            "box_first": True, "goalie_update": True, "player_calibration": True,
+            "standings_drift": True, "start_share_update": True, "absence": True, "standings_sharp": True,
+            "sog_dist": True, "sos": True, "ros_file": True, "ros_interval": True, "goalie_ros": True,
+            "forecast_diff": True,
+            "accepted_items": ["X1", "1.2: in-season skater rates", "1.3: box-score lineups, goalie talent",
+                               "1.4: standings drift, start shares", "1.5: shot distributions",
+                               "1.6: remaining SOS, rest-of-season player file", "1.7: rest-of-season intervals",
+                               "1.8: goalie rest-of-season file, forecast diff (intervals per params)"]},
     "1.7": {"version": "ORR 1.7", "past_starters": True, "lineups": True, "player_update": True,
             "box_first": True, "goalie_update": True, "player_calibration": True,
             "standings_drift": True, "start_share_update": True, "absence": True, "standings_sharp": True,
@@ -99,7 +108,7 @@ MODELS = {
     "1.0": {"version": "ORR 1.0", "past_starters": False, "lineups": False,
             "accepted_items": []},
 }
-DEFAULT_MODEL = "1.7"
+DEFAULT_MODEL = "1.8"
 
 
 def _sha(p: Path) -> str:
@@ -204,7 +213,8 @@ def ros_params() -> dict:
     if not p.exists():
         return {"v": 1.0, "games_var": False}
     d = json.loads(p.read_text())
-    return {"v": float(d.get("v", 1.0)), "games_var": bool(d.get("games_var", False))}
+    return {"v": float(d.get("v", 1.0)), "games_var": bool(d.get("games_var", False)),
+            "spell": bool(d.get("spell", False))}
 
 
 def players_ros(fz: dict, day: pd.Timestamp, results: pd.DataFrame, n0: dict | None = None,
@@ -231,6 +241,7 @@ def players_ros(fz: dict, day: pd.Timestamp, results: pd.DataFrame, n0: dict | N
     n_td = td.n.reindex(sk.player_id).fillna(0).to_numpy() if td is not None else np.zeros(len(sk))
     g_td = td.g.reindex(sk.player_id).fillna(0).to_numpy() if td is not None else np.zeros(len(sk))
     a_td = td.a.reindex(sk.player_id).fillna(0).to_numpy() if td is not None else np.zeros(len(sk))
+    s_td = td.sog.reindex(sk.player_id).fillna(0).to_numpy() if td is not None else np.zeros(len(sk))
     gp = sk.gp.clip(lower=1).to_numpy()
     g0, a0 = sk.g.to_numpy() / gp, sk.a.to_numpy() / gp
     g_r = (k * g0 + g_td) / (k + n_td)
@@ -245,8 +256,14 @@ def players_ros(fz: dict, day: pd.Timestamp, results: pd.DataFrame, n0: dict | N
     else:                                              # 1.7: games and rate variance, simulated
         rng = np.random.default_rng(C.SEED)
         q = np.clip(sk.gp.to_numpy() / total, 0.01, 1)
-        g_draw = (rng.binomial(left.astype(int)[:, None], q[:, None], size=(len(sk), 400)) if ip["games_var"]
-                  else games[:, None])
+        g_draw = (rng.binomial(left.astype(int)[:, None], q[:, None], size=(len(sk), 400)).astype(float)
+                  if ip["games_var"] else games[:, None])
+        if ip.get("spell"):                            # 1.8: injury spells (backtest/ros_interval2_bt.py)
+            from orr.backtest.ros_interval2_bt import spell_prob
+            ps = spell_prob(C.TARGET_SEASON)
+            pspell = sk.player_id.map(ps).fillna(float(ps.mean())).to_numpy()
+            hit = rng.random(g_draw.shape) < np.clip(pspell * left / 82.0, 0, 1)[:, None]
+            g_draw = g_draw * np.where(hit, 1 - rng.uniform(0, 0.6, g_draw.shape), 1.0)
         lam = rng.gamma(np.maximum(shape / ip["v"], 1e-9)[:, None], (ip["v"] / (k + n_td))[:, None], size=(len(sk), 400))
         pts = rng.poisson(lam * g_draw)
         lo, hi = np.percentile(pts, 10, axis=1), np.percentile(pts, 90, axis=1)
@@ -255,8 +272,92 @@ def players_ros(fz: dict, day: pd.Timestamp, results: pd.DataFrame, n0: dict | N
                          "games_left": games, "g_ros": g_r * games, "a_ros": a_r * games,
                          "p_ros": (g_r + a_r) * games, "p_ros_p10": lo, "p_ros_p90": hi,
                          "p_season": g_td + a_td + (g_r + a_r) * games,
-                         "p_season_p10": g_td + a_td + lo, "p_season_p90": g_td + a_td + hi}
+                         "p_season_p10": g_td + a_td + lo, "p_season_p90": g_td + a_td + hi,
+                         "sog_td": s_td,
+                         "sog_ros": (n0["sog"] * sk.sog.to_numpy() / gp + s_td) / (n0["sog"] + n_td) * games}
                         ).sort_values("p_season", ascending=False)
+
+
+def forecast_diff(new: pd.DataFrame, prev_path: Path) -> pd.DataFrame:
+    """ORR 1.8: each game's change in P(home win) since its previous forecast
+    (the earlier run of the same day if one was committed, else the frozen
+    preseason file), with the inputs that changed: starters, lineups, and
+    otherwise the ratings."""
+    out = new.copy()
+    pre = pd.read_csv(FREEZE / "games_2027.csv").set_index("game_id").p_home_win
+    old = pd.read_csv(prev_path).set_index("game_id") if Path(prev_path).exists() else None
+    prev_p, why, src = [], [], []
+    for r in out.itertuples():
+        if old is not None and r.game_id in old.index:
+            o = old.loc[r.game_id]
+            prev_p.append(float(o.p_home_win))
+            src.append(f"run {str(o.get('created_utc', ''))[:16]}")
+            reasons = []
+            for side in ("home", "away"):
+                a, b = o.get(f"goalie_{side}"), getattr(r, f"goalie_{side}")
+                if not (pd.isna(a) and pd.isna(b)) and a != b:
+                    reasons.append(f"{side} starter")
+            for side in ("h", "a"):
+                a, b = o.get(f"lineup_adj_{side}", 0.0), getattr(r, f"lineup_adj_{side}", 0.0)
+                if abs((0 if pd.isna(a) else a) - (0 if pd.isna(b) else b)) > 1e-4:
+                    reasons.append(f"{'home' if side == 'h' else 'away'} lineup")
+            why.append(", ".join(reasons) if reasons else "ratings")
+        else:
+            prev_p.append(float(pre.get(r.game_id, np.nan)))
+            src.append("preseason file")
+            why.append("results since the preseason file")
+    out["p_prev"] = prev_p
+    out["d_p"] = out.p_home_win - out.p_prev
+    out["prev_source"] = src
+    out["change_reason"] = why
+    return out
+
+
+def goalies_ros(fz: dict, day: pd.Timestamp, results: pd.DataFrame, sims: int = 2000) -> pd.DataFrame:
+    """ORR 1.8: season-to-date and rest-of-season goalie lines.
+
+    Starts left = Binomial(team games left, updated start share, 1.4);
+    shots per start = the preseason projection's; save % drawn from the
+    talent posterior (1.3: prior n0 pseudo-shots plus this season's shots).
+    80% intervals by simulation."""
+    from orr import structural as ST
+    g = fz["goalies"][["player_id", "team", "start_share"]].copy()
+    gl = pd.read_csv(FREEZE / "goalies_2027.csv").set_index("player_id")
+    g = update_start_shares_live(g.assign(p_present=1.0), day)
+    n0, m0, w_in, _ = ST._frozen_goalie_key()
+    _, lg_sv = ST.goalie_prior(C.TARGET_SEASON, n0, m0)
+    tal = ST.goalie_talent_live(day)
+    td = None
+    if PU.BOXES_LIVE.exists():
+        b = pd.read_csv(PU.BOXES_LIVE)
+        b = b[(b.pos == "G") & b.shots_against.notna() & (pd.to_datetime(b.date) < day)]
+        if len(b):
+            td = b.groupby("player_id").agg(gp=("game_id", "nunique"),
+                                            gs=("starter", lambda x: int(x.astype(str).str.lower().eq("true").sum())),
+                                            sa=("shots_against", "sum"), ga=("goals_against", "sum"))
+    played = (pd.concat([results.home, results.away]).value_counts() if len(results) else pd.Series(dtype=float))
+    left = np.clip(C.GAMES_PER_TEAM[C.TARGET_SEASON] - g.team.map(played).fillna(0).to_numpy(), 0, None).astype(int)
+    spg = (gl.sa / gl.starts.clip(lower=1)).reindex(g.player_id).fillna(28.0).to_numpy()
+    t = g.player_id.map(tal).fillna(ST.goalie_talent_default()).to_numpy()
+    sa_td = td.sa.reindex(g.player_id).fillna(0).to_numpy() if td is not None else np.zeros(len(g))
+    ga_td = td.ga.reindex(g.player_id).fillna(0).to_numpy() if td is not None else np.zeros(len(g))
+    gs_td = td.gs.reindex(g.player_id).fillna(0).to_numpy() if td is not None else np.zeros(len(g))
+    rng = np.random.default_rng(C.SEED)
+    starts = rng.binomial(left[:, None], np.clip(g.start_share.to_numpy(), 0, 1)[:, None], size=(len(g), sims))
+    shots = rng.poisson(starts * spg[:, None])
+    sv_mean = np.clip(lg_sv + t, 0.80, 0.97)
+    k = n0 + sa_td
+    sv = rng.beta((sv_mean * k)[:, None], ((1 - sv_mean) * k)[:, None], size=(len(g), sims))
+    saves = rng.binomial(shots, sv)
+    season_sv = (sa_td[:, None] - ga_td[:, None] + saves) / np.maximum(sa_td[:, None] + shots, 1)
+    names = gl.name.reindex(g.player_id).to_numpy() if "name" in gl else g.player_id.to_numpy()
+    return pd.DataFrame({"player_id": g.player_id, "name": names, "team": g.team, "start_share": g.start_share,
+                         "gs_td": gs_td, "sa_td": sa_td, "ga_td": ga_td,
+                         "sv_td": np.where(sa_td > 0, 1 - ga_td / np.maximum(sa_td, 1), np.nan),
+                         "starts_ros": starts.mean(1), "sa_ros": shots.mean(1), "starts_ros_p10": np.percentile(starts, 10, 1),
+                         "starts_ros_p90": np.percentile(starts, 90, 1), "sv_season": season_sv.mean(1),
+                         "sv_season_p10": np.percentile(season_sv, 10, 1), "sv_season_p90": np.percentile(season_sv, 90, 1)}
+                        ).sort_values("starts_ros", ascending=False)
 
 
 def merge_starters(file_st: pd.DataFrame | None, lineup_st: pd.DataFrame | None) -> pd.DataFrame | None:
@@ -412,14 +513,19 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     if cfg.get("sos"):          # ORR 1.6: remaining strength of schedule
         standings = standings.merge(remaining_sos(sch, done, cur), on="team", how="left")
     ros = players_ros(fz, day, res, interval_cal=bool(cfg.get("ros_interval"))) if cfg.get("ros_file") else None
+    gros = goalies_ros(fz, day, res) if cfg.get("goalie_ros") else None
 
     outdir = LIVE / date
     outdir.mkdir(parents=True, exist_ok=True)
+    if cfg.get("forecast_diff"):          # ORR 1.8: change since the previous forecast of each game
+        games_out = forecast_diff(games_out, outdir / f"games_{date}.csv")
     games_out.to_csv(outdir / f"games_{date}.csv", index=False, float_format="%.5f")
     players_out.to_csv(outdir / f"players_{date}.csv", index=False, float_format="%.4f")
     standings.to_csv(outdir / f"standings_{date}.csv", index=False, float_format="%.4f")
     if ros is not None:
         ros.to_csv(outdir / f"players_ros_{date}.csv", index=False, float_format="%.3f")
+    if gros is not None:
+        gros.to_csv(outdir / f"goalies_ros_{date}.csv", index=False, float_format="%.4f")
     cur.to_csv(outdir / f"ratings_{date}.csv", index=False, float_format="%.5f")
     run_meta = {"date": date, "created_utc": created, "code": _code_commit(),
                 "results_through": str(res.date.max()) if len(res) else None,

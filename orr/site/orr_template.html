@@ -74,6 +74,7 @@
 <div id="movers"></div>
 
 <h2 id="teamstats">Projected team statistics (season totals)</h2>
+<p class="note">Follows the View selector above the standings. In the in-season view, GF/GA come from the daily run and SF/SA from box scores so far plus the rest-of-season player and goalie lines.</p>
 <p class="note">GF and GA include overtime goals and one goal for each shootout win, as in the standings. SF and PPG sum the team's skater projections; SA and SV% come from its goalie projections.</p>
 <div class="wrap"><table id="t_team"></table></div>
 
@@ -209,15 +210,16 @@
       { k: "pres", h: "Presidents'", f: f1 }, { k: "r2", h: "Round 2", f: f1 }, { k: "cf", h: "Conf. final", f: f1 },
       { k: "fin", h: "Cup final", f: f1 }, { k: "cup", h: "Cup", f: f1 }
     ], rows, { sort: "cup" });
+    table($("t_team"), [
+      { k: "name", h: "Team", l: 1 }, { k: "gf", h: "GF", f: f0 }, { k: "ga", h: "GA", f: f0 }, { k: "diff", h: "DIFF", f: f0 },
+      { k: "sf", h: "SF", f: f0 }, { k: "sa", h: "SA", f: f0 },
+      { k: "sh", h: "SH%", f: x => x == null ? "" : Number(x).toFixed(1) }, { k: "sv", h: "SV%", f: x => x == null ? "" : Number(x).toFixed(1) },
+      { k: "ppg", h: "PPG", f: f0, t: "Power-play goals" }, { k: "rw", h: "RW", f: f1, t: "Regulation wins" }
+    ], rows, { sort: "diff" });
   }
   sv.onchange = drawStandings; drawStandings();
 
-  table($("t_team"), [
-    { k: "name", h: "Team", l: 1 }, { k: "gf", h: "GF", f: f0 }, { k: "ga", h: "GA", f: f0 }, { k: "diff", h: "DIFF", f: f0 },
-    { k: "sf", h: "SF", f: f0 }, { k: "sa", h: "SA", f: f0 },
-    { k: "sh", h: "SH%", f: x => x == null ? "" : Number(x).toFixed(1) }, { k: "sv", h: "SV%", f: x => x == null ? "" : Number(x).toFixed(1) },
-    { k: "ppg", h: "PPG", f: f0, t: "Power-play goals" }, { k: "rw", h: "RW", f: f1, t: "Regulation wins" }
-  ], TX, { sort: "diff" });
+
 
   // ---- playoff odds over time
   (function () {
@@ -281,6 +283,7 @@
     { k: "sog", h: "SOG A-H", t: "Sum of the dressed skaters' expected shots", f: s => s ? `${Number(s[1]).toFixed(1)}-${Number(s[0]).toFixed(1)}` : "" },
     { k: "rest", h: "Rest A-H", t: "Days since each team's previous game; B2B = back-to-back", f: s => s ? [s[1], s[0]].map(x => x == null ? "?" : x <= 1 ? "B2B" : x >= 4 ? "4d+" : `${x}d`).join("-") : "" },
     { k: "km", h: "Travel km A-H", t: "Kilometres travelled since each team's previous game", f: s => s ? `${s[1] ?? "?"}-${s[0] ?? "?"}` : "" },
+    { k: "dp", h: "Δ since last", t: "Change in P(home) since this game's previous forecast", f: (x, g) => x == null ? "" : `${x > 0 ? "+" : ""}${(100 * x).toFixed(1)}${g.why ? " (" + esc(g.why) + ")" : ""}` },
     { k: "kind", h: "Forecast", l: 1 }
   ], TN.games);
   const tp = [];

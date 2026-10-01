@@ -63,6 +63,8 @@ def tonight(pre: pd.DataFrame, elo: pd.Series) -> dict:
         top = q.sort_values("p_goal", ascending=False).head(4)
         games.append({"id": int(r.game_id), "start": st.get(int(r.game_id)), "home": r.home, "away": r.away,
                       "kind": run.get("model", "daily"), "g": _r(r.p_home_win, 4), "pre": _r(pre.get(r.game_id), 4),
+                      "dp": _r(getattr(r, "d_p", None), 4), "why": getattr(r, "change_reason", None)
+                      if isinstance(getattr(r, "change_reason", None), str) else None,
                       "rest": [_r(sf.rest_h.get(r.game_id), 0), _r(sf.rest_a.get(r.game_id), 0)],
                       "km": [_r(sf.km_h.get(r.game_id), 0), _r(sf.km_a.get(r.game_id), 0)],
                       "elo": _r(elo.get(r.game_id), 4), "ot": _r(r.p_ot, 4),
@@ -127,6 +129,12 @@ def evidence() -> list:
         rows.append({"c": "Rest-of-season skater intervals, 80% interval score vs 1.6 (1.7)", "w": "2021-22 to 2022-23",
                      "n": t["n"], "d": f"{t['diff']:+.2f}", "ci": f"{t['ci95'][0]:+.2f} to {t['ci95'][1]:+.2f}",
                      "p": f"coverage {t['cover_best']:.2f} vs {t['cover_1_6']:.2f}"})
+    r2 = _rd(BT / "ros_interval2_bt.json")
+    if r2:
+        t = r2["test"]
+        rows.append({"c": "Rest-of-season skater intervals, 80% interval score vs 1.7 (1.8)", "w": "2021-22 to 2022-23",
+                     "n": t["n"], "d": f"{t['diff']:+.2f}", "ci": f"{t['ci95'][0]:+.2f} to {t['ci95'][1]:+.2f}",
+                     "p": f"coverage {t['cover_best']:.2f} vs {t['cover_1_7']:.2f}"})
     gb = _rd(BT / "gamefile_bt.json")
     if gb:
         v = gb["variants"]["mkt+td (shipped)"]["by_season"]
@@ -262,6 +270,20 @@ def main():
                                   "rw": _r(r.rw), "gf": _r(r.gf), "ga": _r(r.ga), "po": _r(r.playoff_pct),
                                   "div_p": _r(r.division_pct), "pres": _r(r.presidents_pct), "r2": _r(r.round2_pct),
                                   "cf": _r(r.conf_final_pct), "fin": _r(r.cup_final_pct), "cup": _r(r.cup_pct)}
+    # ORR 1.8: in-season team shots from the rest-of-season player and goalie files
+    if lf:
+        pr_f, gr_f = lf[-1].parent / f"players_ros_{live_date}.csv", lf[-1].parent / f"goalies_ros_{live_date}.csv"
+        if pr_f.exists() and gr_f.exists():
+            pr_, gr_ = pd.read_csv(pr_f), pd.read_csv(gr_f)
+            sf_l = (pr_.sog_td + pr_.sog_ros).groupby(pr_.team).sum() if "sog_ros" in pr_ else None
+            sa_l = (gr_.sa_td + gr_.sa_ros).groupby(gr_.team).sum() if "sa_ros" in gr_ else None
+            for tm, row_l in teams_live.items():
+                if sf_l is not None and tm in sf_l:
+                    row_l["sf"] = _r(sf_l[tm])
+                    row_l["sh"] = _r(100 * row_l["gf"] / sf_l[tm], 2) if sf_l[tm] else None
+                if sa_l is not None and tm in sa_l:
+                    row_l["sa"] = _r(sa_l[tm])
+                    row_l["sv"] = _r(100 * (1 - row_l["ga"] / sa_l[tm]), 2) if sa_l[tm] else None
     daily_models = {}
     for f in sorted((C.OUT / "live").glob("*/run_*.json")):
         daily_models[f.parent.name] = (_rd(f) or {}).get("model")
