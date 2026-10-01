@@ -20,6 +20,7 @@
 | | Same games vs NeurHL's own Elo baseline | 0.6641 | Elo 0.6691 | HatTrick −0.0050 (CI −0.0072 to −0.0029) |
 | | NeurHL-G gate games, 2019-24 (n = 6,289) | 0.6610 / 0.6603 | **0.6601** (G stack) | NeurHL slightly better; not significant |
 | | NeurHL seal games, 2024-25 and 2025-26 (n = 2,624) | **0.6712** | 0.6715 | Tie |
+| | The shipped in-season loop (filter started from the market-anchored preseason ratings, as live), NeurHL-G gate games 2019-24 | 0.6613 with no starters; 0.6606 with known starters | 0.6601 (NeurHL-G); NeurHL Elo 0.6657 | Tie with NeurHL-G (+0.0006, CI −0.0019 to +0.0029); beats Elo |
 | **Skaters** | NeurHL's headline protocol: points MAE for players with ≥40 GP ("sample A"), held-out 2022-26 | **9.41** | 9.54 | HatTrick better (details and caveats below) |
 | | Same, 2022-24 only (HatTrick's roster = first 10 games; NeurHL's = each player's actual season team) | **9.49** | 9.74 | HatTrick better by 0.25 |
 | | Same, 2025-26 only (both use the actual season team; no box scores for a proxy) | 9.30 | **9.24** | NeurHL better by 0.05 |
@@ -131,6 +132,8 @@
 
   It has no historical news layer. Per season it is better than Elo in all five seasons (significantly in 2023). It ties the team-history table in 2022.
 
+**`inseason_bt.py`** runs the walk-forward filter from the preseason pipeline's ratings for 2019, 2020 and 2022-24. Those are the ratings `inseason.py` starts from live. OT/SO parameters are shared with the team-history run, so the starting prior is the only difference. Once games are played, the market-anchored start is no better than the team-history start: +0.0003 log loss, CI −0.0008 to +0.0015.
+
 **Skaters** (`players_bt.json`, `players_search_ledger.json`):
 
 - **Tuning** used only 2011-2017 (76 configurations, all logged). 2018-19 confirm; 2022-26 is the held-out test.
@@ -147,7 +150,7 @@
 ## Where HatTrick does not win
 
 - **Skaters on the per-82 protocol and on 2025-26.** NeurHL's A/B blend is 0.14 points better pooled and 0.33 better on 2025-26. HatTrick's skater advantage is on NeurHL's headline protocol, and it is largest where NeurHL's future-roster leak helps it most.
-- **In-season games on NeurHL's gate window.** NeurHL-G is 0.0002 better than HatTrick with known starters, which is not significant.
+- **In-season games on NeurHL's gate window.** NeurHL-G is 0.0002 better than HatTrick's filter with known starters, and 0.0006 better than the shipped loop. Neither difference is significant. The market-anchored start that wins preseason adds nothing once games are played.
 - **Standings, 2012.** NeurHL-2 beats HatTrick's team-history view (6.98 vs 7.20).
 - **Standings, own modelling.** On 2019-24 the sportsbook line does most of the work. HatTrick's own contribution over the market alone is about 0.1 points of MAE, smaller than the noise across seasons.
 - **Goalie save talent.** It is barely predictable (correlation 0.23), so HatTrick's goalie projections tie "league average". Coverage is 0.74, below nominal.
