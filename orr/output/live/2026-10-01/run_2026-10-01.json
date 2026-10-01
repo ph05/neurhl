@@ -1,7 +1,7 @@
 {
  "date": "2026-10-01",
- "created_utc": "2026-10-01T19:35:49+00:00",
- "code": "1599c81",
+ "created_utc": "2026-10-01T20:52:14+00:00",
+ "code": "8f4ff79",
  "results_through": "2026-09-30 00:00:00",
  "n_results": 8,
  "sims": 20000,
@@ -18,9 +18,9 @@
   "absent_players": 0,
   "start_shares_updated": true
  },
- "model": "ORR 1.5",
+ "model": "ORR 1.6",
  "settings": {
-  "version": "ORR 1.5",
+  "version": "ORR 1.6",
   "past_starters": true,
   "lineups": true,
   "player_update": true,
@@ -32,12 +32,15 @@
   "absence": true,
   "standings_sharp": true,
   "sog_dist": true,
+  "sos": true,
+  "ros_file": true,
   "accepted_items": [
    "X1",
    "1.2: in-season skater rates",
    "1.3: box-score lineups, goalie talent",
    "1.4: standings drift, start shares",
-   "1.5: standings sharpness, shot distributions (per params)"
+   "1.5: shot distributions",
+   "1.6: remaining SOS, rest-of-season player file"
   ],
   "lineup_hp": {
    "beta_x": 0.45,
