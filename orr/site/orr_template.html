@@ -1,0 +1,249 @@
+<title>ORR 2026-27 NHL Projections</title>
+<meta name="description" content="ORR (Odds, Ratings & Rosters): NHL projections for 2026-27. Standings, playoff odds, team and player projections, game probabilities and model accuracy.">
+<style>
+  /* Layout of NeurHL's projection site (docs/index.html), kept as is; colours are tokens with a dark set. */
+  :root { --fg:#111; --muted:#555; --rule:#ccc; --cell:#e2e2e2; --headrule:#999; --head:#e8e8e8; --alt:#f6f6f6; --link:#0645ad; --bg:#fff; --hi:#fff6d5; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --fg:#e6e6e6; --muted:#a3a3a3; --rule:#444; --cell:#333; --headrule:#666; --head:#2a2a2a; --alt:#1c1c1c; --link:#8ab4f8; --bg:#121212; --hi:#3a3420; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --fg:#e6e6e6; --muted:#a3a3a3; --rule:#444; --cell:#333; --headrule:#666; --head:#2a2a2a; --alt:#1c1c1c; --link:#8ab4f8; --bg:#121212; --hi:#3a3420; color-scheme: dark; }
+  html { background: var(--bg); }
+  body { margin: 0 auto; max-width: 1180px; padding: 12px 16px 40px; color: var(--fg); background: var(--bg);
+         font: 13px/1.45 Verdana, Geneva, "DejaVu Sans", Arial, sans-serif; }
+  a { color: var(--link); text-decoration: none; } a:hover { text-decoration: underline; }
+  h1 { font-size: 20px; margin: 4px 0 2px; font-weight: bold; }
+  h2 { font-size: 16px; margin: 26px 0 6px; padding-bottom: 3px; border-bottom: 2px solid var(--fg); }
+  h3 { font-size: 13px; margin: 14px 0 4px; }
+  p { margin: 6px 0; max-width: 88ch; }
+  .meta { color: var(--muted); font-size: 12px; }
+  .meta b { color: var(--fg); font-weight: normal; }
+  nav { margin: 8px 0 4px; padding: 5px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); font-size: 12px; }
+  nav a { margin-right: 14px; white-space: nowrap; }
+  .wrap { overflow-x: auto; margin: 4px 0 8px; }
+  table { border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+  th, td { padding: 2px 6px; border-bottom: 1px solid var(--cell); white-space: nowrap; }
+  th { background: var(--head); border-bottom: 1px solid var(--headrule); text-align: right; font-weight: bold; cursor: pointer; user-select: none; }
+  th.l, td.l { text-align: left; } td { text-align: right; }
+  tbody tr:nth-child(even) { background: var(--alt); }
+  tbody tr:hover { background: var(--hi); }
+  th.sorted::after { content: " \25BE"; } th.sorted.asc::after { content: " \25B4"; }
+  .controls { font-size: 12px; margin: 6px 0; } .controls label { margin-right: 12px; }
+  .controls input, .controls select { font: inherit; font-size: 12px; padding: 1px 3px; }
+  .note { color: var(--muted); font-size: 11px; }
+  .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(540px, 100%), 1fr)); gap: 4px 24px; }
+  .grid4 > div { min-width: 0; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 11px; }
+  dl { margin: 4px 0; } dt { font-weight: bold; margin-top: 6px; } dd { margin: 2px 0 2px 0; max-width: 88ch; }
+</style>
+
+<h1>ORR: 2026-27 NHL projections</h1>
+<div class="meta" id="meta"></div>
+<nav>
+  <a href="#standings">Standings</a><a href="#odds">Playoff odds</a><a href="#teamstats">Team stats</a>
+  <a href="#today">Today</a><a href="#games">Games</a><a href="#skaters">Skaters</a><a href="#goalies">Goalies</a>
+  <a href="#scoring">Accuracy</a><a href="#method">Methodology</a><a href="#files">Files</a>
+  <a href="https://github.com/ph05/neurhl/tree/claude/gallant-maxwell-rbw7u6/orr">Repository</a>
+</nav>
+
+<h2 id="standings">Projected standings</h2>
+<p class="note">Mean of 40,000 simulated seasons. P10/P50/P90 are percentiles of season points. HOWE is a reference projection (an Elo and ridge-regression blend) shown for comparison.</p>
+<div class="grid4" id="divs"></div>
+
+<h2 id="odds">Playoff odds (%)</h2>
+<div class="wrap"><table id="t_odds"></table></div>
+
+<h2 id="teamstats">Projected team statistics (season totals)</h2>
+<p class="note">GF and GA include overtime goals and one goal for each shootout win, as in the standings. SF and PPG sum the team's skater projections; SA and SV% come from its goalie projections.</p>
+<div class="wrap"><table id="t_team"></table></div>
+
+<h2 id="today">Today</h2>
+<p class="note" id="today_note"></p>
+<div class="wrap"><table id="t_today"></table></div>
+<div id="today_players"></div>
+
+<h2 id="games">Game probabilities</h2>
+<div class="controls">
+  <label>Team <select id="g_team"><option value="">All</option></select></label>
+  <label>Month <select id="g_month"><option value="">All</option></select></label>
+  <span class="note">P(home) is the preseason model probability of a home win, including overtime and shootout. Elo is the preseason Elo reference from NeurHL's published file.</span>
+</div>
+<div class="wrap"><table id="t_games"></table></div>
+
+<h2 id="skaters">Skater projections</h2>
+<div class="controls">
+  <label>Search <input id="s_q" size="16"></label>
+  <label>Team <select id="s_team"><option value="">All</option></select></label>
+  <label>Pos <select id="s_pos"><option value="">All</option><option>F</option><option>D</option></select></label>
+  <label>Min GP <input id="s_gp" size="3" value="20"></label>
+  <label><input type="checkbox" id="s_all"> Show all rows</label>
+</div>
+<div class="wrap"><table id="t_sk"></table></div>
+<p class="note">Expected values over simulated seasons; GP is the expected number of games dressed. Goals, assists and points include overtime goals. P10/P90 are percentiles of season points. FO%: faceoffs won (players with over 50 projected faceoffs).</p>
+
+<h2 id="goalies">Goalie projections</h2>
+<div class="wrap"><table id="t_gl"></table></div>
+<p class="note">GAA is goals against per game played. Goals against are reconciled to the team's goals against, net of empty-net and shootout goals.</p>
+
+<h2 id="scoring">Model accuracy</h2>
+<div id="scoring_live"></div>
+<div class="wrap"><table id="t_ev"></table></div>
+
+<h2 id="method">Methodology</h2>
+<dl>
+<dt>Name</dt>
+<dd>ORR stands for Odds, Ratings &amp; Rosters, its three layers: the betting market's season lines, team ratings from a game model, and roster-based player projections.</dd>
+<dt>Information cutoff</dt>
+<dd>The 2026-27 forecast uses only information dated before 2026-09-29 17:00 ET, the first puck drop. Every repository input is read from the last commit before that time, and each input file's SHA-256 is recorded. The forecast was built on 2026-09-30 and 2026-10-01, after the season began, so it is scored only on games played after its publication.</dd>
+<dt>Data</dt>
+<dd>MoneyPuck season summaries and game results from 2005-06 to 2025-26; per-game box scores from 2010-11 to 2023-24 (starting goalies, ice time, shots); rosters, roster changes and injury reports up to 2026-09-29; the sportsbook season points lines and Stanley Cup odds recorded on 2026-08-17; historical preseason points lines for 2018-19 to 2025-26; and 46 researched injury, suspension and holdout timelines with dated sources.</dd>
+<dt>Standings target</dt>
+<dd>Each team's expected points are 75% the de-vigged sportsbook line and 25% a regressed team-history view. The weights were chosen leave-one-season-out from a fixed list of combinations; they are non-negative and sum to one, so the forecast is never more spread out than its inputs. Moves after 2026-08-17, which the line had not seen, are priced with the player model by undoing each one: trades, signings, contract terminations, camp injuries, suspensions and the Hellebuyck holdout (a 10% chance he plays for Winnipeg).</dd>
+<dt>Game model</dt>
+<dd>Points targets are converted into offence and defence ratings on the actual schedule. Every game is scored with one model: a Conway-Maxwell-Poisson goal distribution, a late-game pulled-goalie layer that preserves the mean, era-specific overtime and shootout models, rest and travel effects, and starting-goalie effects. Preseason game probabilities average over 400 joint draws of both teams' ratings.</dd>
+<dt>Player projections</dt>
+<dd>Per-60 rates for goals, assists, shots and other events are regressed toward position averages by exposure, adjusted for age, and translated from other leagues for rookies, with draft position as a prior. A depth-chart model decides who dresses, ice time is conserved within each team, and player goals are reconciled to team goals so that player, team and game numbers agree. The final line averages ORR (60%), a Marcel-style projection (30%) and ORR's rates times last season's games (10%).</dd>
+<dt>Season simulation</dt>
+<dd>Each simulated season draws team strength from its uncertainty, sized from the blend's out-of-sample error net of game luck, plus drift during the season. It then plays every game and applies the NHL's standings rules, tiebreakers and playoff bracket.</dd>
+<dt>In-season</dt>
+<dd>After each game day a Kalman-style filter updates the ratings from goals, and from shots when the results carry them, starting from the preseason ratings. The day's games and players are forecast from the updated ratings and known starting goalies, and the rest of the season is simulated again from the current standings.</dd>
+<dt>Evaluation</dt>
+<dd>Every model choice was tuned on earlier seasons and tested walk-forward on later ones. A daily forecast counts only if published before 15:00 UTC on its game date (earlier when the first game starts earlier). Season accuracy is evaluated once, after the last regular-season game; figures during the season are provisional.</dd>
+</dl>
+
+<h2 id="files">Files</h2>
+<div id="files_list"></div>
+
+<script>window.ORR = __ORR_DATA__;</script>
+<script>
+(function () {
+  const D = window.ORR || {};
+  const $ = id => document.getElementById(id);
+  const f1 = x => x == null ? "" : Number(x).toFixed(1);
+  const f0 = x => x == null ? "" : Math.round(x).toString();
+  const pc = x => x == null ? "" : (100 * x).toFixed(1);
+  const esc = s => String(s).replace(/[&<>]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;"}[c]));
+
+  // generic sortable table: cols = [{k, h, l (left), f (format), t (title)}], rows = array of objects
+  function table(el, cols, rows, opt) {
+    opt = opt || {};
+    let key = opt.sort || null, asc = !!opt.asc;
+    function draw() {
+      let r = rows.slice();
+      if (key) {
+        r.sort((a, b) => { const x = a[key], y = b[key];
+          if (x == null) return 1; if (y == null) return -1;
+          return (typeof x === "string" ? x.localeCompare(y) : x - y) * (asc ? 1 : -1); });
+      }
+      if (opt.limit) r = r.slice(0, opt.limit());
+      const head = "<thead><tr>" + cols.map(c => `<th class="${c.l ? "l" : ""}${c.k === key ? " sorted" + (asc ? " asc" : "") : ""}" data-k="${c.k}" title="${c.t || ""}">${c.h}</th>`).join("") + "</tr></thead>";
+      const body = "<tbody>" + r.map((x, i) => "<tr>" + cols.map(c => `<td class="${c.l ? "l" : ""}">${c.f ? c.f(x[c.k], x, i) : esc(x[c.k] == null ? "" : x[c.k])}</td>`).join("") + "</tr>").join("") + "</tbody>";
+      el.innerHTML = head + body;
+      el.querySelectorAll("th").forEach(th => th.onclick = () => {
+        const k = th.dataset.k; if (k === "_rk") return;
+        if (key === k) asc = !asc; else { key = k; asc = typeof rows[0]?.[k] === "string"; }
+        draw();
+      });
+    }
+    draw();
+    return { redraw: (newRows) => { if (newRows) rows = newRows; draw(); } };
+  }
+
+  // ---- header
+  const M = D.meta || {};
+  $("meta").innerHTML = [
+    `<b>${esc(M.release || "ORR")}</b>`, `information cutoff <b>${esc(M.cutoff || "")}</b>`,
+    `${M.draws || ""} rating draws per game, ${(M.sims || 0).toLocaleString()} simulated seasons`, `acceptance tests <b>${esc(M.tests || "n/a")}</b>`,
+    `results through <b>${esc((D.live && D.live.as_of) || "")}</b> (${(D.live && D.live.games_played) || 0} games)`
+  ].join(" &middot; ");
+
+  // ---- teams
+  const T0 = {}; (D.teams || []).forEach(t => T0[t.ab] = t);
+  const TX = (D.teams_x || []).map(t => Object.assign({}, t, { name: (T0[t.ab] || {}).name || t.ab,
+    div: (T0[t.ab] || {}).div || "", howe: (T0[t.ab] || {}).howe, diff: t.gf - t.ga }));
+
+  const divs = {}; TX.forEach(t => (divs[t.div] = divs[t.div] || []).push(t));
+  $("divs").innerHTML = Object.keys(divs).sort().map((d, i) => `<div><h3>${esc(d)}</h3><div class="wrap"><table id="div_${i}"></table></div></div>`).join("");
+  Object.keys(divs).sort().forEach((d, i) => table($("div_" + i), [
+    { k: "name", h: "Team", l: 1 }, { k: "pts", h: "PTS", f: f1 }, { k: "p10", h: "P10" }, { k: "p50", h: "P50" }, { k: "p90", h: "P90" },
+    { k: "w", h: "W", f: f1 }, { k: "l", h: "L", f: f1 }, { k: "otl", h: "OTL", f: f1 }, { k: "diff", h: "DIFF", f: f0, t: "Goals for minus against" },
+    { k: "po", h: "PO%", f: f1 }, { k: "howe", h: "HOWE", f: f1, t: "HOWE projected points" }
+  ], divs[d], { sort: "pts" }));
+
+  table($("t_odds"), [
+    { k: "name", h: "Team", l: 1 }, { k: "pts", h: "PTS", f: f1 }, { k: "po", h: "Playoffs", f: f1 }, { k: "div_p", h: "Division", f: f1 },
+    { k: "pres", h: "Presidents'", f: f1 }, { k: "r2", h: "Round 2", f: f1 }, { k: "cf", h: "Conf. final", f: f1 },
+    { k: "fin", h: "Cup final", f: f1 }, { k: "cup", h: "Cup", f: f1 }
+  ], TX, { sort: "cup" });
+
+  table($("t_team"), [
+    { k: "name", h: "Team", l: 1 }, { k: "gf", h: "GF", f: f0 }, { k: "ga", h: "GA", f: f0 }, { k: "diff", h: "DIFF", f: f0 },
+    { k: "sf", h: "SF", f: f0 }, { k: "sa", h: "SA", f: f0 },
+    { k: "sh", h: "SH%", f: x => x == null ? "" : Number(x).toFixed(1) }, { k: "sv", h: "SV%", f: x => x == null ? "" : Number(x).toFixed(1) },
+    { k: "ppg", h: "PPG", f: f0, t: "Power-play goals" }, { k: "rw", h: "RW", f: f1, t: "Regulation wins" }
+  ], TX, { sort: "diff" });
+
+  // ---- today
+  const TN = D.tonight || { games: [] };
+  $("today_note").textContent = TN.games.length ? `Latest committed forecast for each game on ${TN.date}, from results through ${TN.through || "the previous day"}. Forecasts are committed to the repository before puck drop.` : "No forecasts yet for the current game day.";
+  table($("t_today"), [
+    { k: "start", h: "Start (ET)", l: 1, f: s => s ? new Date(s).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }) : "" },
+    { k: "away", h: "Away", l: 1 }, { k: "home", h: "Home", l: 1 }, { k: "g", h: "P(home)", f: pc },
+    { k: "pre", h: "Preseason", f: pc, t: "ORR's preseason probability for this game" }, { k: "elo", h: "Elo", f: pc }, { k: "ot", h: "P(OT)", f: pc },
+    { k: "score", h: "Reg. goals A-H", t: "Expected regulation goals", f: s => s ? `${Number(s[1]).toFixed(2)}-${Number(s[0]).toFixed(2)}` : "" },
+    { k: "sog", h: "SOG A-H", t: "Sum of the dressed skaters' expected shots", f: s => s ? `${Number(s[1]).toFixed(1)}-${Number(s[0]).toFixed(1)}` : "" },
+    { k: "kind", h: "Forecast", l: 1 }
+  ], TN.games);
+  const tp = [];
+  TN.games.forEach(g => (g.top || []).forEach(p => tp.push({ game: `${g.away}@${g.home}`, name: p[0], team: p[1], sog: p[2], pg: p[3], pp: p[4] })));
+  if (tp.length) {
+    $("today_players").innerHTML = '<h3>Top projected skaters</h3><div class="wrap"><table id="t_tp"></table></div>';
+    table($("t_tp"), [{ k: "game", h: "Game", l: 1 }, { k: "name", h: "Player", l: 1 }, { k: "team", h: "Team", l: 1 },
+      { k: "sog", h: "SOG", f: f1 }, { k: "pg", h: "P(goal)", f: pc }, { k: "pp", h: "P(point)", f: pc }], tp, { sort: "pp" });
+  }
+
+  // ---- games
+  const G = (D.games || []).map(r => ({ id: r[0], date: r[1], away: r[2], home: r[3], p: r[4], elo: r[5], ot: r[6],
+    res: r[7] ? `${r[7][0]}-${r[7][1]}${r[7][2] && r[7][2] !== "REG" ? " " + r[7][2] : ""}` : "" }));
+  Object.keys(T0).sort().forEach(t => { $("g_team").add(new Option(t, t)); $("s_team").add(new Option(t, t)); });
+  [...new Set(G.map(g => g.date.slice(0, 7)))].forEach(m => $("g_month").add(new Option(m, m)));
+  const gcols = [{ k: "date", h: "Date", l: 1 }, { k: "away", h: "Away", l: 1 }, { k: "home", h: "Home", l: 1 },
+    { k: "p", h: "P(home)", f: pc }, { k: "elo", h: "Elo", f: pc }, { k: "ot", h: "P(OT)", f: pc }, { k: "res", h: "Result A-H", l: 1 }];
+  const gsel = () => G.filter(g => (!$("g_team").value || g.home === $("g_team").value || g.away === $("g_team").value)
+    && (!$("g_month").value || g.date.startsWith($("g_month").value)));
+  const gt = table($("t_games"), gcols, gsel().slice(0, 200));
+  const gre = () => { const r = gsel(); gt.redraw(($("g_team").value || $("g_month").value) ? r : r.slice(0, 200)); };
+  $("g_team").onchange = gre; $("g_month").onchange = gre;
+
+  // ---- skaters
+  const S = (D.skaters_x || []).map(r => ({ name: r[0], team: r[1], pos: r[2], gp: r[3], toi: r[4], g: r[5], a: r[6], p: r[7],
+    p10: r[8], p90: r[9], sog: r[10], ixg: r[11], sh: r[12], pim: r[13], hit: r[14], blk: r[15], fo: r[16] }));
+  const scols = [{ k: "_rk", h: "Rk", f: (v, x, i) => i + 1 }, { k: "name", h: "Player", l: 1 }, { k: "team", h: "Team", l: 1 }, { k: "pos", h: "Pos", l: 1 },
+    { k: "gp", h: "GP", f: f1 }, { k: "toi", h: "TOI/GP", f: f1 }, { k: "g", h: "G", f: f1 }, { k: "a", h: "A", f: f1 }, { k: "p", h: "PTS", f: f1 },
+    { k: "p10", h: "P10", f: f0 }, { k: "p90", h: "P90", f: f0 }, { k: "sog", h: "SOG", f: f0 }, { k: "ixg", h: "ixG", f: f1 },
+    { k: "sh", h: "SH%", f: f1 }, { k: "pim", h: "PIM", f: f0 }, { k: "hit", h: "HIT", f: f0 }, { k: "blk", h: "BLK", f: f0 },
+    { k: "fo", h: "FO%", f: f1 }];
+  const ssel = () => { const q = $("s_q").value.toLowerCase(), tm = $("s_team").value, ps = $("s_pos").value, mg = +$("s_gp").value || 0;
+    return S.filter(s => s.gp >= mg && (!tm || s.team === tm) && (!ps || s.pos === ps) && (!q || s.name.toLowerCase().includes(q))); };
+  const st = table($("t_sk"), scols, ssel(), { sort: "p", limit: () => $("s_all").checked ? 100000 : 100 });
+  ["s_q", "s_team", "s_pos", "s_gp", "s_all"].forEach(id => $(id).oninput = () => st.redraw(ssel()));
+
+  // ---- goalies
+  const GL = (D.goalies || []).map(r => ({ name: r[0], team: r[1], gs: r[2], w: r[3], sa: r[4], ga: r[5], sv: r[6], gaa: r[7], gsax: r[8] }));
+  table($("t_gl"), [{ k: "name", h: "Goalie", l: 1 }, { k: "team", h: "Team", l: 1 }, { k: "gs", h: "GS", f: f1 }, { k: "w", h: "W", f: f1 },
+    { k: "sa", h: "SA", f: f0 }, { k: "ga", h: "GA", f: f0 }, { k: "sv", h: "SV%", f: x => x == null ? "" : Number(x).toFixed(3).replace(/^0/, "") },
+    { k: "gaa", h: "GAA", f: x => x == null ? "" : Number(x).toFixed(2) }, { k: "gsax", h: "GSAx", f: f1, t: "Goals saved above expected" }], GL, { sort: "gs" });
+
+  // ---- scoring and evidence
+  const L = D.live || {};
+  const lr = (L.rows || []).map(r => `${esc(r.name)} ${Number(r.log_loss).toFixed(3)} (${r.n} games)`).join("; ");
+  $("scoring_live").innerHTML = `<p>${(L.games_played || 0)} regular-season games played so far. Season accuracy is evaluated once, after the last regular-season game (2027-04-10); figures during the season are provisional.${lr ? " Log loss on games played after each forecast's publication: " + lr + "." : ""} The table lists out-of-sample results on earlier seasons, on the same games or players as the comparison.</p>`;
+  table($("t_ev"), [{ k: "c", h: "Comparison", l: 1 }, { k: "w", h: "Seasons", l: 1 }, { k: "n", h: "N" }, { k: "d", h: "Difference" },
+    { k: "ci", h: "95% CI", l: 1 }, { k: "p", h: "p" }], D.evidence || []);
+  $("t_ev").insertAdjacentHTML("afterend", '<p class="note">Negative differences favour ORR (lower log loss or error). Full results, including where ORR loses, are in orr/RESULTS.md in the repository.</p>');
+
+  // ---- files
+  const sha = D.sha256 || {};
+  $("files_list").innerHTML = "<p>Season forecast files and their SHA-256 hashes. All inputs, code and committed forecasts are in the repository.</p><div class=\"wrap\"><table><thead><tr><th class=\"l\">File</th><th class=\"l\">SHA-256</th></tr></thead><tbody>" +
+    Object.entries(sha).map(([f, h]) => `<tr><td class="l"><a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/${f}">${esc(f)}</a></td><td class="l"><code>${h}</code></td></tr>`).join("") + "</tbody></table></div>";
+})();
+</script>

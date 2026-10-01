@@ -27,6 +27,6 @@ data/raw/right_rail/
 # The review of NeurHL is public
 !/review/**/*.md
 
-# HatTrick: its documents are public, its working cache is not
-!/hattrick/**/*.md
-hattrick/cache/
+# ORR: its documents are public, its working cache is not
+!/orr/**/*.md
+orr/cache/
