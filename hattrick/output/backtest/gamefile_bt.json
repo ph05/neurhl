@@ -1,6 +1,6 @@
 {
- "created_utc": "2026-10-01T00:23:18+00:00",
- "protocol": "Backtest of the SHIPPED preseason game-file pipeline (hattrick/freeze.py).\n\nThe preseason-frozen numbers in games_bt.json validate\nratings.preseason_table (team history only, plug-in probabilities). The\n2026-27 game file is built differently, and this script rebuilds it for past\nseasons exactly the way freeze.py does, reusing its functions:\n\n  1. targets  = blend of team views (points per 82 above the league mean):\n                teams.market_rel82 (+ teams top-down td, or + the bottom-up\n                roster view bu as shipped), weights from teams.fit_blend fitted\n                on the OTHER clean market seasons (leave one season out);\n  2. style    = teams.fit_style / predict_style (walk-forward);\n  3. ratings  = calibrate.solve_ratings on the season's ACTUAL schedule with\n                season.FittedModel(P_V), P_V = the game-model parameters\n                fitted from seasons < V (ratings.fit_gamemodel_params), the\n                league level set by freeze.league_level_mu (previous season's\n                goals per game), rest/travel offsets from\n                FittedModel.game_adjustments;\n  4. rating SD from the blend's out-of-sample RMSE (leave-one-season-out on\n     the other seasons) net of the game luck the scoring model implies\n     (freeze.luck_sd_82), converted with calibrate.points_per_rating, split\n     equally between o and d; league level by freeze.league_level_mu with\n     the Jensen term for that dispersion and in-season drift; ratings\n     re-solved at that level (the order of freeze.main);\n  5. probabilities via freeze.game_file (averaged over rating draws).\n\nSeasons: 2019, 2020, 2022, 2023, 2024 (market lines + clean first-10 roster\nproxies). Scored against ratings.preseason_table frozen predictions and the\npreseason Elo freeze on the same games, paired bootstrap CIs.\n\nDifferences from the 2027 freeze (stated, not hidden):\n  * no 'news' adjustment (market line moves after the posting date are not\n    available historically) and no Hellebuyck-type scenario;\n  * no team-specific backup-on-back-to-back term (no historical goalie depth\n    projections); the league-average backup effect is in the rest\n    coefficients;\n  * historical lines are 82-game late-preseason lines (no O/U prices), used\n    as their own mean.\n  * the bottom-up view's first-10-games roster proxy knows who dressed in a\n    season's first 10 games (mild leakage for those games).\n\nRun: python3 -m hattrick.backtest.gamefile_bt\nWrites hattrick/output/backtest/gamefile_bt.json.\n",
+ "created_utc": "2026-10-01T00:44:05+00:00",
+ "protocol": "Backtest of the SHIPPED preseason game-file pipeline (hattrick/freeze.py).\n\nThe preseason-frozen numbers in games_bt.json validate\nratings.preseason_table (team history only, plug-in probabilities). The\n2026-27 game file is built differently, and this script rebuilds it for past\nseasons exactly the way freeze.py does, reusing its functions:\n\n  1. targets  = blend of team views (points per 82 above the league mean):\n                teams.market_rel82 (+ the teams top-down view td as shipped,\n                or + the bottom-up roster view bu), convex weights from\n                teams.fit_blend fitted on the OTHER clean market seasons\n                (leave one season out);\n  2. style    = teams.fit_style / predict_style (walk-forward);\n  3. ratings  = calibrate.solve_ratings on the season's ACTUAL schedule with\n                season.FittedModel(P_V), P_V = the game-model parameters\n                fitted from seasons < V (ratings.fit_gamemodel_params), the\n                league level set by freeze.league_level_mu (previous season's\n                goals per game), rest/travel offsets from\n                FittedModel.game_adjustments;\n  4. rating SD from the blend's out-of-sample RMSE (leave-one-season-out on\n     the other seasons) net of the game luck the scoring model implies\n     (freeze.luck_sd_82), converted with calibrate.points_per_rating, split\n     equally between o and d; league level by freeze.league_level_mu with\n     the Jensen term for that dispersion and in-season drift; ratings\n     re-solved at that level (the order of freeze.main);\n  5. probabilities via freeze.game_file (averaged over rating draws).\n\nSeasons: 2019, 2020, 2022, 2023, 2024 (market lines + clean first-10 roster\nproxies). Scored against ratings.preseason_table frozen predictions and the\npreseason Elo freeze on the same games, paired bootstrap CIs.\n\nDifferences from the 2027 freeze (stated, not hidden):\n  * no 'news' adjustment (market line moves after the posting date are not\n    available historically) and no Hellebuyck-type scenario;\n  * no team-specific backup-on-back-to-back term (no historical goalie depth\n    projections); the league-average backup effect is in the rest\n    coefficients;\n  * historical lines are 82-game late-preseason lines (no O/U prices), used\n    as their own mean.\n  * the bottom-up view's first-10-games roster proxy knows who dressed in a\n    season's first 10 games (mild leakage for those games).\n\nRun: python3 -m hattrick.backtest.gamefile_bt\nWrites hattrick/output/backtest/gamefile_bt.json.\n",
  "seasons": [
   2019,
   2020,
@@ -17,157 +17,157 @@
     {
      "season": 2019,
      "n": 1271,
-     "gamefile": 0.6781943052064705,
+     "gamefile": 0.6776787636740211,
      "preseason_table_frozen": 0.6811371995398816,
      "elo_frozen": 0.6810599653413304,
      "hattrick_inseason_ref": 0.6765066206030687,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.002942894333411077,
-      "se": 0.0035271121064338147,
+      "diff": -0.003458435865860418,
+      "se": 0.003017084786654963,
       "ci95": [
-       -0.009873104772782077,
-       0.004144583306763965
+       -0.009477999064061639,
+       0.0025246034036193795
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.002865660134859832,
-      "se": 0.0029794463067794913,
+      "diff": -0.003381201667309175,
+      "se": 0.0025474347529709225,
       "ci95": [
-       -0.008564756616912597,
-       0.0029938950048184376
+       -0.008351558504219462,
+       0.0016124540430497592
       ]
      },
-     "logit_sd_gamefile": 0.4009908357421528,
+     "logit_sd_gamefile": 0.3565287163113179,
      "logit_sd_preseason_table": 0.2338418187723653
     },
     {
      "season": 2020,
      "n": 1082,
-     "gamefile": 0.6738154382723396,
+     "gamefile": 0.6741041852737889,
      "preseason_table_frozen": 0.6816254991939514,
      "elo_frozen": 0.6795450700900152,
      "hattrick_inseason_ref": 0.6781745343246398,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.007810060921612004,
-      "se": 0.003038541090133911,
+      "diff": -0.007521313920162615,
+      "se": 0.002859986905971664,
       "ci95": [
-       -0.01385838749970119,
-       -0.0016696848204160763
+       -0.0132789780417102,
+       -0.001727266279311435
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.005729631817675577,
-      "se": 0.0033658876814277217,
+      "diff": -0.005440884816226189,
+      "se": 0.0032260789724951537,
       "ci95": [
-       -0.012277897895542633,
-       0.0007369117551426149
+       -0.011780286978299451,
+       0.0007091644401641599
       ]
      },
-     "logit_sd_gamefile": 0.34170890984599045,
+     "logit_sd_gamefile": 0.32177699021364964,
      "logit_sd_preseason_table": 0.2517358840344316
     },
     {
      "season": 2022,
      "n": 1312,
-     "gamefile": 0.6619144094305277,
+     "gamefile": 0.6622302352047416,
      "preseason_table_frozen": 0.6612768193009583,
      "elo_frozen": 0.6652752998984555,
      "hattrick_inseason_ref": 0.6427610083327386,
      "d_gamefile_vs_preseason_table": {
-      "diff": 0.0006375901295695262,
-      "se": 0.002929889881382261,
+      "diff": 0.0009534159037833102,
+      "se": 0.002681944628030999,
       "ci95": [
-       -0.004845641000582513,
-       0.006564117398891714
+       -0.004190879595399505,
+       0.0062492890063136144
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.0033608904679276875,
-      "se": 0.0033997910183144854,
+      "diff": -0.0030450646937139033,
+      "se": 0.0030963328677709183,
       "ci95": [
-       -0.009960415836561891,
-       0.0032217458525628964
+       -0.008973444239494973,
+       0.0028745546408252905
       ]
      },
-     "logit_sd_gamefile": 0.44834369771696103,
+     "logit_sd_gamefile": 0.41565561732047007,
      "logit_sd_preseason_table": 0.35694545979912545
     },
     {
      "season": 2023,
      "n": 1312,
-     "gamefile": 0.6642114111877321,
+     "gamefile": 0.6643883498473219,
      "preseason_table_frozen": 0.6667462640453489,
      "elo_frozen": 0.6724183471584844,
      "hattrick_inseason_ref": 0.6546140385208734,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.0025348528576167205,
-      "se": 0.0023981481412033855,
+      "diff": -0.0023579141980268757,
+      "se": 0.002233338845330288,
       "ci95": [
-       -0.00708865059387768,
-       0.002088631408752098
+       -0.006550328320338222,
+       0.0020379289273607932
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.008206935970752264,
-      "se": 0.002905124070215518,
+      "diff": -0.00802999731116242,
+      "se": 0.002656095437408575,
       "ci95": [
-       -0.013670690472869835,
-       -0.0022017012896473754
+       -0.013066161408751152,
+       -0.0026719617701863683
       ]
      },
-     "logit_sd_gamefile": 0.4885858673491411,
+     "logit_sd_gamefile": 0.45337504053717154,
      "logit_sd_preseason_table": 0.4383822800188186
     },
     {
      "season": 2024,
      "n": 1312,
-     "gamefile": 0.659784264098983,
+     "gamefile": 0.6601079548371891,
      "preseason_table_frozen": 0.6648829828439444,
      "elo_frozen": 0.6623261341173711,
      "hattrick_inseason_ref": 0.6566543517764587,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.0050987187449614245,
-      "se": 0.0022846377661411748,
+      "diff": -0.004775028006755404,
+      "se": 0.002244607588788412,
       "ci95": [
-       -0.009604334714705799,
-       -0.000498565120237942
+       -0.009123861817352887,
+       -0.000190812966732762
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.0025418700183880375,
-      "se": 0.002526568789801225,
+      "diff": -0.0022181792801820163,
+      "se": 0.002339165664848652,
       "ci95": [
-       -0.007299375598538268,
-       0.0024663897747635335
+       -0.006781213824425988,
+       0.002357958900430545
       ]
      },
-     "logit_sd_gamefile": 0.4746595406452501,
+     "logit_sd_gamefile": 0.44365221438948194,
      "logit_sd_preseason_table": 0.4715965602436483
     },
     {
      "season": "all",
      "n": 6289,
-     "gamefile": 0.6672868973250307,
+     "gamefile": 0.6674027122643694,
      "preseason_table_frozen": 0.6706848353608929,
      "elo_frozen": 0.6717953465872035,
      "hattrick_inseason_ref": 0.6610448929763735,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.0033979380358621363,
-      "se": 0.0012777436991520163,
+      "diff": -0.0032821230965233254,
+      "se": 0.0011677416961823064,
       "ci95": [
-       -0.005824074563787104,
-       -0.0008666286106931962
+       -0.0053973453297103844,
+       -0.0009435485224798231
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.004508449262172845,
-      "se": 0.0013585568863244404,
+      "diff": -0.004392634322834033,
+      "se": 0.0012390650159957303,
       "ci95": [
-       -0.007130933193344511,
-       -0.0017418785532795397
+       -0.006822450921315137,
+       -0.0018531552041082576
       ]
      },
-     "logit_sd_gamefile": 0.4375218795207279,
+     "logit_sd_gamefile": 0.4044857925244216,
      "logit_sd_preseason_table": 0.36766400400518306
     }
    ],
@@ -175,86 +175,86 @@
     "2019": {
      "league_level": {
       "gf_per_team_game_target": 2.9303697875688437,
-      "mu_used": 0.9870596161709155,
-      "var_log_rate": 0.019790796427474992
+      "mu_used": 0.987040308230431,
+      "var_log_rate": 0.019828830534290694
      },
      "weights": {
-      "mkt_rel82": 1.1239293227714806
+      "mkt_rel82": 1.0
      },
-     "loso_rmse_other_82": 12.56225834836178,
-     "luck_sd_82": 8.273230061124309,
-     "talent_sd_82": 9.453253364143706,
-     "rating_sd_net_mean": 0.12131521377819544,
-     "mu": 0.9870596161709155,
-     "max_target_miss": 0.014449083041782274
+     "loso_rmse_other_82": 12.63313903982282,
+     "luck_sd_82": 8.304068286899518,
+     "talent_sd_82": 9.520433387509476,
+     "rating_sd_net_mean": 0.12147839675831192,
+     "mu": 0.987040308230431,
+     "max_target_miss": 0.006590895372070804
     },
     "2020": {
      "league_level": {
       "gf_per_team_game_target": 2.9807238394964597,
-      "mu_used": 0.9950823426512456,
-      "var_log_rate": 0.020815297840510637
+      "mu_used": 0.9951405137710224,
+      "var_log_rate": 0.020699704780950515
      },
      "weights": {
-      "mkt_rel82": 1.0665193545767628
+      "mkt_rel82": 1.0
      },
-     "loso_rmse_other_82": 12.773379564327227,
-     "luck_sd_82": 8.315089143905306,
-     "talent_sd_82": 9.696314661936283,
-     "rating_sd_net_mean": 0.1254756037030098,
-     "mu": 0.9950823426512456,
-     "max_target_miss": 0.0034111791651909584
+     "loso_rmse_other_82": 12.770617758251003,
+     "luck_sd_82": 8.327361880465567,
+     "talent_sd_82": 9.68213416758541,
+     "rating_sd_net_mean": 0.12501662484787085,
+     "mu": 0.9951405137710224,
+     "max_target_miss": 0.0016168736585271404
     },
     "2022": {
      "league_level": {
       "gf_per_team_game_target": 2.898041474654378,
-      "mu_used": 0.9768842610514317,
-      "var_log_rate": 0.014830129077796822
+      "mu_used": 0.9769763053463035,
+      "var_log_rate": 0.0146475197584577
      },
      "weights": {
-      "mkt_rel82": 1.0772574258750438
+      "mkt_rel82": 1.0
      },
-     "loso_rmse_other_82": 11.190113702146398,
-     "luck_sd_82": 8.225711535622198,
-     "talent_sd_82": 7.586587796875251,
-     "rating_sd_net_mean": 0.0987720346533423,
-     "mu": 0.9768842610514317,
-     "max_target_miss": 0.011587903579382441
+     "loso_rmse_other_82": 11.18374839578569,
+     "luck_sd_82": 8.250132047337205,
+     "talent_sd_82": 7.550599273020561,
+     "rating_sd_net_mean": 0.09785070020114599,
+     "mu": 0.9769763053463035,
+     "max_target_miss": 0.004313744359293992
     },
     "2023": {
      "league_level": {
       "gf_per_team_game_target": 3.105945121951219,
-      "mu_used": 1.0429183914742117,
-      "var_log_rate": 0.017288863864147214
+      "mu_used": 1.0430392171262417,
+      "var_log_rate": 0.01704908521976497
      },
      "weights": {
-      "mkt_rel82": 1.0768826733586643
+      "mkt_rel82": 1.0
      },
-     "loso_rmse_other_82": 12.015963153444899,
-     "luck_sd_82": 8.212749941580267,
-     "talent_sd_82": 8.771209090086657,
-     "rating_sd_net_mean": 0.11051580637154654,
-     "mu": 1.0429183914742117,
-     "max_target_miss": 0.004276337669935515
+     "loso_rmse_other_82": 12.006481302180255,
+     "luck_sd_82": 8.24102774400549,
+     "talent_sd_82": 8.73161239303119,
+     "rating_sd_net_mean": 0.10943307039255565,
+     "mu": 1.0430392171262417,
+     "max_target_miss": 0.0047390381321434916
     },
     "2024": {
      "league_level": {
       "gf_per_team_game_target": 3.1432926829268295,
-      "mu_used": 1.0563208973668259,
-      "var_log_rate": 0.01922481920347339
+      "mu_used": 1.0564404644826981,
+      "var_log_rate": 0.018986356958085288
      },
      "weights": {
-      "mkt_rel82": 1.0692395210750327
+      "mkt_rel82": 1.0
      },
-     "loso_rmse_other_82": 12.545463868561809,
-     "luck_sd_82": 8.211239228875904,
-     "talent_sd_82": 9.484946705362097,
-     "rating_sd_net_mean": 0.11893083310506136,
-     "mu": 1.0563208973668259,
-     "max_target_miss": 0.007866531238576613
+     "loso_rmse_other_82": 12.534469854343476,
+     "luck_sd_82": 8.236295729411001,
+     "talent_sd_82": 9.448617210318737,
+     "rating_sd_net_mean": 0.11793127544045878,
+     "mu": 1.0564404644826981,
+     "max_target_miss": 0.013398122638832888
     }
    }
   },
-  "mkt+td": {
+  "mkt+td (shipped)": {
    "views": [
     "mkt_rel82",
     "td_rel82"
@@ -263,157 +263,157 @@
     {
      "season": 2019,
      "n": 1271,
-     "gamefile": 0.6775229946456741,
+     "gamefile": 0.677394211438503,
      "preseason_table_frozen": 0.6811371995398816,
      "elo_frozen": 0.6810599653413304,
      "hattrick_inseason_ref": 0.6765066206030687,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.003614204894207514,
-      "se": 0.002803039292908017,
+      "diff": -0.0037429881013785822,
+      "se": 0.0022884107414901586,
       "ci95": [
-       -0.009319670157436458,
-       0.0019635054854673056
+       -0.008401555781555738,
+       0.0008268175817806729
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.0035369706956562695,
-      "se": 0.002579354309526904,
+      "diff": -0.0036657539028273384,
+      "se": 0.002218406965866803,
       "ci95": [
-       -0.00852444921654337,
-       0.00143723635013523
+       -0.008042145997852818,
+       0.0006837393039721937
       ]
      },
-     "logit_sd_gamefile": 0.36663231569812593,
+     "logit_sd_gamefile": 0.32290676864857665,
      "logit_sd_preseason_table": 0.2338418187723653
     },
     {
      "season": 2020,
      "n": 1082,
-     "gamefile": 0.6742560854275225,
+     "gamefile": 0.6746557898597804,
      "preseason_table_frozen": 0.6816254991939514,
      "elo_frozen": 0.6795450700900152,
      "hattrick_inseason_ref": 0.6781745343246398,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.0073694137664291216,
-      "se": 0.002380306573249459,
+      "diff": -0.006969709334171112,
+      "se": 0.002153825544944672,
       "ci95": [
-       -0.012151262263653493,
-       -0.002687029996197615
+       -0.011320534969589983,
+       -0.002852903405427478
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.005288984662492694,
-      "se": 0.002983736604902866,
+      "diff": -0.004889280230234684,
+      "se": 0.00282172662672597,
       "ci95": [
-       -0.010763247936594214,
-       0.0005347984565599886
+       -0.010134832351814255,
+       0.0007398178880146687
       ]
      },
-     "logit_sd_gamefile": 0.3350238202401872,
+     "logit_sd_gamefile": 0.309526836366829,
      "logit_sd_preseason_table": 0.2517358840344316
     },
     {
      "season": 2022,
      "n": 1312,
-     "gamefile": 0.6607695802110937,
+     "gamefile": 0.6612903864349288,
      "preseason_table_frozen": 0.6612768193009583,
      "elo_frozen": 0.6652752998984555,
      "hattrick_inseason_ref": 0.6427610083327386,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.0005072390898645617,
-      "se": 0.0025771096569551393,
+      "diff": 1.3567133970535614e-05,
+      "se": 0.0023383575631256005,
       "ci95": [
-       -0.005499045891027605,
-       0.004537088098680075
+       -0.004416793476292006,
+       0.004658741416927344
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.004505719687361774,
-      "se": 0.0031536068471431644,
+      "diff": -0.003984913463526677,
+      "se": 0.0028495286535068476,
       "ci95": [
-       -0.010537632827475869,
-       0.0017536638693304676
+       -0.009599099467430724,
+       0.0017604431643127559
       ]
      },
-     "logit_sd_gamefile": 0.4399784074534837,
+     "logit_sd_gamefile": 0.4060416403008883,
      "logit_sd_preseason_table": 0.35694545979912545
     },
     {
      "season": 2023,
      "n": 1312,
-     "gamefile": 0.6642991709613346,
+     "gamefile": 0.6643406875785404,
      "preseason_table_frozen": 0.6667462640453489,
      "elo_frozen": 0.6724183471584844,
      "hattrick_inseason_ref": 0.6546140385208734,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.0024470930840141043,
-      "se": 0.001975129363435279,
+      "diff": -0.0024055764668084035,
+      "se": 0.0016740260607405978,
       "ci95": [
-       -0.006436755500788135,
-       0.001030390366058575
+       -0.005748567348467924,
+       0.0006818150134520617
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.00811917619714965,
-      "se": 0.0028926136872112007,
+      "diff": -0.008077659579943948,
+      "se": 0.0024736796570810965,
       "ci95": [
-       -0.013674543948046304,
-       -0.002425047929071844
+       -0.012804062193613342,
+       -0.0031338887484939322
       ]
      },
-     "logit_sd_gamefile": 0.5141391692362426,
+     "logit_sd_gamefile": 0.46050918109216454,
      "logit_sd_preseason_table": 0.4383822800188186
     },
     {
      "season": 2024,
      "n": 1312,
-     "gamefile": 0.6610202952279619,
+     "gamefile": 0.6607083185694358,
      "preseason_table_frozen": 0.6648829828439444,
      "elo_frozen": 0.6623261341173711,
      "hattrick_inseason_ref": 0.6566543517764587,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.003862687615982504,
-      "se": 0.0017646690240277001,
+      "diff": -0.004174664274508729,
+      "se": 0.001502872922684194,
       "ci95": [
-       -0.007290670667284749,
-       -0.00039741635136949523
+       -0.00713116707587043,
+       -0.0013721007959665724
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.001305838889409116,
-      "se": 0.002940160598264968,
+      "diff": -0.0016178155479353422,
+      "se": 0.0023704348559149737,
       "ci95": [
-       -0.006830729791127496,
-       0.004293501885360491
+       -0.006021560987447046,
+       0.002949086488055481
       ]
      },
-     "logit_sd_gamefile": 0.5412418095713432,
+     "logit_sd_gamefile": 0.4720264754988504,
      "logit_sd_preseason_table": 0.4715965602436483
     },
     {
      "season": "all",
      "n": 6289,
-     "gamefile": 0.6672643726354816,
+     "gamefile": 0.6673593401868962,
      "preseason_table_frozen": 0.6706848353608929,
      "elo_frozen": 0.6717953465872035,
      "hattrick_inseason_ref": 0.6610448929763735,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.00342046272541134,
-      "se": 0.0010406924857320947,
+      "diff": -0.0033254951739965107,
+      "se": 0.0008998418618091908,
       "ci95": [
-       -0.00538365153685495,
-       -0.0013722887174703036
+       -0.005082656242652736,
+       -0.001612475101257219
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.004530973951722048,
-      "se": 0.0013069839846329013,
+      "diff": -0.004436006400307219,
+      "se": 0.001140542901297321,
       "ci95": [
-       -0.00716362277306119,
-       -0.002127973780501572
+       -0.006695833838117291,
+       -0.002360529134401824
       ]
      },
-     "logit_sd_gamefile": 0.4507885286542447,
+     "logit_sd_gamefile": 0.40347567651608635,
      "logit_sd_preseason_table": 0.36766400400518306
     }
    ],
@@ -421,91 +421,91 @@
     "2019": {
      "league_level": {
       "gf_per_team_game_target": 2.9303697875688437,
-      "mu_used": 0.9869887786815295,
-      "var_log_rate": 0.019930336920530995
+      "mu_used": 0.987079618736904,
+      "var_log_rate": 0.019751393991612836
      },
      "weights": {
-      "mkt_rel82": 0.870275076284198,
-      "td_rel82": 0.25811455531133837
+      "mkt_rel82": 0.7504906438670673,
+      "td_rel82": 0.24950935613293262
      },
-     "loso_rmse_other_82": 12.644652274736515,
-     "luck_sd_82": 8.297518377962334,
-     "talent_sd_82": 9.541405552452774,
-     "rating_sd_net_mean": 0.12189351328379862,
-     "mu": 0.9869887786815295,
-     "max_target_miss": 0.007988416442842095
+     "loso_rmse_other_82": 12.657245456580107,
+     "luck_sd_82": 8.325650906206219,
+     "talent_sd_82": 9.533593212220946,
+     "rating_sd_net_mean": 0.12116300978934398,
+     "mu": 0.987079618736904,
+     "max_target_miss": 0.0030285671272309855
     },
     "2020": {
      "league_level": {
       "gf_per_team_game_target": 2.9807238394964597,
-      "mu_used": 0.9951765620105731,
-      "var_log_rate": 0.02062807257074905
+      "mu_used": 0.9952652239037729,
+      "var_log_rate": 0.02045189071319969
      },
      "weights": {
-      "mkt_rel82": 0.7663789846435439,
-      "td_rel82": 0.32243793346926947
+      "mkt_rel82": 0.7007024032288274,
+      "td_rel82": 0.2992975967711726
      },
-     "loso_rmse_other_82": 12.736958329553355,
-     "luck_sd_82": 8.31901020670954,
-     "talent_sd_82": 9.644904181454635,
-     "rating_sd_net_mean": 0.12472585955675228,
-     "mu": 0.9951765620105731,
-     "max_target_miss": 0.0029783894051149673
+     "loso_rmse_other_82": 12.725836865980076,
+     "luck_sd_82": 8.334405255786917,
+     "talent_sd_82": 9.616892064063578,
+     "rating_sd_net_mean": 0.12402099801011741,
+     "mu": 0.9952652239037729,
+     "max_target_miss": 0.0009950120065411738
     },
     "2022": {
      "league_level": {
       "gf_per_team_game_target": 2.898041474654378,
-      "mu_used": 0.9768995827124037,
-      "var_log_rate": 0.0147997319919554
+      "mu_used": 0.9770044213485884,
+      "var_log_rate": 0.01459173961496064
      },
      "weights": {
-      "mkt_rel82": 0.9503758880317077,
-      "td_rel82": 0.1327549258938191
+      "mkt_rel82": 0.8806525540829395,
+      "td_rel82": 0.11934744591706058
      },
-     "loso_rmse_other_82": 11.192447512378228,
-     "luck_sd_82": 8.231957250488396,
-     "talent_sd_82": 7.58325531308772,
-     "rating_sd_net_mean": 0.09861687397489763,
-     "mu": 0.9768995827124037,
-     "max_target_miss": 0.009337930943971173
+     "loso_rmse_other_82": 11.180220145344954,
+     "luck_sd_82": 8.25696253007974,
+     "talent_sd_82": 7.537897072475607,
+     "rating_sd_net_mean": 0.09756483581781389,
+     "mu": 0.9770044213485884,
+     "max_target_miss": 0.002869293009879925
     },
     "2023": {
      "league_level": {
       "gf_per_team_game_target": 3.105945121951219,
-      "mu_used": 1.0427644939687826,
-      "var_log_rate": 0.01759427345048429
+      "mu_used": 1.0430160637239978,
+      "var_log_rate": 0.017095033169132905
      },
      "weights": {
-      "mkt_rel82": 0.8126862898453625,
-      "td_rel82": 0.3008633364165278
+      "mkt_rel82": 0.7433052861491586,
+      "td_rel82": 0.25669471385084147
      },
-     "loso_rmse_other_82": 12.051668932368889,
-     "luck_sd_82": 8.190140031421784,
-     "talent_sd_82": 8.841059343830231,
-     "rating_sd_net_mean": 0.11187878543938831,
-     "mu": 1.0427644939687826,
-     "max_target_miss": 0.013459228361242026
+     "loso_rmse_other_82": 12.006463710868559,
+     "luck_sd_82": 8.234784309518773,
+     "talent_sd_82": 8.737476650389803,
+     "rating_sd_net_mean": 0.10963866081434671,
+     "mu": 1.0430160637239978,
+     "max_target_miss": 0.002849986204438437
     },
     "2024": {
      "league_level": {
       "gf_per_team_game_target": 3.1432926829268295,
-      "mu_used": 1.0562661395095494,
-      "var_log_rate": 0.019334027266730794
+      "mu_used": 1.0564626532038675,
+      "var_log_rate": 0.018942104256799465
      },
      "weights": {
-      "mkt_rel82": 0.7417939127987759,
-      "td_rel82": 0.3926410405242804
+      "mkt_rel82": 0.683523801552661,
+      "td_rel82": 0.31647619844733904
      },
-     "loso_rmse_other_82": 12.455989517906435,
-     "luck_sd_82": 8.152709192880359,
-     "talent_sd_82": 9.41727177512251,
-     "rating_sd_net_mean": 0.11937228984093069,
-     "mu": 1.0562661395095494,
-     "max_target_miss": 0.014764495691494517
+     "loso_rmse_other_82": 12.477091085029457,
+     "luck_sd_82": 8.212959003149862,
+     "talent_sd_82": 9.39282206563614,
+     "rating_sd_net_mean": 0.11773729587678226,
+     "mu": 1.0564626532038675,
+     "max_target_miss": 0.00803513734247474
     }
    }
   },
-  "mkt+bu (shipped)": {
+  "mkt+bu": {
    "views": [
     "mkt_rel82",
     "bu_rel82"
@@ -514,157 +514,157 @@
     {
      "season": 2019,
      "n": 1271,
-     "gamefile": 0.6773676044661453,
+     "gamefile": 0.6776001383831499,
      "preseason_table_frozen": 0.6811371995398816,
      "elo_frozen": 0.6810599653413304,
      "hattrick_inseason_ref": 0.6765066206030687,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.0037695950737363557,
-      "se": 0.003297457929729382,
+      "diff": -0.0035370611567317133,
+      "se": 0.0029697327331698747,
       "ci95": [
-       -0.010076896392891192,
-       0.003198581919780118
+       -0.009317181893696755,
+       0.0027332517498280143
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.0036923608751851123,
-      "se": 0.002843225947383262,
+      "diff": -0.0034598269581804695,
+      "se": 0.0025132960827983324,
       "ci95": [
-       -0.009230712285618553,
-       0.002045357835939273
+       -0.008337168371750917,
+       0.0017218665545764686
       ]
      },
-     "logit_sd_gamefile": 0.38649111952387827,
+     "logit_sd_gamefile": 0.3529015957461245,
      "logit_sd_preseason_table": 0.2338418187723653
     },
     {
      "season": 2020,
      "n": 1082,
-     "gamefile": 0.6741118279680286,
+     "gamefile": 0.674277057440871,
      "preseason_table_frozen": 0.6816254991939514,
      "elo_frozen": 0.6795450700900152,
      "hattrick_inseason_ref": 0.6781745343246398,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.007513671225923049,
-      "se": 0.003017800768317196,
+      "diff": -0.007348441753080521,
+      "se": 0.002763178546966927,
       "ci95": [
-       -0.013342852047794871,
-       -0.001716010864797324
+       -0.01278018430669662,
+       -0.0020960516120536827
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.005433242121986623,
-      "se": 0.0033572024971873647,
+      "diff": -0.005268012649144095,
+      "se": 0.0031432275794048637,
       "ci95": [
-       -0.012189348434886612,
-       0.000942988041253333
+       -0.011442607770229174,
+       0.0007211205112025966
       ]
      },
-     "logit_sd_gamefile": 0.3435901017069562,
+     "logit_sd_gamefile": 0.3123414850601031,
      "logit_sd_preseason_table": 0.2517358840344316
     },
     {
      "season": 2022,
      "n": 1312,
-     "gamefile": 0.6618131672354434,
+     "gamefile": 0.6624768955117162,
      "preseason_table_frozen": 0.6612768193009583,
      "elo_frozen": 0.6652752998984555,
      "hattrick_inseason_ref": 0.6427610083327386,
      "d_gamefile_vs_preseason_table": {
-      "diff": 0.0005363479344851383,
-      "se": 0.0028172822686037156,
+      "diff": 0.0012000762107579135,
+      "se": 0.0025238969490920258,
       "ci95": [
-       -0.004628145103799116,
-       0.005963561604900718
+       -0.003424051743357402,
+       0.006050854999448496
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.003462132663012076,
-      "se": 0.0032680245045921506,
+      "diff": -0.0027984043867393,
+      "se": 0.002890565206667628,
       "ci95": [
-       -0.009742973229232909,
-       0.0030623734032434397
+       -0.008120398221628394,
+       0.0029486287677852655
       ]
      },
-     "logit_sd_gamefile": 0.43394659389174317,
+     "logit_sd_gamefile": 0.3929665426638521,
      "logit_sd_preseason_table": 0.35694545979912545
     },
     {
      "season": 2023,
      "n": 1312,
-     "gamefile": 0.664674917059359,
+     "gamefile": 0.6647597870128347,
      "preseason_table_frozen": 0.6667462640453489,
      "elo_frozen": 0.6724183471584844,
      "hattrick_inseason_ref": 0.6546140385208734,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.0020713469859897785,
-      "se": 0.0029236341589624864,
+      "diff": -0.0019864770325140665,
+      "se": 0.002317757756560453,
       "ci95": [
-       -0.007679517092645354,
-       0.0037583201267433644
+       -0.006456605609427861,
+       0.0025052247384642714
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.007743430099125322,
-      "se": 0.0034446058895873425,
+      "diff": -0.0076585601456496104,
+      "se": 0.0026720761869635894,
       "ci95": [
-       -0.014383936320557846,
-       -0.0011480587056626962
+       -0.012779217600353837,
+       -0.002416641418358959
       ]
      },
-     "logit_sd_gamefile": 0.5147793486755151,
+     "logit_sd_gamefile": 0.4358058100158398,
      "logit_sd_preseason_table": 0.4383822800188186
     },
     {
      "season": 2024,
      "n": 1312,
-     "gamefile": 0.6597455417069743,
+     "gamefile": 0.6600407995114087,
      "preseason_table_frozen": 0.6648829828439444,
      "elo_frozen": 0.6623261341173711,
      "hattrick_inseason_ref": 0.6566543517764587,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.005137441136970146,
-      "se": 0.0024367292114985417,
+      "diff": -0.004842183332535698,
+      "se": 0.0022203283599372308,
       "ci95": [
-       -0.009897037674057843,
-       -0.0003375892495588256
+       -0.009329557417124611,
+       -0.0005520753179007429
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.002580592410396758,
-      "se": 0.002992038568679686,
+      "diff": -0.0022853346059623103,
+      "se": 0.0023349740487679403,
       "ci95": [
-       -0.00857705197333529,
-       0.00357320396113388
+       -0.007003066031633563,
+       0.0023517371692361
       ]
      },
-     "logit_sd_gamefile": 0.5088373549209303,
+     "logit_sd_gamefile": 0.43785319314949045,
      "logit_sd_preseason_table": 0.4715965602436483
     },
     {
      "season": "all",
      "n": 6289,
-     "gamefile": 0.6672383114091602,
+     "gamefile": 0.667531500789821,
      "preseason_table_frozen": 0.6706848353608929,
      "elo_frozen": 0.6717953465872035,
      "hattrick_inseason_ref": 0.6610448929763735,
      "d_gamefile_vs_preseason_table": {
-      "diff": -0.0034465239517326393,
-      "se": 0.0012998456504369055,
+      "diff": -0.003153334571071719,
+      "se": 0.0011455225326513837,
       "ci95": [
-       -0.006068297938863338,
-       -0.0008346239070245591
+       -0.005535731176382044,
+       -0.0008747850465798798
       ]
      },
      "d_gamefile_vs_elo_frozen": {
-      "diff": -0.0045570351780433475,
-      "se": 0.0014261421651183103,
+      "diff": -0.004263845797382428,
+      "se": 0.0012090507972156025,
       "ci95": [
-       -0.0073078086222350324,
-       -0.0018616960498770401
+       -0.006536858396802781,
+       -0.0018941635050992388
       ]
      },
-     "logit_sd_gamefile": 0.44629446150850255,
+     "logit_sd_gamefile": 0.39231868316016594,
      "logit_sd_preseason_table": 0.36766400400518306
     }
    ],
@@ -672,87 +672,87 @@
     "2019": {
      "league_level": {
       "gf_per_team_game_target": 2.9303697875688437,
-      "mu_used": 0.9871821488534904,
-      "var_log_rate": 0.01954942293970314
+      "mu_used": 0.9870338885818648,
+      "var_log_rate": 0.01984147639434885
      },
      "weights": {
-      "mkt_rel82": 0.9794175316631205,
-      "bu_rel82": 0.2148834700312104
+      "mkt_rel82": 0.9795429817681505,
+      "bu_rel82": 0.020457018231849523
      },
-     "loso_rmse_other_82": 12.524794525930478,
-     "luck_sd_82": 8.283777830574804,
-     "talent_sd_82": 9.394120649132384,
-     "rating_sd_net_mean": 0.12031915356835547,
-     "mu": 0.9871821488534904,
-     "max_target_miss": 0.01191836575627292
+     "loso_rmse_other_82": 12.640984899607092,
+     "luck_sd_82": 8.306454150112158,
+     "talent_sd_82": 9.528762704789067,
+     "rating_sd_net_mean": 0.1215309317510407,
+     "mu": 0.9870338885818648,
+     "max_target_miss": 0.005947528337671315
     },
     "2020": {
      "league_level": {
       "gf_per_team_game_target": 2.9807238394964597,
-      "mu_used": 0.9952306869943459,
-      "var_log_rate": 0.0205205197074062
+      "mu_used": 0.9951186407674032,
+      "var_log_rate": 0.020743169085306018
      },
      "weights": {
-      "mkt_rel82": 0.8733430338507864,
-      "bu_rel82": 0.2995072901573858
+      "mkt_rel82": 0.9001318764461274,
+      "bu_rel82": 0.09986812355387255
      },
-     "loso_rmse_other_82": 12.701491471463473,
-     "luck_sd_82": 8.314040403789095,
-     "talent_sd_82": 9.602323560671229,
-     "rating_sd_net_mean": 0.12429233828605882,
-     "mu": 0.9952306869943459,
-     "max_target_miss": 0.0037062720274363414
+     "loso_rmse_other_82": 12.79168714128349,
+     "luck_sd_82": 8.332932288143697,
+     "talent_sd_82": 9.705127479929855,
+     "rating_sd_net_mean": 0.12519082276045174,
+     "mu": 0.9951186407674032,
+     "max_target_miss": 0.0010034994635361727
     },
     "2022": {
      "league_level": {
       "gf_per_team_game_target": 2.898041474654378,
-      "mu_used": 0.9770512872726104,
-      "var_log_rate": 0.014498760941399975
+      "mu_used": 0.9769805955253322,
+      "var_log_rate": 0.014639008350091257
      },
      "weights": {
-      "mkt_rel82": 0.894940201533791,
-      "bu_rel82": 0.27143769492007147
+      "mkt_rel82": 0.8843550304950588,
+      "bu_rel82": 0.11564496950494116
      },
-     "loso_rmse_other_82": 11.122003562771358,
-     "luck_sd_82": 8.236888054314777,
-     "talent_sd_82": 7.47346227868886,
-     "rating_sd_net_mean": 0.09708766598097399,
-     "mu": 0.9770512872726104,
-     "max_target_miss": 0.008219395971252652
+     "loso_rmse_other_82": 11.209147647673044,
+     "luck_sd_82": 8.266227327686419,
+     "talent_sd_82": 7.570632520096612,
+     "rating_sd_net_mean": 0.09781242839692025,
+     "mu": 0.9769805955253322,
+     "max_target_miss": 0.001073063801854346
     },
     "2023": {
      "league_level": {
       "gf_per_team_game_target": 3.105945121951219,
-      "mu_used": 1.0430139252652975,
-      "var_log_rate": 0.017099276942790002
+      "mu_used": 1.0430955141975733,
+      "var_log_rate": 0.016937363623548606
      },
      "weights": {
-      "mkt_rel82": 0.8593413372737417,
-      "bu_rel82": 0.3558850175926448
+      "mkt_rel82": 0.8548095894521472,
+      "bu_rel82": 0.14519041054785278
      },
-     "loso_rmse_other_82": 11.925977348556742,
-     "luck_sd_82": 8.19203985717898,
-     "talent_sd_82": 8.667145937197523,
-     "rating_sd_net_mean": 0.1096468782596906,
-     "mu": 1.0430139252652975,
-     "max_target_miss": 0.015474604927597113
+     "loso_rmse_other_82": 12.002649270174231,
+     "luck_sd_82": 8.254759074670991,
+     "talent_sd_82": 8.71335424058674,
+     "rating_sd_net_mean": 0.10892494922387852,
+     "mu": 1.0430955141975733,
+     "max_target_miss": 0.007903359468372173
     },
     "2024": {
      "league_level": {
       "gf_per_team_game_target": 3.1432926829268295,
-      "mu_used": 1.0562912939279765,
-      "var_log_rate": 0.01928385974695909
+      "mu_used": 1.0564098209048944,
+      "var_log_rate": 0.019047471855529692
      },
      "weights": {
-      "mkt_rel82": 0.8755237515970329,
-      "bu_rel82": 0.3252198197316009
+      "mkt_rel82": 0.9328359387754266,
+      "bu_rel82": 0.06716406122457344
      },
-     "loso_rmse_other_82": 12.501795352493042,
-     "luck_sd_82": 8.182514725358788,
-     "talent_sd_82": 9.452054792737039,
-     "rating_sd_net_mean": 0.11916356195129174,
-     "mu": 1.0562912939279765,
-     "max_target_miss": 0.0010500513340332418
+     "loso_rmse_other_82": 12.559002067056857,
+     "luck_sd_82": 8.240845206417582,
+     "talent_sd_82": 9.477183294850995,
+     "rating_sd_net_mean": 0.1181905435013246,
+     "mu": 1.0564098209048944,
+     "max_target_miss": 0.014231367574353726
     }
    }
   }

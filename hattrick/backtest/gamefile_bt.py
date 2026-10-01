@@ -6,9 +6,10 @@ ratings.preseason_table (team history only, plug-in probabilities). The
 seasons exactly the way freeze.py does, reusing its functions:
 
   1. targets  = blend of team views (points per 82 above the league mean):
-                teams.market_rel82 (+ teams top-down td, or + the bottom-up
-                roster view bu as shipped), weights from teams.fit_blend fitted
-                on the OTHER clean market seasons (leave one season out);
+                teams.market_rel82 (+ the teams top-down view td as shipped,
+                or + the bottom-up roster view bu), convex weights from
+                teams.fit_blend fitted on the OTHER clean market seasons
+                (leave one season out);
   2. style    = teams.fit_style / predict_style (walk-forward);
   3. ratings  = calibrate.solve_ratings on the season's ACTUAL schedule with
                 season.FittedModel(P_V), P_V = the game-model parameters
@@ -60,8 +61,8 @@ from hattrick import teams as T
 from hattrick.backtest.games_bt import paired
 
 SEASONS = [2019, 2020, 2022, 2023, 2024]
-VIEWS = {"mkt": ["mkt_rel82"], "mkt+td": ["mkt_rel82", "td_rel82"],
-         "mkt+bu (shipped)": ["mkt_rel82", "bu_rel82"]}
+VIEWS = {"mkt": ["mkt_rel82"], "mkt+td (shipped)": ["mkt_rel82", "td_rel82"],
+         "mkt+bu": ["mkt_rel82", "bu_rel82"]}
 OUT = C.OUT / "backtest"
 
 
