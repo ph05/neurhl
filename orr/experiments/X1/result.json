@@ -1,0 +1,318 @@
+{
+ "id": "X1",
+ "hypothesis": "Adjusting both teams' ratings for who actually dresses (skater on-ice value and ice time of present minus expected players, plus the starting goalie through the goalie layer) improves ORR's in-season log loss.",
+ "accepted": true,
+ "rule": "Accept if the improvement over ORR without lineups has a 95% CI that excludes 0.",
+ "config": {
+  "goalie": true,
+  "beta_x": 0.45,
+  "beta_st": 0.0,
+  "beta_t": 0.6,
+  "halflife": 10.0,
+  "shot_mult": 0.0
+ },
+ "tuning": {
+  "seasons": [
+   2012,
+   2014,
+   2015,
+   2016,
+   2017
+  ],
+  "n_configs": 29,
+  "tuning_ll": 0.6702257240372974,
+  "no_lineup_ll": 0.6714967576703983,
+  "starters_only_ll": 0.6710608827697043,
+  "skaters_only_ll": 0.6706382897179982,
+  "paired": {
+   "x1_vs_base": {
+    "diff": -0.0012710336331008228,
+    "se": 0.0007199499112004072,
+    "ci95": [
+     -0.0026842975395711217,
+     0.00010780843041501944
+    ]
+   },
+   "x1_vs_starters": {
+    "diff": -0.000835158732406807,
+    "se": 0.0005396208252348053,
+    "ci95": [
+     -0.0018821297059510298,
+     0.00019140536104345632
+    ]
+   },
+   "starters_vs_base": {
+    "diff": -0.00043587490069401595,
+    "se": 0.00047437215617641526,
+    "ci95": [
+     -0.0013522087112027772,
+     0.0004967207644245976
+    ]
+   },
+   "n": 6150
+  }
+ },
+ "confirm_2018": {
+  "no_lineups": {
+   "ll": 0.6694206773320824,
+   "n": 1271
+  },
+  "starters_only": {
+   "ll": 0.6677447201365078,
+   "n": 1271
+  },
+  "x1": {
+   "ll": 0.6677054640523168,
+   "n": 1271
+  },
+  "d_x1_vs_no_lineups": {
+   "diff": -0.0017152132797656398,
+   "se": 0.001540226127941537,
+   "ci95": [
+    -0.004670675824416746,
+    0.0011920065856700181
+   ]
+  },
+  "d_x1_vs_starters_only": {
+   "diff": -3.9256084190948e-05,
+   "se": 0.0011541971229059545,
+   "ci95": [
+    -0.0022842766156368514,
+    0.002167877960552271
+   ]
+  }
+ },
+ "test": {
+  "window": "NeurHL-G gate games 2019-24",
+  "n": 6289,
+  "lineup_known_share": 0.7921768166640165,
+  "baseline_no_lineups": 0.6613087083076613,
+  "starters_only": 0.6606174580468237,
+  "x1": 0.660012400384868,
+  "x1_skaters_only": 0.6606552120589535,
+  "neurhl_g": 0.6600640969214153,
+  "neurhl_elo": 0.6656586518233483,
+  "diff_x1_vs_base": -0.001296307922793134,
+  "ci95": [
+   -0.002548495452526586,
+   -6.492171357134607e-05
+  ],
+  "diff_x1_vs_starters": {
+   "diff": -0.0006050576619556916,
+   "se": 0.0005147876292961353,
+   "ci95": [
+    -0.0016005821837014392,
+    0.0004450993130441766
+   ]
+  },
+  "diff_x1sk_vs_base": {
+   "diff": -0.0006534962487075997,
+   "se": 0.0005144653275230644,
+   "ci95": [
+    -0.0016533762846338727,
+    0.0003770936891064883
+   ]
+  },
+  "diff_starters_vs_base": {
+   "diff": -0.0006912502608374426,
+   "se": 0.0003780265288723969,
+   "ci95": [
+    -0.0014261564794928441,
+    3.100549923313677e-05
+   ]
+  },
+  "goals_only": {
+   "base": 0.6633717660619763,
+   "x1": 0.6621739147640024,
+   "diff": {
+    "diff": -0.0011978512979740935,
+    "se": 0.0006443501701200832,
+    "ci95": [
+     -0.002501898403522326,
+     6.567339463521086e-05
+    ]
+   }
+  },
+  "team_history_start": {
+   "base": 0.6610448106497417,
+   "x1": 0.6596510750596456,
+   "diff": {
+    "diff": -0.0013937355900959705,
+    "se": 0.0006460402899818318,
+    "ci95": [
+     -0.0026572227362851135,
+     -0.00012837353348175496
+    ]
+   }
+  },
+  "vs_neurhl_g": {
+   "diff": -5.169653654733304e-05,
+   "se": 0.0012566472512063754,
+   "ci95": [
+    -0.00254861771941228,
+    0.0023438595086708565
+   ]
+  },
+  "by_season": {
+   "2019": {
+    "n": 1271,
+    "lineup_known_share": 1.0,
+    "base": 0.6761122370687095,
+    "x1": 0.6737791844487948,
+    "diff": {
+     "diff": -0.002333052619914702,
+     "se": 0.00156753967178717,
+     "ci95": [
+      -0.00536977334268921,
+      0.0007211247051058495
+     ]
+    }
+   },
+   "2020": {
+    "n": 1082,
+    "lineup_known_share": 0.8391866913123844,
+    "base": 0.6766774789155373,
+    "x1": 0.6776769055476013,
+    "diff": {
+     "diff": 0.0009994266320638855,
+     "se": 0.001460886076932979,
+     "ci95": [
+      -0.0017189907868330563,
+      0.004102321075854372
+     ]
+    }
+   },
+   "2022": {
+    "n": 1312,
+    "lineup_known_share": 1.0,
+    "base": 0.6449102721771574,
+    "x1": 0.6406812076743722,
+    "diff": {
+     "diff": -0.004229064502785139,
+     "se": 0.0016566195600386151,
+     "ci95": [
+      -0.00759856571914612,
+      -0.0010408662912313922
+     ]
+    }
+   },
+   "2023": {
+    "n": 1312,
+    "lineup_known_share": 1.0,
+    "base": 0.6540460046214336,
+    "x1": 0.6544837489294583,
+    "diff": {
+     "diff": 0.00043774430802469543,
+     "se": 0.001684249064766976,
+     "ci95": [
+      -0.0029585630600425937,
+      0.0036219755191559586
+     ]
+    }
+   },
+   "2024": {
+    "n": 1312,
+    "lineup_known_share": 0.1364329268292683,
+    "base": 0.6579543794864242,
+    "x1": 0.6569678412494563,
+    "diff": {
+     "diff": -0.0009865382369678782,
+     "se": 0.0004892666274615207,
+     "ci95": [
+      -0.001911803197258257,
+      -3.272134669811521e-05
+     ]
+    }
+   }
+  },
+  "lineup_known_games": {
+   "n": 4982,
+   "sh_base": 0.6627116082586252,
+   "sh_starters": 0.6618509820252365,
+   "sh_x1": 0.6610999658702541,
+   "d_sh_x1_vs_base": {
+    "diff": -0.0016116423883711078,
+    "se": 0.0008146497128516607,
+    "ci95": [
+     -0.0031633510850223047,
+     -4.220225320974969e-05
+    ]
+   },
+   "d_sh_x1_vs_starters": {
+    "diff": -0.00075101615498239,
+    "se": 0.0006494232179656724,
+    "ci95": [
+     -0.0019952845745264533,
+     0.00047861013279684283
+    ]
+   }
+  }
+ },
+ "restatement_2018_24": {
+  "n": 8428,
+  "lineup_known_share": 0.8449216896060749,
+  "neurhl_h": 0.6617126406547958,
+  "neurhl_elo": 0.6662435253193135,
+  "orr_no_lineups": 0.6619277553950949,
+  "orr_starters": 0.6611011757944394,
+  "orr_x1": 0.660279743486464,
+  "d_x1_vs_neurhl_h": {
+   "diff": -0.0014328971683318888,
+   "se": 0.0009898513950282821,
+   "ci95": [
+    -0.00333575232119064,
+    0.0004907545516493136
+   ]
+  },
+  "d_x1_vs_no_lineups": {
+   "diff": -0.0016480119086309626,
+   "se": 0.000565473885969499,
+   "ci95": [
+    -0.0027800957195921873,
+    -0.0005487905530613035
+   ]
+  },
+  "d_no_lineups_vs_neurhl_h": {
+   "diff": 0.00021511474029907362,
+   "se": 0.0008445397288527151,
+   "ci95": [
+    -0.0014636882806877893,
+    0.0018235976733363389
+   ]
+  }
+ },
+ "test_runs": "One scored test run (test.py, 2026-10-01T02:55:57Z) with the configuration fixed in ledger.json at 02:53:10Z. Before it, one dry run (test.py --dry) with every skater lineup offset set to 0 validated the pipeline: it reproduced the published baselines exactly (shipped no-starters 0.6613, known starters 0.6606, goals-only 0.6634; team-history start identical to games_bt_preds) and so showed only already-published arms, not X1. No bug was found; no second scored run.",
+ "caveats": [
+  "The CI excludes 0 by a thin margin (upper bound -0.00006).",
+  "Neither half is significant alone on the gate games: known starters vs base -0.00069 [-0.00143,+0.00003]; skater offsets on top of starters -0.00061 [-0.00160,+0.00045]; skaters without starters vs base -0.00065 [-0.00165,+0.00038]. The pre-registered adjustment includes the goalie layer, so the combined test is the one the rule applies to.",
+  "Goals-only variant (what the live loop runs while results carry no shots): -0.00120 [-0.00250,+0.00007], not significant (secondary).",
+  "Season to season it is uneven: 2022 -0.0042 (CI excludes 0), 2019 -0.0023, 2024 -0.0010 (only the 179 games through 2023-11-07 had lineups), 2023 +0.0004, 2020 +0.0010.",
+  "The backtest uses the ACTUAL dressed skaters and starters from box scores. Live lineups come from pregame lineup files (DailyFaceoff via NeurHL) and will sometimes be wrong, so the live gain should be smaller.",
+  "21% of gate games (2020 partial, 2024 after 2023-11-07) had no box score and fall back to no lineup.",
+  "In-sample on the tuning seasons the gain was -0.00127 with a CI including 0 ([-0.00268,+0.00011]); the 2018 confirm was -0.0017 [-0.0047,+0.0012], almost all from starters."
+ ],
+ "integrate": {
+  "files": [
+   "orr/experiments/X1/lineups.py (player_values, lineup_table, wide, offsets)",
+   "orr/experiments/X1/lfilter.py (run_filter_lineup: the offset change to ratings.run_filter)"
+  ],
+  "core_changes": [
+   "ratings.run_filter: optional lineup frame (gid, lo_h, lo_a) added to cg_h / cg_a after the starter offsets, so it enters the pregame eta and the goal-row update; shots rows unchanged (shot_mult 0).",
+   "ratings.InSeasonFilter.update_day: optional lo_h / lo_a columns added to the goal context exactly like gadj (cg = [ctx_h + gadj_a + lo_h, ctx_a + gadj_h + lo_a]).",
+   "inseason.run: add lo_h / lo_a to the log offsets adj_h / adj_a passed to model.rates for today's games, and keep known starters on (--goalies).",
+   "Live lineup source: NeurHL's committed pregame lineup files; the team's expected lineup is the half-life-10 exponentially weighted mean of its earlier 2026-27 lineup values (first game with a lineup: delta 0)."
+  ],
+  "parameters": {
+   "beta_x": 0.45,
+   "beta_st": 0.0,
+   "beta_t": 0.6,
+   "toi_scale_min": 300.0,
+   "halflife_team_games": 10.0,
+   "shot_mult": 0.0,
+   "use_goalie": true,
+   "xg_scale": "league xGF per team-game of players.project_league(V)'s reference season (2027: 2025-26 = 3.134)",
+   "values": "players.project(V): v_xgf = tpg_ev*rel_xgf60/60, v_xga = tpg_ev*rel_xga60/60, toi = sum of tpg_ev/pp/sh/oth",
+   "offset": "lo_h = 0.45*(D_xgf_h + D_xga_a)/xg_scale + 0.6*(D_toi_h - D_toi_a)/300; lo_a symmetric"
+  }
+ }
+}

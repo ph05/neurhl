@@ -2,22 +2,36 @@
 
     python3 -m orr.inseason --date 2026-09-30 \
         [--results orr/output/live/results_2027.csv] \
-        [--goalies goalies.csv] [--sims 20000]
+        [--goalies goalies.csv] [--sims 20000] [--model 1.1|1.0] [--lineup-dir DIR]
+
+Model versions (--model, recorded in run_<date>.json):
+- 1.1 (default from 2026-10-01): ORR 1.0 plus the accepted pre-registered
+  item X1 (orr/PLAN_1_1.md; orr/lineups.py): every game's dressed skaters
+  (on-ice xG value and projected ice time, present minus the team's expected
+  lineup) and its starting goalies enter both the filter's update (past
+  games) and the forecast (today's games). Lineups and starters come from
+  NeurHL's committed pregame lineup files (--lineup-dir, default
+  neurhl/output/live/2027/<date>/: the latest pregame file per game, else
+  the morning, else the preview file); --goalies overrides their starters.
+- 1.0: the loop as first shipped (no past starters, no lineups; --goalies
+  applies to the forecast date's games only).
 
 Inputs
 - The preseason freeze (orr/output/freeze_2027/): ratings, scoring-model
   parameters, schedule, goalie talent table.
 - Results for games BEFORE --date: game_id, date, home, away, home_g, away_g,
   last_period (REG/OT/SO), optional shots_home/shots_away (shots on goal).
-- Optional confirmed or projected starters for --date: game_id, goalie_home,
-  goalie_away (NHL ids). Unknown starters fall back to each team's start-share
-  mix, which is exactly what the preseason file assumed.
+- Optional confirmed or projected starters: game_id, goalie_home,
+  goalie_away (NHL ids); in 1.1 rows for past games are used too. Unknown
+  starters fall back to each team's start-share mix, which is exactly what
+  the preseason file assumed.
 
 What happens
 1. Team ratings are filtered game by game from the preseason prior
    (orr.ratings.InSeasonFilter), using goals and, when the results file
-   carries them, shots. Past games' starting goalies are not used in the
-   update (the backtest's known-starter variant does use them; inseason_bt).
+   carries them, shots. In 1.1 past games' starting goalies (where both are
+   known) and dressed-lineup offsets enter the update, as backtested
+   (orr/backtest/inseason_bt_1_1.py); 1.0 uses neither.
    The filter's home-ice estimate replaces the preseason one.
 2. Every game on --date is forecast with the current ratings (plug-in means,
    as backtested), rest/travel context and starter information.
@@ -47,6 +61,15 @@ from orr import season as S
 
 FREEZE = C.OUT / "freeze_2027"
 LIVE = C.OUT / "live"
+
+# model versions: ORR 1.1 = 1.0 + the accepted pre-registered item X1
+MODELS = {
+    "1.1": {"version": "ORR 1.1", "past_starters": True, "lineups": True,
+            "accepted_items": ["X1"]},
+    "1.0": {"version": "ORR 1.0", "past_starters": False, "lineups": False,
+            "accepted_items": []},
+}
+DEFAULT_MODEL = "1.1"
 
 
 def _sha(p: Path) -> str:
@@ -94,10 +117,31 @@ def starter_diffs(fz: dict, games: pd.DataFrame, starters: pd.DataFrame | None) 
     return out
 
 
-def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed: int):
+def merge_starters(file_st: pd.DataFrame | None, lineup_st: pd.DataFrame | None) -> pd.DataFrame | None:
+    """game_id, goalie_home, goalie_away: the starters file where it names a
+    goalie, else the lineup files' starter (NaN = unknown)."""
+    cols = ["game_id", "goalie_home", "goalie_away"]
+    frames = [f[cols] for f in (file_st, lineup_st) if f is not None and len(f)]
+    if not frames:
+        return None
+    if len(frames) == 1:
+        out = frames[0].copy()
+    else:
+        out = (frames[0].set_index("game_id").astype(float)
+               .combine_first(frames[1].set_index("game_id").astype(float)).reset_index())
+    out = out.drop_duplicates("game_id", keep="first")
+    for c in ("goalie_home", "goalie_away"):
+        out[c] = out[c].astype(float)
+    return out[cols]
+
+
+def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed: int,
+        model: str = DEFAULT_MODEL, lineup_dir: str | None = None):
     from orr import gamemodel as GM
+    from orr import lineups as LU
     from orr import ratings as R
 
+    cfg = MODELS[model]
     day = pd.Timestamp(date)
     fz = load_freeze()
     P = GM.load_params()
@@ -116,6 +160,20 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     rr = res.merge(ctx, on="game_id", how="left")
     # shots on goal enter the update when the results file carries them
     rr = rr.rename(columns={"shots_home": "sh_h", "shots_away": "sh_a"})
+
+    # ORR 1.1 (X1): lineups and starters of past games and of today's games
+    file_st = pd.read_csv(goalies_path) if goalies_path else None
+    lu_sk, lu_gk, lu_files = None, None, []
+    if cfg["lineups"] or cfg["past_starters"]:
+        lu_sk, lu_gk, lu_files = LU.live_lineups(day, lineup_dir)
+    starters = merge_starters(file_st, lu_gk) if cfg["past_starters"] else file_st
+    lo = (LU.live_offsets(lu_sk, LU.X1) if cfg["lineups"]
+          else pd.DataFrame(columns=["game_id", "lo_h", "lo_a", "known_h", "known_a"]))
+    if cfg["past_starters"] and starters is not None and len(rr):
+        d = starter_diffs(fz, rr, starters).rename(columns={"diff_h": "gdiff_h", "diff_a": "gdiff_a"})
+        rr = rr.merge(d, on="game_id", how="left")
+    if cfg["lineups"] and len(rr):
+        rr = rr.merge(lo[["game_id", "lo_h", "lo_a"]], on="game_id", how="left")
     for _, day_games in rr.groupby("date", sort=True):
         filt.update_day(day_games)
     cur = filt.state()[["team", "o", "d", "o_sd", "d_sd", "od_cov"]]
@@ -135,7 +193,6 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
 
     # 2. forecast today's games
     today = sch[sch.date == day].copy()
-    starters = pd.read_csv(goalies_path) if goalies_path else None
     adj = pd.read_csv(FREEZE / "game_adjustments_2027.csv")
     t = today.merge(adj, on="game_id", how="left").merge(
         starter_diffs(fz, today, starters), on="game_id", how="left")
@@ -153,10 +210,13 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
                                           gap_a=t.away[known].map(gap).fillna(0).to_numpy())
         t.loc[known, "adj_h"] = ah
         t.loc[known, "adj_a"] = aa
+    # ORR 1.1 (X1): dressed-lineup offsets on top of the context/starter offsets
+    t = t.merge(lo[["game_id", "lo_h", "lo_a"]], on="game_id", how="left")
+    t["lo_h"], t["lo_a"] = t.lo_h.astype(float).fillna(0.0), t.lo_a.astype(float).fillna(0.0)
     r = cur.set_index("team")
     lh, la = model.rates(r.o.reindex(t.home).to_numpy(), r.d.reindex(t.home).to_numpy(),
                          r.o.reindex(t.away).to_numpy(), r.d.reindex(t.away).to_numpy(),
-                         t.adj_h.fillna(0).to_numpy(), t.adj_a.fillna(0).to_numpy())
+                         (t.adj_h.fillna(0) + t.lo_h).to_numpy(), (t.adj_a.fillna(0) + t.lo_a).to_numpy())
     # plug-in probabilities at the filtered means: the rule inseason_bt validated
     p = model.probs(lh, la)
     created = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -167,7 +227,8 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
                      if starters is not None else np.nan),
         goalie_away=(starters.set_index("game_id").goalie_away.reindex(t.game_id).to_numpy()
                      if starters is not None else np.nan),
-        created_utc=created)
+        lineup_adj_h=t.lo_h.to_numpy(), lineup_adj_a=t.lo_a.to_numpy(),
+        model=cfg["version"], created_utc=created)
 
     players_out = player_lines(fz, games_out, day)
 
@@ -190,9 +251,21 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
                 "n_results": int(len(res)), "sims": sims, "seed": seed,
                 "missing_results_before_date": sorted(map(int, set(sch[sch.date < day].game_id) - set(res.game_id))),
                 "rho_od": rho, "sd_anchor": k_sd, "home_ice": P["h"],
+                "model": cfg["version"],
+                "settings": {**cfg, "lineup_hp": LU.settings(LU.X1) if cfg["lineups"] else None},
+                "orr_1_1": {"results_with_both_starters": int(rr.gdiff_h.notna().mul(rr.gdiff_a.notna()).sum())
+                            if "gdiff_h" in rr else 0,
+                            "results_with_lineup_offset": int((rr.get("lo_h", pd.Series(dtype=float))
+                                                               .fillna(0) != 0).sum()),
+                            "today_lineup_offsets": int((t.lo_h != 0).sum()),
+                            "today_starters_known": int(known.sum())},
                 "inputs": {"results": {"path": str(results_path), "sha256": _sha(results_path)},
                            **({"goalies": {"path": goalies_path, "sha256": _sha(goalies_path)}}
                               if goalies_path else {}),
+                           **({"lineups": [{"path": str(Path(f).relative_to(C.ROOT))
+                                            if str(f).startswith(str(C.ROOT)) else str(f),
+                                            "sha256": _sha(f)} for f in lu_files]}
+                              if lu_files else {}),
                            "freeze_state": _sha(FREEZE / "state_2027.json")}}
     (outdir / f"run_{date}.json").write_text(json.dumps(run_meta, indent=1))
     return games_out, standings
@@ -257,8 +330,13 @@ def main():
     ap.add_argument("--goalies", default=None)
     ap.add_argument("--sims", type=int, default=20000)
     ap.add_argument("--seed", type=int, default=C.SEED)
+    ap.add_argument("--model", choices=sorted(MODELS), default=DEFAULT_MODEL,
+                    help="1.1 (default): lineups and past starters (X1); 1.0: the original loop")
+    ap.add_argument("--lineup-dir", default=None,
+                    help="NeurHL live folder with <date>/pregame_*_lineups.json "
+                         "(default neurhl/output/live/2027)")
     a = ap.parse_args()
-    g, s = run(a.date, a.results, a.goalies, a.sims, a.seed)
+    g, s = run(a.date, a.results, a.goalies, a.sims, a.seed, model=a.model, lineup_dir=a.lineup_dir)
     print(g[["game_id", "home", "away", "p_home_win", "exp_goals_home",
              "exp_goals_away"]].to_string(index=False))
     print(s[["team", "points", "playoff_pct", "cup_pct"]].head(10).round(1).to_string(index=False))

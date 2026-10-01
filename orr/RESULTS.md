@@ -20,7 +20,8 @@
 | | Same games vs NeurHL's own Elo baseline | 0.6641 | Elo 0.6691 | ORR −0.0050 (CI −0.0072 to −0.0029) |
 | | NeurHL-G gate games, 2019-24 (n = 6,289) | 0.6610 / 0.6603 | **0.6601** (G stack) | NeurHL slightly better; not significant |
 | | NeurHL seal games, 2024-25 and 2025-26 (n = 2,624) | **0.6712** | 0.6715 | Tie |
-| | The in-season loop started from the market-anchored preseason ratings (as live), NeurHL-G gate games 2019-24 | 0.6613 updating on goals and shots; 0.6606 with past starters too; **0.6634 on goals only** | 0.6601 (NeurHL-G); NeurHL Elo 0.6657 | With shots: tie with NeurHL-G (+0.0006, CI −0.0019 to +0.0029). Goals only, which is what the live loop runs while results carry no shots: NeurHL-G better by 0.0033 (CI +0.0009 to +0.0056). Both beat Elo. |
+| | The in-season loop started from the market-anchored preseason ratings (as live), NeurHL-G gate games 2019-24 | 0.6613 updating on goals and shots; 0.6606 with past starters too; **0.6634 on goals only** | 0.6601 (NeurHL-G); NeurHL Elo 0.6657 | With shots: tie with NeurHL-G (+0.0012, CI −0.0011 to +0.0036; +0.0006 with past starters). Goals only, which is what the live loop runs while results carry no shots: NeurHL-G better by 0.0033 (CI +0.0009 to +0.0056). Both beat Elo. |
+| | **ORR 1.1** loop (adds dressed lineups and starters, item X1), same games and protocol (`inseason_bt_1_1.json`) | **0.6600** with goals and shots; 0.6622 on goals only | 0.6601 (NeurHL-G); NeurHL Elo 0.6657 | With shots: tie with NeurHL-G (−0.0000, CI −0.0025 to +0.0025). Goals only: NeurHL-G better by 0.0021, no longer significant (CI −0.0007 to +0.0047). |
 | **Skaters** | NeurHL's headline protocol: points MAE for players with ≥40 GP ("sample A"), held-out 2022-26 | 9.51 | 9.54 | Level (ORR −0.04). By season: ORR wins 2022 (9.86 vs 10.47) and 2025 (9.07 vs 9.09); NeurHL wins 2023 (9.60 vs 9.62), 2024 (9.17 vs 9.45) and 2026 (9.39 vs 9.53). |
 | | Same, 2022-24 only (ORR's roster = first 10 games; NeurHL's = each player's actual season team) | 9.64 | 9.74 | ORR better by 0.10, all of it 2022 |
 | | Same, 2025-26 only (both use the actual season team; no box scores for a proxy) | 9.30 | **9.24** | NeurHL better by 0.05 |
@@ -36,6 +37,87 @@
 - **Games:** ORR ties NeurHL's best in-season models with no lineup information and no neural network, when its update uses shots. The goals-only loop that runs while results carry no shots is significantly worse than NeurHL-G. Its shipped preseason pipeline beats a frozen Elo with a confidence interval that excludes zero.
 - **Skaters:** level with NeurHL on its headline protocol (9.51 vs 9.54), with reserves projected without season-V information. ORR wins 2022, when NeurHL under-projected league scoring, and NeurHL wins three of the other four seasons. ORR loses the per-82 restatement by 0.23. On 2022-24 ORR uses first-10-game rosters where NeurHL uses each player's actual season team. On 2025-26 (40% of the pooled sample) both use the season team.
 - **Calibration:** ORR's projections regress toward the mean (slope 0.86 vs 0.96) and its intervals cover near nominal pooled. Its team means track the market far more closely (correlation 0.988 vs 0.884). In spread, both models miss the market by similar amounts in opposite directions: ORR is 7% narrower, NeurHL 10% wider.
+
+## ORR 1.1 (pre-registered hypotheses)
+
+The plan, [`PLAN_1_1.md`](PLAN_1_1.md) (commit `6cb0904`), was committed before any of this work ran. It fixed nine hypotheses: three medium, three large and three extra large. For each it fixed the tasks, data windows, metric and acceptance rule.
+
+- **Tuning.** Only seasons ending in 2017 or earlier were used, with 2013 excluded throughout. 2018-19 was used at most once, to confirm.
+- **Test.** Each item was tested once on the windows used above, with paired bootstrap CIs.
+- **Multiple testing.** An item counts only if it clears its own rule, because nine items were tested on windows that had been looked at before.
+
+**Eight of the nine failed their rules. Only X1 (lineup-aware game forecasts) was accepted.** X3, the integration and full hindcast, also failed its rule: ORR 1.1's gain is significant with shots in the update, but not on goals alone. X1 therefore ships under the plan's fallback clause. That clause ships each individually accepted item that does not hurt in combination, and X1 lowers log loss in both variants.
+
+Each item's code, logs and every configuration tried are in `orr/experiments/<ID>/` (`ledger.json`, `result.json`).
+
+| Item | Size | Hypothesis | Test result (run once) | Rule | Accepted |
+|---|---|---|---|---|---|
+| M1 | Medium | Re-tuning the filter for goals-only updates (process noise, goal scale, prior scale) closes ≥30% of the 0.0033 gap to NeurHL-G. | Gate games 2019-24, goals-only loop: 0.6638 vs 0.6634, **worse** by 0.0005 (CI −0.0001 to +0.0010). | Gain ≥ 0.0010 with a CI that excludes 0 | **No** |
+| M2 | Medium | A walk-forward stack of the in-season, preseason and Elo logits beats the in-season probability. | Goals only: +0.000003 (CI −0.00002 to +0.00003). Goals+shots: +0.000007 (CI −0.00001 to +0.00003). The stack converges on the in-season probability alone. | CI excludes 0, at least on goals only | **No** |
+| M3 | Medium | A leave-one-season-out multiplier on the simulator's team-strength SD gives better-calibrated standings. | Leave-one-season-out CRPS 6.710 vs 6.682, **worse** by 0.028 (CI −0.008 to +0.066). 80% coverage 0.772 vs 0.816. | CRPS −0.05 and coverage closer to 0.80 | **No** |
+| L1 | Large | A walk-forward model of who starts in goal beats the start-share mix when the starter is unknown. | 0.66123 vs 0.66131, −0.00008 (CI −0.00018 to +0.00003). Actual starters, the ceiling, gain only 0.0007. | CI excludes 0 | **No** |
+| L2 | Large | Shrinkage set per component, position and situation closes the 0.23 per-82 (sample B) gap. | Sample B 9.314 vs 9.316, −0.002 (CI −0.017 to +0.014). Sample A +0.001. | Pooled B −0.08, and B better in ≥3 of 5 seasons; A no worse than +0.02 | **No** |
+| L3 | Large | A player-specific games-played model improves GP and points error. | GP MAE 13.77 vs 13.93, −0.16 (CI −0.34 to +0.04). Points MAE (all) −0.066 (CI −0.110 to −0.022), better in every season. | GP −0.5 games **and** points better | **No**: the GP condition failed. The points gain is real but cleared no rule. |
+| X1 | Extra large | Adjusting both teams for who dresses improves in-season log loss. The adjustment covers skaters' on-ice xG value and ice time against the expected lineup, plus the starting goalies. | Gate games, goals+shots: 0.66001 vs 0.66131, **−0.00130 (CI −0.00255 to −0.00006)**. Goals only: −0.00120 (CI −0.00250 to +0.00007). Restatement games 2018-24: 0.6603 vs NeurHL-H 0.6617 (CI includes 0). | CI excludes 0 | **Yes** |
+| X2 | Extra large | Comparables projections in the style of PECOTA (nearest neighbours) improve skater samples A and B. | A 9.517 vs 9.506, **worse** by 0.011 (CI −0.009 to +0.032). B 9.321 vs 9.316, worse by 0.005. It had already failed its 2018-19 confirmation. | A and B both −0.05 | **No** |
+| X3 | Extra large | The accepted items, combined in the daily loop, beat the shipped loop and NeurHL-G. | Goals+shots −0.00130 (CI −0.00255 to −0.00006). **Goals only −0.00120 (CI −0.00250 to +0.00007).** It ties NeurHL-G with shots and loses to it on goals only (not significantly). | CI excludes 0 in each variant | **No**: X1 ships under the fallback clause. |
+
+**Combined hindcast** (`backtest/inseason_bt_1_1.py`, run once; `output/backtest/inseason_bt_1_1.json`).
+
+- **Protocol.** The shipped in-season loop runs from the preseason pipeline's ratings and forecasts every game before it is played, exactly as `inseason_bt.py` does. It is scored on the NeurHL-G gate games 2019-24 (n = 6,289).
+- **Combination.** With X1 the only accepted item, the combination is X1 itself: the "better than any accepted item alone" clause is an identity.
+- **Integration check.** The run reproduces X1's own test to every decimal. Before the run, `orr/experiments/X3/checks.py` showed that on tuning season 2016 the core code equals X1's code exactly, and that the live `InSeasonFilter` reproduces the backtest filter exactly.
+
+| Log loss (95% CI of the difference) | Goals and shots | Goals only (live until results carry shots) |
+|---|---|---|
+| ORR 1.0 shipped loop | 0.66131 | 0.66337 |
+| **ORR 1.1** | **0.66001** | **0.66217** |
+| ORR 1.1 − ORR 1.0 | **−0.00130 (−0.00255 to −0.00006)** | −0.00120 (−0.00250 to +0.00007) |
+| NeurHL-G | 0.66006 | 0.66006 |
+| ORR 1.1 − NeurHL-G | −0.00005 (−0.00250 to +0.00254) | +0.00211 (−0.00065 to +0.00468) |
+| NeurHL Elo | 0.66566 | 0.66566 |
+| ORR 1.1 − NeurHL Elo | −0.00565 (−0.00901 to −0.00206) | −0.00348 (−0.00602 to −0.00097) |
+
+**ORR 1.1 − ORR 1.0, goals and shots, by season:**
+
+| Season | Difference | Significant? |
+|---|---|---|
+| 2019 | −0.0023 | no |
+| 2020 | +0.0010 | no |
+| 2022 | −0.0042 | yes |
+| 2023 | +0.0004 | no |
+| 2024 | −0.0010 | yes (only 14% of its games have box scores) |
+
+- **Subset with known lineups.** On the 79% of games where both lineups and starters are known, the difference is −0.0016.
+- **Sensitivity.** With 20,000 bootstrap resamples instead of 2,000, the CIs are −0.00257 to −0.00004 (goals and shots) and −0.00245 to +0.00005 (goals only), so the verdicts do not change.
+
+**What failed, stated plainly.**
+
+- **No gain from the other in-season items.** Better hyperparameters (M1), stacking with Elo (M2) and a starter-choice model (L1) add nothing measurable. The goals-only gap to NeurHL-G is not a tuning problem. Lineup information (X1) is what narrows it, from 0.0033 (significant) to 0.0021 (not significant).
+- **No skater item moves the 0.23 per-82 gap to NeurHL.** That covers shrinkage (L2) and comparables (X2). L3's games-played model did improve unconditional points MAE significantly, but its pre-registered GP threshold was not met, so it is not adopted.
+- **The standings simulator's uncertainty is already calibrated (M3).** The z-score SD is 1.03.
+- **X1's margin is thin.** Its CI only just excludes 0 (z = 2.01), and 1 of 5 alternative bootstrap seeds gives a CI that includes 0. Neither half is significant on its own:
+  - the new skater lineup component, on top of starters: −0.00061, CI −0.00160 to +0.00045;
+  - starters alone: −0.00069, CI −0.00143 to +0.00003.
+
+  The backtest's "known starter" is the goalie with the most ice time, which is a post-game label (a pre-existing ORR convention). The reviewer bounded its effect on the 10% of games with an in-game goalie change. Treating those starters as unknown gives −0.00099 (CI −0.00224 to +0.00021), so the label does not inflate the result, but it shows how fragile it is.
+- **The live gain is not established at 95%.** Live results currently carry no shots, so ORR 1.1's live loop runs goals only, the variant whose CI includes 0. Its live lineups also come from pregame lineup files that are sometimes wrong, where the backtest used box scores. Expect a smaller live gain than the backtest's.
+
+**Adoption.**
+
+- **Default.** `inseason.py` runs ORR 1.1 by default (`--model 1.0` restores the original loop).
+- **Inputs.**
+  - **Lineups and starters** come from NeurHL's committed pregame lineup files: per game, the latest pregame file, else the morning file, else the preview file. Starters marked FALLBACK count as unknown.
+  - **Player values** come from `players.project(2027)`. True rookies outside the panel fall back to the frozen projection.
+- **What enters the model.**
+  - Past games' starters and lineups enter the update.
+  - Today's lineups and starters enter the forecast.
+  - A team's first known lineup carries no signal.
+- **The 2026-10-01 forecast** was regenerated with ORR 1.1 at 04:09 UTC on 2026-10-01, before any 10-01 game. It differs from the 1.0 forecast by at most 0.0002 in any game's home-win probability. The whole difference comes from the five 09-29 starters entering the update:
+  - each of those games was its teams' first known lineup, so its offset is 0;
+  - no lineup file exists yet for 10-01.
+- **The preseason file is unchanged.** `output/freeze_2027/` was not touched.
+- **Changed code, unchanged defaults.** `ratings.py` changed: only options were added, and their defaults reproduce ORR 1.0 exactly (`experiments/X3/checks.json`). The `ratings.py` that the freeze manifest hashes is the one in git history up to `6cb0904`.
 
 ## The 2026-27 forecast
 
@@ -153,7 +235,16 @@
 - **Skaters.**
   - NeurHL's A/B blend is 0.23 points better pooled on the per-82 protocol, and 0.33 better on 2025-26.
   - On the headline protocol NeurHL wins 2023, 2024 and 2026. ORR's 0.04 pooled lead comes from 2022, when NeurHL under-projected league scoring (league ratio 0.88).
-- **In-season games on NeurHL's gate window.** With shots in the update, NeurHL-G is 0.0002 better than ORR's filter with known starters and 0.0006 better than the shipped loop; neither difference is significant. On goals only, the variant the live loop runs until results carry shots, NeurHL-G is 0.0033 better, which is significant. The market-anchored start that wins preseason adds nothing once games are played.
+- **In-season games on NeurHL's gate window.**
+  - **With shots in the update, ORR 1.0.** NeurHL-G is better than every ORR 1.0 variant, and no difference is significant:
+    - by 0.0002 than the filter with known starters (team-history start);
+    - by 0.0006 than the shipped loop with past starters;
+    - by 0.0012 than the shipped loop without them.
+  - **With shots in the update, ORR 1.1.** It ties NeurHL-G (0.6600 vs 0.6601).
+  - **On goals only**, the variant the live loop runs until results carry shots:
+    - NeurHL-G is 0.0033 better than ORR 1.0, which is significant;
+    - it is 0.0021 better than ORR 1.1, which is not significant.
+  - **Market-anchored start.** It wins preseason but adds nothing once games are played.
 - **Standings, 2012.** NeurHL-2 beats ORR's team-history view (6.98 vs 7.20).
 - **Standings, own modelling.** On 2019-24 the sportsbook line does most of the work. ORR's own contribution over the market alone is about 0.1 points of MAE, smaller than the noise across seasons.
 - **Goalie save talent.** It is barely predictable (correlation 0.23), so ORR's goalie projections tie "league average". Coverage is 0.74, below nominal.

@@ -60,6 +60,49 @@ def test_run_end_to_end():
     shutil.rmtree(IS.LIVE / nxt, ignore_errors=True)
 
 
+def _filter():
+    from orr import ratings as R
+    fz = IS.load_freeze()
+    fp = R.load_filter_params()
+    fp["P"] = {**fp["P"], "mu": fz["league_level"]["mu_used"]}
+    return R.InSeasonFilter(fz["ratings"][["team", "o", "d", "o_sd", "d_sd"]], fp, start_date="2026-09-29")
+
+
+def test_lineup_and_starter_offsets_enter_the_update():
+    """ORR 1.1 (X1): a lineup offset that already expects the home team to
+    score more makes the same 5-goal night move its offence LESS; known
+    starters change the update; zero offsets change nothing."""
+    sch = pd.read_csv(IS.FREEZE / "schedule_2027.csv")
+    g = sch.iloc[0]
+    row = {"game_id": g.game_id, "date": g.date, "home": g.home, "away": g.away,
+           "home_g": 5, "away_g": 1, "extra": "REG"}
+    base, zero, lineup, gk = _filter(), _filter(), _filter(), _filter()
+    base.update_day(pd.DataFrame([row]))
+    zero.update_day(pd.DataFrame([{**row, "lo_h": 0.0, "lo_a": 0.0}]))
+    lineup.update_day(pd.DataFrame([{**row, "lo_h": 0.15, "lo_a": 0.0}]))
+    gk.update_day(pd.DataFrame([{**row, "gdiff_h": 0.0, "gdiff_a": -0.005}]))   # weak away starter
+    b, z, l, k = (f.state().set_index("team") for f in (base, zero, lineup, gk))
+    assert np.allclose(b.o, z.o) and np.allclose(b.d, z.d)
+    assert l.o[g.home] < b.o[g.home]
+    assert k.o[g.home] < b.o[g.home]        # the weak starter explains part of the 5 goals
+    eh, ea = lineup.predict_eta(pd.DataFrame([{**row, "lo_h": 0.15}]))
+    eh0, _ = lineup.predict_eta(pd.DataFrame([row]))
+    assert np.isclose(eh[0] - eh0[0], 0.15)
+
+
+def test_live_lineups_and_offsets():
+    """NeurHL's pregame lineup files parse into 18 skaters a side, and a
+    team's first known lineup carries no signal."""
+    from orr import lineups as LU
+    if not LU.NEURHL_LIVE.exists():
+        return
+    sk, gk, files = LU.live_lineups("2026-09-29")
+    assert len(files) and set(sk.game_id) <= set(gk.game_id)
+    assert (sk.groupby(["game_id", "side"]).size() <= 20).all()
+    lo = LU.live_offsets(sk[pd.to_datetime(sk.date) == pd.Timestamp("2026-09-29")])
+    assert np.allclose(lo.lo_h, 0) and np.allclose(lo.lo_a, 0)
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

@@ -1,0 +1,3125 @@
+{
+ "pre_registration": {
+  "written_utc": "2026-10-01T03:35:16+00:00",
+  "item": "M1 (orr/PLAN_1_1.md): re-tune the in-season filter for goals-only updates",
+  "hypothesis": "The filter's hyperparameters were tuned with shots in the update. Re-tuning the process noise (q_s, q_f, q_mu), the goal observation scale (phi_g) and the prior scale for use_shots=False closes at least 30% of the 0.0033 log-loss gap to NeurHL-G.",
+  "start": "frozen ratings_hp.json HP with use_shots=False (the current goals-only filter)",
+  "fixed_fields": "every other HP field as frozen (mu_sd, h_sd_scale, pace_prior, pace_q, ridge, window, h_halflife, pre_sp, integrate=False, goalie, gk_scale)",
+  "tuning_window": [
+   2012,
+   2014,
+   2015,
+   2016,
+   2017
+  ],
+  "excluded": [
+   2013
+  ],
+  "tuning_metric": "pooled home-win log loss on 2012, 2014-2017, filter from the team-history table (ratings.run_filter), probabilities from ratings.predict_probs",
+  "identifiability": "only q_s + q_f is identified without shots; q_s and q_f are scaled together by q_mult (ratio 5:3 kept), one swapped-split check is logged",
+  "grid": {
+   "q_mult": [
+    0.25,
+    0.5,
+    0.75,
+    1.5,
+    2.0,
+    3.0
+   ],
+   "phi_g": [
+    1.0,
+    1.25,
+    1.75,
+    2.0,
+    2.5
+   ],
+   "prior_scale": [
+    0.6,
+    0.8,
+    1.25,
+    1.5,
+    2.0
+   ],
+   "q_mu": [
+    0.0,
+    5e-07,
+    1e-06,
+    4e-06,
+    1e-05
+   ]
+  },
+  "edge_extension": {
+   "q_mult": [
+    0.125,
+    4.5
+   ],
+   "phi_g": [
+    0.75,
+    3.0
+   ],
+   "prior_scale": [
+    0.4,
+    3.0
+   ],
+   "q_mu": [
+    null,
+    2e-05
+   ]
+  },
+  "search": "greedy coordinate descent from the start over q_mult, phi_g, prior_scale, q_mu (in that order), up to 3 rounds, stopping after a round with no improvement (> 1e-6) and no new extension; after each round, a parameter whose best value sits at a grid end gets its one pre-declared extension value added to the grid (tried in the next round, or in a final extension-only pass after round 3); configurations already logged are never re-run; hard cap 60 configurations in total (start, split check and extensions included)",
+  "selection": "lowest pooled tuning-window log loss among all logged configurations",
+  "confirm": "season_end 2018, once, after the configuration is fixed: candidate vs current goals-only (paired bootstrap CI); diagnostic only, it does not change the choice",
+  "test": {
+   "window": "NeurHL-G gate games 2019-24 (n = 6289): the shipped loop of orr/backtest/inseason_bt.py (preseason pipeline ratings with the frozen HP as pre_override; OT/SO parameters from the same HP's team-history run), no starters, use_shots=False",
+   "comparisons": [
+    "candidate vs current goals-only filter (primary, paired bootstrap 95% CI, games_bt.paired)",
+    "candidate vs NeurHL-G",
+    "candidate vs NeurHL Elo",
+    "team-history start, candidate vs current (secondary)"
+   ],
+   "runs": "once, after the configuration is fixed"
+  },
+  "accept_rule": "Accept if the pooled gate log loss improves on the current goals-only filter with a 95% CI that excludes 0 and the gain is at least 0.0010."
+ },
+ "configs": [
+  {
+   "i": 1,
+   "time": "2026-10-01T03:35:18+00:00",
+   "tag": "start (current goals-only)",
+   "coords": {
+    "q_mult": 1.0,
+    "phi_g": 1.5,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 5e-05,
+    "q_f": 3e-05,
+    "phi_g": 1.5,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.9,
+   "ll": 0.6744311834218212,
+   "goal_nll": 0.1687439469228323,
+   "brier": 0.24083483025241792,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6753149578066887,
+    "2014": 0.6779261254169177,
+    "2015": 0.6679454117478582,
+    "2016": 0.680801463135727,
+    "2017": 0.6701679590019144
+   }
+  },
+  {
+   "i": 2,
+   "time": "2026-10-01T03:35:19+00:00",
+   "tag": "check: q_s/q_f swapped",
+   "coords": {
+    "q_mult": 1.0,
+    "phi_g": 1.5,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 3e-05,
+    "q_f": 5e-05,
+    "phi_g": 1.5,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.2,
+   "ll": 0.6744311836537302,
+   "goal_nll": 0.16874394692283234,
+   "brier": 0.24083483035476905,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.675314958004063,
+    "2014": 0.6779261254496518,
+    "2015": 0.6679454123819659,
+    "2016": 0.6808014633859932,
+    "2017": 0.670167959046977
+   }
+  },
+  {
+   "i": 3,
+   "time": "2026-10-01T03:35:21+00:00",
+   "tag": "r0 q_mult=0.25",
+   "coords": {
+    "q_mult": 0.25,
+    "phi_g": 1.5,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 1.25e-05,
+    "q_f": 7.5e-06,
+    "phi_g": 1.5,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.5,
+   "ll": 0.674741512969142,
+   "goal_nll": 0.1695042711139158,
+   "brier": 0.2409657245123383,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6740330366893625,
+    "2014": 0.6775946673062403,
+    "2015": 0.6702881614164827,
+    "2016": 0.680585304025934,
+    "2017": 0.6712063954076903
+   }
+  },
+  {
+   "i": 4,
+   "time": "2026-10-01T03:35:22+00:00",
+   "tag": "r0 q_mult=0.5",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.5,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.5,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.4,
+   "ll": 0.6744727543646203,
+   "goal_nll": 0.16878650670138579,
+   "brier": 0.24084384316898774,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6744420913898752,
+    "2014": 0.6775494550970486,
+    "2015": 0.6691898358364673,
+    "2016": 0.6805202919267268,
+    "2017": 0.6706620975729835
+   }
+  },
+  {
+   "i": 5,
+   "time": "2026-10-01T03:35:24+00:00",
+   "tag": "r0 q_mult=0.75",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.5,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.5,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.4,
+   "ll": 0.6743937959003683,
+   "goal_nll": 0.1686027723312334,
+   "brier": 0.2408120943227561,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.674875043790157,
+    "2014": 0.6776875572008261,
+    "2015": 0.6684508060606648,
+    "2016": 0.6806131861831657,
+    "2017": 0.6703423862670277
+   }
+  },
+  {
+   "i": 6,
+   "time": "2026-10-01T03:35:25+00:00",
+   "tag": "r0 q_mult=1.5",
+   "coords": {
+    "q_mult": 1.5,
+    "phi_g": 1.5,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 7.500000000000001e-05,
+    "q_f": 4.5e-05,
+    "phi_g": 1.5,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.1,
+   "ll": 0.674702891390752,
+   "goal_nll": 0.16957139336919153,
+   "brier": 0.24097073774771158,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6761851389257724,
+    "2014": 0.6785459717622533,
+    "2015": 0.6673662002945391,
+    "2016": 0.6813340077828033,
+    "2017": 0.6700831381883923
+   }
+  },
+  {
+   "i": 7,
+   "time": "2026-10-01T03:35:26+00:00",
+   "tag": "r0 q_mult=2",
+   "coords": {
+    "q_mult": 2.0,
+    "phi_g": 1.5,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 0.0001,
+    "q_f": 6e-05,
+    "phi_g": 1.5,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.2,
+   "ll": 0.6751098973892665,
+   "goal_nll": 0.1707683451103593,
+   "brier": 0.241166980505602,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.677022902999513,
+    "2014": 0.6792345827448917,
+    "2015": 0.6671260873368857,
+    "2016": 0.6819652955015915,
+    "2017": 0.6702006183634509
+   }
+  },
+  {
+   "i": 8,
+   "time": "2026-10-01T03:35:27+00:00",
+   "tag": "r0 q_mult=3",
+   "coords": {
+    "q_mult": 3.0,
+    "phi_g": 1.5,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 0.00015000000000000001,
+    "q_f": 9e-05,
+    "phi_g": 1.5,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6760727087791898,
+   "goal_nll": 0.1735547725458112,
+   "brier": 0.24162131295573505,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.678581776180871,
+    "2014": 0.6806094074447495,
+    "2015": 0.6671456535603069,
+    "2016": 0.6833073288564556,
+    "2017": 0.6707193778535662
+   }
+  },
+  {
+   "i": 9,
+   "time": "2026-10-01T03:35:29+00:00",
+   "tag": "r0 phi_g=1",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.0,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.0,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.67447937612066,
+   "goal_nll": 0.16898312721643446,
+   "brier": 0.24086404221400384,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6758649626456287,
+    "2014": 0.6778838395444523,
+    "2015": 0.6674737683639766,
+    "2016": 0.6813310935104759,
+    "2017": 0.669843216538766
+   }
+  },
+  {
+   "i": 10,
+   "time": "2026-10-01T03:35:30+00:00",
+   "tag": "r0 phi_g=1.25",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6743817200524477,
+   "goal_nll": 0.16864711260663068,
+   "brier": 0.2408113953707444,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6752682787699065,
+    "2014": 0.6777329561714159,
+    "2015": 0.6679698798602643,
+    "2016": 0.6808754973844934,
+    "2017": 0.6700619880761589
+   }
+  },
+  {
+   "i": 11,
+   "time": "2026-10-01T03:35:31+00:00",
+   "tag": "r0 phi_g=1.75",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.75,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.75,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.2,
+   "ll": 0.6744584367078034,
+   "goal_nll": 0.16869967240790013,
+   "brier": 0.24083889953724955,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6746023381670463,
+    "2014": 0.6776953567590411,
+    "2015": 0.6688966959626544,
+    "2016": 0.6804592358363084,
+    "2017": 0.6706385568139664
+   }
+  },
+  {
+   "i": 12,
+   "time": "2026-10-01T03:35:32+00:00",
+   "tag": "r0 phi_g=2",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 2.0,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 2.0,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.2,
+   "ll": 0.6745480582963045,
+   "goal_nll": 0.1688657918085653,
+   "brier": 0.24087848668655448,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.674405959265626,
+    "2014": 0.6777308099248187,
+    "2015": 0.6693032289424521,
+    "2016": 0.6803698472917219,
+    "2017": 0.6709304460569047
+   }
+  },
+  {
+   "i": 13,
+   "time": "2026-10-01T03:35:34+00:00",
+   "tag": "r0 phi_g=2.5",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 2.5,
+    "prior_scale": 1.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.0,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 2.5,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6747522870360451,
+   "goal_nll": 0.16927518564782085,
+   "brier": 0.24097148002369645,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6741502892788185,
+    "2014": 0.6778368076754504,
+    "2015": 0.6700052206304886,
+    "2016": 0.6802969778484692,
+    "2017": 0.6714721397469989
+   }
+  },
+  {
+   "i": 14,
+   "time": "2026-10-01T03:35:35+00:00",
+   "tag": "r0 prior_scale=0.6",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 0.6,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 0.6,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.674464092483876,
+   "goal_nll": 0.16874096011101786,
+   "brier": 0.24084601573460673,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6749640093462844,
+    "2014": 0.6779804604743757,
+    "2015": 0.6683781658995107,
+    "2016": 0.6804930691113052,
+    "2017": 0.6705047575879033
+   }
+  },
+  {
+   "i": 15,
+   "time": "2026-10-01T03:35:36+00:00",
+   "tag": "r0 prior_scale=0.8",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 0.8,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 0.8,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 0.9,
+   "ll": 0.6744117550732507,
+   "goal_nll": 0.16867688881102072,
+   "brier": 0.24082341017316364,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6751119140967512,
+    "2014": 0.6778499558153597,
+    "2015": 0.6681587547140806,
+    "2016": 0.6806798080277247,
+    "2017": 0.6702583427123371
+   }
+  },
+  {
+   "i": 16,
+   "time": "2026-10-01T03:35:37+00:00",
+   "tag": "r0 prior_scale=1.25",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.2,
+   "ll": 0.6743694887316859,
+   "goal_nll": 0.16864946997036304,
+   "brier": 0.2408083322811276,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6754718913510602,
+    "2014": 0.6776033639111005,
+    "2015": 0.6677704732000556,
+    "2016": 0.6811286383524917,
+    "2017": 0.669873076843721
+   }
+  },
+  {
+   "i": 17,
+   "time": "2026-10-01T03:35:39+00:00",
+   "tag": "r0 prior_scale=1.5",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6743797048228637,
+   "goal_nll": 0.16868768956787783,
+   "brier": 0.24081580596772206,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6756809193143017,
+    "2014": 0.6774898798241865,
+    "2015": 0.6676057389106004,
+    "2016": 0.6813877237609299,
+    "2017": 0.6697342623042996
+   }
+  },
+  {
+   "i": 18,
+   "time": "2026-10-01T03:35:40+00:00",
+   "tag": "r0 prior_scale=2",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 2.0,
+    "q_mu": 2e-06
+   },
+   "hp": {
+    "prior_scale": 2.0,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6744499119597801,
+   "goal_nll": 0.16884593667004474,
+   "brier": 0.24085389656922465,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6761055279508702,
+    "2014": 0.6773032321346912,
+    "2015": 0.6673598858627734,
+    "2016": 0.6819130898062147,
+    "2017": 0.6695678240443501
+   }
+  },
+  {
+   "i": 19,
+   "time": "2026-10-01T03:35:41+00:00",
+   "tag": "r0 q_mu=0",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 0.0
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 0.0,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6743703048933931,
+   "goal_nll": 0.16865704871224863,
+   "brier": 0.24080866578954718,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6754751559258795,
+    "2014": 0.6776009744309345,
+    "2015": 0.6677723361805754,
+    "2016": 0.6811331585548418,
+    "2017": 0.6698698993747338
+   }
+  },
+  {
+   "i": 20,
+   "time": "2026-10-01T03:35:42+00:00",
+   "tag": "r0 q_mu=5e-07",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 5e-07
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 5e-07,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.1,
+   "ll": 0.6743700917902228,
+   "goal_nll": 0.16865405277299342,
+   "brier": 0.24080857914922357,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6754742681815833,
+    "2014": 0.6776016683222479,
+    "2015": 0.6677718635963265,
+    "2016": 0.681131944845547,
+    "2017": 0.66987071400541
+   }
+  },
+  {
+   "i": 21,
+   "time": "2026-10-01T03:35:44+00:00",
+   "tag": "r0 q_mu=1e-06",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 1e-06
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6743698869722552,
+   "goal_nll": 0.16865188136342318,
+   "brier": 0.24080849546853772,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6754734376836442,
+    "2014": 0.677602295285256,
+    "2015": 0.6677713986624195,
+    "2016": 0.6811308025090655,
+    "2017": 0.6698715007208905
+   }
+  },
+  {
+   "i": 22,
+   "time": "2026-10-01T03:35:45+00:00",
+   "tag": "r0 q_mu=4e-06",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 4e-06
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 4e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.2,
+   "ll": 0.6743686592957397,
+   "goal_nll": 0.16864988432470596,
+   "brier": 0.240807982739839,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6754691557677491,
+    "2014": 0.677604980528708,
+    "2015": 0.6677687114410973,
+    "2016": 0.6811247837744339,
+    "2017": 0.6698756649667104
+   }
+  },
+  {
+   "i": 23,
+   "time": "2026-10-01T03:35:46+00:00",
+   "tag": "r0 q_mu=1e-05",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.2,
+   "ll": 0.6743664042376334,
+   "goal_nll": 0.16866996454046307,
+   "brier": 0.24080701145359099,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6754627556873921,
+    "2014": 0.6776075269199177,
+    "2015": 0.6677641930403428,
+    "2016": 0.6811160497562249,
+    "2017": 0.6698814957842896
+   }
+  },
+  {
+   "i": 24,
+   "time": "2026-10-01T03:35:47+00:00",
+   "tag": "r1 q_mult=0.25",
+   "coords": {
+    "q_mult": 0.25,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 1.25e-05,
+    "q_f": 7.5e-06,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6744288164568842,
+   "goal_nll": 0.16886780756928593,
+   "brier": 0.2408238812831181,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6744104331170956,
+    "2014": 0.6772127564028207,
+    "2015": 0.6693012485061891,
+    "2016": 0.6808601896098594,
+    "2017": 0.6703594546484567
+   }
+  },
+  {
+   "i": 25,
+   "time": "2026-10-01T03:35:49+00:00",
+   "tag": "r1 q_mult=0.5",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6743105087577679,
+   "goal_nll": 0.16851119148402377,
+   "brier": 0.24077460797796682,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6749317301775536,
+    "2014": 0.6773245350402294,
+    "2015": 0.6683579330739385,
+    "2016": 0.6809128931985586,
+    "2017": 0.670025452298559
+   }
+  },
+  {
+   "i": 26,
+   "time": "2026-10-01T03:35:50+00:00",
+   "tag": "r1 q_mult=1.5",
+   "coords": {
+    "q_mult": 1.5,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 7.500000000000001e-05,
+    "q_f": 4.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6749948502039038,
+   "goal_nll": 0.17048474279350595,
+   "brier": 0.24111428322625864,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6770069407762063,
+    "2014": 0.6788055638057041,
+    "2015": 0.667036270690269,
+    "2016": 0.6821123007938718,
+    "2017": 0.6700131749534676
+   }
+  },
+  {
+   "i": 27,
+   "time": "2026-10-01T03:35:51+00:00",
+   "tag": "r1 q_mult=2",
+   "coords": {
+    "q_mult": 2.0,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 0.0001,
+    "q_f": 6e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.4,
+   "ll": 0.6755640351405268,
+   "goal_nll": 0.17212066887260893,
+   "brier": 0.24138432723824152,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6779675809229706,
+    "2014": 0.6796602003571642,
+    "2015": 0.6669805770885532,
+    "2016": 0.6828896736639697,
+    "2017": 0.6703221436699759
+   }
+  },
+  {
+   "i": 28,
+   "time": "2026-10-01T03:35:52+00:00",
+   "tag": "r1 q_mult=3",
+   "coords": {
+    "q_mult": 3.0,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 0.00015000000000000001,
+    "q_f": 9e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.2,
+   "ll": 0.6767800132835208,
+   "goal_nll": 0.17559732448625504,
+   "brier": 0.24195181959677256,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.679726166451932,
+    "2014": 0.6812828039672189,
+    "2015": 0.667288083896437,
+    "2016": 0.6844658235970463,
+    "2017": 0.6711371885049698
+   }
+  },
+  {
+   "i": 29,
+   "time": "2026-10-01T03:35:54+00:00",
+   "tag": "r1 phi_g=1",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.0,
+    "prior_scale": 1.25,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.0,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.1,
+   "ll": 0.6743202205187502,
+   "goal_nll": 0.16858350503249028,
+   "brier": 0.24078596988547926,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6754561315159895,
+    "2014": 0.6773102959989896,
+    "2015": 0.6677895869827316,
+    "2016": 0.6813132143826155,
+    "2017": 0.6697318737134252
+   }
+  },
+  {
+   "i": 30,
+   "time": "2026-10-01T03:35:55+00:00",
+   "tag": "r1 phi_g=1.75",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.75,
+    "prior_scale": 1.25,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.75,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.0,
+   "ll": 0.6744894464005724,
+   "goal_nll": 0.16885355816622744,
+   "brier": 0.2408509237806111,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6743597066905703,
+    "2014": 0.6774858043350078,
+    "2015": 0.6693524190128399,
+    "2016": 0.6805575064984587,
+    "2017": 0.6706917954659857
+   }
+  },
+  {
+   "i": 31,
+   "time": "2026-10-01T03:35:56+00:00",
+   "tag": "r1 phi_g=2",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 2.0,
+    "prior_scale": 1.25,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 2.0,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6746093518526374,
+   "goal_nll": 0.16909946886264493,
+   "brier": 0.2409051949246103,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6741956551048326,
+    "2014": 0.6775830007646385,
+    "2015": 0.6697720272892058,
+    "2016": 0.6804849215753778,
+    "2017": 0.6710111545291325
+   }
+  },
+  {
+   "i": 32,
+   "time": "2026-10-01T03:35:57+00:00",
+   "tag": "r1 phi_g=2.5",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 2.5,
+    "prior_scale": 1.25,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 2.5,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6748516379785697,
+   "goal_nll": 0.16960142000125364,
+   "brier": 0.2410168664642391,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6739874812339943,
+    "2014": 0.6777716089756199,
+    "2015": 0.6704796581660587,
+    "2016": 0.6804312924606948,
+    "2017": 0.6715881490564809
+   }
+  },
+  {
+   "i": 33,
+   "time": "2026-10-01T03:35:58+00:00",
+   "tag": "r1 prior_scale=0.6",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 0.6,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 0.6,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.4,
+   "ll": 0.674534618173117,
+   "goal_nll": 0.16887447536904587,
+   "brier": 0.24087301929419,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6744430887082812,
+    "2014": 0.6777846077454268,
+    "2015": 0.6692028057598216,
+    "2016": 0.6803278153215161,
+    "2017": 0.6709147733305394
+   }
+  },
+  {
+   "i": 34,
+   "time": "2026-10-01T03:36:00+00:00",
+   "tag": "r1 prior_scale=0.8",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 0.8,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 0.8,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6744328837568307,
+   "goal_nll": 0.16871073867235833,
+   "brier": 0.24082709441397387,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6745803386078753,
+    "2014": 0.6776239656979126,
+    "2015": 0.6688974851177826,
+    "2016": 0.6804929306069653,
+    "2017": 0.6705696987536178
+   }
+  },
+  {
+   "i": 35,
+   "time": "2026-10-01T03:36:01+00:00",
+   "tag": "r1 prior_scale=1.5",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6742893305349917,
+   "goal_nll": 0.16847664663503253,
+   "brier": 0.24076762377304484,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.675141706095067,
+    "2014": 0.6771885669334428,
+    "2015": 0.6681281468208716,
+    "2016": 0.6811638499364452,
+    "2017": 0.6698243828891322
+   }
+  },
+  {
+   "i": 36,
+   "time": "2026-10-01T03:36:02+00:00",
+   "tag": "r1 prior_scale=2",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 2.0,
+    "q_mu": 1e-05
+   },
+   "hp": {
+    "prior_scale": 2.0,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6743148540473863,
+   "goal_nll": 0.16852297290722415,
+   "brier": 0.24078545863545933,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.675574653105756,
+    "2014": 0.676967282035754,
+    "2015": 0.667780874549815,
+    "2016": 0.681682945032646,
+    "2017": 0.6695685155129605
+   }
+  },
+  {
+   "i": 37,
+   "time": "2026-10-01T03:36:03+00:00",
+   "tag": "r1 q_mu=0",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 0.0
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 0.0,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.0,
+   "ll": 0.6742947091899226,
+   "goal_nll": 0.16848126436643596,
+   "brier": 0.24076990926346992,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6751548165845186,
+    "2014": 0.6771820028329893,
+    "2015": 0.6681383345585845,
+    "2016": 0.6811842742080811,
+    "2017": 0.6698141177654398
+   }
+  },
+  {
+   "i": 38,
+   "time": "2026-10-01T03:36:04+00:00",
+   "tag": "r1 q_mu=5e-07",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 5e-07
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 5e-07,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.0,
+   "ll": 0.6742943978095502,
+   "goal_nll": 0.1684753077633489,
+   "brier": 0.24076978301362806,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6751539395967804,
+    "2014": 0.6771826852039801,
+    "2015": 0.6681376901118159,
+    "2016": 0.6811828292501105,
+    "2017": 0.6698148448850647
+   }
+  },
+  {
+   "i": 39,
+   "time": "2026-10-01T03:36:05+00:00",
+   "tag": "r1 q_mu=1e-06",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 1e-06
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 1e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.0,
+   "ll": 0.6742940757435609,
+   "goal_nll": 0.1684707361812891,
+   "brier": 0.24076964998170397,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6751530335944573,
+    "2014": 0.6771833171452089,
+    "2015": 0.6681370696944676,
+    "2016": 0.6811814173904537,
+    "2017": 0.6698155408932177
+   }
+  },
+  {
+   "i": 40,
+   "time": "2026-10-01T03:36:06+00:00",
+   "tag": "r1 q_mu=4e-06",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 4e-06
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 4e-06,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.1,
+   "ll": 0.6742923281165398,
+   "goal_nll": 0.16846089573092413,
+   "brier": 0.2407689158406046,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6751485271276341,
+    "2014": 0.6771860811380243,
+    "2015": 0.6681336612145987,
+    "2016": 0.681174179829287,
+    "2017": 0.6698191912731555
+   }
+  },
+  {
+   "i": 41,
+   "time": "2026-10-01T03:36:08+00:00",
+   "tag": "r1 q_mu=2e-05",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.2,
+   "ll": 0.6742852317534118,
+   "goal_nll": 0.1685271662942603,
+   "brier": 0.24076582506624658,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6751335589370019,
+    "2014": 0.6771896035003624,
+    "2015": 0.6681210151604402,
+    "2016": 0.681152653292596,
+    "2017": 0.6698293278766586
+   }
+  },
+  {
+   "i": 42,
+   "time": "2026-10-01T03:36:09+00:00",
+   "tag": "r2 q_mult=0.25",
+   "coords": {
+    "q_mult": 0.25,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 1.25e-05,
+    "q_f": 7.5e-06,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.1,
+   "ll": 0.6743494539231905,
+   "goal_nll": 0.1687590070013105,
+   "brier": 0.24078972782974625,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6746086603005561,
+    "2014": 0.6770367094614677,
+    "2015": 0.6689590394578022,
+    "2016": 0.681074788888468,
+    "2017": 0.6700680715076587
+   }
+  },
+  {
+   "i": 43,
+   "time": "2026-10-01T03:36:10+00:00",
+   "tag": "r2 q_mult=0.75",
+   "coords": {
+    "q_mult": 0.75,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 3.7500000000000003e-05,
+    "q_f": 2.25e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.4,
+   "ll": 0.674373168266651,
+   "goal_nll": 0.16875894225264151,
+   "brier": 0.24081297456944534,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.675663312890614,
+    "2014": 0.6774957332966305,
+    "2015": 0.6675936880057612,
+    "2016": 0.6813656781264023,
+    "2017": 0.6697474290138467
+   }
+  },
+  {
+   "i": 44,
+   "time": "2026-10-01T03:36:11+00:00",
+   "tag": "r2 q_mult=1.5",
+   "coords": {
+    "q_mult": 1.5,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 7.500000000000001e-05,
+    "q_f": 4.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.1,
+   "ll": 0.675043458389107,
+   "goal_nll": 0.1706664717200623,
+   "brier": 0.2411388231724331,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6771955042028927,
+    "2014": 0.6787240202251745,
+    "2015": 0.6669638131928859,
+    "2016": 0.682358711737727,
+    "2017": 0.6699752425868544
+   }
+  },
+  {
+   "i": 45,
+   "time": "2026-10-01T03:36:13+00:00",
+   "tag": "r2 q_mult=2",
+   "coords": {
+    "q_mult": 2.0,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 0.0001,
+    "q_f": 6e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.4,
+   "ll": 0.6756227955542365,
+   "goal_nll": 0.1723234717810901,
+   "brier": 0.24141307800273862,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6781473100592903,
+    "2014": 0.6795876105505758,
+    "2015": 0.6669379193818271,
+    "2016": 0.6831260751731238,
+    "2017": 0.6703150626063659
+   }
+  },
+  {
+   "i": 46,
+   "time": "2026-10-01T03:36:14+00:00",
+   "tag": "r2 q_mult=3",
+   "coords": {
+    "q_mult": 3.0,
+    "phi_g": 1.25,
+    "prior_scale": 1.5,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 0.00015000000000000001,
+    "q_f": 9e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.4,
+   "ll": 0.6768462697984304,
+   "goal_nll": 0.17581321317567208,
+   "brier": 0.24198335181159727,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6798906535507208,
+    "2014": 0.6812211645371739,
+    "2015": 0.6672757203523623,
+    "2016": 0.6846810617992148,
+    "2017": 0.6711627487526802
+   }
+  },
+  {
+   "i": 47,
+   "time": "2026-10-01T03:36:15+00:00",
+   "tag": "r2 phi_g=1",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.0,
+    "prior_scale": 1.5,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.0,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.1,
+   "ll": 0.6743452164913374,
+   "goal_nll": 0.16871233890747947,
+   "brier": 0.24080130324076765,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6757143378684441,
+    "2014": 0.6771835919981346,
+    "2015": 0.6675965199524556,
+    "2016": 0.681630282149127,
+    "2017": 0.6696013504885253
+   }
+  },
+  {
+   "i": 48,
+   "time": "2026-10-01T03:36:16+00:00",
+   "tag": "r2 phi_g=1.75",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.75,
+    "prior_scale": 1.5,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.75,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.1,
+   "ll": 0.6744052038957397,
+   "goal_nll": 0.16874033396131632,
+   "brier": 0.24081333853112552,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6744875351070145,
+    "2014": 0.6773461984954368,
+    "2015": 0.6690743273989694,
+    "2016": 0.6806976580284964,
+    "2017": 0.6704203004487816
+   }
+  },
+  {
+   "i": 49,
+   "time": "2026-10-01T03:36:17+00:00",
+   "tag": "r2 phi_g=2",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 2.0,
+    "prior_scale": 1.5,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 2.0,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.0,
+   "ll": 0.6745080377639906,
+   "goal_nll": 0.16894878521271442,
+   "brier": 0.24085911818431047,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6742986668710179,
+    "2014": 0.6774442647821447,
+    "2015": 0.6694860070007507,
+    "2016": 0.6805922211595741,
+    "2017": 0.6707190290064654
+   }
+  },
+  {
+   "i": 50,
+   "time": "2026-10-01T03:36:18+00:00",
+   "tag": "r2 phi_g=2.5",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 2.5,
+    "prior_scale": 1.5,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 1.5,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 2.5,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.0,
+   "ll": 0.6747299855385975,
+   "goal_nll": 0.16940455913796998,
+   "brier": 0.24096048881923227,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6740554096298015,
+    "2014": 0.6776373894741097,
+    "2015": 0.6701903736604083,
+    "2016": 0.6804927427496194,
+    "2017": 0.6712740121790487
+   }
+  },
+  {
+   "i": 51,
+   "time": "2026-10-01T03:36:19+00:00",
+   "tag": "r2 prior_scale=0.6",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 0.6,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 0.6,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6745309180369866,
+   "goal_nll": 0.16892726716511255,
+   "brier": 0.24087138613467904,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6744370838424134,
+    "2014": 0.6777844102903781,
+    "2015": 0.6691947795801648,
+    "2016": 0.680316774647253,
+    "2017": 0.6709215418247235
+   }
+  },
+  {
+   "i": 52,
+   "time": "2026-10-01T03:36:21+00:00",
+   "tag": "r2 prior_scale=0.8",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 0.8,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 0.8,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.674429087774671,
+   "goal_nll": 0.16876299542441722,
+   "brier": 0.24082542019426062,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6745738634252777,
+    "2014": 0.6776240488888079,
+    "2015": 0.66888971239195,
+    "2016": 0.6804818270018018,
+    "2017": 0.6705759871655181
+   }
+  },
+  {
+   "i": 53,
+   "time": "2026-10-01T03:36:22+00:00",
+   "tag": "r2 prior_scale=1.25",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 1.25,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 1.25,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.3,
+   "ll": 0.6743065200258085,
+   "goal_nll": 0.16856230842021513,
+   "brier": 0.24077285431052114,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.674924185903297,
+    "2014": 0.6773252507789375,
+    "2015": 0.6683506021923844,
+    "2016": 0.6809017339595211,
+    "2017": 0.6700308272949023
+   }
+  },
+  {
+   "i": 54,
+   "time": "2026-10-01T03:36:23+00:00",
+   "tag": "r2 prior_scale=2",
+   "coords": {
+    "q_mult": 0.5,
+    "phi_g": 1.25,
+    "prior_scale": 2.0,
+    "q_mu": 2e-05
+   },
+   "hp": {
+    "prior_scale": 2.0,
+    "q_s": 2.5e-05,
+    "q_f": 1.5e-05,
+    "phi_g": 1.25,
+    "phi_s": 0.6,
+    "use_shots": false,
+    "mu_sd": 0.015,
+    "h_sd_scale": 0.5,
+    "q_mu": 2e-05,
+    "integrate": false,
+    "ridge": 1.0,
+    "goalie": [
+     20000.0,
+     -0.002,
+     3.0,
+     30.0
+    ],
+    "gk_scale": 1.25,
+    "window": 8,
+    "h_halflife": 6.0,
+    "use_roster": false,
+    "pre_sp": true,
+    "pace_prior": 0.25,
+    "pace_q": 1.0
+   },
+   "window": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "secs": 1.2,
+   "ll": 0.674310604489733,
+   "goal_nll": 0.16857236564182768,
+   "brier": 0.2407836036578754,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6755655230871334,
+    "2014": 0.6769688255344986,
+    "2015": 0.6677741603810364,
+    "2016": 0.681671759074252,
+    "2017": 0.6695727543717441
+   }
+  }
+ ],
+ "confirm_2018": {
+  "season": 2018,
+  "n": 1271,
+  "candidate": 0.6678521906926328,
+  "current_goals_only": 0.667753951863391,
+  "d_candidate_vs_current": {
+   "diff": 9.823882924183224e-05,
+   "se": 0.00043741609497854466,
+   "ci95": [
+    -0.0007458218921182596,
+    0.000954178460611765
+   ]
+  },
+  "time": "2026-10-01T03:46:06+00:00"
+ }
+}
