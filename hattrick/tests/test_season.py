@@ -51,6 +51,20 @@ def test_division_winners_qualify():
         assert np.all(res.playoff_seed[np.arange(500), best] > 0)
 
 
+def test_tiebreak_is_lexicographic():
+    """99 points with many regulation wins must rank BELOW 100 points."""
+    rng = np.random.default_rng(0)
+    T = 3
+    res = S.SeasonResult(["A", "B", "C"], points=np.array([[99, 100, 100]]), wins=np.array([[45, 44, 44]]),
+                         rw=np.array([[42, 35, 36]]), row=np.array([[44, 40, 40]]),
+                         otl=np.array([[9, 12, 12]]), gf=np.array([[250, 240, 240]]),
+                         ga=np.array([[200, 230, 230]]), gp=np.array([[84, 84, 84]]))
+    k = S._rank_key(res, rng)[0]
+    assert k[0] < k[1] and k[0] < k[2]            # fewer points loses
+    assert k[2] > k[1]                            # same points: more RW wins
+    assert sorted(k) == list(range(T))
+
+
 def test_completed_games_are_fixed():
     sch = D.schedule_2027()
     done = sch.head(5).assign(home_g=[5, 0, 2, 3, 1], away_g=[1, 4, 1, 2, 2],

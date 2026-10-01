@@ -431,3 +431,72 @@ def backup_usage(max_season: int, min_season: int = 2011,
             "p_backup_other": float(t.backup[t.rest != 1].mean()),
             "avg_gap": float((gap.talent_p - gap.talent_b).mean()),
             "seasons": [min_season, max_season]}
+
+
+# ---------------------------------------------------------------------------
+# Goalie talent in the fitted units, for the 2026-27 freeze and live use
+# ---------------------------------------------------------------------------
+def _frozen_goalie_key() -> tuple:
+    import json
+    try:
+        hp = json.loads((C.PARAMS / "ratings_hp.json").read_text())["hp"]
+        return tuple(float(x) for x in hp["goalie"])
+    except FileNotFoundError:
+        return DEFAULT_GOALIE_KEY
+
+
+def goalie_talent(V: int, goalie_key: tuple | None = None) -> pd.Series:
+    """Preseason save talent for season V in the units the game model's
+    goalie coefficient was fitted on (goals saved above average per shot on
+    goal; MoneyPuck GSAx per shot, normalised to the league goals/xG ratio,
+    Marcel weights 3/2/1 over V-1..V-3, regressed toward m0 with n0 weighted
+    pseudo-shots). Reads seasons < V only. Goalies without NHL history in
+    V-1..V-3 get the prior mean m0 (``goalie_talent_default``).
+    Returns a Series player_id -> talent."""
+    n0, m0, _, _ = goalie_key or _frozen_goalie_key()
+    prior, _ = goalie_prior(V, n0, m0)
+    return pd.Series({pid: a / b for pid, (a, b) in prior.items()}, name="talent")
+
+
+def goalie_talent_default(goalie_key: tuple | None = None) -> float:
+    """Talent assigned to a goalie with no NHL history (the prior mean m0)."""
+    return float((goalie_key or _frozen_goalie_key())[1])
+
+
+def goalie_talent_2027() -> pd.Series:
+    """player_id -> preseason save talent for 2026-27 in the fitted units, as of
+    the 2026-09-29 cutoff (MoneyPuck seasons through 2025-26 only, from the
+    pre-cutoff snapshot). Use with gamemodel.goalie_offset (talent minus the
+    team's usual starter) and gamemodel.b2b_goalie_offset (team_gap_2027)."""
+    return goalie_talent(C.TARGET_SEASON)
+
+
+def team_gap_2027(goalies: pd.DataFrame, talent: pd.Series | None = None) -> pd.Series:
+    """Each team's primary-minus-backup save-talent gap in the fitted units.
+
+    goalies: player_id, team, start_share [, p_present]. Goalies with
+    p_present <= 0.5 are dropped; primary and backup are the two largest
+    start shares. A team with one goalie gets 0. Same definition as the
+    historical ``backup_usage`` avg_gap that gamemodel.b2b_goalie_offset is
+    centred on."""
+    t = goalie_talent_2027() if talent is None else talent
+    g = goalies.copy()
+    if "p_present" in g:
+        g = g[g.p_present > 0.5]
+    g = g.sort_values("start_share", ascending=False)
+    g["t"] = g.player_id.map(t).fillna(goalie_talent_default())
+    top2 = g.groupby("team").head(2)
+    return top2.groupby("team").t.agg(lambda x: x.iloc[0] - x.iloc[1] if len(x) > 1 else 0.0)
+
+
+def usual_starter_talent(goalies: pd.DataFrame, talent: pd.Series | None = None) -> pd.Series:
+    """A team's usual-starter reference: start-share-weighted mean talent of
+    its goalies (fitted units). The starter offset for a game is
+    goalie_offset(P, talent[starter] - usual_starter_talent[team])."""
+    t = goalie_talent_2027() if talent is None else talent
+    g = goalies.copy()
+    if "p_present" in g:
+        g = g[g.p_present > 0.5]
+    g["t"] = g.player_id.map(t).fillna(goalie_talent_default())
+    w = g.start_share.clip(lower=0)
+    return (g.assign(wt=w * g.t).groupby("team").wt.sum() / w.groupby(g.team).sum()).rename("ref")

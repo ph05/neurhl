@@ -1,7 +1,7 @@
 """In-season predictions: update on results, forecast a day's games, re-run the season.
 
     python3 -m hattrick.inseason --date 2026-09-30 \
-        [--results neurhl/output/live/results_2027.csv] \
+        [--results hattrick/output/live/results_2027.csv] \
         [--goalies goalies.csv] [--sims 20000]
 
 Inputs
@@ -77,27 +77,23 @@ def load_results(path, before: pd.Timestamp) -> pd.DataFrame:
     return r.sort_values(["date", "game_id"]).reset_index(drop=True)
 
 
-def goalie_offsets(freeze: dict, games: pd.DataFrame, starters: pd.DataFrame | None, P: dict):
-    """Log-rate offsets on goals AGAINST for known starters, relative to the
-    team's expected start mix (the preseason ratings already contain the mix).
-    Save talent is goals saved above expected per shot on goal: the goalie
-    layer's per-unblocked-attempt figure x 1.40 attempts per shot on goal."""
-    out = pd.DataFrame({"game_id": games.game_id.to_numpy(), "gadj_h": 0.0, "gadj_a": 0.0})
-    g = freeze.get("goalies")
+def starter_diffs(fz: dict, games: pd.DataFrame, starters: pd.DataFrame | None) -> pd.DataFrame:
+    """Known starters' save talent minus the team's expected start mix, in the
+    scoring model's fitted goalie units (gamemodel.goalie_talent_2027)."""
+    out = pd.DataFrame({"game_id": games.game_id.to_numpy(), "diff_h": np.nan, "diff_a": np.nan})
+    g = fz.get("goalies")
     if starters is None or g is None or not len(starters):
         return out
     from hattrick import gamemodel as GM
-    g = g.assign(talent=g.gsax_per_fa * 1.40)
-    talent = g.set_index("player_id")
+    tal = GM.goalie_talent_2027()
+    g = g.assign(talent=g.player_id.map(tal).fillna(0.0))
     mix = (g.assign(w=g.start_share * g.talent).groupby("team").w.sum()
            / g.groupby("team").start_share.sum())
     s = games[["game_id", "home", "away"]].merge(starters, on="game_id", how="left")
-    for side, col in (("home", "gadj_h"), ("away", "gadj_a")):
-        gid = s[f"goalie_{side}"]
-        t = gid.map(talent.talent)
-        diff = (t - s[side].map(mix)).fillna(0.0)
-        out[col] = np.asarray(GM.goalie_offset(P, diff.to_numpy()), float)
-    return out.fillna(0.0)
+    for side, col in (("home", "diff_h"), ("away", "diff_a")):
+        t = s[f"goalie_{side}"].map(tal)
+        out[col] = (t - s[side].map(mix)).to_numpy()
+    return out
 
 
 def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed: int):
@@ -128,15 +124,23 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     today = sch[sch.date == day].copy()
     starters = pd.read_csv(goalies_path) if goalies_path else None
     adj = pd.read_csv(FREEZE / "game_adjustments_2027.csv")
-    gadj = goalie_offsets(fz, today, starters, P)
-    t = today.merge(adj, on="game_id", how="left").merge(gadj, on="game_id", how="left")
+    t = today.merge(adj, on="game_id", how="left").merge(
+        starter_diffs(fz, today, starters), on="game_id", how="left")
+    # Known starters: the preseason offsets carry the EXPECTED goalie (the
+    # league-average backup effect on back-to-backs plus the team-specific
+    # gap). When a starter is confirmed, that expectation is replaced by the
+    # starter-known context and the starter's own talent offset.
+    known = t.diff_h.notna() | t.diff_a.notna()
+    if known.any():
+        ctx = GM.schedule_features(sch, C.TARGET_SEASON).set_index("game_id").loc[t.game_id[known]]
+        ah, aa = GM.known_starter_offsets(P, ctx.reset_index(), t.diff_h[known].fillna(0).to_numpy(),
+                                          t.diff_a[known].fillna(0).to_numpy())
+        t.loc[known, "adj_h"] = ah
+        t.loc[known, "adj_a"] = aa
     r = cur.set_index("team")
     lh, la = model.rates(r.o.reindex(t.home).to_numpy(), r.d.reindex(t.home).to_numpy(),
                          r.o.reindex(t.away).to_numpy(), r.d.reindex(t.away).to_numpy(),
                          t.adj_h.fillna(0).to_numpy(), t.adj_a.fillna(0).to_numpy())
-    # a goalie better than the team's mix lowers the OPPONENT's scoring rate
-    la = la * np.exp(t.gadj_h.to_numpy())
-    lh = lh * np.exp(t.gadj_a.to_numpy())
     p = integrate_rating_uncertainty(model, cur, t, lh, la)
     created = datetime.now(timezone.utc).isoformat(timespec="seconds")
     games_out = t[["game_id", "date", "home", "away"]].assign(

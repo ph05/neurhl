@@ -50,7 +50,7 @@ from hattrick import structural as S
 
 HP_FILE = C.PARAMS / "ratings_hp.json"
 ROSTER_FILE = C.OUT / "backtest" / "team_components_hist.csv"
-MARKET_HIST = C.CACHE / "nhl_point_totals_history.csv"
+MARKET_HIST = C.PKG / "data_market_history.csv"     # tracked copy (provenance in teams.py)
 
 # franchise slots (all codes that ever appear, normalised)
 SLOTS = sorted(set(S.game_frame().home) | set(C.TEAMS_2027))

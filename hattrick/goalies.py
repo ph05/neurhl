@@ -121,7 +121,8 @@ def talent_prior(V: int, window: int = 8) -> dict:
     g = goalie_panel()
     h = g[(g.season_end < V) & (g.season_end >= V - window) & (g.fa_all > 0)].copy()
     h["r"] = h.gsax_adj / h.fa_all
-    X = np.column_stack([np.ones(len(h)), np.log(h.workload.clip(0.01, 1.2))])
+    floor = backup_workload(V, window)
+    X = np.column_stack([np.ones(len(h)), np.log(h.workload.clip(floor, 1.2))])
     w = h.fa_all.to_numpy()
     beta = np.linalg.lstsq(X * np.sqrt(w)[:, None], h.r.to_numpy() * np.sqrt(w), rcond=None)[0]
     h["d"] = h.r - X @ beta
@@ -132,7 +133,30 @@ def talent_prior(V: int, window: int = 8) -> dict:
     tau2 = max(float((hw * pr.d * pr.d_n).sum() / hw.sum()), 1e-7)
     p = float((h.xga_all * h.rho).sum() / h.fa_all.sum())       # goals per FA
     sig2 = p * (1 - p)
-    return {"beta": beta.tolist(), "tau2": tau2, "k_shots": sig2 / tau2, "p_goal": p}
+    return {"beta": beta.tolist(), "tau2": tau2, "k_shots": sig2 / tau2, "p_goal": p,
+            "workload_floor": floor}
+
+
+@functools.lru_cache(maxsize=None)
+def backup_workload(V: int, window: int = 8) -> float:
+    """Workload of a typical NHL backup: the median season workload of each
+    team's second goalie by minutes, seasons V-window..V-1. The prior is
+    flat below it -- a log curve extrapolated to 3-game call-ups produced
+    .86-.87 save percentages, which no NHL goalie is expected to post."""
+    gt = D.goalie_team_seasons()
+    gt = gt[(gt.season_end < V) & (gt.season_end >= V - window)
+            & ~gt.season_end.isin([2013, 2020, 2021])]
+    tg = D.team_seasons().groupby("season_end").gp.median()
+    gt = gt.assign(w=gt.toi / (gt.season_end.map(tg) * 60.0))
+    second = gt.sort_values("toi", ascending=False).groupby(["season_end", "team"]).nth(1)
+    return float(second.w.median()) if len(second) else 0.25
+
+
+def prior_rate(V: int, workload) -> np.ndarray:
+    """Workload prior of GSAx per unblocked shot (flat below a backup's)."""
+    pr = talent_prior(V)
+    w = np.clip(np.asarray(workload, float), pr["workload_floor"], 1.2)
+    return pr["beta"][0] + pr["beta"][1] * np.log(w)
 
 
 @functools.lru_cache(maxsize=None)
@@ -162,7 +186,7 @@ def age_curve(V: int, decay: float = GOALIE_DECAY) -> np.ndarray:
 def _talent_unaged(V: int, decay: float = GOALIE_DECAY) -> pd.DataFrame:
     pr = talent_prior(V)
     a = _weighted(V, decay)
-    prior = pr["beta"][0] + pr["beta"][1] * np.log(a.workload.clip(0.01, 1.2))
+    prior = prior_rate(V, a.workload)
     K = pr["k_shots"]
     a["prior"] = prior
     a["rate"] = (a.n + K * prior) / (a.e + K)
@@ -184,7 +208,7 @@ def project_goalies(V: int, ids=None, decay: float = GOALIE_DECAY,
     new = t.rate.isna()
     wl0 = 0.05
     t.loc[new, "workload"] = wl0
-    t.loc[new, "rate"] = pr["beta"][0] + pr["beta"][1] * np.log(wl0)
+    t.loc[new, "rate"] = float(prior_rate(V, wl0))
     t.loc[new, "rate_sd"] = np.sqrt(pr["tau2"])
     t["e"] = t.e.fillna(0.0)
     b = D.bios().drop_duplicates("player_id").set_index("player_id").birth
@@ -411,13 +435,14 @@ def simulate_goalies(dep: pd.DataFrame, V: int, games: int, S: int = 2000,
     """p10/p50/p90 of starts, SA, GA, SV% and GSAx per goalie: injury
     spells, holdout presence and games-out drawn per season; talent drawn
     from its posterior; goals against binomial given the shots."""
-    rng = np.random.default_rng(seed)
+    from hattrick.deploy import stable_seed
     b = share_model(V)
     pr = talent_prior(V)
     lg = league_goalie(V)
     res = []
     for team, t in dep.groupby("team"):
         t = t.reset_index(drop=True)
+        rng = np.random.default_rng([seed, V, stable_seed("goalie", team)])
         n = len(t)
         w = np.exp(_share_features(t, pr) @ b)
         q = np.clip(t.q.to_numpy(), 1e-4, 0.9)
