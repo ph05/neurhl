@@ -1,0 +1,16 @@
+{
+ "date": "2026-10-01",
+ "created_utc": "2026-10-01T00:42:19+00:00",
+ "code": "974e00a",
+ "results_through": "2026-09-29 00:00:00",
+ "n_results": 5,
+ "sims": 20000,
+ "seed": 20260929,
+ "inputs": {
+  "results": {
+   "path": "/home/user/neurhl/hattrick/output/live/results_2027.csv",
+   "sha256": "4aa5a7fbbd16fdc52eb23ac7c85a501458b90618d2e83ed6dc51429c43f56964"
+  },
+  "freeze_state": "40ce19c0d0dc09d0dad7c5988bd8639e3ff455253e443cf0ac10e2b7a9628b98"
+ }
+}

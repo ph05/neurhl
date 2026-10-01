@@ -35,7 +35,10 @@
    "published_utc": "2026-09-29 02:12:11+00:00",
    "published_before_first_game": true,
    "after_publication": {
-    "n": 0
+    "n": 5,
+    "log_loss": 0.7262421961034218,
+    "brier": 0.26530866678,
+    "accuracy": 0.6
    }
   },
   "neurhl_1.1": {
@@ -46,7 +49,10 @@
    "published_utc": "2026-09-29 20:53:49+00:00",
    "published_before_first_game": true,
    "after_publication": {
-    "n": 0
+    "n": 5,
+    "log_loss": 0.7389089214545927,
+    "brier": 0.27065731443999996,
+    "accuracy": 0.6
    }
   },
   "neurhl_1.2": {
