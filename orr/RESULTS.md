@@ -20,11 +20,11 @@
 | | Same games vs NeurHL's own Elo baseline | 0.6641 | Elo 0.6691 | ORR −0.0050 (CI −0.0072 to −0.0029) |
 | | NeurHL-G gate games, 2019-24 (n = 6,289) | 0.6610 / 0.6603 | **0.6601** (G stack) | NeurHL slightly better; not significant |
 | | NeurHL seal games, 2024-25 and 2025-26 (n = 2,624) | **0.6712** | 0.6715 | Tie |
-| | The in-season loop started from the market-anchored preseason ratings (as live), updated on goals and shots, NeurHL-G gate games 2019-24 | 0.6613 with no starters; 0.6606 with past starters in the update | 0.6601 (NeurHL-G); NeurHL Elo 0.6657 | Tie with NeurHL-G (+0.0006, CI −0.0019 to +0.0029); beats Elo. Live results so far carry no shots and past starters are not used, so the live loop currently runs a goals-only variant that has not been backtested. |
-| **Skaters** | NeurHL's headline protocol: points MAE for players with ≥40 GP ("sample A"), held-out 2022-26 | 9.41 as backtested; about 9.50 with reserves projected unconditionally (see the reserve note below) | 9.54 | Roughly level. ORR wins 2022 (9.69 vs 10.47) and 2023; NeurHL wins 2024 and 2026; 2025 tied. Without 2022, NeurHL is ahead (9.31 vs 9.34). |
-| | Same, 2022-24 only (ORR's roster = first 10 games; NeurHL's = each player's actual season team) | 9.49; about 9.64 with reserves projected unconditionally | 9.74 | ORR better by about 0.10, mostly 2022 |
+| | The in-season loop started from the market-anchored preseason ratings (as live), NeurHL-G gate games 2019-24 | 0.6613 updating on goals and shots; 0.6606 with past starters too; **0.6634 on goals only** | 0.6601 (NeurHL-G); NeurHL Elo 0.6657 | With shots: tie with NeurHL-G (+0.0006, CI −0.0019 to +0.0029). Goals only, which is what the live loop runs while results carry no shots: NeurHL-G better by 0.0033 (CI +0.0009 to +0.0056). Both beat Elo. |
+| **Skaters** | NeurHL's headline protocol: points MAE for players with ≥40 GP ("sample A"), held-out 2022-26 | 9.51 | 9.54 | Level (ORR −0.04). By season: ORR wins 2022 (9.86 vs 10.47) and 2025 (9.07 vs 9.09); NeurHL wins 2023 (9.60 vs 9.62), 2024 (9.17 vs 9.45) and 2026 (9.39 vs 9.53). |
+| | Same, 2022-24 only (ORR's roster = first 10 games; NeurHL's = each player's actual season team) | 9.64 | 9.74 | ORR better by 0.10, all of it 2022 |
 | | Same, 2025-26 only (both use the actual season team; no box scores for a proxy) | 9.30 | **9.24** | NeurHL better by 0.05 |
-| | NeurHL v2's per-82 restatement ("sample B"), 2022-26 | 9.22 | **9.08** | NeurHL better by 0.14 (tie on 2022-24, 9.30 vs 9.28) |
+| | NeurHL v2's per-82 restatement ("sample B"), 2022-26 | 9.32 | **9.08** | NeurHL better by 0.23 (by 0.18 on 2022-24, 0.33 on 2025-26) |
 | | Regression toward the mean: slope of projected P/GP on 2025-26 P/GP, skaters with ≥60 GP in 2025-26 (n ≈ 460), 2027 file | 0.86 | 0.96 (1.3) | ORR regresses; NeurHL barely does |
 | | 80% interval coverage of points, held out, every rostered skater (the unconditional sample) | 0.84 pooled (0.79 on 2022-24, 0.91 on 2025-26) | none published; intervals ~1.1× Poisson width | ORR near nominal pooled; too wide on 2025-26 |
 | **Goalies** | GSAx/60 MAE, held-out 2022-26, goalies with ≥1,000 shots (n = 178) | 0.237 | n/a | Ties league average (0.241); beats last season (0.335) |
@@ -33,8 +33,8 @@
 **Summary.**
 
 - **Standings:** ORR beats NeurHL on NeurHL's own judge window and on its backtest seasons. Most of the 2019-24 gain comes from using the sportsbook line, which is allowed new data; ORR's own modelling adds about 0.1 points of MAE on top.
-- **Games:** ORR ties NeurHL's best in-season models with no lineup information and no neural network. Its shipped preseason pipeline beats a frozen Elo with a confidence interval that excludes zero.
-- **Skaters:** roughly level with NeurHL. ORR's pooled lead on the headline protocol is mostly one season (2022, when NeurHL under-projected league scoring). It shrinks to about 0.04 once reserves are projected without season-V information. ORR loses the per-82 restatement and 2024 and 2026. On 2022-24 ORR uses first-10-game rosters where NeurHL uses each player's actual season team. On 2025-26 (40% of the pooled sample) both use the season team.
+- **Games:** ORR ties NeurHL's best in-season models with no lineup information and no neural network, when its update uses shots. The goals-only loop that runs while results carry no shots is significantly worse than NeurHL-G. Its shipped preseason pipeline beats a frozen Elo with a confidence interval that excludes zero.
+- **Skaters:** level with NeurHL on its headline protocol (9.51 vs 9.54), with reserves projected without season-V information. ORR wins 2022, when NeurHL under-projected league scoring, and NeurHL wins three of the other four seasons. ORR loses the per-82 restatement by 0.23. On 2022-24 ORR uses first-10-game rosters where NeurHL uses each player's actual season team. On 2025-26 (40% of the pooled sample) both use the season team.
 - **Calibration:** ORR's projections regress toward the mean (slope 0.86 vs 0.96) and its intervals cover near nominal pooled. Its team means track the market far more closely (correlation 0.988 vs 0.884). In spread, both models miss the market by similar amounts in opposite directions: ORR is 7% narrower, NeurHL 10% wider.
 
 ## The 2026-27 forecast
@@ -138,8 +138,8 @@
 
 - **Tuning** used only 2011-2017 (76 configurations, all logged). 2018-19 confirm; 2022-26 is the held-out test.
 - **Rosters.** "Strict" uses opening rosters from each team's first 10 games. It is available through 2024. That proxy itself knows who dressed in those 10 games, a far smaller leak than NeurHL's full-season team. For 2025-26 no box scores exist, so both models use the season team, and that window is reported separately above.
-- **Reserves.** One more piece of season-V information enters the strict protocol. The evaluation sample, like NeurHL's, is players who played in season V. Players on no opening roster who nonetheless played ("reserves") are projected at the average games of past reserves who played at least once: about 19.5 GP per 82. Projected without that conditioning (8.8 GP per 82, the average including those who never played), the 24-30 sample-A reserves per season would raise sample-A MAE by about 0.15 on 2022-24 and 0.09 pooled. The table quotes both.
-- **Accuracy.** Pooled points MAE 9.41 as backtested sits beside goals MAE 4.31 and assists MAE 6.36; correlation is 0.845.
+- **Reserves.** The evaluation sample, like NeurHL's, is players who played in season V. Players on no opening roster who nonetheless played ("reserves") are projected at the preseason expectation for such players: 8.8 GP per 82, the average over earlier seasons including those who never played. An earlier version used the average of reserves who did play (19.5), which conditions on season-V participation; that version scored 9.41, about 0.09 better than the corrected 9.51.
+- **Accuracy.** Pooled points MAE 9.51 sits beside goals MAE 4.34 and assists MAE 6.41; correlation is 0.842. A Marcel baseline scores 9.63 on the same players.
 - **Final projection.** An average of ORR (0.6), Marcel (0.3) and ORR's rates times last season's GP (0.1). Rookies are calibrated by draft slot.
 
 **Goalies** (`goalies_bt.json`):
@@ -151,11 +151,9 @@
 ## Where ORR does not win
 
 - **Skaters.**
-  - NeurHL's A/B blend is 0.14 points better pooled on the per-82 protocol, and 0.33 better on 2025-26.
-  - On the headline protocol NeurHL wins 2024 (9.17 vs 9.29) and 2026 (9.39 vs 9.53).
-  - Most of ORR's pooled lead is 2022, when NeurHL under-projected league scoring (league ratio 0.88).
-  - With reserves projected unconditionally, the pooled lead is about 0.04 points.
-- **In-season games on NeurHL's gate window.** NeurHL-G is 0.0002 better than ORR's filter with known starters, and 0.0006 better than the shipped loop. Neither difference is significant. The market-anchored start that wins preseason adds nothing once games are played.
+  - NeurHL's A/B blend is 0.23 points better pooled on the per-82 protocol, and 0.33 better on 2025-26.
+  - On the headline protocol NeurHL wins 2023, 2024 and 2026. ORR's 0.04 pooled lead comes from 2022, when NeurHL under-projected league scoring (league ratio 0.88).
+- **In-season games on NeurHL's gate window.** With shots in the update, NeurHL-G is 0.0002 better than ORR's filter with known starters and 0.0006 better than the shipped loop; neither difference is significant. On goals only, the variant the live loop runs until results carry shots, NeurHL-G is 0.0033 better, which is significant. The market-anchored start that wins preseason adds nothing once games are played.
 - **Standings, 2012.** NeurHL-2 beats ORR's team-history view (6.98 vs 7.20).
 - **Standings, own modelling.** On 2019-24 the sportsbook line does most of the work. ORR's own contribution over the market alone is about 0.1 points of MAE, smaller than the noise across seasons.
 - **Goalie save talent.** It is barely predictable (correlation 0.23), so ORR's goalie projections tie "league average". Coverage is 0.74, below nominal.
