@@ -521,7 +521,7 @@ GH_W = GH_W / GH_W.sum()
 
 
 def run_filter(hp: HP, seasons: range | list, use_goalie: bool = False,
-               first: int = 2008) -> pd.DataFrame:
+               first: int = 2008, pre_override: dict | None = None) -> pd.DataFrame:
     """Walk-forward filter over seasons ``first`` .. max(seasons).
 
     Returns one row per regular-season game of ``seasons`` (gid) with the
@@ -533,6 +533,9 @@ def run_filter(hp: HP, seasons: range | list, use_goalie: bool = False,
     With ``use_goalie`` the known starters' offsets enter both the pregame
     prediction and the update (seasons with starters), and the rest/travel
     coefficients of the goalie-aware GLM are used for those games.
+    ``pre_override``: {V: (ratings, mu)} replaces season V's starting team
+    strengths (team, o, d, o_sd, d_sd; e.g. the freeze pipeline's market-
+    anchored ratings) and league level, exactly as ``InSeasonFilter`` does live.
     """
     g = S.game_frame()
     gt = S.goalie_game_talent(*hp.goalie) if use_goalie else None
@@ -544,7 +547,12 @@ def run_filter(hp: HP, seasons: range | list, use_goalie: bool = False,
         gv = g[g.season_end == V].reset_index(drop=True)
         setup = _season_setup(V, hp)
         st = setup["st"]
+        if pre_override and V in pre_override:
+            r_V, mu_V = pre_override[V]
+            setup["pre"] = split_prior(V, hp, r_V)
         x, P = _prior(V, hp, setup)
+        if pre_override and V in pre_override:
+            x[0] = mu_V
         x0, P0 = x.copy(), P.copy()
         # per-game offsets
         cg_h, cg_a = _ctx(st["ctx"], gv, "h"), _ctx(st["ctx"], gv, "a")
@@ -701,6 +709,32 @@ def predict_probs(pred: pd.DataFrame, hp: HP, frozen: bool = False,
 # ---------------------------------------------------------------------------
 # Live in-season API
 # ---------------------------------------------------------------------------
+def split_prior(V: int, hp: HP, pre: pd.DataFrame) -> pd.DataFrame:
+    """An o/d prior (team, o, d, o_sd, d_sd) as the filter's four-component
+    state: o (d) split between shot-rate and finishing parts in the
+    proportion of season V's walk-forward prior covariance, which is rescaled
+    to the given o_sd/d_sd. Tables that already carry so/sd/fo/fd/cov4 pass
+    through."""
+    need = {"so", "sd", "fo", "fd", "cov4"}
+    if need <= set(pre.columns):
+        return pre
+    full = preseason_table(V, hp.ridge, teams=list(pre.team), sp=hp.pre_sp)
+    c4 = np.array(full.cov4.iloc[0])
+    out = pre.copy()
+    # split o (d) between shot and finishing parts in the prior's proportion
+    vso, vfo = c4[0, 0] + c4[0, 2], c4[2, 2] + c4[0, 2]
+    vsd, vfd = c4[1, 1] + c4[1, 3], c4[3, 3] + c4[1, 3]
+    so_share = vso / (vso + vfo)
+    sd_share = vsd / (vsd + vfd)
+    out["so"], out["fo"] = out.o * so_share, out.o * (1 - so_share)
+    out["sd"], out["fd"] = out.d * sd_share, out.d * (1 - sd_share)
+    scale_o = (out.o_sd ** 2) / max(c4[0, 0] + c4[2, 2] + 2 * c4[0, 2], 1e-9)
+    scale_d = (out.d_sd ** 2) / max(c4[1, 1] + c4[3, 3] + 2 * c4[1, 3], 1e-9)
+    s = np.sqrt((scale_o + scale_d) / 2)
+    out["cov4"] = [(c4 * v ** 2).tolist() for v in s]
+    return out
+
+
 class InSeasonFilter:
     """Game-by-game in-season updating from a preseason ratings table.
 
@@ -739,24 +773,8 @@ class InSeasonFilter:
         self.n_games = 0
 
     def _full_prior(self, pre: pd.DataFrame) -> pd.DataFrame:
-        need = {"so", "sd", "fo", "fd", "cov4"}
-        if need <= set(pre.columns):
-            return pre
-        full = preseason_table(self.V, self.hp.ridge, teams=list(pre.team), sp=self.hp.pre_sp)
-        c4 = np.array(full.cov4.iloc[0])
-        out = pre.copy()
-        # split o (d) between shot and finishing parts in the prior's proportion
-        vso, vfo = c4[0, 0] + c4[0, 2], c4[2, 2] + c4[0, 2]
-        vsd, vfd = c4[1, 1] + c4[1, 3], c4[3, 3] + c4[1, 3]
-        so_share = vso / (vso + vfo)
-        sd_share = vsd / (vsd + vfd)
-        out["so"], out["fo"] = out.o * so_share, out.o * (1 - so_share)
-        out["sd"], out["fd"] = out.d * sd_share, out.d * (1 - sd_share)
-        scale_o = (out.o_sd ** 2) / max(c4[0, 0] + c4[2, 2] + 2 * c4[0, 2], 1e-9)
-        scale_d = (out.d_sd ** 2) / max(c4[1, 1] + c4[3, 3] + 2 * c4[1, 3], 1e-9)
-        s = np.sqrt((scale_o + scale_d) / 2)
-        out["cov4"] = [(c4 * v ** 2).tolist() for v in s]
-        return out
+        return split_prior(self.V, self.hp, pre)
+
 
     def _advance(self, date):
         date = pd.Timestamp(date)

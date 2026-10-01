@@ -81,7 +81,8 @@ def schedule(V: int) -> pd.DataFrame:
                          "home": g.home.to_numpy(), "away": g.away.to_numpy()})
 
 
-def game_file_season(V: int, hist: pd.DataFrame, views: list, P_V: dict) -> tuple[pd.DataFrame, dict]:
+def game_file_season(V: int, hist: pd.DataFrame, views: list, P_V: dict,
+                     with_ratings: bool = False) -> tuple:
     """Mirror of freeze.main steps 1-5 for a past season (same order and the
     same leaf functions: solve_ratings, luck_sd_82, points_per_rating,
     league_level_mu, solve_ratings again, game_file). freeze.py's module
@@ -128,7 +129,10 @@ def game_file_season(V: int, hist: pd.DataFrame, views: list, P_V: dict) -> tupl
                 "luck_sd_82": luck, "talent_sd_82": talent,
                 "rating_sd_net_mean": float(np.mean(net_sd)), "mu": P["mu"],
                 "max_target_miss": float((r.target - r.expected).abs().max())})
-    return games.rename(columns={"game_id": "gid"}), log
+    games = games.rename(columns={"game_id": "gid"})
+    if with_ratings:
+        return games, log, r[["team", "o", "d", "o_sd", "d_sd"]].copy()
+    return games, log
 
 
 def main():
