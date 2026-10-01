@@ -112,7 +112,7 @@ python3 -m orr.score                # scorecard against NeurHL
 for t in test_season test_players test_gamemodel test_freeze test_inseason; do python3 -m orr.tests.$t; done
 ```
 
-**Shots matter in-season.** Run `ingest` where the NHL API is reachable, so that results carry shots on goal. These are the backtest results:
+**Shots matter in-season.** Once this branch is on the default branch, `.github/workflows/orr_daily.yml` runs the daily loop on GitHub's runners twice a day, at 13:30 and 21:30 UTC. Each run takes results with shots from the NHL API, runs the ORR 1.1 forecast with NeurHL's committed lineups, updates the scorecard and `docs/orr/`, and commits them back. Locally, run `ingest` where the NHL API is reachable, so that results carry shots on goal. These are the backtest results:
 
 | Updated on | ORR 1.1 | NeurHL-G | Verdict |
 |---|---|---|---|

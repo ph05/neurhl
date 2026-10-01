@@ -91,6 +91,27 @@ Each item's code, logs and every configuration tried are in `orr/experiments/<ID
 - **Subset with known lineups.** On the 79% of games where both lineups and starters are known, the difference is −0.0016.
 - **Sensitivity.** With 20,000 bootstrap resamples instead of 2,000, the CIs are −0.00257 to −0.00004 (goals and shots) and −0.00245 to +0.00005 (goals only), so the verdicts do not change.
 
+**X3r: the revision of X3, confirmed on untouched seasons.** X3 failed only on its goals-only arm. The revision (pre-registered in `PLAN_1_1.md`, commit `6e6b20a`, before it ran) did not loosen X3's rule or re-test on the gate games. It changed two things.
+
+- **A. Shots for the live loop.** A daily GitHub Action (`.github/workflows/orr_daily.yml`) fetches results with shots from the NHL API, which this build container cannot reach. It then runs the ORR 1.1 forecast with NeurHL's committed lineups and rebuilds `docs/orr/`. The live loop then runs the goals-and-shots variant. Scheduled jobs run from the default branch, so this applies once the branch is merged.
+- **B. Confirmation on data no experiment had used.** The seasons are 2010-11 and 2020-21 (2,098 games, all with box-score lineups). Both arms start from the team-history prior, since neither season has market lines. The test ran once (`backtest/inseason_bt_x3r.py`, `output/backtest/inseason_bt_x3r.json`).
+
+| Log loss | ORR 1.1 | ORR 1.0 | Difference (95% CI) |
+|---|---|---|---|
+| Goals and shots, pooled (primary) | 0.67019 | 0.67250 | **−0.00232 (−0.00438 to −0.00019)** |
+| Goals only, pooled | 0.67161 | 0.67391 | **−0.00230 (−0.00436 to −0.00022)** |
+| 2010-11 | 0.68164 | 0.68319 | −0.00156 (−0.00410 to +0.00125) |
+| 2020-21, goals and shots | 0.65396 | 0.65735 | −0.00339 (−0.00690 to +0.00005) |
+| Combined with X3's gate result (inverse variance; reported, not decisive) | | | −0.00156 (−0.00265 to −0.00048) |
+
+**X3r is accepted under its pre-registered rule, so ORR 1.1 is confirmed rather than shipped on the fallback alone.** Caveats:
+
+- **The revision came after the failure.** It was added after X3's result, so it is one more test. Its data, though, were untouched by every experiment, and the rule was fixed before it ran.
+- **Neither season is significant alone.**
+- **2010-11 used goals only in both variants.** The walk-forward shot model has no earlier season to fit from there, so both variants update on goals alone.
+- **Shared tuning.** The filter's own hyperparameters were tuned on seasons that include 2010-11. That applies equally to both arms, but it means the seasons were not wholly unseen by ORR as a system.
+- **Post-game starter label.** Known starters remain the most-ice-time goalie, as in X1.
+
 **What failed, stated plainly.**
 
 - **No gain from the other in-season items.** Better hyperparameters (M1), stacking with Elo (M2) and a starter-choice model (L1) add nothing measurable. The goals-only gap to NeurHL-G is not a tuning problem. Lineup information (X1) is what narrows it, from 0.0033 (significant) to 0.0021 (not significant).
@@ -101,7 +122,7 @@ Each item's code, logs and every configuration tried are in `orr/experiments/<ID
   - starters alone: −0.00069, CI −0.00143 to +0.00003.
 
   The backtest's "known starter" is the goalie with the most ice time, which is a post-game label (a pre-existing ORR convention). The reviewer bounded its effect on the 10% of games with an in-game goalie change. Treating those starters as unknown gives −0.00099 (CI −0.00224 to +0.00021), so the label does not inflate the result, but it shows how fragile it is.
-- **The live gain is not established at 95%.** Live results currently carry no shots, so ORR 1.1's live loop runs goals only, the variant whose CI includes 0. Its live lineups also come from pregame lineup files that are sometimes wrong, where the backtest used box scores. Expect a smaller live gain than the backtest's.
+- **The live gain on goals alone was not established at 95% on the gate games.** It was on the untouched seasons (X3r), and the daily GitHub Action supplies shots once merged. Its live lineups also come from pregame lineup files that are sometimes wrong, where the backtest used box scores. Expect a smaller live gain than the backtest's.
 
 **Adoption.**
 

@@ -1,0 +1,75 @@
+# ORR daily in-season loop (orr/PLAN_1_1.md, item X3r part A).
+# GitHub's runners can reach the NHL API, which the project's build container cannot, so this
+# job is what puts shots on goal into the in-season update: ORR 1.1's live loop then runs the
+# goals-and-shots variant, the one that passed its pre-registered test.
+# Each run: results through yesterday (with shots) -> today's ORR 1.1 forecast with NeurHL's
+# committed lineup files -> scorecard -> GitHub Pages files in docs/orr/ -> commit.
+# A forecast counts for a game only if pushed before that game's scheduled puck drop.
+name: orr-daily
+
+on:
+  schedule:
+    - cron: "30 13 * * *"   # morning: last night's results, first forecast before any afternoon game
+    - cron: "30 21 * * *"   # evening: refresh with posted lineups before evening puck drops
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: orr-daily
+  cancel-in-progress: false
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # the pre-cutoff snapshot is read from git history
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install numpy "pandas>=2" pyarrow scipy scikit-learn requests
+
+      - name: Cache box scores and snapshot
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/raw/fastrhockey
+            orr/cache
+          key: orr-inputs-${{ hashFiles('orr/output/freeze_2027/manifest_2027.json', 'orr/config.py') }}
+
+      - name: Inputs
+        run: |
+          python -m orr.fetch_boxes
+          python -m orr.snapshot
+
+      - name: Results with shots (NHL API), today's forecast, scorecard, pages
+        run: |
+          set -euo pipefail
+          today="$(date -u +%F)"
+          python -m orr.ingest --through "$(date -u -d yesterday +%F)"
+          python -m orr.inseason --date "$today" --lineup-dir neurhl/output/live/2027
+          python -m orr.score
+          python -m orr.site.build_orr
+          python -m orr.site.build_dashboard
+          echo "date=$today" >> "$GITHUB_ENV"
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "orr-daily"
+          git config user.email "orr-daily@users.noreply.github.com"
+          git add orr/output/live orr/output/scorecard_2027.json docs/orr
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          git commit -m "ORR live: results and ORR 1.1 forecast ${date} ($(date -u +%H:%MZ))"
+          for i in 1 2 3 4; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            sleep $((2 ** i))
+          done
+          exit 1

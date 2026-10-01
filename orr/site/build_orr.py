@@ -93,6 +93,11 @@ def evidence() -> list:
             x = a["d_shipped_vs_neurhl_g"]
             rows.append(_ev("In-season ORR (goals only, as live until results carry shots) vs NeurHL-G stack",
                             "2018-19 to 2023-24 (excl. 2020-21)", a["n"], x["diff"], x.get("se"), x["ci95"]))
+    xr = _rd(BT / "inseason_bt_x3r.json")
+    if xr:
+        d = xr["variants"]["goals_shots"]["pooled"]["d"]
+        rows.append(_ev("ORR 1.1 (lineups) vs ORR 1.0, log loss per game, seasons no experiment used",
+                        "2010-11 and 2020-21", xr["n"], d["diff"], d.get("se"), d["ci95"]))
     gb = _rd(BT / "gamefile_bt.json")
     if gb:
         v = gb["variants"]["mkt+td (shipped)"]["by_season"]
