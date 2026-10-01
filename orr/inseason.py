@@ -65,6 +65,11 @@ LIVE = C.OUT / "live"
 
 # model versions: ORR 1.1 = 1.0 + the accepted pre-registered item X1
 MODELS = {
+    "1.5": {"version": "ORR 1.5", "past_starters": True, "lineups": True, "player_update": True,
+            "box_first": True, "goalie_update": True, "player_calibration": True,
+            "standings_drift": True, "start_share_update": True, "absence": True, "standings_sharp": True, "sog_dist": True,
+            "accepted_items": ["X1", "1.2: in-season skater rates", "1.3: box-score lineups, goalie talent",
+                               "1.4: standings drift, start shares", "1.5: standings sharpness, shot distributions (per params)"]},
     "1.4": {"version": "ORR 1.4", "past_starters": True, "lineups": True, "player_update": True,
             "box_first": True, "goalie_update": True, "player_calibration": True,
             "standings_drift": True, "start_share_update": True, "absence": True,
@@ -80,7 +85,7 @@ MODELS = {
     "1.0": {"version": "ORR 1.0", "past_starters": False, "lineups": False,
             "accepted_items": []},
 }
-DEFAULT_MODEL = "1.4"
+DEFAULT_MODEL = "1.5"
 
 
 def _sha(p: Path) -> str:
@@ -288,13 +293,13 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
         model=cfg["version"], created_utc=created)
 
     players_out = player_lines(fz, games_out, day, update_rates=bool(cfg.get("player_update")),
-                               calibrate=bool(cfg.get("player_calibration")))
+                               calibrate=bool(cfg.get("player_calibration")), sog_dist=bool(cfg.get("sog_dist")))
 
     # 3. re-simulate the rest of the season from the current standings
     done = res[["game_id", "home_g", "away_g", "extra"]]
     left = 1.0 - len(done) / len(sch)
     rho = float(np.clip((cur.od_cov / (cur.o_sd * cur.d_sd)).mean(), -0.95, 0.95))
-    sp = standings_params() if cfg.get("standings_drift") or cfg.get("absence") else {}
+    sp = standings_params() if cfg.get("standings_drift") or cfg.get("absence") or cfg.get("standings_sharp") else {}
     k_drift = float(sp.get("drift_k", 1.0)) if cfg.get("standings_drift") else 1.0
     sim_adj, n_absent = adj, 0
     if cfg.get("absence") and sp.get("absence") and lu_sk is not None and len(lu_sk) and len(res):
@@ -308,7 +313,11 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
                                  LU.league_xg_pg(C.TARGET_SEASON), int(sp.get("absence_n", 10)))
         sim_adj = LU.apply_team_offsets(adj, sch, off)
         n_absent = int(off.n_out.sum()) if len(off) else 0
-    sim = S.simulate(sch, cur, model, n_sims=sims, seed=seed, completed=done,
+    sim_r = cur
+    m_sd = float(sp.get("sd_mult", 1.0)) if cfg.get("standings_sharp") else 1.0     # ORR 1.5
+    if m_sd != 1.0:
+        sim_r = cur.assign(o_sd=cur.o_sd * m_sd, d_sd=cur.d_sd * m_sd, od_cov=cur.od_cov * m_sd ** 2)
+    sim = S.simulate(sch, sim_r, model, n_sims=sims, seed=seed, completed=done,
                      game_adj=sim_adj, drift_sd=fz.get("drift_sd", 0.05) * np.sqrt(left) * k_drift, rho_od=rho)
     standings = S.summarise(sim)
 
@@ -323,6 +332,7 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
                 "n_results": int(len(res)), "sims": sims, "seed": seed,
                 "missing_results_before_date": sorted(map(int, set(sch[sch.date < day].game_id) - set(res.game_id))),
                 "rho_od": rho, "sd_anchor": k_sd, "home_ice": P["h"],
+                "orr_1_5": {"sd_mult": m_sd},
                 "orr_1_4": {"drift_k": k_drift, "absent_players": n_absent,
                             "start_shares_updated": bool(cfg.get("start_share_update"))},
                 "model": cfg["version"],
@@ -346,7 +356,7 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
 
 
 def player_lines(fz: dict, games: pd.DataFrame, day: pd.Timestamp, update_rates: bool = False,
-                 calibrate: bool = False) -> pd.DataFrame:
+                 calibrate: bool = False, sog_dist: bool = False) -> pd.DataFrame:
     """Per-game lines for every skater likely to dress: expected goals, points
     and shots, P(at least one goal) and P(at least one point).
 
@@ -355,6 +365,7 @@ def player_lines(fz: dict, games: pd.DataFrame, day: pd.Timestamp, update_rates:
     to score in THIS game relative to its season average, and multiplied by
     the probability that he dresses (zero while a known absence lasts)."""
     sk = pd.read_csv(FREEZE / "skaters_2027.csv")
+    sog_r = PU.load_sog_r() if sog_dist else None       # ORR 1.5: negative binomial if adopted
     # season-average expected REGULATION goals per game (the units of lam)
     gz = pd.read_csv(FREEZE / "games_2027.csv")
     base = pd.concat([pd.Series(gz.exp_reg_goals_home.to_numpy(), index=gz.home),
@@ -398,10 +409,11 @@ def player_lines(fz: dict, games: pd.DataFrame, day: pd.Timestamp, update_rates:
                          p_dress=p_dress, exp_goals=eg * p_dress, exp_points=ep * p_dress,
                          exp_sog=es * p_dress,
                          p_goal=p_dress * (1 - np.exp(-eg)), p_point=p_dress * (1 - np.exp(-ep)),
+                         **{f"p_sog{k}": p_dress * PU.p_shots_ge(es.to_numpy(), k, sog_r) for k in (2, 3, 4)},
                          toi_pg=s.toi / s.gp.clip(lower=1))
             rows.append(s[s.p_dress > 0.05][["game_id", "team", "opponent", "player_id", "name", "pos",
                                              "p_dress", "toi_pg", "exp_goals", "exp_points", "exp_sog",
-                                             "p_goal", "p_point"]])
+                                             "p_goal", "p_point", "p_sog2", "p_sog3", "p_sog4"]])
     out = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
     cal = PU.load_calibration() if calibrate else None      # ORR 1.3: only if the backtest adopted it
     if cal is not None and len(out):

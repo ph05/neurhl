@@ -2,5 +2,7 @@
  "drift_k": 0.5,
  "absence": false,
  "absence_n": 20,
- "source": "orr/backtest/standings_inseason_bt.py"
+ "source": "orr/backtest/standings_inseason_bt.py",
+ "sd_mult": 1.0,
+ "sd_mult_tuned": 1.0
 }

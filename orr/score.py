@@ -191,6 +191,69 @@ def score_games(res: pd.DataFrame) -> dict:
     return out
 
 
+def eligible_probs(res: pd.DataFrame) -> pd.DataFrame:
+    """ORR 1.5: one row per (model, game) with the probability each forecast
+    gave a game it is eligible for: preseason files published before the
+    game's puck drop, ORR's latest daily forecast created before it, and
+    NeurHL's pregame forecasts. Columns: model, game_id, date, p, y."""
+    y = res.set_index("game_id").home_win
+    dates = res.set_index("game_id").date
+    rows = []
+    for name, (path, col, pub) in GAME_FILES.items():
+        if not Path(path).exists():
+            continue
+        g = pd.read_csv(path).set_index("game_id")
+        published = _published(name, pub)
+        for gid in y.index.intersection(g.index):
+            if published is None or published.tz_convert(None) < _game_deadline(gid, dates[gid]):
+                rows.append((name, gid, dates[gid], float(g.at[gid, col]), int(y[gid])))
+    pre = []
+    for f in sorted((C.ROOT / "neurhl/output/live/2027").glob("*/pregame_*.csv")):
+        if not f.name.endswith(("_players.csv", "_lineups.csv")):
+            pre.append(pd.read_csv(f))
+    if pre:
+        d = pd.concat(pre).drop_duplicates("game_id", keep="last").set_index("game_id")
+        for col, name in (("p_home_win_neurhl_g", "neurhl_G_pregame"), ("p_home_win_neurhl_h", "neurhl_H_pregame"),
+                          ("p_home_win_elo", "elo_pregame")):
+            for gid in y.index.intersection(d.index):
+                if pd.notna(d.at[gid, col]):
+                    rows.append((name, gid, dates[gid], float(d.at[gid, col]), int(y[gid])))
+    hl = C.OUT / "live"
+    lf = sorted(hl.glob("*/games_*.csv")) if hl.exists() else []
+    if lf:
+        d = pd.concat([pd.read_csv(f) for f in lf])
+        ok = pd.to_datetime(d.created_utc).dt.tz_convert(None) < pd.Series(
+            [_game_deadline(i, x) for i, x in zip(d.game_id, d.date)], index=d.index)
+        d = d[ok].sort_values("created_utc").drop_duplicates("game_id", keep="last").set_index("game_id")
+        for gid in y.index.intersection(d.index):
+            rows.append(("orr_inseason", gid, dates[gid], float(d.at[gid, "p_home_win"]), int(y[gid])))
+    return pd.DataFrame(rows, columns=["model", "game_id", "date", "p", "y"])
+
+
+def running_by_date(ep: pd.DataFrame) -> dict:
+    """Cumulative log loss of each model by date, on the games it is eligible for."""
+    if not len(ep):
+        return {}
+    ep = ep.assign(ll=-(ep.y * np.log(ep.p.clip(1e-6, 1 - 1e-6)) + (1 - ep.y) * np.log((1 - ep.p).clip(1e-6, 1 - 1e-6))))
+    out = {}
+    for m, x in ep.groupby("model"):
+        x = x.sort_values("date")
+        by = x.groupby("date").agg(n=("ll", "size"), s=("ll", "sum"))
+        out[m] = [{"date": str(dt), "n": int(n), "log_loss": float(s / n)}
+                  for dt, n, s in zip(by.index, by.n.cumsum(), by.s.cumsum())]
+    return out
+
+
+def reliability(ep: pd.DataFrame, model: str = "orr_inseason") -> list:
+    x = ep[ep.model == model]
+    if not len(x):
+        return []
+    bins = [0, 0.35, 0.45, 0.55, 0.65, 1.0]
+    x = x.assign(bin=pd.cut(x.p, bins, include_lowest=True))
+    return [{"bin": f"{iv.left:.2f}-{iv.right:.2f}", "n": int(len(g)), "mean_p": float(g.p.mean()),
+             "home_win_rate": float(g.y.mean())} for iv, g in x.groupby("bin", observed=True)]
+
+
 def _team_points_so_far(res):
     rows = []
     for side, other, sign in (("home", "away", 1), ("away", "home", -1)):
@@ -260,8 +323,10 @@ def main():
     ap.add_argument("--out", default=str(C.OUT / "scorecard_2027.json"))
     a = ap.parse_args()
     res = load_results(a.results)
+    ep = eligible_probs(res)
     card = {"through": str(res.date.max()), "games_played": int(len(res)),
             "games": score_games(res), "teams_interim": score_teams_interim(res),
+            "running": running_by_date(ep), "reliability": reliability(ep),
             "teams_final": score_teams_final(res)}
     Path(a.out).write_text(json.dumps(card, indent=1))
     g = pd.DataFrame(card["games"]).T

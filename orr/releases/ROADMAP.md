@@ -2,6 +2,15 @@
 
 A version ships every cycle. Each cycle opens with a brainstorm, and every feature considered there is planned into the next version. A feature that fails its backtest still ships, but behind a switch with the result documented; it is not silently dropped. Release notes are in this folder.
 
+## 1.6 (planned): the full picture
+
+Brainstorm, held after 1.5 shipped. Every item is planned into 1.6:
+
+1. **Upstream NeurHL live files in the scorer.** Score NeurHL's pregame forecasts from upstream's committed files (`git archive origin/main neurhl/output/live`), not this branch's stale checkout, so the running table is complete. Applies to `score.py --neurhl-live` and the daily GitHub Action.
+2. **In-season goalie table.** The website's goalie table gains season-to-date shots against, save %, the updated save talent (1.3) and the updated start share (1.4) beside the preseason projection.
+3. **Remaining strength of schedule.** Each team's average opponent rating over its remaining games, from the current filter ratings, in the standings output and the website's standings table. Test: a unit test that it equals the mean of the opponents' net ratings.
+4. **Rest-of-season skater projections file.** A daily `players_ros_<date>.csv`: season-to-date counts, plus rest-of-season goals, assists and points from the updated rates, times expected remaining games (dress probability times remaining team games), with 80% intervals. Linked from the website.
+
 ## 1.5 (planned): calibration everywhere
 
 Brainstorm, held after 1.4 shipped. Every item is planned into 1.5:

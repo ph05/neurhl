@@ -63,8 +63,8 @@ def tonight(pre: pd.DataFrame, elo: pd.Series) -> dict:
                       "elo": _r(elo.get(r.game_id), 4), "ot": _r(r.p_ot, 4),
                       "score": [_r(r.exp_goals_home, 2), _r(r.exp_goals_away, 2)],
                       "sog": [_r(sog.get(r.home), 1), _r(sog.get(r.away), 1)],
-                      "top": [[x.name, x.team, _r(x.exp_sog / max(x.p_dress, 1e-9), 1), _r(x.p_goal, 3), _r(x.p_point, 3)]
-                              for x in top.itertuples()]})
+                      "top": [[x.name, x.team, _r(x.exp_sog / max(x.p_dress, 1e-9), 1), _r(x.p_goal, 3), _r(x.p_point, 3),
+                               _r(getattr(x, "p_sog3", None), 3)] for x in top.itertuples()]})
     games.sort(key=lambda x: x["start"] or "")
     through = run.get("results_through")
     return {"date": d.name, "through": through[:10] if through else None, "games": games}
@@ -231,9 +231,30 @@ def main():
         for tm in hist:
             hist[tm].append(_r(sd.get(tm)))
     odds_history = {"dates": hist_dates, "labels": ["Preseason"] + hist_dates[1:], "teams": hist}
+    # ORR 1.5: biggest movers between the last two committed forecasts, with the games between them
+    movers = []
+    if len(hist_dates) >= 2:
+        d0, d1 = hist_dates[-2], hist_dates[-1]
+        rr = pd.read_csv(rp) if rp.exists() else pd.DataFrame(columns=["date", "home", "away", "home_g", "away_g", "last_period"])
+        between = rr[(rr.date >= d0) & (rr.date < d1)]
+        for tm, v in hist.items():
+            if v[-1] is None or v[-2] is None:
+                continue
+            gs = []
+            for x in between.itertuples():
+                if tm in (x.home, x.away):
+                    us, them = (x.home_g, x.away_g) if tm == x.home else (x.away_g, x.home_g)
+                    opp = x.away if tm == x.home else "@" + x.home
+                    res_ = "W" if us > them else ("OTL" if x.last_period != "REG" else "L")
+                    gs.append(f"{res_} {us}-{them} {opp if tm == x.home else opp}")
+            movers.append({"team": tm, "from": v[-2], "to": v[-1], "delta": round(v[-1] - v[-2], 1), "games": "; ".join(gs)})
+        movers.sort(key=lambda m: -abs(m["delta"]))
+        movers = {"from": "Preseason" if d0 == hist_dates[0] else d0, "to": d1, "rows": movers[:8]}
     data = {"meta": {"release": f"{MODELS[DEFAULT_MODEL]['version']} in-season (preseason file: ORR 1.0)", "cutoff": "2026-09-29 17:00 ET", "draws": 400, "sims": st.get("sims", 40000),
                      "tests": "7/7"},
-            "live": {"as_of": card.get("through", "")[:10], "games_played": card.get("games_played", 0), "rows": live_rows},
+            "live": {"as_of": card.get("through", "")[:10], "games_played": card.get("games_played", 0), "rows": live_rows,
+                     "running": card.get("running", {}), "reliability": card.get("reliability", [])},
+            "movers": movers,
             "teams": teams, "teams_x": tx, "tonight": tonight(g.set_index("game_id").p_home_win, elo),
             "games": games, "skaters_x": skx, "has_td": td is not None, "odds_history": odds_history, "goalies": gx, "evidence": evidence(),
             "sha256": {f"orr/output/freeze_2027/{f}": hashlib.sha256((F / f).read_bytes()).hexdigest() for f in HASHED}}

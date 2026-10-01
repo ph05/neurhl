@@ -2,6 +2,12 @@
 
 ORR (Odds, Ratings & Rosters) is versioned by what it forecasts in-season. The scored 2026-27 preseason forecast (`orr/output/freeze_2027/`, ORR 1.0) is frozen; later versions change the daily in-season forecasts from the day they ship, and each forecast counts only for games after its publication. Release notes with evidence are in `orr/releases/`.
 
+## 1.5 (2026-10-01): calibration everywhere
+
+- **Shot distributions.** Player lines publish P(≥2), P(≥3) and P(≥4) shots on goal from a negative binomial (r = 16.6) around the updated shot rates. It is slightly better than Poisson on held-out 2021-23 (mean log loss 0.48632 vs 0.48653) and is adopted.
+- **Standings sharpness.** A multiplier on in-season rating uncertainty was tuned; it chose 1.0, the current setting, so there is no change. Tuning-season coverage is 0.816; 1.4's 0.86 test coverage looks like sampling variation.
+- **Live accuracy panel** (running log loss by date on eligible games, plus a reliability table) and **biggest movers** on the website.
+
 ## 1.4 (2026-10-01): the standings race
 
 - **In-season playoff odds backtested for the first time** (2021-23, run once). CRPS of final points is 3.84 against 4.99 for the preseason forecast; MAE is 5.47 against 7.07 for points pace. The rest-of-season drift multiplier is tuned (0.5; the surface is flat). 80% coverage is 0.86, slightly wide.
