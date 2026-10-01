@@ -55,9 +55,10 @@ def data() -> dict:
     live = {}
     lf = sorted((C.OUT / "live").glob("*/games_*.csv"))
     if lf:
-        from orr.score import _deadline
+        from orr.score import _game_deadline
         ld = pd.concat([pd.read_csv(f) for f in lf])
-        ld = ld[pd.to_datetime(ld.created_utc).dt.tz_convert(None) < pd.to_datetime(ld.date).map(_deadline)]
+        ld = ld[pd.to_datetime(ld.created_utc).dt.tz_convert(None)
+                < pd.Series([_game_deadline(i, x) for i, x in zip(ld.game_id, ld.date)], index=ld.index)]
         live = ld.sort_values("created_utc").drop_duplicates("game_id").set_index("game_id").p_home_win.to_dict()
     games = [{"id": int(r.game_id), "d": str(r.date), "h": r.home, "a": r.away, "p": _r(r.p_home_win, 3),
               "live": _r(live.get(r.game_id), 3),
