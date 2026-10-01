@@ -2,6 +2,14 @@
 
 ORR (Odds, Ratings & Rosters) is versioned by what it forecasts in-season. The scored 2026-27 preseason forecast (`orr/output/freeze_2027/`, ORR 1.0) is frozen; later versions change the daily in-season forecasts from the day they ship, and each forecast counts only for games after its publication. Release notes with evidence are in `orr/releases/`.
 
+## 1.6 (2026-10-01): the full picture
+
+- **Upstream NeurHL in the scorer.** `orr.score --neurhl-live` scores NeurHL's committed pregame forecasts; the daily Action uses it.
+- **In-season goalie table** on the website: so-far GP, SA and SV%, with preseason and updated talent and start share.
+- **Remaining strength of schedule** in the daily standings file and the website.
+- **Daily rest-of-season skater file** (`players_ros_<date>.csv`) with 80% intervals for rest-of-season points.
+- **Fix:** teams with no starts yet keep their preseason goalie start shares.
+
 ## 1.5 (2026-10-01): calibration everywhere
 
 - **Shot distributions.** Player lines publish P(≥2), P(≥3) and P(≥4) shots on goal from a negative binomial (r = 16.6) around the updated shot rates. It is slightly better than Poisson on held-out 2021-23 (mean log loss 0.48632 vs 0.48653) and is adopted.

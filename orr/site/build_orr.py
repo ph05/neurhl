@@ -208,9 +208,40 @@ def main():
             _r(r.pim), _r(r.hits), _r(r.blk), _r(100 * r.fow / f) if f > 50 else None]
            + ([_r(td["gp"][i], 0), _r(td["p"][i], 0), _r(td["ros"][i])] if td is not None else [])
            for i, (r, f) in enumerate(zip(s.itertuples(), fo))]
-    gx = [[r.name, r.team, _r(r.starts), _r(r.wins), _r(r.sa), _r(r.ga), _r(r.sv_pct, 4),
-           _r(r.ga / r.gp, 2) if r.gp > 0 else None, _r(r.gsax)]
-          for r in gl[gl.starts >= 1].itertuples()]
+    # ORR 1.6: in-season goalie columns (box scores, updated talent and start share)
+    gtd, tal0, tal1, share1 = None, None, None, None
+    if bp.exists():
+        bx = pd.read_csv(bp)
+        bx = bx[(bx.pos == "G") & bx.shots_against.notna()]
+        if len(bx):
+            from orr import structural as ST
+            from orr.inseason import update_start_shares_live
+            gtd = bx.groupby("player_id").agg(gp=("game_id", "nunique"), sa=("shots_against", "sum"),
+                                             ga=("goals_against", "sum"))
+            day = pd.Timestamp.now("UTC").tz_convert(None).normalize() + pd.Timedelta(days=1)
+            tal0, tal1 = ST.goalie_talent_2027(), ST.goalie_talent_live(day)
+            share1 = update_start_shares_live(gl[["player_id", "team", "start_share"]].assign(p_present=1.0), day) \
+                .set_index("player_id").start_share
+    gx = []
+    for r in gl[gl.starts >= 1].itertuples():
+        row = [r.name, r.team, _r(r.starts), _r(r.wins), _r(r.sa), _r(r.ga), _r(r.sv_pct, 4),
+               _r(r.ga / r.gp, 2) if r.gp > 0 else None, _r(r.gsax)]
+        if gtd is not None:
+            gq = gtd.reindex([r.player_id]).iloc[0]
+            row += [_r(gq.gp, 0), _r(gq.sa, 0), _r(1 - gq.ga / gq.sa, 4) if gq.sa > 0 else None,
+                    _r(100 * tal0.get(r.player_id, np.nan), 2), _r(100 * tal1.get(r.player_id, np.nan), 2),
+                    _r(r.start_share, 3), _r(share1.get(r.player_id), 3)]
+        gx.append(row)
+    # ORR 1.6: remaining strength of schedule and the latest daily files
+    sos, daily_files = {}, []
+    lf = sorted((C.OUT / "live").glob("*/standings_*.csv"))
+    if lf:
+        ls = pd.read_csv(lf[-1])
+        if "sos_remaining" in ls:
+            sos = {r.team: _r(100 * r.sos_remaining, 1) for r in ls.itertuples()}
+        daily_files = [str(f.relative_to(C.ROOT)) for f in sorted(lf[-1].parent.glob("*.csv"))]
+    for row in tx:
+        row["sos"] = sos.get(row["ab"])
 
     card = _rd(C.OUT / "scorecard_2027.json") or {}
     names = {"orr_preseason": "ORR preseason", "orr_inseason": "ORR daily",
@@ -257,6 +288,7 @@ def main():
             "movers": movers,
             "teams": teams, "teams_x": tx, "tonight": tonight(g.set_index("game_id").p_home_win, elo),
             "games": games, "skaters_x": skx, "has_td": td is not None, "odds_history": odds_history, "goalies": gx, "evidence": evidence(),
+            "has_gtd": gtd is not None, "daily_files": daily_files,
             "sha256": {f"orr/output/freeze_2027/{f}": hashlib.sha256((F / f).read_bytes()).hexdigest() for f in HASHED}}
     blob = json.dumps(data, separators=(",", ":"), default=lambda o: None if isinstance(o, float) and np.isnan(o) else o)
     html = (SITE / "orr_template.html").read_text().replace("__ORR_DATA__", blob.replace("</", "<\\/"))

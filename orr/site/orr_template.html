@@ -188,7 +188,9 @@
   Object.keys(divs).sort().forEach((d, i) => table($("div_" + i), [
     { k: "name", h: "Team", l: 1 }, { k: "pts", h: "PTS", f: f1 }, { k: "p10", h: "P10" }, { k: "p50", h: "P50" }, { k: "p90", h: "P90" },
     { k: "w", h: "W", f: f1 }, { k: "l", h: "L", f: f1 }, { k: "otl", h: "OTL", f: f1 }, { k: "diff", h: "DIFF", f: f0, t: "Goals for minus against" },
-    { k: "po", h: "PO%", f: f1 }, { k: "howe", h: "HOWE", f: f1, t: "HOWE projected points" }
+    { k: "po", h: "PO%", f: f1 }, { k: "howe", h: "HOWE", f: f1, t: "HOWE projected points" },
+    { k: "sos", h: "SOS left", f: x => x == null ? "" : (x > 0 ? "+" : "") + Number(x).toFixed(1),
+      t: "Remaining strength of schedule: opponents' mean net rating in the games left, x100 (log goal-rate units). Higher is harder. From the latest daily run." }
   ], divs[d], { sort: "pts" }));
 
   table($("t_odds"), [
@@ -304,10 +306,16 @@
   ["s_q", "s_team", "s_pos", "s_gp", "s_all"].forEach(id => $(id).oninput = () => st.redraw(ssel()));
 
   // ---- goalies
-  const GL = (D.goalies || []).map(r => ({ name: r[0], team: r[1], gs: r[2], w: r[3], sa: r[4], ga: r[5], sv: r[6], gaa: r[7], gsax: r[8] }));
+  const GL = (D.goalies || []).map(r => ({ name: r[0], team: r[1], gs: r[2], w: r[3], sa: r[4], ga: r[5], sv: r[6], gaa: r[7], gsax: r[8],
+    gptd: r[9], satd: r[10], svtd: r[11], t0: r[12], t1: r[13], sh0: r[14], sh1: r[15] }));
   table($("t_gl"), [{ k: "name", h: "Goalie", l: 1 }, { k: "team", h: "Team", l: 1 }, { k: "gs", h: "GS", f: f1 }, { k: "w", h: "W", f: f1 },
     { k: "sa", h: "SA", f: f0 }, { k: "ga", h: "GA", f: f0 }, { k: "sv", h: "SV%", f: x => x == null ? "" : Number(x).toFixed(3).replace(/^0/, "") },
-    { k: "gaa", h: "GAA", f: x => x == null ? "" : Number(x).toFixed(2) }, { k: "gsax", h: "GSAx", f: f1, t: "Goals saved above expected" }], GL, { sort: "gs" });
+    { k: "gaa", h: "GAA", f: x => x == null ? "" : Number(x).toFixed(2) }, { k: "gsax", h: "GSAx", f: f1, t: "Goals saved above expected" }].concat(D.has_gtd ? [
+      { k: "gptd", h: "GP so far", f: f0 }, { k: "satd", h: "SA so far", f: f0 },
+      { k: "svtd", h: "SV% so far", f: x => x == null ? "" : Number(x).toFixed(3).replace(/^0/, "") },
+      { k: "t0", h: "Talent pre", f: x => x == null ? "" : Number(x).toFixed(2), t: "Save talent: goals saved above average per 100 shots, preseason" },
+      { k: "t1", h: "Talent now", f: x => x == null ? "" : Number(x).toFixed(2), t: "Save talent updated with this season (ORR 1.3)" },
+      { k: "sh0", h: "Share pre", f: pc }, { k: "sh1", h: "Share now", f: pc, t: "Start share updated with this season (ORR 1.4)" }] : []), GL, { sort: "gs" });
 
   // ---- scoring and evidence
   const L = D.live || {};
@@ -336,7 +344,9 @@
 
   // ---- files
   const sha = D.sha256 || {};
-  $("files_list").innerHTML = "<p>Season forecast files and their SHA-256 hashes. All inputs, code and committed forecasts are in the repository.</p><div class=\"wrap\"><table><thead><tr><th class=\"l\">File</th><th class=\"l\">SHA-256</th></tr></thead><tbody>" +
+  const DF = D.daily_files || [];
+  const dfl = DF.length ? `<p>Latest daily run: ${DF.map(f => `<a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/${f}">${esc(f.split("/").pop())}</a>`).join(" · ")}</p>` : "";
+  $("files_list").innerHTML = dfl + "<p>Season forecast files and their SHA-256 hashes. All inputs, code and committed forecasts are in the repository.</p><div class=\"wrap\"><table><thead><tr><th class=\"l\">File</th><th class=\"l\">SHA-256</th></tr></thead><tbody>" +
     Object.entries(sha).map(([f, h]) => `<tr><td class="l"><a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/${f}">${esc(f)}</a></td><td class="l"><code>${h}</code></td></tr>`).join("") + "</tbody></table></div>";
 })();
 </script>
