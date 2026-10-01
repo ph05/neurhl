@@ -98,6 +98,12 @@ def evidence() -> list:
         d = xr["variants"]["goals_shots"]["pooled"]["d"]
         rows.append(_ev("ORR 1.1 (lineups) vs ORR 1.0, log loss per game, seasons no experiment used",
                         "2010-11 and 2020-21", xr["n"], d["diff"], d.get("se"), d["ci95"]))
+    pu = _rd(BT / "player_update_bt.json")
+    if pu:
+        t = pu["test"]
+        rows.append({"c": "In-season skater rates vs preseason rates, rest-of-season points MAE (1.2)",
+                     "w": "2021-22 to 2022-23", "n": t["n"], "d": f"{t['d']['diff']:+.3f}",
+                     "ci": f"{t['d']['ci95'][0]:+.3f} to {t['d']['ci95'][1]:+.3f}", "p": "<0.0001"})
     gb = _rd(BT / "gamefile_bt.json")
     if gb:
         v = gb["variants"]["mkt+td (shipped)"]["by_season"]
@@ -186,7 +192,8 @@ def main():
         ap = v.get("after_publication", v) if k != "orr_inseason" else v
         if ap and ap.get("n"):
             live_rows.append({"name": names[k], "n": ap["n"], "log_loss": ap["log_loss"]})
-    data = {"meta": {"release": "ORR 1.0", "cutoff": "2026-09-29 17:00 ET", "draws": 400, "sims": st.get("sims", 40000),
+    from orr.inseason import DEFAULT_MODEL, MODELS
+    data = {"meta": {"release": f"{MODELS[DEFAULT_MODEL]['version']} in-season (preseason file: ORR 1.0)", "cutoff": "2026-09-29 17:00 ET", "draws": 400, "sims": st.get("sims", 40000),
                      "tests": "7/7"},
             "live": {"as_of": card.get("through", "")[:10], "games_played": card.get("games_played", 0), "rows": live_rows},
             "teams": teams, "teams_x": tx, "tonight": tonight(g.set_index("game_id").p_home_win, elo),

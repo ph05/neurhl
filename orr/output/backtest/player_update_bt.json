@@ -1,0 +1,341 @@
+{
+ "protocol": "Walk-forward backtest of in-season skater rate updating (ORR 1.2, orr/player_update.py).\n\nFor each season V, the prior is ORR's strict preseason projection\n(players_bt.run_season(V, 'strict'): first-10-game rosters, nothing else\nfrom V). At checkpoints after 25%, 50% and 75% of the season's games (in\ngame-id order), each skater's goals and assists per game are predicted for\nthe REST of the season, and the prediction is scored against what he did\nafter the checkpoint, scaled by his actual remaining games so that only the\nrates are judged:\n\n    error = |(g_pg + a_pg) * n_after - points_after|, skaters with n_after >= 10.\n\nn0 (pseudo-games, per statistic) is chosen on 2012 and 2014-2017 only from a\nfixed grid; 2018-19 confirm; the test is 2022 and 2023 (the last seasons with\ncomplete box scores), run once. Baseline: the preseason rate alone (n0 = inf).\n\nRun: python3 -m orr.backtest.player_update_bt   -> orr/output/backtest/player_update_bt.json\nand orr/output/params/player_update.json (the chosen n0).\n",
+ "grid": [
+  "10.0",
+  "20.0",
+  "40.0",
+  "80.0",
+  "160.0",
+  "320.0",
+  "inf"
+ ],
+ "ledger": [
+  {
+   "n0_g": 10.0,
+   "n0_a": 10.0,
+   "tune_mae": 4.019261165628675
+  },
+  {
+   "n0_g": 10.0,
+   "n0_a": 20.0,
+   "tune_mae": 3.8971259701176577
+  },
+  {
+   "n0_g": 10.0,
+   "n0_a": 40.0,
+   "tune_mae": 3.829728049881692
+  },
+  {
+   "n0_g": 10.0,
+   "n0_a": 80.0,
+   "tune_mae": 3.823157745805969
+  },
+  {
+   "n0_g": 10.0,
+   "n0_a": 160.0,
+   "tune_mae": 3.8480416677308202
+  },
+  {
+   "n0_g": 10.0,
+   "n0_a": 320.0,
+   "tune_mae": 3.8780530012530328
+  },
+  {
+   "n0_g": 10.0,
+   "n0_a": Infinity,
+   "tune_mae": 3.926308349928042
+  },
+  {
+   "n0_g": 20.0,
+   "n0_a": 10.0,
+   "tune_mae": 3.962738435202907
+  },
+  {
+   "n0_g": 20.0,
+   "n0_a": 20.0,
+   "tune_mae": 3.846718034475461
+  },
+  {
+   "n0_g": 20.0,
+   "n0_a": 40.0,
+   "tune_mae": 3.7875306625908567
+  },
+  {
+   "n0_g": 20.0,
+   "n0_a": 80.0,
+   "tune_mae": 3.788602608637503
+  },
+  {
+   "n0_g": 20.0,
+   "n0_a": 160.0,
+   "tune_mae": 3.8180708681468554
+  },
+  {
+   "n0_g": 20.0,
+   "n0_a": 320.0,
+   "tune_mae": 3.8490447809883475
+  },
+  {
+   "n0_g": 20.0,
+   "n0_a": Infinity,
+   "tune_mae": 3.9004690930551282
+  },
+  {
+   "n0_g": 40.0,
+   "n0_a": 10.0,
+   "tune_mae": 3.941489949761988
+  },
+  {
+   "n0_g": 40.0,
+   "n0_a": 20.0,
+   "tune_mae": 3.8282744583396786
+  },
+  {
+   "n0_g": 40.0,
+   "n0_a": 40.0,
+   "tune_mae": 3.7785391439506997
+  },
+  {
+   "n0_g": 40.0,
+   "n0_a": 80.0,
+   "tune_mae": 3.787149499626675
+  },
+  {
+   "n0_g": 40.0,
+   "n0_a": 160.0,
+   "tune_mae": 3.8196865198780476
+  },
+  {
+   "n0_g": 40.0,
+   "n0_a": 320.0,
+   "tune_mae": 3.8532259960934856
+  },
+  {
+   "n0_g": 40.0,
+   "n0_a": Infinity,
+   "tune_mae": 3.908675959810595
+  },
+  {
+   "n0_g": 80.0,
+   "n0_a": 10.0,
+   "tune_mae": 3.951191952352848
+  },
+  {
+   "n0_g": 80.0,
+   "n0_a": 20.0,
+   "tune_mae": 3.8434100566447156
+  },
+  {
+   "n0_g": 80.0,
+   "n0_a": 40.0,
+   "tune_mae": 3.7987643714497032
+  },
+  {
+   "n0_g": 80.0,
+   "n0_a": 80.0,
+   "tune_mae": 3.8141985860349648
+  },
+  {
+   "n0_g": 80.0,
+   "n0_a": 160.0,
+   "tune_mae": 3.8507950990400635
+  },
+  {
+   "n0_g": 80.0,
+   "n0_a": 320.0,
+   "tune_mae": 3.8872899574301787
+  },
+  {
+   "n0_g": 80.0,
+   "n0_a": Infinity,
+   "tune_mae": 3.9449941108740925
+  },
+  {
+   "n0_g": 160.0,
+   "n0_a": 10.0,
+   "tune_mae": 3.9742323580683157
+  },
+  {
+   "n0_g": 160.0,
+   "n0_a": 20.0,
+   "tune_mae": 3.86958146043544
+  },
+  {
+   "n0_g": 160.0,
+   "n0_a": 40.0,
+   "tune_mae": 3.8297541819715963
+  },
+  {
+   "n0_g": 160.0,
+   "n0_a": 80.0,
+   "tune_mae": 3.8488813573490406
+  },
+  {
+   "n0_g": 160.0,
+   "n0_a": 160.0,
+   "tune_mae": 3.8898286158245283
+  },
+  {
+   "n0_g": 160.0,
+   "n0_a": 320.0,
+   "tune_mae": 3.9282722137033343
+  },
+  {
+   "n0_g": 160.0,
+   "n0_a": Infinity,
+   "tune_mae": 3.9888799261074235
+  },
+  {
+   "n0_g": 320.0,
+   "n0_a": 10.0,
+   "tune_mae": 3.9950771248595154
+  },
+  {
+   "n0_g": 320.0,
+   "n0_a": 20.0,
+   "tune_mae": 3.8929988309839096
+  },
+  {
+   "n0_g": 320.0,
+   "n0_a": 40.0,
+   "tune_mae": 3.8573389999358265
+  },
+  {
+   "n0_g": 320.0,
+   "n0_a": 80.0,
+   "tune_mae": 3.8793669415017544
+  },
+  {
+   "n0_g": 320.0,
+   "n0_a": 160.0,
+   "tune_mae": 3.922744722049047
+  },
+  {
+   "n0_g": 320.0,
+   "n0_a": 320.0,
+   "tune_mae": 3.962901938173588
+  },
+  {
+   "n0_g": 320.0,
+   "n0_a": Infinity,
+   "tune_mae": 4.024515648885139
+  },
+  {
+   "n0_g": Infinity,
+   "n0_a": 10.0,
+   "tune_mae": 4.0276531221014595
+  },
+  {
+   "n0_g": Infinity,
+   "n0_a": 20.0,
+   "tune_mae": 3.928701336118224
+  },
+  {
+   "n0_g": Infinity,
+   "n0_a": 40.0,
+   "tune_mae": 3.89866751641886
+  },
+  {
+   "n0_g": Infinity,
+   "n0_a": 80.0,
+   "tune_mae": 3.9241435871526846
+  },
+  {
+   "n0_g": Infinity,
+   "n0_a": 160.0,
+   "tune_mae": 3.9699600717059753
+  },
+  {
+   "n0_g": Infinity,
+   "n0_a": 320.0,
+   "tune_mae": 4.012192089434083
+  },
+  {
+   "n0_g": Infinity,
+   "n0_a": Infinity,
+   "tune_mae": 4.075171268782091
+  }
+ ],
+ "chosen": {
+  "g": 40.0,
+  "a": 40.0,
+  "sog": 20.0
+ },
+ "tune": {
+  "n": 9266,
+  "mae_updated": 3.7785391439506997,
+  "mae_preseason": 4.075171268782091,
+  "by_checkpoint": {
+   "0.25": {
+    "updated": 4.861718216029999,
+    "preseason": 5.176019413376218
+   },
+   "0.5": {
+    "updated": 3.7411014634815944,
+    "preseason": 4.071689916482042
+   },
+   "0.75": {
+    "updated": 2.48443423798198,
+    "preseason": 2.719881666072512
+   }
+  },
+  "sog": {
+   "updated": 9.319947639005614,
+   "preseason": 10.818665292555277
+  }
+ },
+ "confirm": {
+  "n": 3835,
+  "mae_updated": 3.9373352687496457,
+  "mae_preseason": 4.281717500740608,
+  "by_checkpoint": {
+   "0.25": {
+    "updated": 5.090852133205363,
+    "preseason": 5.504441627567521
+   },
+   "0.5": {
+    "updated": 3.8490634343573356,
+    "preseason": 4.244510794862757
+   },
+   "0.75": {
+    "updated": 2.6276883003389107,
+    "preseason": 2.8279238539729605
+   }
+  },
+  "sog": {
+   "updated": 9.480906629932766,
+   "preseason": 10.556618169581885
+  }
+ },
+ "test": {
+  "n": 3987,
+  "mae_updated": 4.070458556775024,
+  "mae_preseason": 4.482992517110706,
+  "by_checkpoint": {
+   "0.25": {
+    "updated": 5.323384067824436,
+    "preseason": 5.738819540145398
+   },
+   "0.5": {
+    "updated": 3.954788501897033,
+    "preseason": 4.445733287930584
+   },
+   "0.75": {
+    "updated": 2.676396027451755,
+    "preseason": 2.9951180479030124
+   }
+  },
+  "sog": {
+   "updated": 9.225041315133259,
+   "preseason": 10.707970492480733
+  },
+  "d": {
+   "diff": -0.41253396033568135,
+   "se": 0.036488703263365146,
+   "ci95": [
+    -0.4869250723605807,
+    -0.34413393776849033
+   ]
+  }
+ }
+}

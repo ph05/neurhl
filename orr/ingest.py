@@ -25,6 +25,47 @@ PATH = C.OUT / "live" / "results_2027.csv"
 COLS = ["game_id", "date", "home", "away", "home_g", "away_g", "last_period", "source"]
 OPTIONAL = ["shots_home", "shots_away"]          # used by the in-season filter when present
 SCORE_URL = "https://api-web.nhle.com/v1/score/{d}"
+BOX_URL = "https://api-web.nhle.com/v1/gamecenter/{gid}/boxscore"
+BOXES = C.OUT / "live" / f"boxes_{C.TARGET_SEASON}.csv"
+BOX_COLS = ["game_id", "date", "team", "player_id", "pos", "toi", "g", "a", "sog", "starter",
+            "shots_against", "goals_against"]
+
+
+def _toi(s) -> float:
+    try:
+        m, sec = str(s or "0:00").split(":")
+        return int(m) + int(sec) / 60.0
+    except ValueError:
+        return 0.0
+
+
+def parse_boxscore(box: dict, game_id: int, date: str) -> list[dict]:
+    """Per-player rows of an NHL API boxscore (playerByGameStats)."""
+    rows = []
+    for side in ("home", "away"):
+        team = (box.get(f"{side}Team") or {}).get("abbrev")
+        t = (box.get("playerByGameStats") or {}).get(f"{side}Team") or {}
+        for key, pos in (("forwards", "F"), ("defense", "D"), ("goalies", "G")):
+            for p in t.get(key) or []:
+                sa = p.get("shotsAgainst")
+                if sa is None and isinstance(p.get("saveShotsAgainst"), str) and "/" in p["saveShotsAgainst"]:
+                    sa = int(p["saveShotsAgainst"].split("/")[1])
+                rows.append({"game_id": game_id, "date": date, "team": team, "player_id": int(p["playerId"]),
+                             "pos": pos, "toi": _toi(p.get("toi")), "g": p.get("goals", 0) or 0,
+                             "a": p.get("assists", 0) or 0, "sog": p.get("sog", 0) or 0,
+                             "starter": bool(p.get("starter", False)), "shots_against": sa,
+                             "goals_against": p.get("goalsAgainst")})
+    return rows
+
+
+def save_boxes(rows: list[dict]) -> None:
+    if not rows:
+        return
+    new = pd.DataFrame(rows, columns=BOX_COLS)
+    old = pd.read_csv(BOXES) if BOXES.exists() else pd.DataFrame(columns=BOX_COLS)
+    out = pd.concat([old, new]).drop_duplicates(["game_id", "player_id"], keep="last").sort_values(["date", "game_id"])
+    BOXES.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(BOXES, index=False)
 
 
 def load() -> pd.DataFrame:
@@ -72,6 +113,12 @@ def fetch_api(through: dt.date) -> pd.DataFrame:
                              "last_period": (g.get("gameOutcome") or {}).get("lastPeriodType", "REG"),
                              "source": "api-web.nhle.com",
                              "shots_home": g["homeTeam"].get("sog"), "shots_away": g["awayTeam"].get("sog")})
+                try:      # per-player box score (ORR 1.2: in-season player rates)
+                    box = requests.get(BOX_URL.format(gid=g["id"]), timeout=30).json()
+                    save_boxes(parse_boxscore(box, int(g["id"]), ds))
+                except Exception as e:          # a missing box score must not stop the results
+                    print(f"boxscore {g['id']}: {e}")
+                time.sleep(0.2)
         time.sleep(0.4)
     return pd.DataFrame(rows, columns=COLS + OPTIONAL)
 
