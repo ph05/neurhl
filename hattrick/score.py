@@ -2,11 +2,14 @@
 
 Scores whatever has been played so far (and the full season at the end):
 
-- games: log loss, Brier and accuracy of P(home win), on the frozen preseason
-  files of every model (HatTrick freeze; NeurHL 09-25 freeze, 1.0, 1.1, 1.2,
-  1.3) and on the game-day forecasts (HatTrick in-season; NeurHL-G pregame).
-  1.2 and 1.3 were published after the first puck drop; they are scored but
-  flagged, since they could not have been used before those games.
+- games: log loss, Brier and accuracy of P(home win), on the preseason files
+  of every model (HatTrick; NeurHL 09-25 freeze, 1.0, 1.1, 1.2, 1.3) and on the
+  game-day forecasts (HatTrick in-season; NeurHL-G/H pregame).
+  Timing is reported, not assumed: NeurHL 1.0 and 1.1 were committed before
+  the first puck drop; HatTrick's preseason file uses only pre-cutoff
+  information but was BUILT on 2026-09-30/10-01, and NeurHL 1.2/1.3 were
+  published after games had started. Each file is therefore also scored on the
+  games played after its own publication time ("after_publication").
 - teams (interim): actual points vs each model's expected points FOR THE
   GAMES PLAYED (sum of the per-game expected points), which is a fair interim
   measure; at season end, points MAE/RMSE and CRPS.
@@ -33,16 +36,21 @@ from hattrick import config as C
 RESULTS_DEFAULT = C.OUT / "live" / "results_2027.csv"
 FREEZE = C.OUT / "freeze_2027"
 
+# (path, probability column, publication time UTC: the commit that first added
+# the file; HatTrick's from its own state file)
 GAME_FILES = {
-    "hattrick_freeze": (FREEZE / "games_2027.csv", "p_home_win", True),
-    "neurhl_0925_freeze": (C.ROOT / "neurhl/output/games_2027.csv", "p_home_win", True),
-    "neurhl_1.0": (C.ROOT / "neurhl/output/neurhl_1_0/games_2027.csv", "p_home_win", True),
-    "neurhl_1.1": (C.ROOT / "neurhl/output/neurhl_1_1/season/games_2027.csv", "p_home_win", True),
-    "neurhl_1.2": (C.ROOT / "neurhl/output/neurhl_1_2/season/games_2027.csv", "p_home_win", False),
-    "neurhl_1.3": (C.ROOT / "neurhl/output/neurhl_1_3/season/games_2027.csv", "p_home_win", False),
+    "hattrick_preseason": (FREEZE / "games_2027.csv", "p_home_win", None),
+    "neurhl_0925_freeze": (C.ROOT / "neurhl/output/games_2027.csv", "p_home_win", "2026-09-25T00:00:00Z"),
+    "neurhl_1.0": (C.ROOT / "neurhl/output/neurhl_1_0/games_2027.csv", "p_home_win", "2026-09-29T02:12:11Z"),
+    "neurhl_1.1": (C.ROOT / "neurhl/output/neurhl_1_1/season/games_2027.csv", "p_home_win", "2026-09-29T20:53:49Z"),
+    "neurhl_1.2": (C.ROOT / "neurhl/output/neurhl_1_2/season/games_2027.csv", "p_home_win", "2026-09-30T01:41:45Z"),
+    "neurhl_1.3": (C.ROOT / "neurhl/output/neurhl_1_3/season/games_2027.csv", "p_home_win", "2026-09-30T21:06:08Z"),
 }
+FIRST_PUCK_DROP = pd.Timestamp("2026-09-29T21:00:00Z")
+# A game counts as "after publication" when it falls on a later calendar date
+# than the publication (games start no earlier than ~16:00 UTC).
 TEAM_FILES = {
-    "hattrick_freeze": FREEZE / "teams_2027.csv",
+    "hattrick_preseason": FREEZE / "teams_2027.csv",
     "neurhl_1.0": C.ROOT / "neurhl/output/neurhl_1_0/teams_2027.csv",
     "neurhl_1.1": C.ROOT / "neurhl/output/neurhl_1_1/season/teams_2027.csv",
     "neurhl_1.2": C.ROOT / "neurhl/output/neurhl_1_2/season/teams_2027.csv",
@@ -62,22 +70,38 @@ def _ll(p, y):
     return float(-(y * np.log(p) + (1 - y) * np.log(1 - p)).mean())
 
 
+def _published(name, pub):
+    if pub is not None:
+        return pd.Timestamp(pub)
+    st = FREEZE / "state_2027.json"
+    return pd.Timestamp(json.loads(st.read_text())["created_utc"]) if st.exists() else None
+
+
+def _metrics(p, y):
+    return {"n": int(len(y)), "log_loss": _ll(p, y), "brier": float(((p - y) ** 2).mean()),
+            "accuracy": float(((p > 0.5) == y).mean())}
+
+
 def score_games(res: pd.DataFrame) -> dict:
     out = {}
     y = res.set_index("game_id").home_win
-    for name, (path, col, pre) in GAME_FILES.items():
+    dates = pd.to_datetime(res.set_index("game_id").date)
+    for name, (path, col, pub) in GAME_FILES.items():
         if not Path(path).exists():
             continue
         g = pd.read_csv(path).set_index("game_id")
         common = y.index.intersection(g.index)
         if not len(common):
             continue
-        p = g.loc[common, col].to_numpy(float)
-        yy = y.loc[common].to_numpy()
-        out[name] = {"n": int(len(common)), "log_loss": _ll(p, yy),
-                     "brier": float(((p - yy) ** 2).mean()),
-                     "accuracy": float(((p > 0.5) == yy).mean()),
-                     "published_before_first_game": pre}
+        published = _published(name, pub)
+        row = {**_metrics(g.loc[common, col].to_numpy(float), y.loc[common].to_numpy()),
+               "published_utc": str(published),
+               "published_before_first_game": bool(published is not None and published < FIRST_PUCK_DROP)}
+        if published is not None:
+            later = [gid for gid in common if dates[gid].date() > published.date()]
+            row["after_publication"] = (_metrics(g.loc[later, col].to_numpy(float), y.loc[later].to_numpy())
+                                        if later else {"n": 0})
+        out[name] = row
     # game-day forecasts
     live = C.ROOT / "neurhl/output/live/2027"
     rows = []
@@ -102,8 +126,12 @@ def score_games(res: pd.DataFrame) -> dict:
     if hl.exists():
         rows = [pd.read_csv(f) for f in sorted(hl.glob("*/games_*.csv"))]
         if rows:
-            d = (pd.concat(rows).sort_values("created_utc")
-                 .drop_duplicates("game_id", keep="first").set_index("game_id"))
+            d = pd.concat(rows)
+            # a forecast counts only if created before its game's date (UTC);
+            # the pushed commit time is the external evidence (git log)
+            d = d[pd.to_datetime(d.created_utc).dt.tz_convert(None).dt.normalize()
+                  < pd.to_datetime(d.date)]
+            d = d.sort_values("created_utc").drop_duplicates("game_id", keep="first").set_index("game_id")
             common = y.index.intersection(d.index)
             if len(common):
                 p = d.loc[common, "p_home_win"].to_numpy(float)
@@ -127,7 +155,7 @@ def score_teams_interim(res: pd.DataFrame) -> dict:
     """Actual points so far vs each model's expected points in those games."""
     act = _team_points_so_far(res)
     out = {}
-    for name, (path, col, pre) in GAME_FILES.items():
+    for name, (path, col, _) in GAME_FILES.items():
         if not Path(path).exists():
             continue
         g = pd.read_csv(path)
@@ -184,7 +212,7 @@ def main():
     Path(a.out).write_text(json.dumps(card, indent=1))
     g = pd.DataFrame(card["games"]).T
     print(f"through {card['through']}: {card['games_played']} games")
-    print(g.to_string())
+    print(g.drop(columns=[c for c in ("after_publication",) if c in g]).to_string())
     print(pd.DataFrame(card["teams_interim"]).T.to_string())
 
 

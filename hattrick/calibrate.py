@@ -1,7 +1,7 @@
 """Turn team points targets into scoring-model ratings.
 
 The team layer (hattrick.teams) produces a points target per team: the
-walk-forward blend of the market line, team history and the roster model.
+blend of the market line, team history and the roster model.
 The season simulator works on offence/defence log-rates. This module solves
 for ratings whose expected points over the ACTUAL schedule (opponents, home
 games, rest) equal the targets, while keeping each team's offence/defence

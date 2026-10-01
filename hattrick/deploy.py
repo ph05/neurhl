@@ -34,6 +34,7 @@ Poisson scoring noise.
 from __future__ import annotations
 
 import functools
+import zlib
 
 import numpy as np
 import pandas as pd
@@ -116,8 +117,24 @@ def health(V: int, ids, age: np.ndarray, q_scale: float = 1.0) -> np.ndarray:
 # ---------------------------------------------------------------------------
 # Dressing competition (exact Poisson-binomial over the depth chart)
 # ---------------------------------------------------------------------------
+def stable_seed(*parts) -> int:
+    """Deterministic 32-bit seed from strings/ints (Python's hash() of a
+    str is salted per process and must never seed anything)."""
+    return zlib.crc32("|".join(str(p) for p in parts).encode()) & 0x7FFFFFFF
+
+
+def player_normals(ids, draws: int, *key) -> np.ndarray:
+    """(draws, n) standard normals, one fixed stream per player: common
+    random numbers, so adding or removing a teammate does not reshuffle
+    anybody else's draws (counterfactual rosters compare cleanly)."""
+    return np.column_stack([np.random.default_rng([stable_seed(*key), int(i)])
+                            .standard_normal(draws) for i in ids]) if len(ids) else \
+        np.zeros((draws, 0))
+
+
 def dress_probs(score: np.ndarray, h: np.ndarray, n_slots: int,
-                noise_sd: float, draws: int = 64, seed: int = 0):
+                noise_sd: float, draws: int = 64, seed: int = 0,
+                eps: np.ndarray | None = None):
     """P(player dressed in a game) and expected call-ups per game.
 
     score: depth-chart score (projected min/game); h: P(healthy/available)
@@ -128,10 +145,10 @@ def dress_probs(score: np.ndarray, h: np.ndarray, n_slots: int,
     n = len(score)
     if n == 0:
         return np.zeros(0), float(n_slots)
-    rng = np.random.default_rng(seed)
-    eps = rng.standard_normal((draws, n)) * noise_sd
-    order = np.argsort(-(score[None, :] + eps), axis=1)          # (R, n)
-    R = draws
+    if eps is None:
+        eps = np.random.default_rng(seed).standard_normal((draws, n))
+    R = eps.shape[0]
+    order = np.argsort(-(score[None, :] + noise_sd * eps), axis=1)   # (R, n)
     state = np.zeros((R, n_slots + 1))
     state[:, 0] = 1.0
     pd_ = np.zeros((R, n))
@@ -154,7 +171,21 @@ def dress_probs(score: np.ndarray, h: np.ndarray, n_slots: int,
 # ---------------------------------------------------------------------------
 RESEARCH_FILE = C.PKG / "data_injuries_2027.csv"
 RESEARCH_CONFIDENCE = ("high", "medium")
-RESEARCH_CUTOFF = "2026-09-29"
+# Reports carry a date but no time; the information cutoff is 2026-09-29
+# 21:00 UTC, so a report dated 2026-09-29 may postdate it. Only reports
+# dated STRICTLY BEFORE this day are used (the rest fall back to the
+# 09-28 snapshot rules).
+RESEARCH_BEFORE = "2026-09-29"
+
+
+def research_rows() -> pd.DataFrame:
+    """The injury research file restricted to reports dated before
+    RESEARCH_BEFORE (empty frame if the file is absent)."""
+    if not RESEARCH_FILE.exists():
+        return pd.DataFrame(columns=["team", "name", "report_date", "est_games_out",
+                                     "est_min", "est_max", "confidence"])
+    r = pd.read_csv(RESEARCH_FILE)
+    return r[pd.to_datetime(r.report_date) < pd.Timestamp(RESEARCH_BEFORE)].copy()
 
 
 def _norm_name(z) -> str:
@@ -165,13 +196,12 @@ def _norm_name(z) -> str:
 
 def injury_research_2027(roster: pd.DataFrame) -> pd.DataFrame:
     """Researched 2026-27 injury estimates (hattrick/data_injuries_2027.csv,
-    reports dated on or before the cutoff), matched to roster player ids by
+    reports dated before the cutoff day), matched to roster player ids by
     name (team only breaks ties: the roster file's team is authoritative)."""
-    if not RESEARCH_FILE.exists():
-        return pd.DataFrame(columns=["player_id", "est_games_out", "est_min", "est_max",
-                                     "confidence"])
-    r = pd.read_csv(RESEARCH_FILE)
-    r = r[pd.to_datetime(r.report_date) <= pd.Timestamp(RESEARCH_CUTOFF)].copy()
+    r = research_rows()
+    if not len(r):
+        return pd.DataFrame(columns=["player_id", "name", "est_games_out", "est_min",
+                                     "est_max", "confidence"])
     if {"name", "team"} <= set(roster.columns):
         ros = roster[["player_id", "team", "name"]].dropna(subset=["name"]).copy()
     else:
@@ -241,7 +271,8 @@ def deploy_team(t: pd.DataFrame, games: int, budgets: dict, repl_tpg: dict,
                 noise_sd: float, draws: int = 64,
                 cover: dict | None = None,
                 gp_map: dict | None = None,
-                gp_override: dict | None = None) -> tuple[pd.DataFrame, dict]:
+                gp_override: dict | None = None,
+                seed_key: str = "") -> tuple[pd.DataFrame, dict]:
     """Expected games and ice time for one team's roster.
 
     t columns: player_id, pos, score, q (injury rate), games_out,
@@ -261,10 +292,12 @@ def deploy_team(t: pd.DataFrame, games: int, budgets: dict, repl_tpg: dict,
         score = sub.score.to_numpy(float)
         pres = sub["presence"].to_numpy(float) if "presence" in sub else np.ones(len(sub))
         if gp_override is None and gp_map is None:
+            # the same per-player depth-chart noise in every block of games
+            eps = player_normals(sub.player_id.to_numpy(), draws, C.SEED, "dress",
+                                 seed_key)
             for a, b in _blocks(sub.games_out.to_numpy(float), games):
                 h = np.where(sub.games_out.to_numpy() > a, 0.0, 1.0 - sub.q.to_numpy(float)) * pres
-                p, r = dress_probs(score, h, N_DRESS[pos], noise_sd, draws,
-                                   seed=hash((pos, a, len(sub))) % 2**31)
+                p, r = dress_probs(score, h, N_DRESS[pos], noise_sd, draws, eps=eps)
                 gp += p * (b - a)
                 rep += r * (b - a)
         if gp_override is not None:
@@ -676,7 +709,7 @@ def deploy(proj: pd.DataFrame, roster: pd.DataFrame, V: int, games: int,
     outs = []
     for team, t in r.groupby("team"):
         dt, info = deploy_team(t, games, bud, rep, noise_sd, draws, cover, gp_map,
-                               gp_override)
+                               gp_override, seed_key=str(V))
         dt["rep_gp_F"] = info["rep_gp_F"]
         dt["rep_gp_D"] = info["rep_gp_D"]
         outs.append(dt)
@@ -834,10 +867,10 @@ def simulate(dep: pd.DataFrame, proj: pd.DataFrame, V: int, games: int, mc: dict
     rc = [c for c in pj.columns if c.startswith(("r60_", "sd60_")) and c not in dep.columns]
     d = dep.join(pj[rc], on="player_id")
     bud, rep = budgets_for(V)
-    rng = np.random.default_rng(seed)
     out = []
     for team, t in d.groupby("team", sort=True):
         t = t.reset_index(drop=True)
+        rng = np.random.default_rng([seed, V, stable_seed(team)])    # per team
         r = simulate_team(t, games, bud, rep, mc, S, rng)
         o = pd.DataFrame({"player_id": t.player_id})
         for s in MC_STATS:

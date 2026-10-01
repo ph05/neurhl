@@ -101,7 +101,7 @@ def manifest() -> dict:
             h = hashlib.sha256(p.read_bytes()).hexdigest()
             when = _git("log", "-1", "--format=%cI", C.CUTOFF_COMMIT, "--", rel).strip()
             files[rel] = {"sha256": h, "last_changed": when}
-    latest = max(v["last_changed"] for v in files.values())
+    latest = max((datetime.fromisoformat(v["last_changed"]) for v in files.values())).isoformat()
     return {"cutoff_utc": C.CUTOFF_UTC.isoformat(), "commit": C.CUTOFF_COMMIT,
             "latest_input_change": latest, "n_files": len(files), "files": files}
 

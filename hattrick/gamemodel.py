@@ -194,6 +194,51 @@ def b2b_goalie_offset(P: dict, gap) -> np.ndarray:
     return g["coef"] * x
 
 
+def known_starter_offsets(P: dict, sch_rows, starter_talent_diff_h, starter_talent_diff_a,
+                          gap_h=None, gap_a=None) -> tuple[np.ndarray, np.ndarray]:
+    """Complete log-rate offsets (adj_h on home goals, adj_a on away goals)
+    for games where starting goalies may be known. REPLACES ctx_offsets for
+    these games (do not add both).
+
+    sch_rows: rest_h, rest_a, km_h, km_a, dtz_h, dtz_a (schedule_features).
+    starter_talent_diff_h/_a: the home / away starter's save talent minus his
+      team's usual-starter talent, in the fitted units
+      (structural.goalie_talent_2027; NaN = starter not known).
+    gap_h/gap_a (optional): primary-minus-backup gaps (structural.team_gap_2027)
+      used only for a team whose starter is NOT known.
+
+    Rule, per team: starter known -> that team's rest/travel features use
+    the goalie-aware coefficients P['ctx_gk'] (fatigue only; the backup
+    effect is now explicit) and its starter offset goalie_offset(P, diff)
+    goes on the OPPONENT's goals; no backup-on-back-to-back term.
+    Starter unknown -> P['ctx'] (which contains the league-average backup
+    effect) plus, if a gap is given, b2b_goalie_offset on its back-to-backs.
+    """
+    c0 = P["ctx"]
+    c1 = P.get("ctx_gk") or c0
+    fh = ctx_features(sch_rows["rest_h"], sch_rows["km_h"], sch_rows["dtz_h"])
+    fa = ctx_features(sch_rows["rest_a"], sch_rows["km_a"], sch_rows["dtz_a"])
+    dh = np.asarray(starter_talent_diff_h, float) * np.ones(len(fh["b2b"]))
+    da = np.asarray(starter_talent_diff_a, float) * np.ones(len(fa["b2b"]))
+    kh, ka = ~np.isnan(dh), ~np.isnan(da)
+
+    def team_terms(f, known):
+        # (contribution of a team's features to its own goals, to its opponent's goals)
+        own = sum(np.where(known, c1[f"{k}_o"], c0[f"{k}_o"]) * f[k] for k in CTX_FEATURES)
+        opp = sum(np.where(known, c1[f"{k}_d"], c0[f"{k}_d"]) * f[k] for k in CTX_FEATURES)
+        return own, opp
+
+    own_h, opp_h = team_terms(fh, kh)
+    own_a, opp_a = team_terms(fa, ka)
+    adj_h = own_h + opp_a + np.where(ka, goalie_offset(P, da), 0.0)
+    adj_a = own_a + opp_h + np.where(kh, goalie_offset(P, dh), 0.0)
+    if gap_a is not None:      # away starter unknown, away on a back-to-back -> home scores more
+        adj_h = adj_h + np.where(~ka & (fa["b2b"] == 1), b2b_goalie_offset(P, gap_a), 0.0)
+    if gap_h is not None:
+        adj_a = adj_a + np.where(~kh & (fh["b2b"] == 1), b2b_goalie_offset(P, gap_h), 0.0)
+    return np.asarray(adj_h, float), np.asarray(adj_a, float)
+
+
 def rates(P, o_h, d_h, o_a, d_a, sch=None, mu=None, h=None, goalie_h=None,
           goalie_a=None):
     """Expected regulation goals (lam_home, lam_away) for arrays of games.

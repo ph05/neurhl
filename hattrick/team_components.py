@@ -120,7 +120,7 @@ def components(V: int, skaters: pd.DataFrame, goalies: pd.DataFrame, games: int,
         gd = GL.deploy_goalies(V, goalies, games, goalie_out, goalie_present, prm.q_scale)
         pr = GL.talent_prior(V)
         lgg = GL.league_goalie(V)
-        rep_rate = pr["beta"][0] + pr["beta"][1] * np.log(0.05)
+        rep_rate = float(GL.prior_rate(V, 0.05))
         g = gd.groupby("team").apply(lambda d: pd.Series({
             "goalie_starts": d.starts.sum(), "callup_starts": d.callup_starts.iloc[0],
             "goalie_gsax_per_fa": (d.starts * d.gsax_per_fa).sum() + d.callup_starts.iloc[0] * rep_rate}),

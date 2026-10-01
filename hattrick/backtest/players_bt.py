@@ -73,6 +73,7 @@ OBJECTIVE_SAMPLE = "all"
 STACK_GP = True       # games stacking layer (deploy.gp_stack); see ledger
 
 NEURHL_A = {2022: 10.466, 2023: 9.597, 2024: 9.166, 2025: 9.092, 2026: 9.394}
+NEURHL_A_N = {2022: 587, 2023: 603, 2024: 594, 2025: 586, 2026: 586}   # its sample sizes
 NEURHL_V2 = {2011: (14.022, 9.775, 10.254), 2012: (10.399, 9.774, 9.561),
              2014: (9.385, 9.22, 8.966), 2015: (9.137, 9.143, 8.55),
              2016: (8.453, 8.64, 8.145), 2017: (9.313, 9.394, 8.904),
@@ -396,7 +397,13 @@ def report(prm: PL.Params, seasons, sims=400) -> dict:
         print(f"{V}: matched A {row['matched']['A']['mae']:.2f}  strict A "
               f"{row['strict']['A']['mae']:.2f}  marcel A {row['marcel']['A']['mae']:.2f}  "
               f"NeurHL A {NEURHL_A.get(V)}  ({time.time() - t:.0f}s)", flush=True)
-    for name, vs in (("tune", TUNE_V), ("confirm", CONFIRM_V), ("test", TEST_V)):
+    windows = (("tune", TUNE_V), ("confirm", CONFIRM_V), ("test", TEST_V),
+               # held-out window split by roster proxy: 2022-24 strict is truly
+               # preseason (first-10-game rosters); 2025-26 strict falls back to
+               # season-V teams and is as leaky as NeurHL's own protocol
+               ("test_first10_2022_24", [2022, 2023, 2024]),
+               ("test_season_team_2025_26", [2025, 2026]))
+    for name, vs in windows:
         rows = [res["seasons"][v] for v in vs if v in res["seasons"]]
         if not rows:
             continue
@@ -407,6 +414,9 @@ def report(prm: PL.Params, seasons, sims=400) -> dict:
                                            for s in ("A", "B")}
         nA = [NEURHL_A[v] for v in vs if v in NEURHL_A]
         res[f"pooled_{name}"]["neurhl_A_mean"] = float(np.mean(nA)) if nA else None
+        nw = [(NEURHL_A[v], NEURHL_A_N[v]) for v in vs if v in NEURHL_A]
+        res[f"pooled_{name}"]["neurhl_A_pooled"] = (
+            sum(a * n for a, n in nw) / sum(n for _, n in nw) if nw else None)
         nb = [(NEURHL_V2[v][2], res["seasons"][v]["matched"]["B"]["n"]) for v in vs if v in NEURHL_V2]
         res[f"pooled_{name}"]["neurhl_v2_blend_pooled"] = (
             sum(a * n for a, n in nb) / sum(n for _, n in nb) if nb else None)
@@ -453,10 +463,10 @@ def main():
     res["protocol_notes"] = __doc__
     D.write_json(res, OUT / "players_bt.json")
     print_table(res)
-    for name in ("tune", "confirm", "test"):
+    for name in ("tune", "confirm", "test", "test_first10_2022_24", "test_season_team_2025_26"):
         if f"pooled_{name}" in res:
             pp = res[f"pooled_{name}"]
-            print(f"POOLED {name:<8} matched A {pp['matched']['A']['mae']:.3f}  strict A "
+            print(f"POOLED {name:<26} matched A {pp['matched']['A']['mae']:.3f}  strict A "
                   f"{pp['strict']['A']['mae']:.3f}  Marcel A {pp['marcel']['A']['mae']:.3f}  "
                   f"NeurHL A {pp['neurhl_A_mean']}  | matched B {pp['matched']['B']['mae']:.3f} "
                   f"strict B {pp['strict']['B']['mae']:.3f} NeurHL blend "

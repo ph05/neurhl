@@ -1,33 +1,43 @@
-"""The 2026-27 preseason freeze: every game, team and player, before puck drop.
+"""The 2026-27 preseason forecast: every game, team and player.
 
-    python3 -m hattrick.freeze [--sims 40000]
+    python3 -m hattrick.freeze [--sims 40000] [--allow-dirty]
 
-Information: every repository input comes from the pre-cutoff git snapshot
-(hattrick.snapshot); added inputs (box scores to 2023-24, historical market
-lines, researched injury timelines dated <= 2026-09-29) are listed with their
-provenance in the manifest. Nothing after 2026-09-29 21:00 UTC is read.
+What it is: a forecast built ONLY from information dated before the first puck
+drop (2026-09-29 21:00 UTC). Every repository input is read from the git tree
+of the last commit before that moment (hattrick.snapshot); the added inputs
+(box scores to 2023-24, historical preseason lines, researched injury timelines
+reported before 2026-09-29) are listed with their hashes in the manifest.
+It was BUILT on 2026-09-30/10-01, after the opening games had been played; the
+information set, not the build time, is what predates the season, and the
+scorecard treats it accordingly (hattrick.score).
 
 Steps
  1. Player layer: skater and goalie projections with availability and ice time
-    (hattrick.players / goalies / deploy), and the roster components.
+    (hattrick.players / goalies / deploy), and the bottom-up roster components.
  2. Team views, each as points per 82 above the league mean:
-      market      the 2026-08-17 points lines, de-vigged, PLUS the news the
-                  line had not seen (roster moves, injuries, suspensions and
-                  the Hellebuyck standoff between 08-17 and the cutoff),
-                  priced by the roster-change model;
-      top-down    regressed team history;
-      roster      top-down corrected for the change from last season's
-                  roster to this one.
-    Blend weights are the non-negative least-squares weights fitted on every
-    season with a preseason market line (2019-2026), whose leave-one-season-
-    out accuracy is reported in the team backtest.
- 3. Targets -> offence/defence ratings on the actual schedule (calibrate),
-    rating SD from the blend's out-of-sample error net of game luck.
+      market     the 2026-08-17 points lines (no-vig mean from the over/under
+                 prices) PLUS the news the line had not seen (trades, signings
+                 and departures after 08-17, injuries and suspensions reported
+                 after it, the Hellebuyck standoff), priced by the player model;
+      top-down   regressed team history;
+      roster     team history corrected for the change from last season's
+                 roster to this one (hattrick.roster_delta);
+      bottom-up  the opening roster's summed player projections
+                 (hattrick.team_points_map).
+    A pre-declared list of view combinations is scored leave-one-season-out on
+    the seasons that have both a preseason line and a clean (first-10-games)
+    roster proxy: 2019, 2020, 2022, 2023, 2024. The combination with the lowest
+    out-of-sample RMSE is used, its non-negative weights refitted on those
+    seasons.
+ 3. Targets -> offence/defence ratings on the actual schedule (calibrate); the
+    rating SD is the blend's out-of-sample error net of the game luck the
+    scoring model itself implies.
  4. Simulate the season (season.simulate) with the fitted scoring model,
     rest/travel effects, strength drawn per simulation and drifting in season.
  5. Game file: every game's probabilities averaged over rating uncertainty.
  6. Player lines reconciled to simulated team goals; goalie lines to team GA.
- 7. Manifest: SHA-256 of every input and output, code commit, cutoff.
+ 7. Manifest: SHA-256 of every input, code file and output; refuses to run on
+    uncommitted code unless --allow-dirty (and then records the diff state).
 """
 from __future__ import annotations
 
@@ -52,18 +62,29 @@ V = C.TARGET_SEASON
 GAMES = C.GAMES_PER_TEAM[V]
 OUT = C.OUT / f"freeze_{V}"
 
-# Hellebuyck (WPG, suspended 2026-09-17 after a public trade request on
-# 08-27). Research (data_injuries_2027.csv, reports <= 09-29): a trade is
-# expected within ~12 games; Carolina reported as the most aggressive bidder,
-# Buffalo, Utah and San Jose linked. Expected share of the season he plays
-# for each destination = P(destination) x (84 - 13)/84; as a starter he takes
-# ~65% of starts. These are stated assumptions, not fitted parameters.
 # Empty-net goals against per team-game, 2023-24..2025-26 (team GA minus the
 # goalies' GA in MoneyPuck): 0.170, 0.200, 0.195.
 EN_GA_PER_GAME = 0.188
 
-HELLEBUYCK = {"player_id": 8476945, "p_dest": {"CAR": 0.35, "BUF": 0.12, "UTA": 0.12, "SJS": 0.08},
-              "season_share": (84 - 13) / 84, "start_share": 0.65}
+# Hellebuyck (WPG) asked for a trade on 08-27 and was suspended on 09-17. The
+# goalie layer gives him a 10% chance of playing for Winnipeg (hattrick.goalies
+# HOLDOUTS). Where he would go if traded was not settled before the cutoff, so
+# no destination is credited (spread over ~20 possible clubs it is negligible).
+HELLEBUYCK_ID = 8476945
+
+# Injuries that were public before the 2026-08-17 market line (surgery dates
+# from hattrick/data_injuries_2027.csv); the line already priced them, so the
+# news counterfactual keeps them out too.
+PRE_MARKET_INJURIES = {8478873: "Terry, hip surgery June",
+                       8484144: "Bedard, shoulder surgery July",
+                       8482093: "Jarvis, shoulder surgery late June",
+                       8477967: "Demko, hip surgery January",
+                       8480873: "Sandin, ACL surgery April"}
+
+# Seasons with a preseason line AND a first-10-games roster proxy. 2025 and
+# 2026 have no box scores, so their rosters would come from each player's
+# season team -- in-season information -- and are excluded from every fit.
+CLEAN_MARKET_SEASONS = [2019, 2020, 2022, 2023, 2024]
 
 
 def _sha(p) -> str:
@@ -93,7 +114,9 @@ def news_moves(ros: pd.DataFrame) -> pd.DataFrame:
         e.g. Kreider ANA->MTL (09-12), Evangelista NSH->NJD (09-02), the
         Knies/Marchenko/Andrae trade (09-28), plus Merzlikins CBJ->TOR (09-28,
         per the injury research file);
-      * veterans (age >= 25, 50+ NHL games in 2025-26) added from outside.
+      * veterans (age >= 25, 50+ NHL games in 2025-26) added from outside;
+      * departures: players with 50+ NHL games in 2025-26 removed from a club
+        and on no NHL roster (or injured list) at the cutoff.
     Camp churn (prospects added, depth players assigned or waived) is ignored:
     the line already assumed a typical opening lineup.
     Returns player_id, from_team (None = not on an NHL club), to_team.
@@ -113,6 +136,8 @@ def news_moves(ros: pd.DataFrame) -> pd.DataFrame:
             out.append((pid, rem[0], add[-1], "switch"))
         elif add and not rem and last.get(pid, 0) >= 50 and ages.get(pid, 0) >= 25:
             out.append((pid, None, add[-1], "veteran addition"))
+        elif rem and not add and last.get(pid, 0) >= 50 and pid not in set(ros.player_id):
+            out.append((pid, rem[0], None, "departure"))
     out.append((8478007, "CBJ", "TOR", "switch (research file)"))   # Merzlikins
     m = pd.DataFrame(out, columns=["player_id", "from_team", "to_team", "kind"])
     return m.drop_duplicates("player_id", keep="last")
@@ -120,10 +145,11 @@ def news_moves(ros: pd.DataFrame) -> pd.DataFrame:
 
 def news_components():
     """Bottom-up components at the cutoff and in the counterfactual 'market
-    date' state: same roster except the news moves undone, every injury,
-    suspension and holdout reported after the market date healed, and
-    Hellebuyck in Winnipeg. LTIR placements made before the market date
-    (Pietrangelo, Ellis) stay in both states."""
+    date' state: the same roster with the news moves undone (switches moved
+    back, veteran additions removed, departures restored), every absence
+    reported after the market date healed, and Hellebuyck in Winnipeg.
+    LTIR placements and the injuries in PRE_MARKET_INJURIES keep their
+    absences in both states. Both states use the same deterministic seeds."""
     from hattrick import deploy as DP
     from hattrick import goalies as GL
     from hattrick import players as PL
@@ -133,32 +159,48 @@ def news_components():
     moves = news_moves(ros)
     cf = ros.copy()
     for mv in moves.itertuples(index=False):
-        if mv.player_id in set(cf.player_id):
+        if mv.kind == "departure":
+            info = _player_info(mv.player_id)
+            if info is not None:
+                cf = pd.concat([cf, pd.DataFrame([{**info, "player_id": mv.player_id,
+                                                   "team": mv.from_team}])], ignore_index=True)
+        elif mv.player_id in set(cf.player_id):
             if mv.from_team is None:
                 cf = cf[cf.player_id != mv.player_id]
             else:
                 cf.loc[cf.player_id == mv.player_id, "team"] = mv.from_team
     status = D.availability_raw_2027().set_index("player_id").manual_status.dropna()
-    pre_market_out = [pid for pid, st in status.items() if st == "LTIR"]
+    ltir = [pid for pid, st in status.items() if st == "LTIR"]
 
-    def comps(r, injuries: bool):
+    def comps(r, now: bool):
         sk = r[r.grp != "G"]
         gl = r[r.grp == "G"][["player_id", "team", "birth", "name"]]
         extra = sk.assign(pos=np.where(sk.grp == "D", "D", "F"))[["player_id", "pos", "birth", "name"]]
-        if injuries:
-            go, rng_, _ = DP.games_out_2027(sk, GAMES, with_range=True)
-            ggo, gpres, _ = GL.goalie_status_2027(gl, GAMES)
-        else:
-            go = pd.Series(0.0, index=sk.player_id.to_numpy())
-            go[go.index.isin(pre_market_out)] = GAMES
-            rng_, ggo, gpres = None, None, None
+        go, rng_, _ = DP.games_out_2027(sk, GAMES, with_range=True)
+        ggo, gpres, _ = GL.goalie_status_2027(gl, GAMES)
+        if not now:
+            keep = set(ltir) | set(PRE_MARKET_INJURIES)
+            go = go.where(go.index.isin(keep), 0.0)
+            rng_ = None
+            ggo = ggo.where(ggo.index.isin(keep), 0.0)
+            gpres = pd.Series(1.0, index=ggo.index)
         c, _ = TC.components(V, sk[["player_id", "team", "name"]], gl, GAMES,
                              roster_kind="opening", games_out=go, games_out_range=rng_,
                              goalie_out=ggo, goalie_present=gpres, extra=extra)
         return c
 
-    now = pd.read_csv(OUT / f"team_components_{V}.csv")
-    return now, comps(cf, injuries=False), moves
+    return comps(ros, True), comps(cf, False), moves
+
+
+def _player_info(pid: int) -> dict | None:
+    """grp/name/birth for a player absent from the 2026-27 rosters."""
+    sk = D.skater_seasons()
+    row = sk[sk.player_id == pid].sort_values("season_end").tail(1)
+    if not len(row):
+        return None
+    b = D.bios().set_index("player_id")
+    return {"grp": "D" if row.pos.iloc[0] == "D" else "F", "name": row.name.iloc[0],
+            "birth": b.birth.get(pid, pd.NaT), "pos_raw": row.position.iloc[0]}
 
 
 def points_per_goal_diff() -> float:
@@ -183,41 +225,27 @@ def value_news(now: pd.DataFrame, cf: pd.DataFrame) -> pd.DataFrame:
                          "news_rel82": (ppg * 82.0 * (d_gf - d_ga)).to_numpy()})
 
 
-def hellebuyck_adjustment(now: pd.DataFrame, goalies: pd.DataFrame) -> pd.Series:
-    """Expected change in team goalie GSAx/60 from a possible trade."""
-    h = HELLEBUYCK
-    row = goalies[goalies.player_id == h["player_id"]]
-    if not len(row):
-        return pd.Series(0.0, index=now.team)
-    g60 = float(row.gsax60.iloc[0])
-    cur = now.set_index("team").goalie_gsax60
-    adj = pd.Series(0.0, index=cur.index)
-    for t, p in h["p_dest"].items():
-        adj[t] = p * h["season_share"] * h["start_share"] * (g60 - cur[t])
-    return adj
-
-
 # ---------------------------------------------------------------------------
 # Team targets
 # ---------------------------------------------------------------------------
 def team_targets(log: dict) -> pd.DataFrame:
     from hattrick import players as PL  # noqa: F401  (ensures params exist)
-    goalies = pd.read_csv(OUT / f"goalie_rates_{V}.csv")
     now, cf, moves = news_components()
-    now = now.copy()
-    now["goalie_gsax60"] = now.goalie_gsax60 + now.team.map(hellebuyck_adjustment(now, goalies))
     news = value_news(now, cf).set_index("team").news_rel82
 
     # roster-change model (current roster vs last season's), fitted on history
     hist_delta = pd.read_csv(RD.OUT)
+    hist_delta = hist_delta[hist_delta.season_end <= max(CLEAN_MARKET_SEASONS)]   # first-10 rosters only
     rd_fit = RD.to_points(hist_delta, V)
     comps = [c[2:] for c in rd_fit["cols"]]
     a_, b_ = now.set_index("team"), RD.previous_components(V, GAMES).set_index("team")
     rd = RD.apply(rd_fit, pd.DataFrame({"team": a_.index, **{f"d_{c}": (a_[c] - b_[c].reindex(a_.index)).to_numpy()
                                                           for c in comps}}))
-    # bottom-up roster view (hattrick.team_points_map), fitted on 2011-2026
+    # bottom-up roster view (hattrick.team_points_map), fitted on the seasons
+    # whose roster proxy is the first 10 games (2011-2024)
     from hattrick import team_points_map as TPM
     bu_hist = pd.read_csv(C.OUT / "backtest" / "team_components_hist.csv")
+    bu_hist = bu_hist[bu_hist.roster_proxy == "first10"]
     bu_fit = TPM.fit(pd.concat([bu_hist, now.assign(season_end=V)], ignore_index=True), V)
     bu = TPM.predict(bu_fit, pd.concat([bu_hist, now.assign(season_end=V)], ignore_index=True), V)
     bu = bu.set_index("team").bu_rel82
@@ -234,15 +262,15 @@ def team_targets(log: dict) -> pd.DataFrame:
                       "rd_rel82": rd.reindex(teams).to_numpy(),
                       "bu_rel82": bu.reindex(teams).to_numpy()})
 
-    # blend weights: all seasons with a market line
-    hist = T.blend_frame([2019, 2020, 2022, 2023, 2024, 2025, 2026])
+    # blend: seasons with a preseason line and a clean roster proxy
+    hist = T.blend_frame(CLEAN_MARKET_SEASONS)
     hist = hist.merge(TPM.walk_forward_points(bu_hist), on=["team", "season_end"], how="left")
     wf = RD.walk_forward(hist_delta)
     hist = hist.merge(wf, on=["team", "season_end"], how="left")
     hist["rd_rel82"] = hist.rd_rel82.fillna(0.0)          # expansion teams: no previous roster
     hist["tdr_rel82"] = hist.td_rel82 + hist.rd_rel82
     # pre-declared candidate view sets; the one with the lowest leave-one-
-    # season-out RMSE is used, with weights refitted on all market seasons
+    # season-out RMSE is used, with weights refitted on the same seasons
     candidates = [["mkt_rel82"], ["mkt_rel82", "td_rel82"], ["mkt_rel82", "tdr_rel82"],
                   ["mkt_rel82", "td_rel82", "tdr_rel82"], ["mkt_rel82", "bu_rel82"]]
     scored = []
@@ -258,8 +286,8 @@ def team_targets(log: dict) -> pd.DataFrame:
     log["blend"] = {"views": views, "weights": dict(zip(views, map(float, w))),
                     "loso_rmse_82": rmse, "loso_mae_82": float((loso.blend_mae * loso.n).sum() / loso.n.sum()),
                     "league_points_per_team_84": league84}
-    log["talent_sd_82"] = float(np.sqrt(max(rmse ** 2 - T.LUCK_SD_82 ** 2, 1.0)))
-    log["hellebuyck"] = HELLEBUYCK
+    log["blend_seasons"] = CLEAN_MARKET_SEASONS
+    log["pre_market_injuries"] = PRE_MARKET_INJURIES
     return f
 
 
@@ -270,39 +298,56 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sims", type=int, default=40000)
     ap.add_argument("--seed", type=int, default=C.SEED)
+    ap.add_argument("--allow-dirty", action="store_true",
+                    help="run with uncommitted code (recorded in the manifest)")
     a = ap.parse_args()
+    dirty = _dirty_code()
+    if dirty and not a.allow_dirty:
+        raise SystemExit("uncommitted code changes:\n" + "\n".join(dirty) +
+                         "\ncommit first (or pass --allow-dirty)")
     OUT.mkdir(parents=True, exist_ok=True)
     log: dict = {"cutoff_utc": C.CUTOFF_UTC.isoformat(), "created_utc":
-                 datetime.now(timezone.utc).isoformat(timespec="seconds"), "code": _commit()}
+                 datetime.now(timezone.utc).isoformat(timespec="seconds"), "code": _commit(),
+                 "code_dirty": dirty,
+                 "status": ("forecast from information dated before the cutoff; built after "
+                            "the first puck drop (see created_utc)")}
 
     from hattrick import gamemodel as GM
     P = GM.load_params()
+    log["mu_fitted"] = P["mu"]
     model = S.FittedModel(P, V)
     sch = D.schedule_2027()
     adj = model.game_adjustments(sch)
-    adj = add_backup_b2b(adj, sch, P, GM)
-
-    # league scoring level: the same rule the player layer uses (last intact
-    # season), so team goals and the sum of player goals agree
-    lvl = league_level_mu(model, sch, adj, log)
-    P["mu"] = lvl
-    model = S.FittedModel(P, V)
+    adj = add_backup_b2b(adj, sch, P, GM, log)
 
     # 2-3: targets and ratings
     tg = team_targets(log)
     style = T.predict_style(T.fit_style(V), V, sorted(C.TEAMS_2027))
     targets = tg.set_index("team").target84
     r = K.solve_ratings(sch, targets, style[["team", "o_m", "d_m"]], model, adj)
-    slope = K.points_per_rating(sch, r[["team", "o", "d"]], model, adj)
-    net_sd = log["talent_sd_82"] * GAMES / 82.0 / slope.reindex(r.team).to_numpy()
-    r["o_sd"] = net_sd / np.sqrt(2)
-    r["d_sd"] = net_sd / np.sqrt(2)
+
+    # rating uncertainty: out-of-sample blend error net of the game luck that
+    # the scoring model itself implies over an 82-game schedule
+    luck = luck_sd_82(sch, r, model, adj)
+    talent = float(np.sqrt(max(log["blend"]["loso_rmse_82"] ** 2 - luck ** 2, 1.0)))
+    hp = json.loads((C.PARAMS / "ratings_hp.json").read_text())["hp"]
     # within-season drift of each of o and d: the in-season filter's daily
     # process variance (shot-rate + finishing parts) over a ~190-day season
-    hp = json.loads((C.PARAMS / "ratings_hp.json").read_text())["hp"]
     drift = float(np.sqrt(190 * (hp["q_s"] + hp["q_f"])))
-    log["drift_sd"] = drift
-    log["rating_sd_net_mean"] = float(np.mean(net_sd))
+    slope = K.points_per_rating(sch, r[["team", "o", "d"]], model, adj)
+    net_sd = talent * GAMES / 82.0 / slope.reindex(r.team).to_numpy()
+    log.update(luck_sd_82=luck, talent_sd_82=talent, drift_sd=drift,
+               rating_sd_net_mean=float(np.mean(net_sd)))
+
+    # league scoring level (the player layer's rule: last intact season), with
+    # the Jensen term for this rating dispersion and drift; then re-solve
+    # Var(log lam) = o_sd^2 + d_sd^2 (= net_sd^2) + two centred random walks (drift^2/6 each)
+    var = float(np.mean(net_sd ** 2) + 2 * drift ** 2 / 6)
+    P["mu"] = league_level_mu(model, sch, adj, log, var)
+    model = S.FittedModel(P, V)
+    r = K.solve_ratings(sch, targets, style[["team", "o_m", "d_m"]], model, adj)
+    r["o_sd"] = net_sd / np.sqrt(2)
+    r["d_sd"] = net_sd / np.sqrt(2)
 
     # 4: simulate
     res = S.simulate(sch, r[["team", "o", "d", "o_sd", "d_sd"]], model, n_sims=a.sims,
@@ -324,21 +369,52 @@ def main():
     r.to_csv(OUT / "ratings_2027.csv", index=False, float_format="%.5f")
     adj.to_csv(OUT / "game_adjustments_2027.csv", index=False, float_format="%.6f")
     sch.to_csv(OUT / "schedule_2027.csv", index=False)
-    state = {**log, "sims": a.sims, "seed": a.seed}
+    state = {**log, "sims": a.sims, "seed": a.seed, "P_mu": P["mu"]}
     (OUT / "state_2027.json").write_text(json.dumps(state, indent=1, default=float))
     manifest = SNAP.manifest()
+    fr = sorted((C.ROOT / "data" / "raw" / "fastrhockey").glob("*.parquet"))
     manifest["added_inputs"] = {
         "hattrick/data_market_history.csv": _sha(C.PKG / "data_market_history.csv"),
         "hattrick/data_injuries_2027.csv": _sha(C.PKG / "data_injuries_2027.csv"),
-        "fastRhockey box scores": "sportsdataverse/fastRhockey-data, seasons 2010-11..2023-24"}
+        "neurhl/output/preds (game ids, realised shots; unchanged since before the cutoff)":
+            {p.name: _sha(p) for p in sorted((C.ROOT / "neurhl/output/preds").glob("*.csv"))},
+        "data/raw/fastrhockey (sportsdataverse/fastRhockey-data, 2010-11..2023-24)":
+            {p.name: _sha(p) for p in fr}}
+    manifest["code"] = {"commit": log["code"], "dirty": dirty,
+                        "files": {str(p.relative_to(C.ROOT)): _sha(p)
+                                  for p in sorted(C.PKG.rglob("*.py")) if "cache" not in p.parts}}
     manifest["outputs"] = {p.name: _sha(p) for p in sorted(OUT.glob("*.csv"))}
-    manifest["code"] = log["code"]
     (OUT / "manifest_2027.json").write_text(json.dumps(manifest, indent=1))
     print(teams[["team", "points", "points_p10", "points_p90", "playoff_pct", "cup_pct",
                  "target84", "news_rel82"]].round(1).to_string(index=False))
 
 
-def league_level_mu(model, sch, adj, log, drift_var: float = 0.005) -> float:
+def _dirty_code() -> list[str]:
+    out = subprocess.run(["git", "-C", str(C.ROOT), "status", "--porcelain", "--", "hattrick"],
+                         capture_output=True, text=True).stdout.splitlines()
+    return [l for l in out if l.strip().endswith(".py")]
+
+
+def luck_sd_82(sch, r, model, adj) -> float:
+    """SD of a team's season points from game outcomes alone, at the solved
+    ratings: per game, points are 2 / 1 / 0 with the model's probabilities."""
+    rr = r.set_index("team")
+    a2 = adj.set_index("game_id").reindex(sch.game_id)
+    lh, la = model.rates(rr.o.reindex(sch.home).to_numpy(), rr.d.reindex(sch.home).to_numpy(),
+                         rr.o.reindex(sch.away).to_numpy(), rr.d.reindex(sch.away).to_numpy(),
+                         a2.adj_h.to_numpy(), a2.adj_a.to_numpy())
+    p = model.probs(lh, la)
+    otl_h = p["tie"] - p["h_ot"] - p["h_so"]
+    otl_a = p["h_ot"] + p["h_so"]
+    win_h, win_a = p["p_home"], 1 - p["p_home"]
+    var_h = 4 * win_h + otl_h - (2 * win_h + otl_h) ** 2
+    var_a = 4 * win_a + otl_a - (2 * win_a + otl_a) ** 2
+    v = pd.concat([pd.Series(var_h, index=sch.home.to_numpy()),
+                   pd.Series(var_a, index=sch.away.to_numpy())]).groupby(level=0).sum()
+    return float(np.sqrt(v.mean() * 82.0 / GAMES))
+
+
+def league_level_mu(model, sch, adj, log, var_log_rate: float) -> float:
     """mu such that expected goals per team-game (regulation + overtime
     winners, no shootout) equal last season's league level, allowing for the
     rating dispersion the simulation adds (Jensen: E[exp(x)] = exp(E x + var/2))."""
@@ -348,29 +424,27 @@ def league_level_mu(model, sch, adj, log, drift_var: float = 0.005) -> float:
     P = model.P
     flat = np.zeros(len(sch))
     a2 = adj.set_index("game_id").reindex(sch.game_id)
-    mu0 = P["mu"]
     for _ in range(3):
         lh, la = model.rates(flat, flat, flat, flat, a2.adj_h.to_numpy(), a2.adj_a.to_numpy())
         p = model.probs(lh, la)
         ot = (p["h_ot"] + p["a_ot"]).mean() / 2.0
-        reg = (lh.mean() + la.mean()) / 2.0 * np.exp(0.5 * (2 * 0.0067 + drift_var))
+        reg = (lh.mean() + la.mean()) / 2.0 * np.exp(0.5 * var_log_rate)
         P["mu"] = P["mu"] + np.log((L - ot) / reg)
         model = S.FittedModel(P, V)
-    log["league_level"] = {"gf_per_team_game_target": L, "mu_fitted": mu0, "mu_used": P["mu"]}
+    log["league_level"] = {"gf_per_team_game_target": L, "mu_used": P["mu"],
+                           "var_log_rate": var_log_rate}
     return P["mu"]
 
 
-def add_backup_b2b(adj, sch, P, GM) -> pd.DataFrame:
+def add_backup_b2b(adj, sch, P, GM, log) -> pd.DataFrame:
     """Team-specific backup-on-back-to-back effect: a team whose backup is far
     below its starter loses more on the second night of a back-to-back.
-    Save talent per shot on goal from the goalie layer (per unblocked attempt
-    x attempts per shot on goal)."""
+    The starter-minus-backup gap is in the scoring model's own fitted goalie
+    units (gamemodel.team_gap_2027)."""
     g = pd.read_csv(OUT / f"goalie_rates_{V}.csv")
-    g = g[g.p_present > 0.5].sort_values("start_share", ascending=False)
-    per_sog = g.gsax_per_fa * 1.40
-    g = g.assign(t=per_sog)
-    top2 = g.groupby("team").head(2)
-    gap = top2.groupby("team").t.agg(lambda x: x.iloc[0] - x.iloc[1] if len(x) > 1 else 0.0)
+    g = g[g.p_present > 0.5]
+    gap = GM.team_gap_2027(g)
+    log["b2b_goalie_gap"] = {k: float(v) for k, v in gap.items()}
     sf = GM.schedule_features(sch, V)
     a = adj.copy()
     b2b_h = (sf.rest_h.to_numpy() == 1)
@@ -409,35 +483,43 @@ def game_file(sch, r, model, adj, n_draws: int = 400, seed: int = 11) -> pd.Data
 
 
 def player_lines(teams: pd.DataFrame):
-    """Scale skater goals/assists (and their bands) so that, per team, rostered
-    skaters' goals + the call-ups' share equal the simulated team goals
-    (excluding shootout 'goals'); goalies' GA to the simulated team GA."""
+    """Reconcile the player layer to the simulated team totals.
+
+    Skaters: goals, assists and their bands are scaled so that, per team, the
+    rostered skaters' goals plus the call-ups' share equal the simulated team
+    goals (no shootout 'goals'). Goalies: the rostered goalies' GA is scaled to
+    the team's GA net of empty-net and shootout goals and of the call-ups'
+    starts; save percentage and GSAx move with it; wins follow the team's
+    expected win rate."""
     sk = pd.read_csv(OUT / f"player_rates_{V}.csv")
     gl = pd.read_csv(OUT / f"goalie_rates_{V}.csv")
     comp = pd.read_csv(OUT / f"team_components_{V}.csv").set_index("team")
     t = teams.set_index("team")
-    # simulated GF includes one goal per shootout win; remove the expected number
-    so_wins = t.w - t.row
-    gf_real = t.gf - so_wins
+    gf_real = t.gf - (t.w - t.row)                      # remove shootout 'goals'
     share = (comp.gf_pg_skaters / comp.gf_pg_total).reindex(t.index)
-    tgt = gf_real * share
-    cur = sk.groupby("team").g.sum().reindex(t.index)
-    k = (tgt / cur).rename("goal_scale")
-    sk["goal_scale"] = sk.team.map(k).fillna(1.0)
-    for c in ("g", "g_p10", "g_p90", "g_sd", "a", "a_p10", "a_p90", "a_sd", "a1", "a2",
-              "ppg", "ppa", "p", "p_p10", "p_p50", "p_p90", "p_sd"):
-        if c in sk:
-            sk[c] = sk[c] * sk.goal_scale
-    # goalies are charged with neither shootout "goals" nor empty-net goals
-    gt = t.ga - t.so_losses - EN_GA_PER_GAME * GAMES
-    cur_ga = gl.groupby("team").ga.sum().reindex(t.index)
-    kg = (gt / cur_ga).rename("ga_scale")
-    gl["ga_scale"] = gl.team.map(kg).fillna(1.0)
+    k = (gf_real * share / sk.groupby("team").g.sum().reindex(t.index)).rename("goal_scale")
+    sk = sk.assign(goal_scale=sk.team.map(k).fillna(1.0))
+    cols = [c for c in ("g", "g_p10", "g_p90", "g_sd", "a", "a_p10", "a_p90", "a_sd", "a1", "a2",
+                        "ppg", "ppa", "p", "p_p10", "p_p50", "p_p90", "p_sd") if c in sk]
+    sk[cols] = sk[cols].mul(sk.goal_scale, axis=0)
+
+    starts = gl.groupby("team").starts.sum().reindex(t.index)
+    callup = gl.groupby("team").callup_starts.first().reindex(t.index).fillna(0.0)
+    team_goalie_ga = (t.ga - t.so_losses - EN_GA_PER_GAME * GAMES)
+    tgt = team_goalie_ga * starts / (starts + callup)
+    kg = (tgt / gl.groupby("team").ga.sum().reindex(t.index)).rename("ga_scale")
+    gl = gl.assign(ga_scale=gl.team.map(kg).fillna(1.0))
+    ga0 = gl.ga.copy()
     for c in ("ga", "ga_p10", "ga_p90"):
         gl[c] = gl[c] * gl.ga_scale
-    gl["sv_pct"] = 1 - gl.ga / gl.sa.clip(lower=1)
+    shift = gl.ga - ga0                                   # GSAx = xGA - GA moves with GA
+    for c in ("gsax", "gsax_p10", "gsax_p90"):
+        if c in gl:
+            gl[c] = gl[c] - shift
+    sa = gl.sa.clip(lower=1)
+    gl["sv_pct"] = 1 - gl.ga / sa
+    gl["sv_pct_p10"] = 1 - gl.ga_p90 / sa
+    gl["sv_pct_p90"] = 1 - gl.ga_p10 / sa
+    gl["wins"] = gl.starts * gl.team.map(t.w / t.gp)
+    gl = gl.drop(columns=[c for c in ("wins_placeholder",) if c in gl])
     return sk, gl
-
-
-if __name__ == "__main__":
-    main()

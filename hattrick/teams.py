@@ -123,7 +123,7 @@ def _design(df, cols):
     return df[cols].to_numpy(float)
 
 
-def fit_topdown(target_season: int, alpha: float = 2.0, extra_cols=(),
+def fit_topdown(target_season: int, alpha: float = 8.0, extra_cols=(),
                 extra_frame: pd.DataFrame | None = None):
     """Fit points-per-82 above league average on seasons before target_season.
 
@@ -237,8 +237,11 @@ def predict_style(fit: dict, season_end: int, teams) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 def market_history() -> pd.DataFrame:
     """Historical preseason points lines (82-game seasons), hand-collected from
-    Hockey-Reference preseason-odds tables and cross-checked (see
-    hattrick/data_sources.csv)."""
+    Hockey-Reference preseason-odds tables and cross-checked against other
+    books; each row carries its source URL and a confidence grade
+    (hattrick/data_market_history.csv). These are late-preseason lines
+    (about Oct 1); the 2026-27 line is from Aug 17, which is why the freeze
+    adds the news between Aug 17 and the cutoff."""
     m = pd.read_csv(C.PKG / "data_market_history.csv")
     m["team"] = D.norm_team(m.team)
     return m[["season_end", "team", "line", "confidence"]]

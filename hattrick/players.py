@@ -1212,9 +1212,8 @@ def roster_2027() -> pd.DataFrame:
                  | (av.override_games_out.fillna(0) > 0)]
     flagged = flagged[flagged.team.notna() & ~flagged.player_id.isin(r.player_id)]
     add = flagged[["player_id", "team", "name"]].drop_duplicates("player_id").copy()
-    if DP.RESEARCH_FILE.exists():
-        res = pd.read_csv(DP.RESEARCH_FILE)
-        res = res[pd.to_datetime(res.report_date) <= pd.Timestamp(DP.RESEARCH_CUTOFF)]
+    res = DP.research_rows()
+    if len(res):
         res["nn"] = res.name.map(DP._norm_name)
         avn = av.dropna(subset=["name"]).assign(nn=lambda d: d.name.map(DP._norm_name))
         rr = res.merge(avn[["nn", "player_id"]].drop_duplicates("nn"), on="nn")

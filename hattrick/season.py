@@ -249,7 +249,12 @@ def simulate(schedule: pd.DataFrame, ratings: pd.DataFrame, model: ScoringModel,
     r = ratings.set_index("team").loc[teams]
     sch = schedule.sort_values(["date", "game_id"]).reset_index(drop=True)
     G = len(sch)
-    step_of = np.minimum((np.arange(G) * n_steps) // max(G, 1), n_steps - 1)
+    done_ids = set(completed.game_id) if completed is not None and len(completed) else set()
+    remaining = ~sch.game_id.isin(done_ids).to_numpy()
+    # strength drifts only over the games still to play
+    k_rem = np.cumsum(remaining) - 1
+    n_rem = max(int(remaining.sum()), 1)
+    step_of = np.minimum((np.maximum(k_rem, 0) * n_steps) // n_rem, n_steps - 1)
     O, D = strength_paths(teams, r.o.to_numpy(float), r.d.to_numpy(float),
                           r.o_sd.to_numpy(float), r.d_sd.to_numpy(float),
                           n_sims, n_steps, drift_sd, rng, rho_od)
@@ -275,11 +280,8 @@ def simulate(schedule: pd.DataFrame, ratings: pd.DataFrame, model: ScoringModel,
             hg, ag, ex = int(res["home_g"]), int(res["away_g"]), res["extra"]
             hw = hg > ag
             extra = {"REG": 0, "OT": 1, "SO": 2}[ex]
-            # standings convention: a shootout counts as one goal for the winner
+            # recorded scores already include the deciding OT/SO goal
             hg_s = np.full(n_sims, hg); ag_s = np.full(n_sims, ag)
-            if extra == 2:
-                # the recorded SO score already includes the decisive goal
-                pass
             hw = np.full(n_sims, hw)
             ext = np.full(n_sims, extra)
             p_home[k] = float(hw[0])
@@ -323,13 +325,19 @@ def _book(h, a, hg, ag, ext, hw, pts, w, rw, row, otl, gf, ga, gp):
 # Ranking and playoffs
 # ---------------------------------------------------------------------------
 def _rank_key(res: SeasonResult, rng) -> np.ndarray:
-    """Composite sort key (bigger is better) encoding the NHL tiebreakers."""
-    pct = res.points / np.maximum(2 * res.gp, 1)
-    gd = res.gf - res.ga
-    noise = rng.random(res.points.shape)
-    # lexicographic: points pct, RW, ROW, W, GD, GF, random
-    return (pct * 1e12 + res.rw * 1e9 + res.row * 1e6 + res.wins * 1e3
-            + (gd + 500) * 1.0 + res.gf * 1e-3 + noise * 1e-6)
+    """Standings rank per simulation (bigger is better), strictly
+    lexicographic on the NHL tiebreakers: points percentage, regulation wins,
+    regulation+OT wins, wins, goal differential, goals for, then a random draw
+    (standing in for head-to-head points). Returns ranks 0..T-1."""
+    n, T = res.points.shape
+    # points percentage as an exact integer comparison: points * (L / gp)
+    L = int(np.lcm.reduce(np.unique(np.maximum(res.gp, 1))))
+    pct = res.points.astype(np.int64) * (L // np.maximum(res.gp, 1)).astype(np.int64)
+    noise = rng.random((n, T))
+    order = np.lexsort((noise, res.gf, res.gf - res.ga, res.wins, res.row, res.rw, pct), axis=-1)
+    rank = np.empty((n, T), np.int64)
+    rank[np.arange(n)[:, None], order] = np.arange(T)[None, :]
+    return rank
 
 
 def seed_playoffs(res: SeasonResult, rng) -> np.ndarray:
@@ -358,7 +366,7 @@ def seed_playoffs(res: SeasonResult, rng) -> np.ndarray:
             for j in range(3):
                 qualified[np.arange(n), top3[:, j]] = True
         conf_ids = np.array([col[t] for dv in divs for t in C.DIVISIONS[dv] if t in col])
-        rest_key = np.where(qualified[:, conf_ids], -np.inf, key[:, conf_ids])
+        rest_key = np.where(qualified[:, conf_ids], -1, key[:, conf_ids])
         wc = conf_ids[np.argsort(-rest_key, axis=1)[:, :2]]
         w0, w1 = winners
         first_is_0 = key[np.arange(n), w0] > key[np.arange(n), w1]
