@@ -340,3 +340,43 @@ def live_offsets(skaters: pd.DataFrame, hp: LineupHP = X1, V: int = C.TARGET_SEA
 
 def settings(hp: LineupHP = X1) -> dict:
     return asdict(hp)
+
+
+def box_lineups(before, schedule: pd.DataFrame, path: Path | str | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """ORR 1.3: actual dressed skaters and starting goalies of every game dated
+    strictly before ``before`` from the NHL box scores (orr.ingest ->
+    boxes_2027.csv), in live_lineups' format (lineup_source 'NHL_BOX'). This is
+    the information the X1 backtest used for past games."""
+    path = Path(path) if path is not None else C.OUT / "live" / f"boxes_{C.TARGET_SEASON}.csv"
+    cols_s = ["game_id", "date", "side", "team", "player_id", "pos", "lineup_source"]
+    cols_g = ["game_id", "goalie_home", "goalie_away", "goalie_source_home", "goalie_source_away"]
+    if not path.exists():
+        return pd.DataFrame(columns=cols_s), pd.DataFrame(columns=cols_g)
+    b = pd.read_csv(path)
+    b = b[(pd.to_datetime(b.date) < pd.Timestamp(before)) & (b.toi > 0)]
+    sch = schedule[["game_id", "home", "away"]]
+    b = b.merge(sch, on="game_id", how="inner")
+    b["side"] = np.where(b.team == b.home, "h", "a")
+    sk = b[b.pos != "G"].assign(lineup_source="NHL_BOX")
+    sk = sk[cols_s[:-1] + ["lineup_source"]].copy()
+    sk["date"] = pd.to_datetime(sk.date)
+    gl = b[b.pos == "G"].copy()
+    # the flagged starter, else the goalie with the most ice time
+    gl = gl.sort_values(["game_id", "side", "starter", "toi"], ascending=[True, True, False, False])
+    st = gl.drop_duplicates(["game_id", "side"]).pivot(index="game_id", columns="side", values="player_id")
+    gk = pd.DataFrame({"game_id": st.index.astype(int),
+                       "goalie_home": st.get("h", pd.Series(np.nan, index=st.index)).to_numpy(float),
+                       "goalie_away": st.get("a", pd.Series(np.nan, index=st.index)).to_numpy(float),
+                       "goalie_source_home": "NHL_BOX", "goalie_source_away": "NHL_BOX"})
+    return sk.reset_index(drop=True), gk
+
+
+def prefer_box(live_sk, live_gk, box_sk, box_gk):
+    """Box-score lineups and starters replace the pregame files' for the games
+    they cover; other games keep the pregame files'."""
+    if box_sk is None or not len(box_gk):
+        return live_sk, live_gk
+    covered = set(box_gk.game_id)
+    sk = pd.concat([live_sk[~live_sk.game_id.isin(covered)], box_sk], ignore_index=True)
+    gk = pd.concat([live_gk[~live_gk.game_id.isin(covered)], box_gk], ignore_index=True)
+    return sk, gk

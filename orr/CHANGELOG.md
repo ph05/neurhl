@@ -2,6 +2,13 @@
 
 ORR (Odds, Ratings & Rosters) is versioned by what it forecasts in-season. The scored 2026-27 preseason forecast (`orr/output/freeze_2027/`, ORR 1.0) is frozen; later versions change the daily in-season forecasts from the day they ship, and each forecast counts only for games after its publication. Release notes with evidence are in `orr/releases/`.
 
+## 1.3 (2026-10-01): the live loop matches the backtest
+
+- **Box-score-first lineups and starters** for past games, ahead of NeurHL's pregame files, as in the X1 backtest (`box_first`).
+- **In-season goalie talent**, using the backtests' own rule: preseason prior plus season saves above average. Each game uses only earlier evidence (`goalie_update`).
+- **Per-game P(goal) and P(point) checked against 92,313 held-out skater-games.** They are already calibrated (log loss 0.3969 and 0.5973). The Platt correction made both slightly worse and is **not adopted**; it ships switched off.
+- **Season-to-date columns on the website** (GP and points so far, rest-of-season points) once box scores exist.
+
 ## 1.2 (2026-10-01): player-level in-season
 
 - **In-season skater rates.** Each skater's goals, assists and shots per game are updated with his own games so far, as a Gamma-Poisson posterior mean with a prior weight of 40 games for goals and assists and 20 for shots. On held-out 2021-22 and 2022-23, rest-of-season points error falls from 4.48 to 4.07 (−0.41, CI −0.49 to −0.34) and shots error from 10.71 to 9.23.

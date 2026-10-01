@@ -65,6 +65,9 @@ LIVE = C.OUT / "live"
 
 # model versions: ORR 1.1 = 1.0 + the accepted pre-registered item X1
 MODELS = {
+    "1.3": {"version": "ORR 1.3", "past_starters": True, "lineups": True, "player_update": True,
+            "box_first": True, "goalie_update": True, "player_calibration": True,
+            "accepted_items": ["X1", "1.2: in-season skater rates", "1.3: box-score lineups, goalie talent"]},
     "1.2": {"version": "ORR 1.2", "past_starters": True, "lineups": True, "player_update": True,
             "accepted_items": ["X1", "1.2: in-season skater rates"]},
     "1.1": {"version": "ORR 1.1", "past_starters": True, "lineups": True,
@@ -72,7 +75,7 @@ MODELS = {
     "1.0": {"version": "ORR 1.0", "past_starters": False, "lineups": False,
             "accepted_items": []},
 }
-DEFAULT_MODEL = "1.2"
+DEFAULT_MODEL = "1.3"
 
 
 def _sha(p: Path) -> str:
@@ -103,20 +106,27 @@ def load_results(path, before: pd.Timestamp) -> pd.DataFrame:
     return r.sort_values(["date", "game_id"]).reset_index(drop=True)
 
 
-def starter_diffs(fz: dict, games: pd.DataFrame, starters: pd.DataFrame | None) -> pd.DataFrame:
+def starter_diffs(fz: dict, games: pd.DataFrame, starters: pd.DataFrame | None,
+                  talent_fn=None) -> pd.DataFrame:
     """Known starters' save talent minus the team's expected start mix, in the
-    scoring model's fitted goalie units (structural.goalie_talent_2027)."""
+    scoring model's fitted goalie units (structural.goalie_talent_2027).
+    ``talent_fn(date)`` (ORR 1.3) gives the talent as of a date, so each game
+    uses only goalie evidence from before it."""
     out = pd.DataFrame({"game_id": games.game_id.to_numpy(), "diff_h": np.nan, "diff_a": np.nan})
     g = fz.get("goalies")
     if starters is None or g is None or not len(starters):
         return out
     from orr import structural as ST
-    tal = ST.goalie_talent_2027()
-    mix = ST.usual_starter_talent(g, tal)
-    s = games[["game_id", "home", "away"]].merge(starters, on="game_id", how="left")
-    for side, col in (("home", "diff_h"), ("away", "diff_a")):
-        t = s[f"goalie_{side}"].map(tal).fillna(ST.goalie_talent_default()).where(s[f"goalie_{side}"].notna())
-        out[col] = (t - s[side].map(mix)).to_numpy()
+    s = games[["game_id", "date", "home", "away"]].merge(starters, on="game_id", how="left")
+    dates = pd.to_datetime(s.date)
+    for d in sorted(dates.unique()) if talent_fn is not None else [None]:
+        tal = talent_fn(d) if talent_fn is not None else ST.goalie_talent_2027()
+        mix = ST.usual_starter_talent(g, tal)
+        rows = (dates == d).to_numpy() if d is not None else np.ones(len(s), bool)
+        for side, col in (("home", "diff_h"), ("away", "diff_a")):
+            gid = s.loc[rows, f"goalie_{side}"]
+            t = gid.map(tal).fillna(ST.goalie_talent_default()).where(gid.notna())
+            out.loc[rows, col] = (t - s.loc[rows, side].map(mix)).to_numpy()
     return out
 
 
@@ -169,11 +179,18 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     lu_sk, lu_gk, lu_files = None, None, []
     if cfg["lineups"] or cfg["past_starters"]:
         lu_sk, lu_gk, lu_files = LU.live_lineups(day, lineup_dir)
+        if cfg.get("box_first"):          # ORR 1.3: past games' actual lineups and starters
+            b_sk, b_gk = LU.box_lineups(day, sch)
+            lu_sk, lu_gk = LU.prefer_box(lu_sk, lu_gk, b_sk, b_gk)
+    tal_fn = None
+    if cfg.get("goalie_update"):          # ORR 1.3: in-season goalie talent, as of each game's date
+        from orr import structural as ST
+        tal_fn = ST.goalie_talent_live
     starters = merge_starters(file_st, lu_gk) if cfg["past_starters"] else file_st
     lo = (LU.live_offsets(lu_sk, LU.X1) if cfg["lineups"]
           else pd.DataFrame(columns=["game_id", "lo_h", "lo_a", "known_h", "known_a"]))
     if cfg["past_starters"] and starters is not None and len(rr):
-        d = starter_diffs(fz, rr, starters).rename(columns={"diff_h": "gdiff_h", "diff_a": "gdiff_a"})
+        d = starter_diffs(fz, rr, starters, tal_fn).rename(columns={"diff_h": "gdiff_h", "diff_a": "gdiff_a"})
         rr = rr.merge(d, on="game_id", how="left")
     if cfg["lineups"] and len(rr):
         rr = rr.merge(lo[["game_id", "lo_h", "lo_a"]], on="game_id", how="left")
@@ -198,7 +215,7 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     today = sch[sch.date == day].copy()
     adj = pd.read_csv(FREEZE / "game_adjustments_2027.csv")
     t = today.merge(adj, on="game_id", how="left").merge(
-        starter_diffs(fz, today, starters), on="game_id", how="left")
+        starter_diffs(fz, today, starters, tal_fn), on="game_id", how="left")
     # Known starters: the preseason offsets carry the EXPECTED goalie (the
     # league-average backup effect on back-to-backs plus the team-specific
     # gap). When a starter is confirmed, that expectation is replaced by the
@@ -233,7 +250,8 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
         lineup_adj_h=t.lo_h.to_numpy(), lineup_adj_a=t.lo_a.to_numpy(),
         model=cfg["version"], created_utc=created)
 
-    players_out = player_lines(fz, games_out, day, update_rates=bool(cfg.get("player_update")))
+    players_out = player_lines(fz, games_out, day, update_rates=bool(cfg.get("player_update")),
+                               calibrate=bool(cfg.get("player_calibration")))
 
     # 3. re-simulate the rest of the season from the current standings
     done = res[["game_id", "home_g", "away_g", "extra"]]
@@ -274,7 +292,8 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     return games_out, standings
 
 
-def player_lines(fz: dict, games: pd.DataFrame, day: pd.Timestamp, update_rates: bool = False) -> pd.DataFrame:
+def player_lines(fz: dict, games: pd.DataFrame, day: pd.Timestamp, update_rates: bool = False,
+                 calibrate: bool = False) -> pd.DataFrame:
     """Per-game lines for every skater likely to dress: expected goals, points
     and shots, P(at least one goal) and P(at least one point).
 
@@ -331,6 +350,11 @@ def player_lines(fz: dict, games: pd.DataFrame, day: pd.Timestamp, update_rates:
                                              "p_dress", "toi_pg", "exp_goals", "exp_points", "exp_sog",
                                              "p_goal", "p_point"]])
     out = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
+    cal = PU.load_calibration() if calibrate else None      # ORR 1.3: only if the backtest adopted it
+    if cal is not None and len(out):
+        for k, col in (("goal", "p_goal"), ("point", "p_point")):
+            p = (out[col] / out.p_dress.clip(lower=1e-9)).clip(1e-6, 1 - 1e-6)
+            out[col] = out.p_dress * PU.platt(p.to_numpy(), cal[k])
     return out.sort_values(["game_id", "team", "exp_points"], ascending=[True, True, False])
 
 
