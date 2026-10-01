@@ -61,7 +61,8 @@
 </nav>
 
 <h2 id="standings">Projected standings</h2>
-<p class="note">Mean of 40,000 simulated seasons. P10/P50/P90 are percentiles of season points. HOWE is a reference projection (an Elo and ridge-regression blend) shown for comparison.</p>
+<div class="controls"><label>View <select id="st_view"></select></label></div>
+<p class="note" id="st_note">Mean of simulated seasons. P10/P50/P90 are percentiles of season points. HOWE is a reference projection (an Elo and ridge-regression blend) shown for comparison.</p>
 <div class="grid4" id="divs"></div>
 
 <h2 id="odds">Playoff odds (%)</h2>
@@ -183,21 +184,33 @@
   const TX = (D.teams_x || []).map(t => Object.assign({}, t, { name: (T0[t.ab] || {}).name || t.ab,
     div: (T0[t.ab] || {}).div || "", howe: (T0[t.ab] || {}).howe, diff: t.gf - t.ga }));
 
-  const divs = {}; TX.forEach(t => (divs[t.div] = divs[t.div] || []).push(t));
-  $("divs").innerHTML = Object.keys(divs).sort().map((d, i) => `<div><h3>${esc(d)}</h3><div class="wrap"><table id="div_${i}"></table></div></div>`).join("");
-  Object.keys(divs).sort().forEach((d, i) => table($("div_" + i), [
-    { k: "name", h: "Team", l: 1 }, { k: "pts", h: "PTS", f: f1 }, { k: "p10", h: "P10" }, { k: "p50", h: "P50" }, { k: "p90", h: "P90" },
-    { k: "w", h: "W", f: f1 }, { k: "l", h: "L", f: f1 }, { k: "otl", h: "OTL", f: f1 }, { k: "diff", h: "DIFF", f: f0, t: "Goals for minus against" },
-    { k: "po", h: "PO%", f: f1 }, { k: "howe", h: "HOWE", f: f1, t: "HOWE projected points" },
-    { k: "sos", h: "SOS left", f: x => x == null ? "" : (x > 0 ? "+" : "") + Number(x).toFixed(1),
-      t: "Remaining strength of schedule: opponents' mean net rating in the games left, x100 (log goal-rate units). Higher is harder. From the latest daily run." }
-  ], divs[d], { sort: "pts" }));
+  // standings and odds: the latest daily run by default (1.7), the preseason file on request
+  const TL = D.teams_live || {};
+  const TXL = TX.map(t => Object.assign({}, t, TL[t.ab] || {}, TL[t.ab] ? { diff: TL[t.ab].gf - TL[t.ab].ga } : {}));
+  const sv = $("st_view");
+  if (Object.keys(TL).length) sv.add(new Option(`Latest daily run (${D.live_date})`, "live"));
+  sv.add(new Option("Preseason file (2026-09-29)", "pre"));
+  function drawStandings() {
+    const rows = sv.value === "live" ? TXL : TX;
+    $("st_note").textContent = (sv.value === "live" ? `ORR in-season forecast from the daily run of ${D.live_date}: results so far fixed, the rest simulated. ` : "The frozen preseason forecast (40,000 simulated seasons). ") +
+      "P10/P50/P90 are percentiles of season points. HOWE is a reference projection (an Elo and ridge-regression blend) shown for comparison.";
+    const divs = {}; rows.forEach(t => (divs[t.div] = divs[t.div] || []).push(t));
+    $("divs").innerHTML = Object.keys(divs).sort().map((d, i) => `<div><h3>${esc(d)}</h3><div class="wrap"><table id="div_${i}"></table></div></div>`).join("");
+    Object.keys(divs).sort().forEach((d, i) => table($("div_" + i), [
+      { k: "name", h: "Team", l: 1 }, { k: "pts", h: "PTS", f: f1 }, { k: "p10", h: "P10" }, { k: "p50", h: "P50" }, { k: "p90", h: "P90" },
+      { k: "w", h: "W", f: f1 }, { k: "l", h: "L", f: f1 }, { k: "otl", h: "OTL", f: f1 }, { k: "diff", h: "DIFF", f: f0, t: "Goals for minus against" },
+      { k: "po", h: "PO%", f: f1 }, { k: "howe", h: "HOWE", f: f1, t: "HOWE projected points" },
+      { k: "sos", h: "SOS left", f: x => x == null ? "" : (x > 0 ? "+" : "") + Number(x).toFixed(1),
+        t: "Remaining strength of schedule: opponents' mean net rating in the games left, x100 (log goal-rate units). Higher is harder. From the latest daily run." }
+    ], divs[d], { sort: "pts" }));
 
-  table($("t_odds"), [
-    { k: "name", h: "Team", l: 1 }, { k: "pts", h: "PTS", f: f1 }, { k: "po", h: "Playoffs", f: f1 }, { k: "div_p", h: "Division", f: f1 },
-    { k: "pres", h: "Presidents'", f: f1 }, { k: "r2", h: "Round 2", f: f1 }, { k: "cf", h: "Conf. final", f: f1 },
-    { k: "fin", h: "Cup final", f: f1 }, { k: "cup", h: "Cup", f: f1 }
-  ], TX, { sort: "cup" });
+    table($("t_odds"), [
+      { k: "name", h: "Team", l: 1 }, { k: "pts", h: "PTS", f: f1 }, { k: "po", h: "Playoffs", f: f1 }, { k: "div_p", h: "Division", f: f1 },
+      { k: "pres", h: "Presidents'", f: f1 }, { k: "r2", h: "Round 2", f: f1 }, { k: "cf", h: "Conf. final", f: f1 },
+      { k: "fin", h: "Cup final", f: f1 }, { k: "cup", h: "Cup", f: f1 }
+    ], rows, { sort: "cup" });
+  }
+  sv.onchange = drawStandings; drawStandings();
 
   table($("t_team"), [
     { k: "name", h: "Team", l: 1 }, { k: "gf", h: "GF", f: f0 }, { k: "ga", h: "GA", f: f0 }, { k: "diff", h: "DIFF", f: f0 },
@@ -266,6 +279,8 @@
     { k: "pre", h: "Preseason", f: pc, t: "ORR's preseason probability for this game" }, { k: "elo", h: "Elo", f: pc }, { k: "ot", h: "P(OT)", f: pc },
     { k: "score", h: "Reg. goals A-H", t: "Expected regulation goals", f: s => s ? `${Number(s[1]).toFixed(2)}-${Number(s[0]).toFixed(2)}` : "" },
     { k: "sog", h: "SOG A-H", t: "Sum of the dressed skaters' expected shots", f: s => s ? `${Number(s[1]).toFixed(1)}-${Number(s[0]).toFixed(1)}` : "" },
+    { k: "rest", h: "Rest A-H", t: "Days since each team's previous game; B2B = back-to-back", f: s => s ? [s[1], s[0]].map(x => x == null ? "?" : x <= 1 ? "B2B" : x >= 4 ? "4d+" : `${x}d`).join("-") : "" },
+    { k: "km", h: "Travel km A-H", t: "Kilometres travelled since each team's previous game", f: s => s ? `${s[1] ?? "?"}-${s[0] ?? "?"}` : "" },
     { k: "kind", h: "Forecast", l: 1 }
   ], TN.games);
   const tp = [];
@@ -344,8 +359,8 @@
 
   // ---- files
   const sha = D.sha256 || {};
-  const DF = D.daily_files || [];
-  const dfl = DF.length ? `<p>Latest daily run: ${DF.map(f => `<a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/${f}">${esc(f.split("/").pop())}</a>`).join(" · ")}</p>` : "";
+  const DF = D.daily_files || [], DM = D.daily_models || {};
+  const dfl = DF.length ? `<p>Latest daily run (${esc(DM[(DF[0] || "").split("/").slice(-2)[0]] || "ORR")}): ${DF.map(f => `<a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/${f}">${esc(f.split("/").pop())}</a>`).join(" · ")}</p>` : "";
   $("files_list").innerHTML = dfl + "<p>Season forecast files and their SHA-256 hashes. All inputs, code and committed forecasts are in the repository.</p><div class=\"wrap\"><table><thead><tr><th class=\"l\">File</th><th class=\"l\">SHA-256</th></tr></thead><tbody>" +
     Object.entries(sha).map(([f, h]) => `<tr><td class="l"><a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/${f}">${esc(f)}</a></td><td class="l"><code>${h}</code></td></tr>`).join("") + "</tbody></table></div>";
 })();

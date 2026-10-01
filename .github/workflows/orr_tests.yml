@@ -34,6 +34,6 @@ jobs:
       - name: Test suites
         run: |
           set -e
-          for t in test_season test_players test_gamemodel test_inseason test_freeze test_player_update test_live_1_3 test_live_1_4 test_live_1_5 test_live_1_6; do
+          for t in test_season test_players test_gamemodel test_inseason test_freeze test_player_update test_live_1_3 test_live_1_4 test_live_1_5 test_live_1_6 test_live_1_7; do
             echo "== $t"; python -m orr.tests.$t
           done
