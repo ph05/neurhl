@@ -1,7 +1,7 @@
 {
  "cutoff_utc": "2026-09-29T21:00:00+00:00",
- "created_utc": "2026-10-01T00:35:05+00:00",
- "code": "291f9326b5483537703ba59b5340852467693962",
+ "created_utc": "2026-10-01T00:37:30+00:00",
+ "code": "1578710109079bee7f3ae18c1cf44819c46054bd",
  "code_dirty": [],
  "status": "forecast from information dated before the cutoff; built after the first puck drop (see created_utc)",
  "mu_fitted": 1.0707594857499656,
@@ -205,23 +205,24 @@
  ],
  "points_per_goal_diff": 0.33181949620437207,
  "blend_candidates": {
-  "mkt_rel82": 12.227475121680685,
-  "mkt_rel82+td_rel82": 12.203638572070279,
-  "mkt_rel82+tdr_rel82": 12.214568444905161,
-  "mkt_rel82+td_rel82+tdr_rel82": 12.223656031183783,
-  "mkt_rel82+bu_rel82": 12.171061142866975
+  "mkt_rel82": 12.24101446494843,
+  "mkt_rel82+td_rel82": 12.214844259731922,
+  "mkt_rel82+tdr_rel82": 12.230912876737378,
+  "mkt_rel82+td_rel82+tdr_rel82": 12.225154899087089,
+  "mkt_rel82+bu_rel82": 12.254148229757215,
+  "mkt_rel82+td_rel82+bu_rel82": 12.232643627030981
  },
  "blend": {
   "views": [
    "mkt_rel82",
-   "bu_rel82"
+   "td_rel82"
   ],
   "weights": {
-   "mkt_rel82": 0.8972883504396303,
-   "bu_rel82": 0.28656583623980825
+   "mkt_rel82": 0.7503529813596548,
+   "td_rel82": 0.24964701864034528
   },
-  "loso_rmse_82": 12.171061142866975,
-  "loso_mae_82": 9.431823278934083,
+  "loso_rmse_82": 12.214844259731922,
+  "loso_mae_82": 9.417104892555463,
   "league_points_per_team_84": 93.27286585365853
  },
  "blend_seasons": [
@@ -238,16 +239,16 @@
   "8477967": "Demko, hip surgery January",
   "8480873": "Sandin, ACL surgery April"
  },
- "luck_sd_82": 8.271664222462189,
- "talent_sd_82": 8.928286528458042,
+ "luck_sd_82": 8.314239436950322,
+ "talent_sd_82": 8.94851065119587,
  "drift_sd": 0.12328828005937953,
- "rating_sd_net_mean": 0.1129147607182521,
+ "rating_sd_net_mean": 0.11230571422239705,
  "league_level": {
   "gf_per_team_game_target": 3.081554878048781,
-  "mu_used": 1.05324316241179,
-  "var_log_rate": 0.01782590154060565
+  "mu_used": 1.053313303802515,
+  "var_log_rate": 0.017686173837329656
  },
  "sims": 40000,
  "seed": 20260929,
- "P_mu": 1.05324316241179
+ "P_mu": 1.053313303802515
 }

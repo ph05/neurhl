@@ -994,7 +994,7 @@
   }
  },
  "code": {
-  "commit": "291f9326b5483537703ba59b5340852467693962",
+  "commit": "1578710109079bee7f3ae18c1cf44819c46054bd",
   "dirty": [],
   "files": {
    "hattrick/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -1003,13 +1003,13 @@
    "hattrick/backtest/games_bt.py": "43441e01c939ac9e8f892a5aa1e5466fb3b4eebb94a67b4693e4bf6571b4999b",
    "hattrick/backtest/goalies_bt.py": "a36d19a8a02bc74a9edef4ddfb4bd212db233d7cf65d055028b1667e997b4d5c",
    "hattrick/backtest/players_bt.py": "50959f3c5aae2ae449928f528c48dba60fc44255e3b774682666bcde669a9be9",
-   "hattrick/backtest/teams_bt.py": "6a8eaf5dd97943a64e0c879bc2f7867f41fad52e2b56f3a23b8f8a0969c18439",
+   "hattrick/backtest/teams_bt.py": "91960319cbe07ecd2e93171fe70c9dd8e6554c6a65c81179c5ca391d7cf26eee",
    "hattrick/backtest/tune_games.py": "93d1498ca0f67ba88d07b9f178eada72086fcc00f01d964f0d7975b431cc5a3a",
    "hattrick/calibrate.py": "c30727c02ce5eb752ff06afde29d973e80bfcd8d87af5fc9b2df52369dd7c234",
    "hattrick/config.py": "ace4cc72cd308b920346e80199af9ae3c549c9ddecf1e8dbf383a027172cfb00",
    "hattrick/data.py": "6b581fe5449f78ccca0a4ef37a2087cd92b9c46ff3e5826b45e8ed926fa2834c",
    "hattrick/deploy.py": "435ad9c31da9873d281852e9528be0d150b78dc784a5015ded3aa5caadf26e01",
-   "hattrick/freeze.py": "a3ec056aed59a579f68e58eec6a0cc0c4edc7de5c152365cc69be3f1dfd542eb",
+   "hattrick/freeze.py": "9e64ec2676406b97f64dde0d068f3cdba3a3591e01141843c07caf81136e6a26",
    "hattrick/gamemodel.py": "e8259b365d5ce350e8bc60e75237d72b3874b9ac23546ddf962108c655ad57a9",
    "hattrick/gametable.py": "304252db2abb901d5ae75c9e6d907c7b2de2609c5b8de020d760d2a45f9c9f15",
    "hattrick/goalies.py": "e0f2f0b3c42368d0066373df137275a0771c61c1e4a41446420afeabf429e494",
@@ -1026,7 +1026,7 @@
    "hattrick/structural.py": "041d98b01d958e2569dd6b8cb911f92082a25204870efc88286afc12a9a7fd84",
    "hattrick/team_components.py": "a84d488726f594eaea19e282ef68447169cae661550655b2d91c93ae38fb34c9",
    "hattrick/team_points_map.py": "224ab672544185fcf23cb9203a20b2ac5d8fde0a19fabe8f32767778946eced5",
-   "hattrick/teams.py": "9ecbf31d204a5cd322974f1092407119aad47a61bb8da5b8fb702dffd3a5d119",
+   "hattrick/teams.py": "136d19a019123e5f971bc23d8c4bfa836fd8b7720c2c781f768b74d92247ee20",
    "hattrick/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
    "hattrick/tests/test_freeze.py": "1e96bdf617d5a326693ab1bc42ee276136337e76ec2204d93f3a68dcd4ebbc0d",
    "hattrick/tests/test_gamemodel.py": "94a0d0528c2a761daf90321754eb3e34569fa609aecb44a7d6623e6ba31f6cb7",
@@ -1037,14 +1037,14 @@
  },
  "outputs": {
   "game_adjustments_2027.csv": "fcd74d950c7bd3c9059b016019065a9a9e5cb8294fd8284d30b30c96b6d61cec",
-  "games_2027.csv": "392242a49eb6c397ee1699c6aedeca3d8a43e65ea6e54460ef229e9aab9265cc",
+  "games_2027.csv": "e16c3f807c0b16d12589124b32a1dba412c1e47286c00f90b724fef8006541f3",
   "goalie_rates_2027.csv": "f2e86bd0956172d6c01d70c3a369ac7f7fec9400e97085199793785b7daf9184",
-  "goalies_2027.csv": "11432e3c1c49fb2a2f5e905e6dac696361afd97b748a5f044eefad650dc33d00",
+  "goalies_2027.csv": "4fe8ad7e80537ad607b5f79e229485234f99e44db8cdbd5f53b43431ec85f89d",
   "player_rates_2027.csv": "16af11e87559be537308deaf08906b2d0540af394e99a9d0c53ae65c3638aed9",
-  "ratings_2027.csv": "b5436c88a285927febef1b22f6c6d7ca7249af5133af79fdc4c32f27058e4f70",
+  "ratings_2027.csv": "5495be0e3e044918db71bdbd65ea8217a600b2aba9c5141dd19c306b5e5fb2b1",
   "schedule_2027.csv": "30cfc5aa455e61d441adb3ac20eed18b24b6a8cd6c49e02f0f9decba208cdb50",
-  "skaters_2027.csv": "4843e91ce1fcb3bef38e1f3ee34292c7787f9528e41a17fd46aea71e9b937966",
+  "skaters_2027.csv": "925684ccf7b88963b6c81e8a3244a88a8d31b9c51f133fecdc7dc3778a7e9f7b",
   "team_components_2027.csv": "d56676a84d73c0bdbe1b488cdeab4fc84a78f54321c0ad16712d54cbc2c051df",
-  "teams_2027.csv": "71411523b0ab73cd0dc4119a19e94a686ad06e2f380a41e9cff9e38cf8cea1c0"
+  "teams_2027.csv": "16b35fecbba1c28ad43c514eed4172d2d955744456fdd85585e442b57c838328"
  }
 }
