@@ -1,0 +1,63 @@
+{
+ "protocol": "In-season standings sharpness (ORR 1.5).\n\nORR 1.4's in-season 80% intervals covered 0.86 of final points on test, so\nthey are too wide. This scales the filter's rating uncertainty used in the\nrest-of-season simulation (o_sd, d_sd by m; od_cov by m^2), on the setup of\nstandings_inseason_bt.py (checkpoints 25/50/75%, drift k from 1.4).\n\nm is chosen on 2012 and 2014-2017 by CRPS from GRID; the test (2022, 2023)\nruns once. Pre-declared rule: adopt m (params/standings_inseason.json\n\"sd_mult\") only if test CRPS improves on m = 1; coverage is reported.\n\nRun: python3 -m orr.backtest.standings_sharp_bt\n",
+ "drift_k": 0.5,
+ "tune": {
+  "0.4": {
+   "n": 450,
+   "crps": 3.9271548188888885,
+   "mae": 5.479586666666666,
+   "cover80": 0.76
+  },
+  "0.55": {
+   "n": 450,
+   "crps": 3.9216779844444445,
+   "mae": 5.480133333333335,
+   "cover80": 0.7733333333333333
+  },
+  "0.7": {
+   "n": 450,
+   "crps": 3.916092853333333,
+   "mae": 5.482600000000001,
+   "cover80": 0.7911111111111111
+  },
+  "0.85": {
+   "n": 450,
+   "crps": 3.9097234655555555,
+   "mae": 5.4801866666666665,
+   "cover80": 0.8022222222222222
+  },
+  "1.0": {
+   "n": 450,
+   "crps": 3.908686417222222,
+   "mae": 5.480698888888889,
+   "cover80": 0.8155555555555556
+  },
+  "1.15": {
+   "n": 450,
+   "crps": 3.9095741861111106,
+   "mae": 5.479916666666667,
+   "cover80": 0.8355555555555556
+  }
+ },
+ "m_best": 1.0,
+ "test": {
+  "m_best": {
+   "n": 192,
+   "crps": 3.8393201770833336,
+   "mae": 5.473822916666667,
+   "cover80": 0.859375
+  },
+  "m_1": {
+   "n": 192,
+   "crps": 3.8393201770833336,
+   "mae": 5.473822916666667,
+   "cover80": 0.859375
+  },
+  "diff": 0.0,
+  "ci95": [
+   0.0,
+   0.0
+  ]
+ },
+ "adopted": false
+}

@@ -102,3 +102,24 @@ def load_calibration() -> dict | None:
 def platt(p: np.ndarray, w) -> np.ndarray:
     x = np.log(p / (1 - p))
     return 1 / (1 + np.exp(-(w[0] + w[1] * x)))
+
+
+SOG_PARAMS = C.PARAMS / "sog_dist.json"
+
+
+def load_sog_r() -> float | None:
+    """Negative-binomial size for skater shots per game, or None (Poisson)
+    when backtest/sog_dist_bt.py did not adopt it."""
+    if not SOG_PARAMS.exists():
+        return None
+    d = json.loads(SOG_PARAMS.read_text())
+    return float(d["r"]) if d.get("adopted") else None
+
+
+def p_shots_ge(mu: np.ndarray, k: int, r: float | None = None) -> np.ndarray:
+    """P(shots >= k) for expected shots mu: Poisson, or negative binomial with size r."""
+    from scipy import stats
+    mu = np.clip(np.asarray(mu, float), 1e-6, None)
+    if r is None:
+        return stats.poisson.sf(k - 1, mu)
+    return stats.nbinom.sf(k - 1, r, r / (r + mu))

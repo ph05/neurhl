@@ -70,6 +70,7 @@
 <div class="controls"><label>Team <select id="oh_team"></select></label>
   <span class="note">Grey lines: every other team. One point per committed forecast: the preseason file, then each daily run.</span></div>
 <div class="oh" id="oh"></div>
+<div id="movers"></div>
 
 <h2 id="teamstats">Projected team statistics (season totals)</h2>
 <p class="note">GF and GA include overtime goals and one goal for each shootout win, as in the standings. SF and PPG sum the team's skater projections; SA and SV% come from its goalie projections.</p>
@@ -105,6 +106,8 @@
 
 <h2 id="scoring">Model accuracy</h2>
 <div id="scoring_live"></div>
+<div id="running"></div>
+<div id="reliab"></div>
 <div class="wrap"><table id="t_ev"></table></div>
 
 <h2 id="method">Methodology</h2>
@@ -243,6 +246,15 @@
     let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(draw, 150); });
   })();
 
+  // ---- biggest movers (1.5)
+  const MV = D.movers;
+  if (MV && MV.rows && MV.rows.length) {
+    $("movers").innerHTML = `<h3>Biggest movers: ${esc(MV.from)} to ${esc(MV.to)}</h3><div class="wrap"><table id="t_mv"></table></div>`;
+    table($("t_mv"), [{ k: "team", h: "Team", l: 1, f: t => esc((T0[t] || {}).name || t) }, { k: "from", h: "Playoffs before", f: f1 },
+      { k: "to", h: "Playoffs now", f: f1 }, { k: "delta", h: "Change", f: x => (x > 0 ? "+" : "") + Number(x).toFixed(1) },
+      { k: "games", h: "Games in between", l: 1 }], MV.rows);
+  }
+
   // ---- today
   const TN = D.tonight || { games: [] };
   $("today_note").textContent = TN.games.length ? `Latest committed forecast for each game on ${TN.date}, from results through ${TN.through || "the previous day"}. Forecasts are committed to the repository before puck drop.` : "No forecasts yet for the current game day.";
@@ -255,11 +267,12 @@
     { k: "kind", h: "Forecast", l: 1 }
   ], TN.games);
   const tp = [];
-  TN.games.forEach(g => (g.top || []).forEach(p => tp.push({ game: `${g.away}@${g.home}`, name: p[0], team: p[1], sog: p[2], pg: p[3], pp: p[4] })));
+  TN.games.forEach(g => (g.top || []).forEach(p => tp.push({ game: `${g.away}@${g.home}`, name: p[0], team: p[1], sog: p[2], pg: p[3], pp: p[4], s3: p[5] })));
   if (tp.length) {
     $("today_players").innerHTML = '<h3>Top projected skaters</h3><div class="wrap"><table id="t_tp"></table></div>';
     table($("t_tp"), [{ k: "game", h: "Game", l: 1 }, { k: "name", h: "Player", l: 1 }, { k: "team", h: "Team", l: 1 },
-      { k: "sog", h: "SOG", f: f1 }, { k: "pg", h: "P(goal)", f: pc }, { k: "pp", h: "P(point)", f: pc }], tp, { sort: "pp" });
+      { k: "sog", h: "SOG", f: f1 }, { k: "pg", h: "P(goal)", f: pc }, { k: "pp", h: "P(point)", f: pc },
+      { k: "s3", h: "P(3+ SOG)", f: pc, t: "Negative-binomial shot distribution (ORR 1.5)" }], tp, { sort: "pp" });
   }
 
   // ---- games
@@ -300,6 +313,23 @@
   const L = D.live || {};
   const lr = (L.rows || []).map(r => `${esc(r.name)} ${Number(r.log_loss).toFixed(3)} (${r.n} games)`).join("; ");
   $("scoring_live").innerHTML = `<p>${(L.games_played || 0)} regular-season games played so far. Season accuracy is evaluated once, after the last regular-season game (2027-04-10); figures during the season are provisional.${lr ? " Log loss on games played after each forecast's publication: " + lr + "." : ""} The table lists out-of-sample results on earlier seasons, on the same games or players as the comparison.</p>`;
+  // running log loss by date and reliability (1.5)
+  const RN = L.running || {};
+  const rdates = [...new Set(Object.values(RN).flat().map(r => r.date))].sort();
+  if (rdates.length) {
+    const nm = { orr_preseason: "ORR preseason", orr_inseason: "ORR daily", "neurhl_1.0": "NeurHL 1.0", "neurhl_1.1": "NeurHL 1.1",
+      "neurhl_1.2": "NeurHL 1.2", "neurhl_1.3": "NeurHL 1.3", neurhl_0925_freeze: "NeurHL 09-25", neurhl_G_pregame: "NeurHL-G pregame",
+      neurhl_H_pregame: "NeurHL-H pregame", elo_pregame: "Elo pregame" };
+    const rows = Object.entries(RN).map(([m, v]) => { const o = { model: nm[m] || m }; v.forEach(r => { o[r.date] = r.log_loss; o["n_" + r.date] = r.n; }); return o; });
+    $("running").innerHTML = '<h3>Running log loss by date</h3><p class="note">Cumulative log loss through each date, on the games each forecast is eligible for (published before puck drop); the number of games is in brackets. Lower is better.</p><div class="wrap"><table id="t_run"></table></div>';
+    table($("t_run"), [{ k: "model", h: "Forecast", l: 1 }].concat(rdates.map(dt => ({ k: dt, h: dt,
+      f: (v, x) => v == null ? "" : `${Number(v).toFixed(3)} (${x["n_" + dt]})` }))), rows, { sort: rdates[rdates.length - 1], asc: true });
+  }
+  if ((L.reliability || []).length) {
+    $("reliab").innerHTML = '<h3>Reliability of ORR daily game probabilities</h3><div class="wrap"><table id="t_rel"></table></div>';
+    table($("t_rel"), [{ k: "bin", h: "P(home) bin", l: 1 }, { k: "n", h: "Games" }, { k: "mean_p", h: "Mean forecast", f: pc },
+      { k: "home_win_rate", h: "Home win rate", f: pc }], L.reliability);
+  }
   table($("t_ev"), [{ k: "c", h: "Comparison", l: 1 }, { k: "w", h: "Seasons", l: 1 }, { k: "n", h: "N" }, { k: "d", h: "Difference" },
     { k: "ci", h: "95% CI", l: 1 }, { k: "p", h: "p" }], D.evidence || []);
   $("t_ev").insertAdjacentHTML("afterend", '<p class="note">Negative differences favour ORR (lower log loss or error). Full results, including where ORR loses, are in orr/RESULTS.md in the repository.</p>');
