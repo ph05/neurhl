@@ -52,7 +52,15 @@ def data() -> dict:
         rr = pd.read_csv(src)
         res = {int(r.game_id): f"{r.away} {int(r.away_g)}–{int(r.home_g)} {r.home}"
                + ("" if r.last_period == "REG" else f" ({r.last_period})") for r in rr.itertuples()}
+    live = {}
+    lf = sorted((C.OUT / "live").glob("*/games_*.csv"))
+    if lf:
+        from hattrick.score import _deadline
+        ld = pd.concat([pd.read_csv(f) for f in lf])
+        ld = ld[pd.to_datetime(ld.created_utc).dt.tz_convert(None) < pd.to_datetime(ld.date).map(_deadline)]
+        live = ld.sort_values("created_utc").drop_duplicates("game_id").set_index("game_id").p_home_win.to_dict()
     games = [{"id": int(r.game_id), "d": str(r.date), "h": r.home, "a": r.away, "p": _r(r.p_home_win, 3),
+              "live": _r(live.get(r.game_id), 3),
               "ot": _r(r.p_ot, 3), "n13": _r(n13g.p_home_win.get(r.game_id), 3),
               "res": res.get(int(r.game_id))} for r in g.itertuples()]
     card = json.loads((C.OUT / "scorecard_2027.json").read_text()) if (C.OUT / "scorecard_2027.json").exists() else {}
@@ -63,16 +71,21 @@ def data() -> dict:
 
 
 SUMMARY = [
-    ["Skaters", "NeurHL's own protocol, ≥40 GP, held-out 2022-26", "9.42", "9.54", "win",
-     "HatTrick uses preseason rosters; NeurHL knew each player's season team"],
-    ["Skaters", "Per-82 restatement, same sample", "9.23", "9.08", "loss", "NeurHL's A/B blend is 0.15 better"],
+    ["Standings", "NeurHL's judge window 2019-24 (raw points MAE / CRPS)", "9.23 / 6.70", "9.42 / 6.80", "win",
+     "Market + team history, convex weights, leave-one-season-out; the market alone is 9.32 / 6.71; Elo 9.47 / 6.87"],
+    ["Standings", "NeurHL's backtest seasons 2012, 2014-17 (per-82 MAE)", "8.96", "9.99", "win",
+     "Team-history view; NeurHL's v1 Elo + xG 9.17; HatTrick loses 2012"],
+    ["Games", "Shipped preseason game-file pipeline, 2019-24 (6,289 games)", "0.6674", "—", "win",
+     "No historical NeurHL preseason file; beats a frozen Elo (0.6718) by 0.0044, CI excludes 0"],
+    ["Games", "NeurHL's 11,052 games, in-season log loss", "0.6635", "0.6645", "tie",
+     "HatTrick with starters where known, no lineups; NeurHL-H with actual lineups and starters"],
+    ["Games", "NeurHL-G gate games 2019-24", "0.6603", "0.6601", "tie", "Difference not significant"],
+    ["Skaters", "NeurHL's protocol, ≥40 GP, held-out 2022-26 (points MAE)", "9.41", "9.54", "win",
+     "2022-24 (HatTrick: first-10-games rosters; NeurHL: actual season team) 9.49 vs 9.74; 2025-26 9.30 vs 9.24"],
+    ["Skaters", "Per-82 restatement, same players", "9.22", "9.08", "loss", "NeurHL's A/B blend is 0.14 better; 0.33 better on 2025-26"],
     ["Skaters", "Regression toward the mean (slope on last season)", "0.83", "0.96", "win", "Below 1 is what a projection should do"],
-    ["Games", "NeurHL's 11,052 games, in-season log loss", "0.6641", "0.6645", "tie",
-     "HatTrick without lineups or starters; NeurHL with both"],
-    ["Games", "NeurHL-G gate games 2019-24", "0.6610", "0.6601", "tie", "Difference not significant"],
-    ["Games", "Preseason-frozen, every game 2018-26", "0.6742", "—", "win", "Beats a frozen Elo by 0.0018 (CI excludes 0)"],
-    ["Standings", "NeurHL's matched seasons 2012, 2014-17 (MAE)", "8.96", "9.99", "win", "NeurHL's Elo 9.17"],
-    ["Standings", "Judge window 2019-24 (MAE / CRPS)", "9.47 / 6.88", "9.42 / 6.80", "tie", "Elo 9.47 / 6.87; all three within noise"],
+    ["Goalies", "GSAx/60 MAE, held-out 2022-26, ≥1,000 shots", "0.237", "—", "tie",
+     "League average 0.241, last season 0.335; save talent is barely predictable"],
 ]
 
 
@@ -131,7 +144,7 @@ tr:hover td { background: color-mix(in srgb, var(--blue) 6%, transparent); }
 .range .n { position: absolute; top: 2px; width: 8px; height: 8px; border: 2px solid var(--red); border-radius: 50%; transform: translateX(-4px); }
 .pos { color: var(--win); } .neg { color: var(--loss); }
 .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.seg { display: inline-flex; border: 1px solid var(--rule); background: var(--board); }
+.seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--rule); background: var(--board); }
 .seg button { font: 500 13px/1 var(--body); color: var(--ink); background: none; border: 0; padding: 8px 10px; cursor: pointer; }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--board); }
 input[type=search], select { font: 14px var(--body); color: var(--ink); background: var(--board); border: 1px solid var(--rule); padding: 7px 9px; min-width: 0; }
@@ -147,7 +160,7 @@ footer { color: var(--muted); font-size: 12px; }
 <div class="wrap">
 <header class="board">
   <h1>HatTrick <span>2026–27</span></h1>
-  <p class="sub">NHL projections frozen before the first puck drop (2026-09-29, 5:00 pm ET) from information that existed before it, and compared with every NeurHL release. Standings anchor to the sportsbook line, re-price the news it had not seen, and add a roster model. Games come from one scoring model, players from regressed per-60 rates with conserved ice time.</p>
+  <p class="sub">NHL projections from information dated before the first puck drop (2026-09-29, 5:00 pm ET), built after the season began and scored against every NeurHL release only on games after publication. Standings anchor to the sportsbook line, re-price the news it had not seen with the player model, and blend in team history. Games come from one scoring model, players from regressed per-60 rates with conserved ice time.</p>
   <div class="chips" id="chips"></div>
 </header>
 
@@ -179,7 +192,7 @@ footer { color: var(--muted); font-size: 12px; }
 </section>
 
 <section aria-labelledby="h-gm">
-  <h2 id="h-gm">Games<small>every game frozen preseason</small></h2>
+  <h2 id="h-gm">Games<small>preseason file and daily in-season forecasts</small></h2>
   <div class="controls"><label for="gmdate" class="note">Date</label><select id="gmdate"></select></div>
   <div class="frame"><table id="gm"></table></div>
 </section>
@@ -258,20 +271,24 @@ $("#gmdate").innerHTML = dates.map(d => `<option>${d}</option>`).join("");
 function drawGames() {
   const d = $("#gmdate").value;
   const rows = D.games.filter(g => g.d === d);
-  $("#gm").innerHTML = `<thead><tr><th>Matchup</th><th class="num">HatTrick P(home)</th><th></th><th class="num">NeurHL 1.3</th><th class="num">P(past regulation)</th><th>Result</th></tr></thead><tbody>` +
+  $("#gm").innerHTML = `<thead><tr><th>Matchup</th><th class="num">HatTrick P(home)</th><th></th><th class="num">HatTrick in-season</th><th class="num">NeurHL 1.3</th><th class="num">P(past regulation)</th><th>Result</th></tr></thead><tbody>` +
     rows.map(g => `<tr><td class="team">${g.a} @ ${g.h}</td><td class="num">${fmt(g.p * 100, 1)}%</td><td><span class="prob"><span style="width:${(g.p * 100).toFixed(1)}%"></span></span></td>
-    <td class="num">${g.n13 == null ? "—" : fmt(g.n13 * 100, 1) + "%"}</td><td class="num">${fmt(g.ot * 100, 1)}%</td><td>${g.res || ""}</td></tr>`).join("") + "</tbody>";
+    <td class="num">${g.live == null ? "—" : fmt(g.live * 100, 1) + "%"}</td><td class="num">${g.n13 == null ? "—" : fmt(g.n13 * 100, 1) + "%"}</td><td class="num">${fmt(g.ot * 100, 1)}%</td><td>${g.res || ""}</td></tr>`).join("") + "</tbody>";
 }
 $("#gmdate").onchange = drawGames; drawGames();
 
 const games = (D.card.games || {});
-const names = { hattrick_freeze: "HatTrick freeze", hattrick_inseason: "HatTrick in-season", "neurhl_1.0": "NeurHL 1.0", "neurhl_1.1": "NeurHL 1.1",
+const names = { hattrick_preseason: "HatTrick preseason (built after puck drop)", hattrick_inseason: "HatTrick in-season", "neurhl_1.0": "NeurHL 1.0", "neurhl_1.1": "NeurHL 1.1",
   "neurhl_1.2": "NeurHL 1.2 (after puck drop)", "neurhl_1.3": "NeurHL 1.3 (after puck drop)", neurhl_0925_freeze: "NeurHL 09-25 freeze",
   neurhl_G_pregame: "NeurHL-G pregame", neurhl_H_pregame: "NeurHL-H pregame", elo_pregame: "Elo pregame" };
-$("#sc").innerHTML = `<thead><tr><th>Forecast</th><th class="num">Games</th><th class="num">Log loss</th><th class="num">Brier</th><th class="num">Accuracy</th></tr></thead><tbody>` +
-  Object.entries(games).sort((a, b) => a[1].log_loss - b[1].log_loss).map(([k, v]) => `<tr><td>${names[k] || k}</td><td class="num">${v.n}</td><td class="num">${fmt(v.log_loss, 3)}</td><td class="num">${fmt(v.brier, 3)}</td><td class="num">${fmt(v.accuracy * 100, 0)}%</td></tr>`).join("") + "</tbody>";
-$("#scnote").textContent = `Through ${D.card.through || "—"}: ${D.card.games_played || 0} games. At this sample size the ranking is noise; a season of 1,344 games separates models by about 0.005.`;
-$("#foot").textContent = `Freeze created ${D.created}. Built from hattrick/output/freeze_2027 and NeurHL's published files.`;
+$("#sc").innerHTML = `<thead><tr><th>Forecast</th><th class="num">Games</th><th class="num">Log loss</th><th class="num">Brier</th><th class="num">Accuracy</th><th class="num">After publication</th></tr></thead><tbody>` +
+  Object.entries(games).sort((a, b) => a[1].log_loss - b[1].log_loss).map(([k, v]) => {
+    const ap = v.after_publication;
+    const apc = ap == null ? "—" : ap.n ? `${ap.n} games · ${fmt(ap.log_loss, 3)}` : "0 games";
+    return `<tr><td>${names[k] || k}</td><td class="num">${v.n}</td><td class="num">${fmt(v.log_loss, 3)}</td><td class="num">${fmt(v.brier, 3)}</td><td class="num">${fmt(v.accuracy * 100, 0)}%</td><td class="num">${apc}</td></tr>`;
+  }).join("") + "</tbody>";
+$("#scnote").textContent = `Through ${D.card.through || "—"}: ${D.card.games_played || 0} games. "After publication" counts only games that started after the file was published, the fair comparison. At this sample size the ranking is noise; a season of 1,344 games separates models by about 0.005.`;
+$("#foot").textContent = `Preseason file created ${D.created} from inputs dated before ${D.cutoff}. Built from hattrick/output/freeze_2027 and NeurHL's published files.`;
 </script>
 """
 
