@@ -1,0 +1,119 @@
+{
+ "2026020011": {
+  "game_id": 2026020011,
+  "date": "2026-10-01",
+  "start_utc": "2026-10-01T23:00:00+00:00",
+  "as_of": "2026-10-01T21:50:10.946130+00:00",
+  "roster_snapshot": "2026-09-29",
+  "notes": [],
+  "home": {
+   "team": "CBJ",
+   "forwards": [
+    8482720,
+    8484166,
+    8482660,
+    8477501,
+    8477497,
+    8478856,
+    8482705,
+    8475745,
+    8479671,
+    8479066,
+    8481716,
+    8478046
+   ],
+   "defense": [
+    8478460,
+    8483485,
+    8477369,
+    8482126,
+    8481161,
+    8475790
+   ],
+   "skaters": [
+    8482720,
+    8484166,
+    8482660,
+    8477501,
+    8477497,
+    8478856,
+    8482705,
+    8475745,
+    8479671,
+    8479066,
+    8481716,
+    8478046,
+    8478460,
+    8483485,
+    8477369,
+    8482126,
+    8481161,
+    8475790
+   ],
+   "goalie": 8482982,
+   "lineup_source": "DF_CONFIRMED",
+   "goalie_source": "DF_LIKELY",
+   "notes": [
+    "boxscore lineup not published",
+    "DF lines 2026-10-01 'Brian Hedger' updated 10-01 16:18Z"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  },
+  "away": {
+   "team": "BUF",
+   "forwards": [
+    8480064,
+    8479420,
+    8482659,
+    8484145,
+    8483500,
+    8482097,
+    8481522,
+    8480802,
+    8484797,
+    8483468,
+    8475842,
+    8479359
+   ],
+   "defense": [
+    8480839,
+    8482671,
+    8481806,
+    8476891,
+    8484305
+   ],
+   "skaters": [
+    8480064,
+    8479420,
+    8482659,
+    8484145,
+    8483500,
+    8482097,
+    8481522,
+    8480802,
+    8484797,
+    8483468,
+    8475842,
+    8479359,
+    8480839,
+    8482671,
+    8481806,
+    8476891,
+    8484305
+   ],
+   "goalie": 8480045,
+   "lineup_source": "DF_CONFIRMED",
+   "goalie_source": "DF_CONFIRMED",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Conor Timmins, Jason Zucker, Alex Lyon, Olen Zellweger, Jack Rathbone",
+    "DF dropped unavailable/injured: Mattias Samuelsson, Alex Lyon",
+    "DF lines 2026-10-01 'Paul Hamilton' updated 10-01 15:52Z",
+    "short: only 12 F / 5 D available"
+   ],
+   "n_f": 12,
+   "n_d": 5
+  }
+ }
+}

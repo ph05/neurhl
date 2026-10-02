@@ -1,0 +1,122 @@
+{
+ "2026020016": {
+  "game_id": 2026020016,
+  "date": "2026-10-01",
+  "start_utc": "2026-10-02T02:00:00+00:00",
+  "as_of": "2026-10-02T00:50:10.318060+00:00",
+  "roster_snapshot": "2026-09-29",
+  "notes": [],
+  "home": {
+   "team": "SJS",
+   "forwards": [
+    8478975,
+    8484801,
+    8484227,
+    8484994,
+    8485402,
+    8475726,
+    8486103,
+    8477505,
+    8484911,
+    8476624,
+    8482859,
+    8480748
+   ],
+   "defense": [
+    8477498,
+    8480891,
+    8482700,
+    8476885,
+    8475200,
+    8484152
+   ],
+   "skaters": [
+    8478975,
+    8484801,
+    8484227,
+    8484994,
+    8485402,
+    8475726,
+    8486103,
+    8477505,
+    8484911,
+    8476624,
+    8482859,
+    8480748,
+    8477498,
+    8480891,
+    8482700,
+    8476885,
+    8475200,
+    8484152
+   ],
+   "goalie": 8482137,
+   "lineup_source": "DF_PROJECTED",
+   "goalie_source": "DF_CONFIRMED",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Alex Barre-Boulet, Adam Gaudette, Patrick Giles, Cam Lund",
+    "DF dropped unavailable/injured: Alex Nedeljkovic",
+    "DF lines 2026-10-01/2030 'Sheng Peng' updated 09-30 20:05Z"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  },
+  "away": {
+   "team": "FLA",
+   "forwards": [
+    8477933,
+    8477493,
+    8477935,
+    8482113,
+    8479314,
+    8477409,
+    8480801,
+    8480185,
+    8474189,
+    8483771,
+    8477903,
+    8478147
+   ],
+   "defense": [
+    8477495,
+    8478055,
+    8478859,
+    8477932,
+    8475179,
+    8475462
+   ],
+   "skaters": [
+    8477933,
+    8477493,
+    8477935,
+    8482113,
+    8479314,
+    8477409,
+    8480801,
+    8480185,
+    8474189,
+    8483771,
+    8477903,
+    8478147,
+    8477495,
+    8478055,
+    8478859,
+    8477932,
+    8475179,
+    8475462
+   ],
+   "goalie": 8481033,
+   "lineup_source": "FALLBACK",
+   "goalie_source": "DF_CONFIRMED",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Brad Marchand, Jonah Gadjovich, MacKenzie Entwistle",
+    "DF lines stale (updated 2026-09-30 11:26Z, snapshot 2026-10-01/2030)",
+    "base: dressed in last game 2026020001 (2026-09-29)"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  }
+ }
+}

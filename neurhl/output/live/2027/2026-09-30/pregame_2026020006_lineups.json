@@ -1,0 +1,120 @@
+{
+ "2026020006": {
+  "game_id": 2026020006,
+  "date": "2026-09-30",
+  "start_utc": "2026-09-30T23:30:00+00:00",
+  "as_of": "2026-09-30T22:27:52.275951+00:00",
+  "roster_snapshot": "2026-09-29",
+  "notes": [],
+  "home": {
+   "team": "PHI",
+   "forwards": [
+    8480015,
+    8481533,
+    8485406,
+    8482159,
+    8477989,
+    8478439,
+    8483731,
+    8480220,
+    8484387,
+    8479336,
+    8476461,
+    8478569
+   ],
+   "defense": [
+    8477948,
+    8477499,
+    8481546,
+    8482142,
+    8476372,
+    8481122
+   ],
+   "skaters": [
+    8480015,
+    8481533,
+    8485406,
+    8482159,
+    8477989,
+    8478439,
+    8483731,
+    8480220,
+    8484387,
+    8479336,
+    8476461,
+    8478569,
+    8477948,
+    8477499,
+    8481546,
+    8482142,
+    8476372,
+    8481122
+   ],
+   "goalie": 8478435,
+   "lineup_source": "DF_PROJECTED",
+   "goalie_source": "DF_CONFIRMED",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Denver Barkey, Nikita Grebenkin, Helge Grans",
+    "DF lines 2026-09-30/1801 'Charlie O'Connor' updated 09-29 15:49Z"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  },
+  "away": {
+   "team": "PIT",
+   "forwards": [
+    8481582,
+    8471675,
+    8476483,
+    8482475,
+    8478438,
+    8471215,
+    8480842,
+    8482148,
+    8482758,
+    8480980,
+    8481481,
+    8481725
+   ],
+   "defense": [
+    8483398,
+    8474578,
+    8477845,
+    8471724,
+    8479398,
+    8481527
+   ],
+   "skaters": [
+    8481582,
+    8471675,
+    8476483,
+    8482475,
+    8478438,
+    8471215,
+    8480842,
+    8482148,
+    8482758,
+    8480980,
+    8481481,
+    8481725,
+    8483398,
+    8474578,
+    8477845,
+    8471724,
+    8479398,
+    8481527
+   ],
+   "goalie": 8481668,
+   "lineup_source": "DF_PROJECTED",
+   "goalie_source": "DF_CONFIRMED",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Bryan Rust, Ben Kindel, Andrei Kuzmenko, Justin Brazeau, Ryan Graves, Tristan Broz",
+    "DF lines 2026-09-30/1801 '@PensInsideScoop' updated 09-29 15:50Z"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  }
+ }
+}
