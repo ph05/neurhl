@@ -2,7 +2,17 @@
 
 A version ships every cycle. Each cycle opens with a brainstorm, and every feature considered there is planned into the next version. A feature that fails its backtest still ships, but behind a switch with the result documented; it is not silently dropped. Release notes are in this folder.
 
-## 2.0 (planned): one system, accountable
+## 2.1 (planned): test what is still untested
+
+Brainstorm, held after 2.0 shipped. It starts from 2.0's own limits and from the model card's "Known limitations". Every item is planned into 2.1:
+
+1. **In-season ice time.** Each skater's time on ice per game is updated with his box scores (normal shrinkage toward the preseason projection, prior weight tuned on ≤2017). It feeds rest-of-season goals, assists and shots. Test once on 2021-23: rest-of-season TOI and points MAE against 1.2's rates with preseason TOI. Adopt only if points MAE falls with a CI excluding zero.
+2. **Goalie rest-of-season intervals backtested.** Score 1.8's goalie intervals (starts, season save %) at 25%, 50% and 75% of 2021-23 for 80% coverage and interval score. Tune a save-% variance multiplier on ≤2017 if coverage is off.
+3. **Playoff-round probabilities backtested.** Re-run the season simulator's playoff layer from each held-out season's final regular-season ratings (2014-2019, 2022-2024). Score round-advancement probabilities with Brier and log loss against a seed-only baseline. Publish the result, whatever it is, on the model card.
+4. **Exact magic numbers.** Replace 1.9's approximate magic number with one that applies the wildcard format and the regulation-wins tiebreaker, by enumeration over the remaining head-to-head games. Unit tests on constructed tables where the answer is known.
+5. **Reproduction status on the website.** The freshness banner shows the latest reproduce verdict. A "differs" verdict is shown as a warning with a link to its report.
+
+## 2.0 (shipped 2026-10-02): one system, accountable
 
 Brainstorm, held after 1.9 shipped. Every item is planned into 2.0:
 

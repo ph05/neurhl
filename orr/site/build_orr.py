@@ -117,6 +117,26 @@ def evidence() -> list:
         rows.append({"c": "In-season standings vs preseason forecast, final points CRPS (1.4)", "w": "2021-22 to 2022-23",
                      "n": t["filter_kbest"]["n"], "d": f"{t['filter_kbest']['crps'] - t['preseason']['crps']:+.2f}",
                      "ci": "", "p": ""})
+        a = t["absence_minus_filter"]
+        rows.append({"c": "Long-term absences in the standings simulation, final points CRPS (1.4; ships off)",
+                     "w": "2021-22 to 2022-23", "n": t["filter_kbest"]["n"], "d": f"{a['diff']:+.4f}",
+                     "ci": f"{a['ci95'][0]:+.4f} to {a['ci95'][1]:+.4f}", "p": ""})
+    pp = _rd(BT / "player_prob_bt.json")
+    if pp:
+        rows.append({"c": "Platt correction of per-game P(goal) and P(point), log loss (1.3; ships off)",
+                     "w": "2021-22 to 2022-23", "n": pp["n_test"],
+                     "d": f"{pp['goal']['test_logloss_platt'] - pp['goal']['test_logloss_raw']:+.5f} / "
+                          f"{pp['point']['test_logloss_platt'] - pp['point']['test_logloss_raw']:+.5f}", "ci": "", "p": ""})
+    sd = _rd(BT / "sog_dist_bt.json")
+    if sd:
+        m = sd["test"]["mean_ll"]
+        rows.append({"c": "Negative-binomial shots vs Poisson, P(2+/3+/4+ SOG) mean log loss (1.5)",
+                     "w": "2021-22 to 2022-23", "n": sd["n_test"], "d": f"{m['nb'] - m['poisson']:+.5f}", "ci": "", "p": ""})
+    sh = _rd(BT / "standings_sharp_bt.json")
+    if sh:
+        rows.append({"c": f"Standings uncertainty multiplier (tuned m = {sh['m_best']}: no change), final points CRPS (1.5)",
+                     "w": "2021-22 to 2022-23", "n": sh["test"]["m_best"]["n"], "d": f"{sh['test']['diff']:+.2f}",
+                     "ci": "", "p": f"coverage {sh['test']['m_best']['cover80']:.2f}"})
     ss = _rd(BT / "start_share_bt.json")
     if ss:
         t = ss["test"]
@@ -301,6 +321,23 @@ def main():
         ap = v.get("after_publication", v) if k != "orr_inseason" else v
         if ap and ap.get("n"):
             live_rows.append({"name": names[k], "n": ap["n"], "log_loss": ap["log_loss"]})
+    # ORR 2.0: one table for every scored forecast, and the preregistered evaluation's status
+    all_names = {**names, "neurhl_0925_freeze": "NeurHL 09-25 freeze", "neurhl_G_pregame": "NeurHL-G pregame",
+                 "neurhl_H_pregame": "NeurHL-H pregame", "elo_pregame": "Elo pregame"}
+    pv = card.get("paired") or {}
+    summary = []
+    for k, v in (card.get("games") or {}).items():
+        ap = v.get("after_publication", v) if k != "orr_inseason" else v
+        if not ap or not ap.get("n"):
+            continue
+        pr = pv.get(k) or {}
+        summary.append({"model": all_names.get(k, k), "n": ap["n"], "log_loss": ap.get("log_loss"), "brier": ap.get("brier"),
+                        "acc": ap.get("accuracy"), "vs": None if k == "orr_inseason" or not pr else pr.get("diff"),
+                        "verdict": pr.get("verdict", "")})
+    ev = _rd(C.OUT / "evaluation_2027.json") or {}
+    prereg = [{"id": k.split("_")[0], "what": k.split("_", 1)[1].replace("_", " "), "status": v.get("status", ""),
+               "n": v.get("n"), "diff": v.get("diff"), "verdict": v.get("verdict", v.get("reason", ""))}
+              for k, v in ev.items() if k[:1] == "P" and k[1:2].isdigit()]
     from orr.inseason import DEFAULT_MODEL, MODELS
     # ORR 1.4: playoff odds by date (preseason file, then every committed daily run)
     hist_dates, hist = ["2026-09-29"], {r.team: [_r(r.playoff_pct)] for r in t.itertuples()}
@@ -333,7 +370,8 @@ def main():
                      "tests": "7/7"},
             "live": {"as_of": card.get("through", "")[:10], "games_played": card.get("games_played", 0), "rows": live_rows,
                      "running": card.get("running", {}), "reliability": card.get("reliability", []),
-                     "paired": card.get("paired", {}), "player_reliability": card.get("player_reliability", {})},
+                     "paired": card.get("paired", {}), "player_reliability": card.get("player_reliability", {}),
+                     "summary": summary, "prereg": prereg, "evaluated": ev.get("evaluated_utc", "")},
             "movers": movers,
             "teams": teams, "teams_x": tx, "tonight": tonight(g.set_index("game_id").p_home_win, elo),
             "games": games, "skaters_x": skx, "has_td": td is not None, "odds_history": odds_history, "goalies": gx, "evidence": evidence(),

@@ -66,7 +66,7 @@ PAGE = """<!DOCTYPE html>
 </style>
 </head>
 <body>
-<nav><a href="index.html">Projections</a><a href="compare.html">ORR vs NeurHL</a><a href="changelog.html">Changelog</a></nav>
+<nav><a href="index.html">Projections</a><a href="compare.html">ORR vs NeurHL</a><a href="changelog.html">Changelog</a><a href="model.html">Model card</a></nav>
 __BODY__
 </body>
 </html>

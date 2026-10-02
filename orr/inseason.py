@@ -65,6 +65,18 @@ LIVE = C.OUT / "live"
 
 # model versions: ORR 1.1 = 1.0 + the accepted pre-registered item X1
 MODELS = {
+    # ORR 2.0 forecasts exactly as 1.9 does. The release adds the preregistered evaluation
+    # (orr/evaluate_2027.py), the reproducibility check (orr/reproduce.py) and the model card.
+    "2.0": {"version": "ORR 2.0", "past_starters": True, "lineups": True, "player_update": True,
+            "box_first": True, "goalie_update": True, "player_calibration": True,
+            "standings_drift": True, "start_share_update": True, "absence": True, "standings_sharp": True,
+            "sog_dist": True, "sos": True, "ros_file": True, "ros_interval": True, "goalie_ros": True,
+            "forecast_diff": True, "clinch": True,
+            "accepted_items": ["X1", "1.2: in-season skater rates", "1.3: box-score lineups, goalie talent",
+                               "1.4: standings drift, start shares", "1.5: shot distributions",
+                               "1.6: remaining SOS, rest-of-season player file", "1.7-1.8: rest-of-season intervals",
+                               "1.8: goalie rest-of-season file, forecast diff", "1.9: clinch flags, magic numbers",
+                               "2.0: preregistered evaluation, reproducibility check, model card"]},
     "1.9": {"version": "ORR 1.9", "past_starters": True, "lineups": True, "player_update": True,
             "box_first": True, "goalie_update": True, "player_calibration": True,
             "standings_drift": True, "start_share_update": True, "absence": True, "standings_sharp": True,
@@ -117,7 +129,7 @@ MODELS = {
     "1.0": {"version": "ORR 1.0", "past_starters": False, "lineups": False,
             "accepted_items": []},
 }
-DEFAULT_MODEL = "1.9"
+DEFAULT_MODEL = "2.0"
 
 
 def _sha(p: Path) -> str:

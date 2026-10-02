@@ -174,7 +174,7 @@ body { margin: 0; }
   <h1>ORR <span>2026–27</span></h1>
   <p class="sub">NHL projections from information dated before the first puck drop (2026-09-29, 5:00 pm ET), built after the season began and scored against every NeurHL release only on games after publication. Standings anchor to the sportsbook line, re-price the news it had not seen with the player model, and blend in team history. Games come from one scoring model, players from regressed per-60 rates with conserved ice time.</p>
   <div class="chips" id="chips"></div>
-  <p class="sub"><a href="index.html" style="color: var(--blue)">ORR projections: standings, games, skaters, goalies</a></p>
+  <p class="sub"><a href="index.html" style="color: var(--blue)">ORR projections: standings, games, skaters, goalies</a> · <a href="model.html" style="color: var(--blue)">Model card</a></p>
 </header>
 
 <section aria-labelledby="h-sum">

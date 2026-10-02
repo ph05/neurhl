@@ -2,6 +2,14 @@
 
 ORR (Odds, Ratings & Rosters) is versioned by what it forecasts in-season. The scored 2026-27 preseason forecast (`orr/output/freeze_2027/`, ORR 1.0) is frozen; later versions change the daily in-season forecasts from the day they ship, and each forecast counts only for games after its publication. Release notes with evidence are in `orr/releases/`.
 
+## 2.0 (2026-10-02): one system, accountable
+
+- **Preregistered season-end evaluation** against NeurHL (`orr/EVALUATION_2027.md`, `orr/evaluate_2027.py`). It records the SHA-256 of every evaluated file and has four primary comparisons, each with a paired-bootstrap CI. A verdict counts only after the last regular-season game.
+- **Reproducibility check.** `python3 -m orr.reproduce --date D` re-runs a published day from its recorded code commit and SHA-matched inputs. Both published days (10-01 with 1.7, 10-02 with 1.9) reproduce exactly. The daily Action checks the previous day.
+- **Model card** at `docs/orr/model.html`: every layer and every switch, with its version, held-out evidence and state.
+- **One accuracy section** on the website. It has one held-out results table for every layer, including failures, a season scorecard of every forecast, and the evaluation's status.
+- Forecasts are unchanged from 1.9. Retrospective of 1.0 to 2.0 in `orr/releases/v2.0.md`.
+
 ## 1.9 (2026-10-02): is ORR beating NeurHL?
 
 - **Paired live comparison** with NeurHL on the same eligible games: paired bootstrap CI and a plain verdict.

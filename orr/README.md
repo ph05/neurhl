@@ -39,6 +39,19 @@ Start from the strongest cheap signal, add what it misses, and never be more con
   - so do its starting goalies.
 
   Lineups and starters come from NeurHL's committed pregame lineup files. The other eight items failed their rules and are not in the model; see RESULTS.
+- **In-season, ORR 1.2 to 2.0** (2026-10-01 to 02; default `--model 2.0`, and every earlier version stays available):
+  - skater rates, goalie talent and start shares are updated with the season so far;
+  - the rest-of-season standings simulation is drift-calibrated;
+  - shots on goal follow a negative binomial;
+  - rest-of-season player and goalie files carry calibrated intervals;
+  - clinch flags and magic numbers are published.
+
+  Three features failed their held-out tests and ship switched off: long-term absences, the Platt correction, and a standings sharpness multiplier other than 1.0. 2.0 adds three things:
+  - a preregistered season-end evaluation against NeurHL (`orr/EVALUATION_2027.md`, `orr/evaluate_2027.py`);
+  - a reproducibility check of any published day (`orr/reproduce.py`);
+  - a model card (`docs/orr/model.html`).
+
+  See `orr/CHANGELOG.md` and `orr/releases/`.
 
 ## Pipeline
 
@@ -105,14 +118,18 @@ python3 -m orr.freeze --sims 40000  # refuses to run with uncommitted model code
 
 # in-season, each day
 python3 -m orr.ingest               # NHL API, with shots; or --add "id,date,home,away,hg,ag,REG|OT|SO[,source,shots_h,shots_a]"
-python3 -m orr.inseason --date 2026-10-02 [--goalies starters.csv] [--model 1.1|1.0] [--lineup-dir DIR]
-python3 -m orr.score                # scorecard against NeurHL
+python3 -m orr.inseason --date 2026-10-02 [--goalies starters.csv] [--model 2.0|1.9|...|1.0] [--lineup-dir DIR]
+python3 -m orr.score [--neurhl-live DIR]          # scorecard against NeurHL
+python3 -m orr.evaluate_2027 [--neurhl-live DIR]  # the preregistered season-end evaluation (pending until April)
+python3 -m orr.reproduce --date 2026-10-02        # re-run a published day from its recorded code and inputs
 
-# tests
-for t in test_season test_players test_gamemodel test_freeze test_inseason; do python3 -m orr.tests.$t; done
+# tests (the same list runs in .github/workflows/orr_tests.yml)
+for t in test_season test_players test_gamemodel test_inseason test_freeze test_player_update \
+         test_live_1_3 test_live_1_4 test_live_1_5 test_live_1_6 test_live_1_7 test_live_1_8 test_live_1_9 test_live_2_0; do
+  python3 -m orr.tests.$t; done
 ```
 
-**Shots matter in-season.** Once this branch is on the default branch, `.github/workflows/orr_daily.yml` runs the daily loop on GitHub's runners twice a day, at 13:30 and 21:30 UTC. Each run takes results with shots from the NHL API, runs the ORR 1.1 forecast with NeurHL's committed lineups, updates the scorecard and `docs/orr/`, and commits them back. Locally, run `ingest` where the NHL API is reachable, so that results carry shots on goal. These are the backtest results:
+**Shots matter in-season.** Once this branch is on the default branch, `.github/workflows/orr_daily.yml` runs the daily loop on GitHub's runners twice a day, at 13:30 and 21:30 UTC. Each run takes results with shots from the NHL API, runs the default model's forecast with NeurHL's committed lineups, updates the scorecard and the preregistered evaluation, re-runs the previous day's forecast as a reproducibility check, rebuilds `docs/orr/`, and commits the results back. Locally, run `ingest` where the NHL API is reachable, so that results carry shots on goal. These are the backtest results:
 
 | Updated on | ORR 1.1 | NeurHL-G | Verdict |
 |---|---|---|---|

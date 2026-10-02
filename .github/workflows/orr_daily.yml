@@ -2,8 +2,9 @@
 # GitHub's runners can reach the NHL API, which the project's build container cannot, so this
 # job is what puts shots on goal into the in-season update: ORR 1.1's live loop then runs the
 # goals-and-shots variant, the one that passed its pre-registered test.
-# Each run: results through yesterday (with shots) -> today's ORR 1.1 forecast with NeurHL's
-# committed lineup files -> scorecard -> GitHub Pages files in docs/orr/ -> commit.
+# Each run: results through yesterday (with shots) -> today's forecast (the default model in
+# orr/inseason.py) with NeurHL's committed lineup files -> scorecard, preregistered evaluation and
+# a re-run of yesterday's forecast -> GitHub Pages files in docs/orr/ -> commit.
 # A forecast counts for a game only if pushed before that game's scheduled puck drop.
 name: orr-daily
 
@@ -56,8 +57,13 @@ jobs:
           python -m orr.ingest --through "$(date -u -d yesterday +%F)"
           python -m orr.inseason --date "$today" --lineup-dir neurhl/output/live/2027
           python -m orr.score --neurhl-live neurhl/output/live/2027
+          python -m orr.evaluate_2027 --neurhl-live neurhl/output/live/2027
+          # ORR 2.0: re-run yesterday's published forecast from its recorded code and inputs
+          python -m orr.reproduce --date "$(date -u -d yesterday +%F)" || echo "reproduce check did not run"
           python -m orr.site.build_orr
           python -m orr.site.build_dashboard
+          python -m orr.site.build_model
+          python -m orr.site.build_changelog
           echo "date=$today" >> "$GITHUB_ENV"
 
       - name: Commit and push
@@ -65,9 +71,9 @@ jobs:
           set -euo pipefail
           git config user.name "orr-daily"
           git config user.email "orr-daily@users.noreply.github.com"
-          git add orr/output/live orr/output/scorecard_2027.json docs/orr
+          git add orr/output/live orr/output/scorecard_2027.json orr/output/evaluation_2027.json orr/output/reproduce docs/orr
           if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
-          git commit -m "ORR live: results and ORR 1.1 forecast ${date} ($(date -u +%H:%MZ))"
+          git commit -m "ORR live: results and daily forecast ${date} ($(date -u +%H:%MZ))"
           for i in 1 2 3 4; do
             git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
             sleep $((2 ** i))
