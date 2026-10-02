@@ -1,0 +1,35 @@
+{
+ "protocol": "Shots-on-goal distributions for player lines (ORR 1.5).\n\nPer skater-game, the expected shots are ORR 1.2's updated rate (the strict\npreseason shots per game updated with the player's games so far, prior weight\nfrom params/player_update.json). P(shots >= k) for k = 2, 3, 4 comes from a\nPoisson or a negative binomial with size r (variance mu + mu^2 / r); r is\nfitted by maximum likelihood on 2012 and 2014-2017. The test (2022, 2023)\nruns once. Pre-declared rule: the negative binomial is adopted\n(params/sog_dist.json \"adopted\") only if its mean log loss over the three\nthresholds is lower than the Poisson's on test.\n\nRun: python3 -m orr.backtest.sog_dist_bt\n",
+ "r": 16.569864930456816,
+ "n_tune": 215751,
+ "n_test": 92313,
+ "tune_var_ratio": 1.102180998585158,
+ "test": {
+  "2": {
+   "rate": 0.48241309458039494,
+   "mean_p_poisson": 0.49643473792589965,
+   "mean_p_nb": 0.48580558071397134,
+   "ll_poisson": 0.6209368276320983,
+   "ll_nb": 0.6206506743102668
+  },
+  "3": {
+   "rate": 0.26557472945305644,
+   "mean_p_poisson": 0.2640267041249701,
+   "mean_p_nb": 0.26358803876121367,
+   "ll_poisson": 0.50460459150122,
+   "ll_nb": 0.5046824332158825
+  },
+  "4": {
+   "rate": 0.13264653949064595,
+   "mean_p_poisson": 0.12479393416750399,
+   "mean_p_nb": 0.13046308569013781,
+   "ll_poisson": 0.33404066014711276,
+   "ll_nb": 0.3336151047160713
+  },
+  "mean_ll": {
+   "poisson": 0.4865273597601437,
+   "nb": 0.48631607074740685
+  }
+ },
+ "adopted": true
+}

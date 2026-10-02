@@ -23,3 +23,10 @@ data/raw/right_rail/
 # Markdown documents are kept in a private repository; only the root README is published
 *.md
 !/README.md
+
+# The review of NeurHL is public
+!/review/**/*.md
+
+# ORR: its documents are public, its working cache is not
+!/orr/**/*.md
+orr/cache/

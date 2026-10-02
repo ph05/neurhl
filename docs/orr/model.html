@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORR Model Card</title>
+<style>
+  :root { --fg:#111; --muted:#555; --rule:#ccc; --link:#0645ad; --bg:#fff; --code:#f2f2f2; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --fg:#e6e6e6; --muted:#a3a3a3; --rule:#444; --link:#8ab4f8; --bg:#121212; --code:#222; color-scheme: dark; } }
+  :root[data-theme="dark"] { --fg:#e6e6e6; --muted:#a3a3a3; --rule:#444; --link:#8ab4f8; --bg:#121212; --code:#222; color-scheme: dark; }
+  html { background: var(--bg); }
+  body { margin: 0 auto; max-width: 860px; padding: 12px 16px 40px; color: var(--fg); background: var(--bg);
+         font: 13px/1.55 Verdana, Geneva, "DejaVu Sans", Arial, sans-serif; }
+  a { color: var(--link); } h1 { font-size: 20px; } h2 { font-size: 16px; margin-top: 26px; padding-bottom: 3px; border-bottom: 2px solid var(--fg); }
+  p, li { max-width: 88ch; }
+  table { border-collapse: collapse; } td, th { padding: 2px 10px 2px 0; text-align: left; border-bottom: 1px solid var(--rule); } code { background: var(--code); padding: 0 3px; font-size: 12px; }
+  nav { font-size: 12px; margin: 6px 0; padding: 5px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  nav a { margin-right: 14px; }
+</style>
+</head>
+<body>
+<nav><a href="index.html">Projections</a><a href="compare.html">ORR vs NeurHL</a><a href="changelog.html">Changelog</a><a href="model.html">Model card</a></nav>
+
+<h1>ORR model card</h1>
+<p>The current model is <b>ORR 2.0</b>. ORR (Odds, Ratings &amp; Rosters) forecasts the 2026-27 NHL season: game probabilities, standings and playoff odds, and skater and goalie projections. It is a public, reproducible alternative to NeurHL. This page is generated from the code's own configuration, parameter files and evaluation records.</p>
+
+<h2>What it is for</h2>
+<ul>
+<li>Pregame win probabilities, expected goals and lineup-aware player lines for each game day.</li>
+<li>Season standings, playoff and Cup odds, clinch flags and magic numbers, and rest-of-season player and goalie intervals.</li>
+<li>Comparison with NeurHL, on terms fixed in advance.</li>
+</ul>
+<p>It is not for betting. It does not model trades, coaching changes or injuries that are not yet visible in lineups. Its playoff-round probabilities have never been tested against held-out playoffs.</p>
+
+<h2>Layers</h2>
+<ol>
+<li><b>Preseason file (ORR 1.0), frozen.</b> This layer is a market-anchored team rating with a roster-based prior. It gives one scoring model for every game (home ice, rest, travel and the starting goalie) and simulates the season. Player projections conserve team ice time. Inputs were dated before 2026-09-29 17:00 ET. The file is in <code>orr/output/freeze_2027/</code>.</li>
+<li><b>Daily in-season update.</b> A Kalman-style filter updates each team's offence and defence from results and shots on goal. Ratings are adjusted for dressed lineups and starting goalies (X1). Goalie talent and start shares are updated with the season so far.</li>
+<li><b>Players.</b> Each skater's per-game rates are posterior means given his games so far. Player lines give P(goal), P(point) and P(k+ shots), conditional on dressing and weighted by the probability of dressing.</li>
+<li><b>Season simulation.</b> 20,000 seasons are simulated with completed games fixed. It includes rest-of-season rating drift and the full tiebreakers and playoff format, and produces standings, odds, clinch flags and remaining strength of schedule.</li>
+<li><b>Rest-of-season files.</b> Skater and goalie intervals come from a Monte Carlo over games played, rate uncertainty and injury spells.</li>
+</ol>
+
+<h2>Switches in ORR 2.0</h2>
+<p>Each feature can be switched off, so every earlier version stays reproducible with <code>python3 -m orr.inseason --model 1.x</code>. Tuning used seasons up to 2016-17 only. Each test ran once, on 2021-22 and 2022-23, under an adoption rule declared beforehand. A feature that failed its test ships switched off rather than being deleted.</p>
+<table><thead><tr><th>Switch</th><th>Since</th><th>What it does</th><th>Held-out evidence</th><th>State</th></tr></thead><tbody><tr><td><code>past_starters</code></td><td>1.1</td><td>Past games use the goalie who actually started.</td><td>Part of X1. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/RESULTS.md">evidence</a></td><td><b>live</b></td></tr><tr><td><code>lineups</code></td><td>1.1</td><td>Team ratings are adjusted for who dresses and who starts in goal (X1).</td><td>Log loss −0.00130 (CI −0.00255 to −0.00006) on 2019-24 gate games; −0.00232 (CI −0.00438 to −0.00019) on two unused seasons. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/output/backtest/inseason_bt_x3r.json">evidence</a></td><td><b>live</b></td></tr><tr><td><code>player_update</code></td><td>1.2</td><td>Skater goal, assist and shot rates are updated with his games so far (Gamma-Poisson, n0 = 40/40/20).</td><td>Rest-of-season points MAE 4.07 vs 4.48 (CI −0.49 to −0.34) on 2021-23. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/output/backtest/player_update_bt.json">evidence</a></td><td><b>live</b></td></tr><tr><td><code>box_first</code></td><td>1.3</td><td>Past lineups and starters come from box scores first, then NeurHL&#x27;s pregame files.</td><td>Matches the X1 backtest&#x27;s inputs. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/releases/v1.3.md">evidence</a></td><td><b>live</b></td></tr><tr><td><code>goalie_update</code></td><td>1.3</td><td>Goalie talent is updated with this season&#x27;s saves above average.</td><td>The backtests&#x27; own rule, applied live. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/releases/v1.3.md">evidence</a></td><td><b>live</b></td></tr><tr><td><code>player_calibration</code></td><td>1.3</td><td>Platt correction of per-game P(goal) and P(point).</td><td>Made held-out log loss worse for both; not adopted. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/output/backtest/player_prob_bt.json">evidence</a></td><td><b>off (by its test)</b></td></tr><tr><td><code>standings_drift</code></td><td>1.4</td><td>Rest-of-season rating drift in the standings simulation (k = 0.5).</td><td>Final-points CRPS 3.84 vs 4.99 for the preseason forecast on 2021-23. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/output/backtest/standings_inseason_bt.json">evidence</a></td><td><b>live</b></td></tr><tr><td><code>start_share_update</code></td><td>1.4</td><td>Goalie start shares are updated with starts so far (Dirichlet, α = 10).</td><td>Rest-of-season starts MAE 5.29 vs 6.13 (CI −1.12 to −0.56) on 2021-23. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/output/backtest/start_share_bt.json">evidence</a></td><td><b>live</b></td></tr><tr><td><code>absence</code></td><td>1.4</td><td>Long-term absences lower a team&#x27;s rest-of-season strength.</td><td>+0.0008 CRPS (CI ±0.01): no measurable effect; ships off. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/output/backtest/standings_inseason_bt.json">evidence</a></td><td><b>off (by its test)</b></td></tr><tr><td><code>standings_sharp</code></td><td>1.5</td><td>Multiplier on in-season rating uncertainty in the standings simulation.</td><td>Tuned to 1.0, the existing setting: no change. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/output/backtest/standings_sharp_bt.json">evidence</a></td><td><b>off (by its test)</b></td></tr><tr><td><code>sog_dist</code></td><td>1.5</td><td>Shots on goal follow a negative binomial (r = 16.6) rather than a Poisson.</td><td>Held-out log loss 0.48632 vs 0.48653. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/output/backtest/sog_dist_bt.json">evidence</a></td><td><b>live</b></td></tr><tr><td><code>sos</code></td><td>1.6</td><td>Remaining strength of schedule in the daily standings.</td><td>Descriptive. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/releases/v1.6.md">evidence</a></td><td><b>live</b></td></tr><tr><td><code>ros_file</code></td><td>1.6</td><td>Daily rest-of-season skater file with 80% intervals.</td><td>Descriptive file. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/releases/v1.6.md">evidence</a></td><td><b>live</b></td></tr><tr><td><code>ros_interval</code></td><td>1.7</td><td>Rest-of-season intervals simulate games played, rate variance (v = 6) and injury spells.</td><td>Interval score 25.07 vs 25.53 (CI −0.73 to −0.18); coverage 0.80 on 2021-23. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/output/backtest/ros_interval2_bt.json">evidence</a></td><td><b>live</b></td></tr><tr><td><code>goalie_ros</code></td><td>1.8</td><td>Daily rest-of-season goalie file: starts and save % with intervals.</td><td>Descriptive file. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/releases/v1.8.md">evidence</a></td><td><b>live</b></td></tr><tr><td><code>forecast_diff</code></td><td>1.8</td><td>Each game&#x27;s change since its previous forecast, and why.</td><td>Descriptive. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/releases/v1.8.md">evidence</a></td><td><b>live</b></td></tr><tr><td><code>clinch</code></td><td>1.9</td><td>Clinch and elimination flags and playoff magic numbers.</td><td>Exact by enumeration of results. <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/releases/v1.9.md">evidence</a></td><td><b>live</b></td></tr></tbody></table>
+
+<h2>Preregistered evaluation against NeurHL</h2>
+<p>The protocol is <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/EVALUATION_2027.md">orr/EVALUATION_2027.md</a> and the code is <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/evaluate_2027.py">orr/evaluate_2027.py</a>. They were fixed on 2026-10-02 with the SHA-256 of every forecast file. There are four primary comparisons, each with a paired-bootstrap 95% CI. A comparison is decided only when its CI excludes zero.</p>
+<p>Run 2026-10-02T02:01 UTC on 8 games. Verdicts are read only after the last regular-season game.</p><table><thead><tr><th></th><th>Comparison</th><th>Status</th><th>N</th><th>ORR − NeurHL</th><th>Verdict / reason</th></tr></thead><tbody><tr><td>P1</td><td>daily vs neurhl G</td><td>pending</td><td></td><td></td><td>no eligible games for both orr_inseason and neurhl_G_pregame yet</td></tr><tr><td>P2</td><td>preseason vs neurhl 1 1</td><td>interim</td><td>1</td><td>+0.0571</td><td>(interim, not a verdict) NeurHL better</td></tr><tr><td>P3</td><td>teams vs neurhl 1 1</td><td>pending</td><td></td><td></td><td>regular season not complete</td></tr><tr><td>P4</td><td>skaters vs neurhl 1 1</td><td>pending</td><td></td><td></td><td>regular season not complete or no box scores</td></tr></tbody></table>
+
+<h2>Reproducibility</h2>
+<p><code>python3 -m orr.reproduce --date D</code> re-runs a published daily forecast. It checks out the recorded code commit in a temporary worktree and rebuilds the exact inputs: the results file and every lineup file, each matched by SHA-256. It then re-runs the day with the recorded seed and compares every output file.</p>
+<table><thead><tr><th>Forecast</th><th>Model</th><th>Code</th><th>Results file matched</th><th>Lineup files matched</th><th>Re-run</th></tr></thead><tbody><tr><td>2026-10-02</td><td>ORR 2.0</td><td><code>47ebc98</code></td><td>yes</td><td>20/20</td><td><b>identical</b></td></tr><tr><td>2026-10-01</td><td>ORR 1.7</td><td><code>1a472a1</code></td><td>yes</td><td>15/15</td><td><b>identical</b></td></tr></tbody></table>
+
+<h2>Known limitations</h2>
+<ul>
+<li>Shots on goal enter the live update only where the NHL API is reachable, as in the daily GitHub Action. Without it the filter runs on goals alone, the variant that did not pass its test.</li>
+<li>The preseason file was published at 2026-10-01 00:37 UTC, after seven of the first eight games had started, so it is scored only on later games.</li>
+<li>Rest-of-season player intervals reach 80% coverage on held-out seasons, but goalie intervals have no held-out test.</li>
+<li>Playoff-round probabilities have never been tested against held-out playoffs.</li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+ "created_utc": "2026-10-01T04:02:43+00:00",
+ "season": 2016,
+ "offsets_n": [
+  15220,
+  15220,
+  15220
+ ],
+ "offsets_maxdiff": 0.0,
+ "no_lineup_maxdiff": 0.0,
+ "x1_gs_maxdiff": 0.0,
+ "x1_go_maxdiff": 0.0,
+ "live_gs_eta_maxdiff": 0.0,
+ "live_gs_eta_meanabs": 0.0,
+ "live_go_eta_maxdiff": 0.0,
+ "live_go_eta_meanabs": 0.0,
+ "secs": 19.0
+}

@@ -1,0 +1,232 @@
+{
+ "id": "X3",
+ "accepted": false,
+ "ship_x1_default_on": true,
+ "summary": "Only X1 of the eight experiments was accepted, so ORR 1.1 = the shipped in-season loop + X1 (dressed-skater lineup offsets and known starters in the filter's prediction and update), integrated in the core behind settings (ratings.run_filter(lineup=...), InSeasonFilter lo_h/lo_a and gdiff_h/gdiff_a, orr/lineups.py, inseason.py --model 1.1 default). The single hindcast on the gate games 2019-24 (n=6289) gives, goals+shots, 0.66001 vs the shipped loop's 0.66131 (-0.0013, CI [-0.00255, -6e-05]); goals-only 0.66217 vs 0.66337 (-0.0012, CI [-0.0025, 7e-05]). The goals-only CI includes 0, so X3 is NOT accepted under the pre-registered reading (both variants); X1 ships default ON under the plan's fallback clause because it does not hurt in either variant.",
+ "tuning": "None. X3 tunes nothing; ORR 1.1 uses X1's configuration fixed before X1's test (beta_x 0.45, beta_st 0, beta_t 0.6, TOI scale 300, expected-lineup half-life 10, shot_mult 0, use_goalie). One configuration, logged in ledger.json.",
+ "test_metric": "Home-win log loss on the NeurHL-G gate games 2019-24 (n=6289), the shipped in-season loop protocol of inseason_bt.py (preseason pipeline start, OT/SO from each arm's team-history run), paired bootstrap 95% CI (games_bt.paired). Headline numbers (baseline/candidate/diff/ci95) are the GOALS-ONLY variant, the one that decides the verdict and that the live loop runs while results carry no shots; goals+shots in extra.",
+ "baseline": 0.66337,
+ "candidate": 0.66217,
+ "diff": -0.0012,
+ "ci95": [
+  -0.0025,
+  7e-05
+ ],
+ "rule_check": "Plan: \"Accept if the combined loop improves on the current shipped loop (same variant) with a 95% CI that excludes 0. Otherwise ship only the individually accepted items that do not hurt in combination.\" Reading declared before the run (prereg.json): both variants must pass. Goals+shots: -0.0013, CI [-0.00255, -6e-05] -> MET. Goals-only: -0.0012, CI [-0.0025, 7e-05] -> NOT MET. X3 NOT ACCEPTED. Fallback: X1 does not hurt (point estimates <= 0 in both variants) -> X1 ships in ORR 1.1, default ON. Hypothesis clauses: 'better than any accepted item alone' is an identity (the combination is X1); 'better than NeurHL-G': goals+shots -5e-05 (CI [-0.0025, 0.00254]), a tie; goals-only 0.00211 (CI [-0.00065, 0.00468]), NeurHL-G better, not significantly.",
+ "extra": {
+  "gate_all": {
+   "goals_shots": {
+    "shipped": 0.66131,
+    "orr_1_1": 0.66001,
+    "d_vs_shipped": {
+     "diff": -0.0013,
+     "ci95": [
+      -0.00255,
+      -6e-05
+     ]
+    },
+    "d_vs_neurhl_g": {
+     "diff": -5e-05,
+     "ci95": [
+      -0.0025,
+      0.00254
+     ]
+    },
+    "d_vs_neurhl_elo": {
+     "diff": -0.00565,
+     "ci95": [
+      -0.00901,
+      -0.00206
+     ]
+    },
+    "teamhist_start": {
+     "shipped": 0.66104,
+     "orr_1_1": 0.65965
+    }
+   },
+   "goals_only": {
+    "shipped": 0.66337,
+    "orr_1_1": 0.66217,
+    "d_vs_shipped": {
+     "diff": -0.0012,
+     "ci95": [
+      -0.0025,
+      7e-05
+     ]
+    },
+    "d_vs_neurhl_g": {
+     "diff": 0.00211,
+     "ci95": [
+      -0.00065,
+      0.00468
+     ]
+    },
+    "d_vs_neurhl_elo": {
+     "diff": -0.00348,
+     "ci95": [
+      -0.00602,
+      -0.00097
+     ]
+    },
+    "teamhist_start": {
+     "shipped": 0.66417,
+     "orr_1_1": 0.66286
+    }
+   }
+  },
+  "neurhl_g": 0.66006,
+  "neurhl_elo": 0.66566,
+  "lineup_known_share": 0.792,
+  "by_season_orr_1_1_minus_shipped": {
+   "2019": {
+    "goals_shots": {
+     "diff": -0.00233,
+     "ci95": [
+      -0.00542,
+      0.00085
+     ]
+    },
+    "goals_only": {
+     "diff": -0.00221,
+     "ci95": [
+      -0.00513,
+      0.00086
+     ]
+    }
+   },
+   "2020": {
+    "goals_shots": {
+     "diff": 0.001,
+     "ci95": [
+      -0.00189,
+      0.00384
+     ]
+    },
+    "goals_only": {
+     "diff": 0.00146,
+     "ci95": [
+      -0.00144,
+      0.00437
+     ]
+    }
+   },
+   "2022": {
+    "goals_shots": {
+     "diff": -0.00423,
+     "ci95": [
+      -0.00732,
+      -0.00094
+     ]
+    },
+    "goals_only": {
+     "diff": -0.00389,
+     "ci95": [
+      -0.00713,
+      -0.00055
+     ]
+    }
+   },
+   "2023": {
+    "goals_shots": {
+     "diff": 0.00044,
+     "ci95": [
+      -0.00275,
+      0.0038
+     ]
+    },
+    "goals_only": {
+     "diff": 8e-05,
+     "ci95": [
+      -0.00332,
+      0.00342
+     ]
+    }
+   },
+   "2024": {
+    "goals_shots": {
+     "diff": -0.00099,
+     "ci95": [
+      -0.00194,
+      -5e-05
+     ]
+    },
+    "goals_only": {
+     "diff": -0.00099,
+     "ci95": [
+      -0.00207,
+      -0.0
+     ]
+    }
+   }
+  },
+  "games_with_lineups_and_starters": {
+   "n": 4982,
+   "goals_shots": {
+    "diff": -0.00161,
+    "ci95": [
+     -0.00328,
+     -4e-05
+    ]
+   },
+   "goals_only": {
+    "diff": -0.00147,
+    "ci95": [
+     -0.00312,
+     0.00011
+    ]
+   }
+  },
+  "sensitivity_nb20000": {
+   "goals_shots": [
+    -0.00257,
+    -4e-05
+   ],
+   "goals_only": [
+    -0.00245,
+    5e-05
+   ]
+  },
+  "reproduces_x1_test": "yes: 0.66001 / 0.66217 and identical CIs to X1's test_output.json",
+  "integration_checks_2016": {
+   "offsets_maxdiff": 0.0,
+   "no_lineup_maxdiff": 0.0,
+   "x1_gs_maxdiff": 0.0,
+   "x1_go_maxdiff": 0.0,
+   "live_gs_eta_maxdiff": 0.0,
+   "live_go_eta_maxdiff": 0.0
+  },
+  "today_forecast_2026_10_01": "regenerated with ORR 1.1 at 2026-10-01T04:09:30Z (before the 15:00Z deadline); max |change| in p_home_win 0.0002, all from the 09-29 starters entering the update; no lineup offset was non-zero.",
+  "tests": "test_season 6/6, test_players 10/10, test_gamemodel 12/12, test_inseason 4/4 (2 new), test_freeze 7/7: all pass."
+ },
+ "integrate": "DONE in the core (defaults reproduce ORR 1.0 exactly when the options are off): orr/lineups.py (new: LineupHP/X1 settings, backtest_offsets, live_lineups, live_values, live_offsets); orr/ratings.py run_filter(lineup=None) and InSeasonFilter (lo_h/lo_a, gdiff_h/gdiff_a columns, _goal_offsets, predict_eta); orr/inseason.py MODELS {'1.1','1.0'}, --model (default 1.1), --lineup-dir, merge_starters; orr/backtest/inseason_bt_1_1.py (new). Parameters: beta_x 0.45, beta_st 0, beta_t 0.6, toi_scale 300, halflife 10, use_goalie True.",
+ "caveats": [
+  "Goals-only, the variant the live loop runs today (results carry no shots), does not clear the rule: the live gain is not established at 95%.",
+  "Live lineups/starters come from NeurHL's pregame files (DailyFaceoff projections and confirmations), not box scores as in the backtest; past games' starters are the pregame starters, which may differ from who actually played. Expect a smaller live gain.",
+  "Live starter talent uses inseason.starter_diffs (the 2027 talent table minus the start-share mix), the backtest uses structural.goalie_game_talent (walk-forward with in-season evidence, EWMA reference): same units and coefficient, different reference.",
+  "A side without a lineup counts as its expected lineup (D=0) live; in the backtest both sides always come together from the box score.",
+  "The bootstrap CIs depend on games_bt's module RNG call order; the order was fixed before the run (prereg amendment) and a 20,000-resample check agrees.",
+  "run_2026-10-01.json records code '6cb0904' (HEAD) while the ORR 1.1 code is uncommitted; the commit that adds it should be pushed together with the regenerated forecast.",
+  "RESULTS.md previously attributed '+0.0006 (CI -0.0019 to +0.0029)' vs NeurHL-G to the no-starter goals+shots loop; that figure is the known-starters mode (flagged by M2). Corrected to +0.0012 (CI -0.0011 to +0.0036).",
+  "Pre-existing, not changed: build_dashboard keeps the EARLIEST live forecast per game while score.py keeps the latest before the deadline."
+ ],
+ "report_note": "REPORT.md could not be written: the harness refuses report .md files from this subagent ('subagents should return findings as text'). Its content (hypothesis, what was done, tuning, the single test with CI, decision, integration) is in this file and in the subagent's final response.",
+ "files": [
+  "/home/user/neurhl/orr/experiments/X3/__init__.py",
+  "/home/user/neurhl/orr/experiments/X3/prereg.json",
+  "/home/user/neurhl/orr/experiments/X3/checks.py",
+  "/home/user/neurhl/orr/experiments/X3/checks.json",
+  "/home/user/neurhl/orr/experiments/X3/make_result.py",
+  "/home/user/neurhl/orr/experiments/X3/ledger.json",
+  "/home/user/neurhl/orr/experiments/X3/result.json",
+  "/home/user/neurhl/orr/lineups.py",
+  "/home/user/neurhl/orr/ratings.py",
+  "/home/user/neurhl/orr/inseason.py",
+  "/home/user/neurhl/orr/backtest/inseason_bt_1_1.py",
+  "/home/user/neurhl/orr/tests/test_inseason.py",
+  "/home/user/neurhl/orr/output/backtest/inseason_bt_1_1.json",
+  "/home/user/neurhl/orr/output/backtest/inseason_bt_1_1_preds.csv.gz",
+  "/home/user/neurhl/orr/RESULTS.md",
+  "/home/user/neurhl/orr/README.md",
+  "/home/user/neurhl/orr/output/live/2026-10-01"
+ ]
+}

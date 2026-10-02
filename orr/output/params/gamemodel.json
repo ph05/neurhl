@@ -1,0 +1,84 @@
+{
+ "season_end": 2027,
+ "mu": 1.0707594857499656,
+ "h": 0.06716674285795839,
+ "h_sd": 0.023445591898176518,
+ "kappa": 1.1001805009352585,
+ "layer": {
+  "a1": 0.18206753797884356,
+  "b1": 0.25771400388331106,
+  "a2": 0.06100076951398494,
+  "b2": 0.41499220874020165,
+  "g": -0.038080276777289555
+ },
+ "ot": {
+  "c0": 0.7008827153539119,
+  "c1": 1.131959519518053,
+  "a_ot": 0.016615236702082686,
+  "b_ot": 1.1433035358126251,
+  "a_so": -0.0023166972191188055,
+  "b_so": -0.09489127398845625
+ },
+ "ctx": {
+  "b2b_o": -0.06292879871771115,
+  "b2b_d": 0.04907542446897189,
+  "rest3_o": 0.008800280064800282,
+  "rest3_d": -0.007139693985641099,
+  "km_o": 0.005089775830249286,
+  "km_d": 0.006465044192528446,
+  "tz_o": 0.0003714040333687495,
+  "tz_d": -0.003353779873390348
+ },
+ "ctx_gk": {
+  "b2b_o": -0.059552500583375405,
+  "b2b_d": 0.06413077025980327,
+  "rest3_o": 0.01334046665609115,
+  "rest3_d": 0.007929415067689656,
+  "km_o": 0.0010113269428314814,
+  "km_d": 0.010556725908802035,
+  "tz_o": 0.00663917722844867,
+  "tz_d": -0.003341366295254069
+ },
+ "goalie": {
+  "coef": -15.601223793667085,
+  "sv_lg": 0.895546056260342,
+  "p_backup_b2b": 0.5591978403393753,
+  "p_backup_other": 0.33788706739526414,
+  "avg_gap": 0.001177275926659333
+ },
+ "disp_g": 0.9583215218806884,
+ "meta": {
+  "fitted_utc": "2026-09-30T23:42:34+00:00",
+  "seasons_used": [
+   2019,
+   2026
+  ],
+  "hp": {
+   "prior_scale": 1.0,
+   "q_s": 5e-05,
+   "q_f": 3e-05,
+   "phi_g": 1.5,
+   "phi_s": 0.6,
+   "use_shots": true,
+   "mu_sd": 0.015,
+   "h_sd_scale": 0.5,
+   "q_mu": 2e-06,
+   "integrate": false,
+   "ridge": 1.0,
+   "goalie": [
+    20000.0,
+    -0.002,
+    3.0,
+    30.0
+   ],
+   "gk_scale": 1.25,
+   "window": 8,
+   "h_halflife": 6.0,
+   "use_roster": false,
+   "pre_sp": true,
+   "pace_prior": 0.25,
+   "pace_q": 1.0
+  },
+  "notes": "mu, h: log scale (expected regulation goals exp(mu+h+o+d)); ctx: no-goalie rest/travel coefficients (use when starters are unknown); ctx_gk: the same when both starters are known, to be combined with goalie_offset; goalie.coef multiplies the starter's save talent above the team's usual starter (goals saved per shot)."
+ }
+}

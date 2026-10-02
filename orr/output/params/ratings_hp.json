@@ -1,0 +1,44 @@
+{
+ "hp": {
+  "prior_scale": 1.0,
+  "q_s": 5e-05,
+  "q_f": 3e-05,
+  "phi_g": 1.5,
+  "phi_s": 0.6,
+  "use_shots": true,
+  "mu_sd": 0.015,
+  "h_sd_scale": 0.5,
+  "q_mu": 2e-06,
+  "integrate": false,
+  "ridge": 1.0,
+  "goalie": [
+   20000.0,
+   -0.002,
+   3.0,
+   30.0
+  ],
+  "gk_scale": 1.25,
+  "window": 8,
+  "h_halflife": 6.0,
+  "use_roster": false,
+  "pre_sp": true,
+  "pace_prior": 0.25,
+  "pace_q": 1.0
+ },
+ "tuned_on": [
+  2012,
+  2014,
+  2015,
+  2016,
+  2017
+ ],
+ "tuning_ll": 0.6714967576703983,
+ "tuning_ll_frozen": 0.6776052591866658,
+ "frozen_utc": "2026-09-30T23:41:58+00:00",
+ "goalie_variant_ll": 0.6715251274672923,
+ "goalie_variant_n": 6149,
+ "tuning_goal_nll": 0.16390237871211533,
+ "best_tuning_ll": 0.6714201477658007,
+ "selection_rule": "Pre-declared final selection rule (fixed before any test-season\n    number was computed): among model-version-v2 no-goalie configurations\n    whose tuning-window win log loss is within ``tol`` of the best, take the\n    one with the best tuning-window goal NLL (regulation goals, Poisson\n    deviance form), so the one scoring model is also as good as possible for\n    goals. Goalie parameters come from the goalie stage.",
+ "n_candidates_within_tol": 14
+}

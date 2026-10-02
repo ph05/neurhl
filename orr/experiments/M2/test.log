@@ -1,0 +1,17 @@
+[go primary] n=6289 stack 0.66337 in-season 0.66337 NeurHL-G 0.66006 NeurHL Elo 0.66566  stack-in +0.00000 [-0.00002,+0.00003]
+     2019 n=1271 stack 0.67621 in 0.67620 d +0.00002
+     2020 n=1082 stack 0.67593 in 0.67591 d +0.00001
+     2022 n=1312 stack 0.64922 in 0.64925 d -0.00003
+     2023 n=1312 stack 0.65647 in 0.65646 d +0.00001
+     2024 n=1312 stack 0.66165 in 0.66164 d +0.00001
+[go sec_ht_start] n=6289 stack 0.66417 in-season 0.66417 NeurHL-G 0.66006 NeurHL Elo 0.66566  stack-in -0.00001 [-0.00003,+0.00001]
+[go sec_train_ship_where_available] n=6289 stack 0.66337 in-season 0.66337 NeurHL-G 0.66006 NeurHL Elo 0.66566  stack-in +0.00000 [-0.00002,+0.00002]
+[gs primary] n=6289 stack 0.66132 in-season 0.66131 NeurHL-G 0.66006 NeurHL Elo 0.66566  stack-in +0.00001 [-0.00001,+0.00003]
+     2019 n=1271 stack 0.67613 in 0.67611 d +0.00001
+     2020 n=1082 stack 0.67669 in 0.67668 d +0.00001
+     2022 n=1312 stack 0.64489 in 0.64491 d -0.00002
+     2023 n=1312 stack 0.65407 in 0.65405 d +0.00003
+     2024 n=1312 stack 0.65796 in 0.65795 d +0.00001
+[gs sec_ht_start] n=6289 stack 0.66104 in-season 0.66104 NeurHL-G 0.66006 NeurHL Elo 0.66566  stack-in -0.00000 [-0.00002,+0.00002]
+[gs sec_train_ship_where_available] n=6289 stack 0.66131 in-season 0.66131 NeurHL-G 0.66006 NeurHL Elo 0.66566  stack-in +0.00001 [-0.00001,+0.00002]
+accepted: False

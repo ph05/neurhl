@@ -1,0 +1,32 @@
+{
+ "item": "X3",
+ "configurations_tried": [
+  {
+   "name": "ORR 1.1 = shipped loop + X1 (fixed X1 configuration)",
+   "lineup_settings": {
+    "beta_x": 0.45,
+    "beta_st": 0.0,
+    "beta_t": 0.6,
+    "toi_scale": 300.0,
+    "halflife": 10.0,
+    "use_goalie": true
+   },
+   "tuned": false
+  }
+ ],
+ "note": "X3 tunes nothing: the only accepted item is X1, whose configuration was fixed before X1's test. No other configuration was run.",
+ "runs": [
+  {
+   "what": "integration checks, tuning season 2016 only",
+   "file": "checks.json",
+   "utc": "2026-10-01T04:02:43+00:00"
+  },
+  {
+   "what": "hindcast on the gate games 2019-24, run once",
+   "file": "orr/output/backtest/inseason_bt_1_1.json",
+   "utc": "2026-10-01T04:07:56+00:00",
+   "secs": 86.8
+  }
+ ],
+ "prereg": "prereg.json (declared 2026-10-01T03:59:19Z, amendment on bootstrap procedure before the run)"
+}

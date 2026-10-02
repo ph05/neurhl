@@ -1,0 +1,942 @@
+{
+ "protocol": {
+  "item": "X1 lineup-aware game forecasts (orr/PLAN_1_1.md)",
+  "declared_utc": "2026-10-01T02:49:59+00:00",
+  "tuning_seasons": [
+   2012,
+   2014,
+   2015,
+   2016,
+   2017
+  ],
+  "excluded": [
+   2013
+  ],
+  "confirm": [
+   2018
+  ],
+  "metric": "pooled home-win log loss, in-season filter, goals+shots, team-history start",
+  "search": "X1 tuning on 2012, 2014-2017 (2013 excluded), every configuration logged.\n\nMetric: pooled home-win log loss of the in-season filter (goals + shots,\nfrozen ratings_hp.json, team-history start: the only start that exists\nbefore 2019) on the regular-season games of 2012, 2014, 2015, 2016, 2017.\nCoordinate search (pre-declared in ledger.json[\"protocol\"] before any run):\n\n  S0  baselines: no lineups; known starters only (goalie layer)\n  S1  on-ice xG value (v_xgf, v_xga), expected-lineup half-life 40 games,\n      offset on goals only, known starters on: beta_x in a grid\n  S2  half-life of the expected lineup (dress-probability memory)\n  S3  shot_mult (offset also on the shots rows)\n  S4  special-teams on-ice value (beta_st = beta_x)\n  S5  ice-time index (beta_t)\n  S6  beta_x re-grid at the chosen settings\nA component found in S3-S5 is kept only if it lowers the pooled tuning log\nloss by at least 0.0001. 2018 is then scored once to confirm.\n\nRun: python3 -m orr.experiments.X1.tune [--confirm]\n",
+  "test_primary": "Gate games 2019-24 (NeurHL g_gate_games.csv, n=6289). Model: the shipped in-season loop (preseason pipeline start as orr/backtest/inseason_bt.py, goals+shots) with the lineup adjustment = skater lineup offsets (fixed config) + known starting goalies through the existing goalie layer (use_goalie). Baseline 'ORR without lineups': the same loop with no starters and no skater offsets (0.6613 reference). Paired bootstrap 95% CI (games_bt.paired). Accept iff the CI of (X1 - baseline) lies entirely below 0. Games with no box score (2020 partial, 2024 after 2023-11-07) fall back to no lineup.",
+  "test_secondary_reported_not_for_acceptance": [
+   "skater increment: X1 vs known-starters-only loop (same games)",
+   "skaters only (no goalie layer) vs no lineups",
+   "goals-only variant (use_shots=False) of both arms",
+   "team-history start for both arms",
+   "games where both lineups are known",
+   "NeurHL restatement games 2018-24 vs NeurHL-H (team-history start: no market prior for 2018/2021)"
+  ],
+  "amendments": [
+   {
+    "utc": "2026-10-01T02:51:31+00:00",
+    "text": "S7/S8 (amendment, tuning window only): the S2 and S5 optima sat on a\n    grid edge (half-life 10 = smallest tried, beta_t 0.4 = largest tried).\n    S7 steps each edge parameter outward (beta_t x1.5 per step, half-life\n    halved per step) until the pooled tuning loss stops improving; S8\n    re-grids beta_x at x0.75 / x1.25 of the current value."
+   }
+  ]
+ },
+ "configs": [
+  {
+   "id": 1,
+   "stage": "S0",
+   "config": {
+    "goalie": false
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6714967576703983,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6704628457340527,
+    "2014": 0.6744512539114637,
+    "2015": 0.666925634758319,
+    "2016": 0.6764735158918203,
+    "2017": 0.6691705380563358
+   },
+   "secs": 3.2
+  },
+  {
+   "id": 2,
+   "stage": "S0",
+   "config": {
+    "goalie": true
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6710608827697043,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6704628457340527,
+    "2014": 0.6758530751460117,
+    "2015": 0.6651724821578159,
+    "2016": 0.6760941615615098,
+    "2017": 0.6677218492491315
+   },
+   "secs": 5.8
+  },
+  {
+   "id": 3,
+   "stage": "S1",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.25,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 40.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6708189783434012,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.670187475701849,
+    "2014": 0.6759781340367761,
+    "2015": 0.6646467311100444,
+    "2016": 0.6758193663661791,
+    "2017": 0.6674631845021576
+   },
+   "secs": 8.3
+  },
+  {
+   "id": 4,
+   "stage": "S1",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.5,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 40.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6706954523231725,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.670031741141837,
+    "2014": 0.6762468567925094,
+    "2015": 0.6642314235315243,
+    "2016": 0.6756664221100045,
+    "2017": 0.6673008180399876
+   },
+   "secs": 2.4
+  },
+  {
+   "id": 5,
+   "stage": "S1",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 40.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6706904229019786,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6699976158209595,
+    "2014": 0.6766597101715095,
+    "2015": 0.6639252431488852,
+    "2016": 0.6756360499723113,
+    "2017": 0.6672334953962272
+   },
+   "secs": 1.7
+  },
+  {
+   "id": 6,
+   "stage": "S1",
+   "config": {
+    "goalie": true,
+    "beta_x": 1.0,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 40.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6708036739061084,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6700867321736826,
+    "2014": 0.6772165773404218,
+    "2015": 0.6637266521400632,
+    "2016": 0.675728354895026,
+    "2017": 0.6672600529813482
+   },
+   "secs": 1.8
+  },
+  {
+   "id": 7,
+   "stage": "S1",
+   "config": {
+    "goalie": true,
+    "beta_x": 1.5,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 40.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6713820879811953,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6706398680716994,
+    "2014": 0.6787583434219784,
+    "2015": 0.6636448370819,
+    "2016": 0.6762780677387128,
+    "2017": 0.6675893235916861
+   },
+   "secs": 1.8
+  },
+  {
+   "id": 8,
+   "stage": "S1",
+   "config": {
+    "goalie": true,
+    "beta_x": 2.0,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 40.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6724219004188199,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6716969598058713,
+    "2014": 0.6808588304700417,
+    "2015": 0.6639696543039341,
+    "2016": 0.6773057992153395,
+    "2017": 0.6682782582989124
+   },
+   "secs": 1.8
+  },
+  {
+   "id": 9,
+   "stage": "S2",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6706111547553562,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6698480360898136,
+    "2014": 0.6766733798005216,
+    "2015": 0.6641270892358184,
+    "2016": 0.6756308349810676,
+    "2017": 0.6667764336695603
+   },
+   "secs": 2.1
+  },
+  {
+   "id": 10,
+   "stage": "S2",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 20.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6706545303587256,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6699242056190408,
+    "2014": 0.6766602590639648,
+    "2015": 0.6640074591363982,
+    "2016": 0.6756215682450029,
+    "2017": 0.6670591597292219
+   },
+   "secs": 2.2
+  },
+  {
+   "id": 11,
+   "stage": "S2",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 80.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6707097065594978,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6700413075674563,
+    "2014": 0.6766630401602248,
+    "2015": 0.6638784745179688,
+    "2016": 0.6756475832859116,
+    "2017": 0.6673181272659277
+   },
+   "secs": 2.2
+  },
+  {
+   "id": 12,
+   "stage": "S2",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 1000000.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6707284432786954,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6700869788736042,
+    "2014": 0.6766697853438276,
+    "2015": 0.6638295679372922,
+    "2016": 0.6756608284889436,
+    "2017": 0.6673950557498092
+   },
+   "secs": 1.9
+  },
+  {
+   "id": 13,
+   "stage": "S3",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 10.0,
+    "shot_mult": 0.5
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6706355336412124,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6699908514126731,
+    "2014": 0.6767020041348153,
+    "2015": 0.6642449962531578,
+    "2016": 0.675715088864743,
+    "2017": 0.6665247275406736
+   },
+   "secs": 2.2
+  },
+  {
+   "id": 14,
+   "stage": "S3",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.0,
+    "beta_t": 0.0,
+    "halflife": 10.0,
+    "shot_mult": 1.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6706810395411876,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6701539885196903,
+    "2014": 0.6767582922561236,
+    "2015": 0.6643809046568532,
+    "2016": 0.675819406207877,
+    "2017": 0.6662926060653942
+   },
+   "secs": 2.1
+  },
+  {
+   "id": 15,
+   "stage": "S4",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.75,
+    "beta_t": 0.0,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6705875051008651,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6688902264084722,
+    "2014": 0.6775417129403616,
+    "2015": 0.6641085529548484,
+    "2016": 0.6757080938729,
+    "2017": 0.6666889393277429
+   },
+   "secs": 2.1
+  },
+  {
+   "id": 16,
+   "stage": "S5",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.0,
+    "beta_t": 0.1,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6704900444600151,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.66960433788208,
+    "2014": 0.6768048660869646,
+    "2015": 0.6638594474602261,
+    "2016": 0.6753311342491783,
+    "2017": 0.6668504366216267
+   },
+   "secs": 2.1
+  },
+  {
+   "id": 17,
+   "stage": "S5",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.0,
+    "beta_t": 0.2,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6703973414912853,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6693919234797601,
+    "2014": 0.67696767894957,
+    "2015": 0.6636207253302052,
+    "2016": 0.6750565010172299,
+    "2017": 0.666949878679661
+   },
+   "secs": 2.7
+  },
+  {
+   "id": 18,
+   "stage": "S5",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.0,
+    "beta_t": 0.4,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6702965873971672,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6690611789767961,
+    "2014": 0.6773863905323841,
+    "2015": 0.6632287927795186,
+    "2016": 0.6745823512664286,
+    "2017": 0.6672242234307086
+   },
+   "secs": 2.2
+  },
+  {
+   "id": 19,
+   "stage": "S6",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.45,
+    "beta_st": 0.0,
+    "beta_t": 0.4,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6702650399794714,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6690927451515242,
+    "2014": 0.6767955791541425,
+    "2015": 0.663451129053104,
+    "2016": 0.6745568373679386,
+    "2017": 0.6674289091706473
+   },
+   "secs": 2.4
+  },
+  {
+   "id": 20,
+   "stage": "S6",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.6,
+    "beta_st": 0.0,
+    "beta_t": 0.4,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6702626822683817,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6690585623051694,
+    "2014": 0.6770686845924007,
+    "2015": 0.6633230172274028,
+    "2016": 0.6745508834706903,
+    "2017": 0.6673122637462452
+   },
+   "secs": 2.0
+  },
+  {
+   "id": 21,
+   "stage": "S6",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.9,
+    "beta_st": 0.0,
+    "beta_t": 0.4,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6703666952491285,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6691009860671409,
+    "2014": 0.6777486766102103,
+    "2015": 0.6631681623327327,
+    "2016": 0.6746511629987704,
+    "2017": 0.6671644882367888
+   },
+   "secs": 1.9
+  },
+  {
+   "id": 22,
+   "stage": "S6",
+   "config": {
+    "goalie": true,
+    "beta_x": 1.05,
+    "beta_st": 0.0,
+    "beta_t": 0.4,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6704728694945694,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6691782949119435,
+    "2014": 0.6781551646834638,
+    "2015": 0.6631408309844976,
+    "2016": 0.6747573420957342,
+    "2017": 0.6671327147972087
+   },
+   "secs": 1.9
+  },
+  {
+   "id": 23,
+   "stage": "D",
+   "config": {
+    "goalie": false,
+    "beta_x": 0.6,
+    "beta_st": 0.0,
+    "beta_t": 0.4,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6706741112356459,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6690585623051694,
+    "2014": 0.6755902252532631,
+    "2015": 0.6650050372550826,
+    "2016": 0.6749233387279895,
+    "2017": 0.6687933926367247
+   },
+   "secs": 2.3
+  },
+  {
+   "id": 24,
+   "stage": "S7",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.6,
+    "beta_st": 0.0,
+    "beta_t": 0.6,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6702485994537226,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6688258330379808,
+    "2014": 0.6775787361198313,
+    "2015": 0.6630210484757941,
+    "2016": 0.6741516206875741,
+    "2017": 0.6676657589474332
+   },
+   "secs": 19.8
+  },
+  {
+   "id": 25,
+   "stage": "S7",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.6,
+    "beta_st": 0.0,
+    "beta_t": 0.9,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.670433745121567,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6687107377907934,
+    "2014": 0.6785696164084399,
+    "2015": 0.6627727834598219,
+    "2016": 0.6737360905310055,
+    "2017": 0.6683794974177744
+   },
+   "secs": 2.7
+  },
+  {
+   "id": 26,
+   "stage": "S7",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.6,
+    "beta_st": 0.0,
+    "beta_t": 0.6,
+    "halflife": 5.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6703144259408615,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6689624943790472,
+    "2014": 0.677331219808584,
+    "2015": 0.6636243943142621,
+    "2016": 0.6743153829651,
+    "2017": 0.6673386382373149
+   },
+   "secs": 2.4
+  },
+  {
+   "id": 27,
+   "stage": "S8",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.45,
+    "beta_st": 0.0,
+    "beta_t": 0.6,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6702257240372974,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6688327299143285,
+    "2014": 0.677274069348328,
+    "2015": 0.663126927187078,
+    "2016": 0.6741330027678141,
+    "2017": 0.6677618909689385
+   },
+   "secs": 2.9
+  },
+  {
+   "id": 28,
+   "stage": "S8",
+   "config": {
+    "goalie": true,
+    "beta_x": 0.75,
+    "beta_st": 0.0,
+    "beta_t": 0.6,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6703074884444606,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6688559063549098,
+    "2014": 0.6779277084680845,
+    "2015": 0.6629486460812463,
+    "2016": 0.6742073527429101,
+    "2017": 0.6675978285751528
+   },
+   "secs": 2.2
+  },
+  {
+   "id": 29,
+   "stage": "D",
+   "config": {
+    "goalie": false,
+    "beta_x": 0.45,
+    "beta_st": 0.0,
+    "beta_t": 0.6,
+    "halflife": 10.0,
+    "shot_mult": 0.0
+   },
+   "seasons": [
+    2012,
+    2014,
+    2015,
+    2016,
+    2017
+   ],
+   "ll": 0.6706382897179982,
+   "n": 6150,
+   "by_season": {
+    "2012": 0.6688327299143285,
+    "2014": 0.6758194502490581,
+    "2015": 0.6648093348069111,
+    "2016": 0.6744996957746905,
+    "2017": 0.6692302378450028
+   },
+   "secs": 3.2
+  }
+ ],
+ "chosen": {
+  "config": {
+   "goalie": true,
+   "beta_x": 0.45,
+   "beta_st": 0.0,
+   "beta_t": 0.6,
+   "halflife": 10.0,
+   "shot_mult": 0.0
+  },
+  "tuning_ll": 0.6702257240372974,
+  "no_lineup_ll": 0.6714967576703983,
+  "starters_only_ll": 0.6710608827697043,
+  "skaters_only_ll": 0.6706382897179982,
+  "fixed_before_test_utc": "2026-10-01T02:53:10+00:00",
+  "notes": "Surface is flat near the optimum: beta_x 0.45-0.6 with beta_t 0.4-0.6 and half-life 10 all lie within 0.00005 of the chosen loss (below the 0.0001 keep threshold); beta_x 0.45 is the lower end of the S8 grid but the S6/S8 neighbours differ by <0.00004, so the edge was not chased further. Special-teams value (S4) gained 0.00002 (< 0.0001) and shot offsets (S3) lost: both dropped.",
+  "tuning_paired": {
+   "x1_vs_base": {
+    "diff": -0.0012710336331008228,
+    "se": 0.0007199499112004072,
+    "ci95": [
+     -0.0026842975395711217,
+     0.00010780843041501944
+    ]
+   },
+   "x1_vs_starters": {
+    "diff": -0.000835158732406807,
+    "se": 0.0005396208252348053,
+    "ci95": [
+     -0.0018821297059510298,
+     0.00019140536104345632
+    ]
+   },
+   "starters_vs_base": {
+    "diff": -0.00043587490069401595,
+    "se": 0.00047437215617641526,
+    "ci95": [
+     -0.0013522087112027772,
+     0.0004967207644245976
+    ]
+   },
+   "n": 6150
+  }
+ },
+ "confirm_2018": {
+  "no_lineups": {
+   "ll": 0.6694206773320824,
+   "n": 1271
+  },
+  "starters_only": {
+   "ll": 0.6677447201365078,
+   "n": 1271
+  },
+  "x1": {
+   "ll": 0.6677054640523168,
+   "n": 1271
+  },
+  "d_x1_vs_no_lineups": {
+   "diff": -0.0017152132797656398,
+   "se": 0.001540226127941537,
+   "ci95": [
+    -0.004670675824416746,
+    0.0011920065856700181
+   ]
+  },
+  "d_x1_vs_starters_only": {
+   "diff": -3.9256084190948e-05,
+   "se": 0.0011541971229059545,
+   "ci95": [
+    -0.0022842766156368514,
+    0.002167877960552271
+   ]
+  }
+ }
+}

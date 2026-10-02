@@ -1,0 +1,1050 @@
+{
+ "cutoff_utc": "2026-09-29T21:00:00+00:00",
+ "commit": "95806068c62596c4596475a5b9cece9809556683",
+ "latest_input_change": "2026-09-29T16:53:49-04:00",
+ "n_files": 230,
+ "files": {
+  "data/manual/df_alias.csv": {
+   "sha256": "53739a289f28e8cd0184718b3e3f654b86052311e68e4ca21d19bf690811ba56",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/manual/player_status_2027.csv": {
+   "sha256": "782571813d317daeb3235b213d890dfaf5ba20ba501a4d9fb27f72148fafc6d9",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/market/nhl_cup_2027.csv": {
+   "sha256": "9e811a483b5ce129249137fb9a28d5cae940d04ac25a3d78433f47142e87cdac",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/market/nhl_cup_2027_best_price.csv": {
+   "sha256": "90ad2e7859894ca175f73eefbdbc49afd81b27f02e717f6551ba5683cc6a9d4e",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/market/nhl_point_milestones_2027.csv": {
+   "sha256": "73197a1a424ae0fe2d0326d41971f86d5573da31a7adb82c38cc60d2c64dfd7a",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/market/nhl_totals_ou_2027.csv": {
+   "sha256": "7f4d092698bcf042cfd0ccccef929a95f88db432566c64f8e43a4d55a65f2d2b",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/market/odds_log/cup_2026-08-19.csv": {
+   "sha256": "1edd7c0a7d7fbc42b23fb65497cf5243fa68ec86d88070d2df5e54d43dacb2a9",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/coaches.csv": {
+   "sha256": "a64c67075e7f6f71c66586df4f5ecbc0d10e73e22b037765dfa723a01936ba74",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/draft_join.csv": {
+   "sha256": "2dc5c4e5e0c4eedc45f2535d53e25eb932130426de853c5dc045e6f8df482f6a",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/edge_players.csv": {
+   "sha256": "b1fa4a6745942e3186400de6bf7194068527cc6ffb22c7c6b01e6e53f4826b1b",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/edge_team.csv": {
+   "sha256": "933e3d08fb80a39c15fd052ccc5dcd5830fc1e54e8331760f5acc01307a37443",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/games.csv": {
+   "sha256": "0a3d431c40f4c4a8614c2720235ff1c0bed82604b301e726cb3ae2a1f8605f80",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/hr_league.csv": {
+   "sha256": "af4ed09f8bd6f60f4711947c5004bb938460aa858126edd8775f8a9585c51379",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/panel_bios.csv": {
+   "sha256": "f8337a673b98632ef2291268f1b52b46c0455a9c5f014e26a7686d15986c8375",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/panel_goalie_team.csv": {
+   "sha256": "0f281e4bbb6faf55caea116baf4cf5f186895538d159ef8114b16066c1f0b3c2",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/panel_goalies.csv": {
+   "sha256": "0f82a1f926b237213daa3a319d68ba2624289ef30a8a11a117a99ec95425743a",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/panel_skater_team.csv": {
+   "sha256": "c2e15a0e096a8e925c12073727841f4a90218de1b08aebc3ed2cf240bcf9b7d2",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/panel_skaters.csv": {
+   "sha256": "4bd7b16fe75bfc49712cd987c7eedd78cdcdec455529cf7d017e97f52816ce8e",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/pbp_team_seasons.csv": {
+   "sha256": "28ec256924ecd12e2452fa50622f6acb7903192d08ad2ab139f6aaaf98497e95",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/player_absences.csv": {
+   "sha256": "50b9954783d3fb722f854dcfb3a7e856d5f150fc5f9b4891c9169afd3eab44f0",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/prospect_production.csv": {
+   "sha256": "08ff9806b0ac0b990f9bbb351ce52b4c30fcb1cca5d3af0ff8dfd35a083be2e5",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/shift_pairs.csv": {
+   "sha256": "9ac6d17555900578ca07202034d2590b2145c875caa3908485f84e04f34f1839",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/shift_team_seasons.csv": {
+   "sha256": "db8cbbc5da94e13776af4e90ee40742fe00e4918ce6c2f093573cd03266a033d",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/team_seasons.csv": {
+   "sha256": "a7cce6a72fe9a93e78d9cd9138fe73ffc8f274c1ee60a2267ef7167ed6cfaf8f",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/team_seasons_v5.csv": {
+   "sha256": "59377aa67785f8f0263f34248af6a97a780369da91e67cf854fb26edf9acf3e8",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/team_seasons_v6.csv": {
+   "sha256": "dec52bd9e3e6b5804634579cd1d1c8bbbe6b6cfcfbb686153da20c3e77ef08cc",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/processed/travel_games.csv": {
+   "sha256": "62bca46c89c488f951d54d62ad3e86a9447b7943ce8140e518462a53c5ca70ef",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/arenas.csv": {
+   "sha256": "c2e0da53f483052212c31f88b1fae8158a01f5ea094498921fcbfbe97e6bc634",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2008.csv": {
+   "sha256": "05a1a14d130d128d85a1f0f4769aeeb0d4a435496c9e4972e8b74697e5175e05",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2009.csv": {
+   "sha256": "8dfa1f86e99f0cc966ce77604f1e2f974647d72736b96dec1343c85740bee6d1",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2010.csv": {
+   "sha256": "d02058c378e60ef3c182ffd7068705594172ce0035177d615d4525e164f342a2",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2011.csv": {
+   "sha256": "195d61d321dcb5b3e83373a9658fdaa7a5f2667db87874392a0fbe8c5e0ad705",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2012.csv": {
+   "sha256": "54c17c3ed3bb5134398f1373207c89a3a6a1580e4b1591a3fc5c3721b65d8ad1",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2013.csv": {
+   "sha256": "c69e295625462a38df15728572636924bcf864b442f0a32e774bd5c109f414b3",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2014.csv": {
+   "sha256": "763d6725fe3f44d94139a25e7cae3741db5f2eb9654cc80186c9492b5a4ace9e",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2015.csv": {
+   "sha256": "d4f079b27aed3a2a5069728ae19398cad1ab594dce3f84960d2b522e14de47ee",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2016.csv": {
+   "sha256": "96536a07a15904d56457894acd769638bac944aa23499fa63ad6331aa988b18a",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2017.csv": {
+   "sha256": "0277c8419df6e363210553e035390ea17b587cf58bbda74d5550ebf60eef883e",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2018.csv": {
+   "sha256": "90eb24de0ba63ac9b03f67eed17268e9af83a8d308f03d46e31e48810a236c93",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2019.csv": {
+   "sha256": "1c4c78e48440b2c9ecd297cac096eebe2853423d9b0cf4d9355f0a975d43e208",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2020.csv": {
+   "sha256": "ae4f9d1e3776aa24244031b9469e423fdf5fc2befc234248c30fee25c7d5d50c",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2021.csv": {
+   "sha256": "7fb1b4b7dcda448d95063bac873e38ac0de32e3441497a2e3b1df20faeb4bf46",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2022.csv": {
+   "sha256": "a7f712fd7f50229b5f2ffa607fb0cbb8016b8e84bee034b44399eeca16d2d5a3",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2023.csv": {
+   "sha256": "9b9ca9dad5f2b4fc9ebb65f3fea09915335fb1bbe3868366f61a7f3075389645",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2024.csv": {
+   "sha256": "a718782ffbeb8d0d05eb6921f4cbea300dbcaa86be8e068930e71be4a22a9d8d",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_goalies_2025.csv": {
+   "sha256": "2fe2a2dbf25822cf1650e2ad00388c94ef303681fbfd8a8c7fdcb065212cd2fc",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2008.csv": {
+   "sha256": "86d4d5568e92834d30a882e6a52f71c46116189879cdf9a971aebc5fb718f6d0",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2009.csv": {
+   "sha256": "b364534eddd1647d55da336c6490c97402d47cd7fbb77d349c478019a81c0f94",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2010.csv": {
+   "sha256": "729f02d5129a00103d12613ee1eab4fbe7a5cce1fe473e15c0fc56749e4a82d0",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2011.csv": {
+   "sha256": "3f807f79c9cf6bb1be9db431796b41fd8c892f4d890adc82bbad35e44b4a5a9a",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2012.csv": {
+   "sha256": "ccc9a7c90141dade84eeb3454383ee0fa8c557e5da3c636d71ed6e272eae50df",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2013.csv": {
+   "sha256": "4ac4b724adf52db2f43f14140506a526894936a8f617d8b3fcfa864ba693fb03",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2014.csv": {
+   "sha256": "1003babfa5dd476441236ce34286d119d6a17ec9ec4f88e00d1367eb55605690",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2015.csv": {
+   "sha256": "edfbe6d0b1b1e05bae3783944b5387a6598a342cb28398e3c0b336d390fd1121",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2016.csv": {
+   "sha256": "583ac1c36e221e0f1fc7ecce02adfdfbc90357ea8aeff40235602c9ba8e74cfd",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2017.csv": {
+   "sha256": "de2b115d4d16305fca20e6058e4c93a2fefe23e9938ae9ea8b24d57113b0480b",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2018.csv": {
+   "sha256": "87f59c37d6717b50af228232580b14953e44727afd553565f08be0281baf3d90",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2019.csv": {
+   "sha256": "f8bfb0078a1f2b9e58defbf0c316dedfc62be9d2a07e007e9b51a90b89c36f11",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2020.csv": {
+   "sha256": "001a2758f28126f75d9d48285aa5da2185ae3e5691f2f6b088a06210959df2c5",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2021.csv": {
+   "sha256": "8e839a6bbb42b5c58409a300108f87d35ac4fd87ee41361b1dc8acaefd09f51f",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2022.csv": {
+   "sha256": "59a1a409d17ba24018a6b7063299f222b55ac9068221c083b4d5e24ee7bf14c3",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2023.csv": {
+   "sha256": "ee8d191d3633064c1f4f76d64c76e04f8a8e555528a4b49caa6d0ecb8bac9299",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2024.csv": {
+   "sha256": "467260ae6b411621fc3e736ed005588f75dd4470610416626584f2878a463fd4",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_skaters_2025.csv": {
+   "sha256": "9a7e1f1a2f6bc8bc2bf10c5ba32947b47c4b26d5397287e4b30e9d662c4966e4",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2007.csv": {
+   "sha256": "4e45e24b90f99ef0837d2bb787624832e0069fa0ff78f3ea71dc2adfd557f23d",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2008.csv": {
+   "sha256": "5950f2b5fae19cd0bc7aa84c91dc434081a4d52560e1a19adbadcc4da69d89cf",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2009.csv": {
+   "sha256": "f3e1eeb564d0dd8cf2e34023e10497fef24ad8487377554141a6af9e469ef978",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2010.csv": {
+   "sha256": "512ea0139ee5be171c78e454675498738f83837b226ba91b5ebf36b7ddbe6049",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2011.csv": {
+   "sha256": "6bb472aafd3c352788e1f0795c299ce80cc8a15c28201a8b327de99aac930beb",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2012.csv": {
+   "sha256": "5efbb5f17ef3f5746b9706afe6d24afdd61093974414c3abfbf26ce4b02ae88c",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2013.csv": {
+   "sha256": "4aeae7142fcb6b25fb5c8a13b8ee0f46deaf0a4d506894d9dfbdc223a0e11492",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2014.csv": {
+   "sha256": "7f3fead286d6cbf305613d90b43ed28224f772926af602963cc1d2cb42895f98",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2015.csv": {
+   "sha256": "54811b7e626983e4417fdde97720049d5db77f130dfdfce73a774b8532c81c3f",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2016.csv": {
+   "sha256": "3ca3e2df4cb63deb7b822d01669b0348936bcda30e7982763bbd397a6585567a",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2017.csv": {
+   "sha256": "7482905b54c6e3dac11a04468b9b53a3c45d33c6f0f78d385561b608c5d4d243",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2018.csv": {
+   "sha256": "a2c29eb55e7c93a642849269cd6b4cabe9a3a7f9d8ec5b196aa3ca2aab46b2fe",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2019.csv": {
+   "sha256": "1bf3cd989436b9bd8465acd49af46bab8b8b5426b5de21e898a2c41d31c4774b",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2020.csv": {
+   "sha256": "da55c4af31a62b210aefe4e290774c90859f25afb1028cf39a063827dd52aa34",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2021.csv": {
+   "sha256": "46f3cb9b14910578a25d573535d390140974f2bf791ebf0255153a7f0377b93f",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2022.csv": {
+   "sha256": "5ae000e7787e7cd91fdb291280b644059f38dc057906c1e3a3398ca58678a4d0",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2023.csv": {
+   "sha256": "aa693a3bb46c05fff7369e111c1f65d9a72a45de84bb509a7dfb2bc95bf31611",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2024.csv": {
+   "sha256": "c56d1b1fd36288b4b4751ef2c51c05813efe2011aa8d5c17db11556956cff5b1",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/mp_teams_2025.csv": {
+   "sha256": "dc1ce57c226fc7f932241c597f3a8c879cc8e837fc01e6457fd8841ca5273ac9",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/nhl_drafts.csv": {
+   "sha256": "1e38889814d177acf7830d60ce196a4b0cccf5b721a26064b7ec7f737e4e5422",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/nhl_schedule_20262027.csv": {
+   "sha256": "30cfc5aa455e61d441adb3ac20eed18b24b6a8cd6c49e02f0f9decba208cdb50",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/moves_vs_2026-08.csv": {
+   "sha256": "003bd959a1565dc3d6ba4f68b4bb676ee7d3ed4f3646362b5a4fef71f853e659",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_ANA.json": {
+   "sha256": "bb68ea1c8e282eb1d62dfdba94b120a7e82fe554260cf6daf684ec30e9942285",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_BOS.json": {
+   "sha256": "6e3fff223691668c67f3fe9de251bed08bbe6fadb30cb8190bf56a880cd2b3f2",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_BUF.json": {
+   "sha256": "46fcdd4b15cc0cd777c1866fcf74d80f485656c9d9eeeba666e30ae6ef666cd3",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_CAR.json": {
+   "sha256": "332b94117dc331dc7cdedb23372d7fc2cf97b26e9c099e8c356d81d34f9185f4",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_CBJ.json": {
+   "sha256": "8fbd2cd65441e58d1cf845e42313f19b8549b9ec48ea74020434d02474b51adb",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_CGY.json": {
+   "sha256": "7de25763fda70de6f271d68052b4a290f533960d56483c44b40ff850f0e7ff7b",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_CHI.json": {
+   "sha256": "c853d991c2833269cba6dc0f8d37f840afaf9eccf1d28b20dc06851245039522",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_COL.json": {
+   "sha256": "1d2b76b3fbc3fcd10ddbe8941306e81716460ec8f43190e966378803fcf9c04e",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_DAL.json": {
+   "sha256": "952708c7b70d3fdd5ea063b6952b14c72a76fe9dd750bd2d3a3281bedb82651e",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_DET.json": {
+   "sha256": "8a8e04d22ce7ef3ef7b0a334c6afcdbe58f6600a41df40ffe66b07af04c46d36",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_EDM.json": {
+   "sha256": "6d3d37cb078db0bf099d6d431fd58e80d78a0041fcb62ea8ee194339f940a670",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_FLA.json": {
+   "sha256": "ea64ee807264883bb749c30047cc5fbfd27485077b4400d79ed5be883fa6203e",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_LAK.json": {
+   "sha256": "7758c4fd691fe044bbd51f090d60ca96843f22457a72d15d0c8176767bef310b",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_MIN.json": {
+   "sha256": "21a190837d17b9b4f0b3e25d058a5a064c91fc173460480c7bf6d0eed2fba879",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_MTL.json": {
+   "sha256": "3d1120795b4c6c862b574c6dbebcb499c474fb5de92a869850aac583037ba2d7",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_NJD.json": {
+   "sha256": "bb0dfc4b3b1a436083e2b57726ec61eaafda8b50778ebf6d17559a583609968f",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_NSH.json": {
+   "sha256": "25bbe404759bf89eae8d66b529d4229c2df583682dee484cf027b50db7430c4a",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_NYI.json": {
+   "sha256": "610aae1e45d21a2c6833fd6e338f8d993ca39c97659849ad4042c4cd3847ea09",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_NYR.json": {
+   "sha256": "2f7fa7f53d4d794adab5794203b099e8de6a0b01d93aba6b4f8a8f33db26f7fb",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_OTT.json": {
+   "sha256": "756b0bcc5840026a72b3cc1efbc53e65b1863bf55b8fe252439b6517e4512d44",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_PHI.json": {
+   "sha256": "14545d6d9023f9748f0497c649a14a6fc5f09620c6eb280516b43a874cfbb326",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_PIT.json": {
+   "sha256": "417ffbac573060117ff650282e8af32c4da0444e3ab5f3f143d30bb652de7bdc",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_SEA.json": {
+   "sha256": "553bc70f405fe3cc3eec4e912cc8c7a3d66c599a40691711d6205bd81d044e2b",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_SJS.json": {
+   "sha256": "d2c7e330bea7df67e676afc51417d40a2baf2c3aebc25b7a8dbf3c7811002318",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_STL.json": {
+   "sha256": "0973ba8f7c364c1f7047fe751c83e2368661e67dc641df401693fc06bf6a5ab9",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_TBL.json": {
+   "sha256": "1810099073dc6dbfc0b44618bab2ffd31ee5d78116a36cd235fb083549a6c002",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_TOR.json": {
+   "sha256": "df0c67e384f78e2f526e83da986fd79d330a508266f81ec1206c19e747860161",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_UTA.json": {
+   "sha256": "a733e92fffdd8f9b192bf6ca175ea0133dc8aba6ab724e1a2831c138e666a5b4",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_VAN.json": {
+   "sha256": "76303f8d19fe1b29d1e2b688117018433398ce4eb5570159176dae9a4673e12c",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_VGK.json": {
+   "sha256": "ec00c50b366e186e0867e07df7fbdfaf5606234b166299c6a1d63a3d9c27d2a6",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_WPG.json": {
+   "sha256": "f39cee32c5465f44461193c62149e39746e8d22af23e1c16942db4d8c938aa59",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/nhl_roster_WSH.json": {
+   "sha256": "eab52ffb83a48240b132eb0175d1e72f9e0eb854a69b69e63fa3ae9399cc826f",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-27/rosters.csv": {
+   "sha256": "09906f7bb03d2034a18862abf4ef4d9a7fb59ee7e62e6297cdf6b097419268fc",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/moves_vs_2026-09-27.csv": {
+   "sha256": "e275e0ceb8dfe48baa110cedb76b3c87f3e7a999395cad0054d41700569df17d",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_ANA.json": {
+   "sha256": "b8b12a38f015d7ef923e0cd00f355faae862ca7263ce14cec1f4c437a06110c5",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_BOS.json": {
+   "sha256": "b05e9b7db47dfba05605e254a9a535708f4e61797d66493e21ae4f899e16e27f",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_BUF.json": {
+   "sha256": "46fcdd4b15cc0cd777c1866fcf74d80f485656c9d9eeeba666e30ae6ef666cd3",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_CAR.json": {
+   "sha256": "944eb4e061ac6ada87cdebc86be45d628e8a3b2630c0941764af4778634abffc",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_CBJ.json": {
+   "sha256": "8fbd2cd65441e58d1cf845e42313f19b8549b9ec48ea74020434d02474b51adb",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_CGY.json": {
+   "sha256": "95abf71e97d5dedbee5615091139177e1aaf224e64dc308f02ca5ea9c9ab48df",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_CHI.json": {
+   "sha256": "e2c7255497d16e12f6fee69f171750960783951865c8188281d6371285d5bf33",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_COL.json": {
+   "sha256": "e7820ded770990f61070f2d204951afde634c6a1a76b2f2ef1c1e112bedc4e06",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_DAL.json": {
+   "sha256": "6271c15bed4dc0594bce5c44ee1a5dfe91172dc4052112ae3ddac2d4fc434445",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_DET.json": {
+   "sha256": "acf7f186ff3e6bfa06182f35a9c785e825b3c2d09153f443e4277ae1e531f6b2",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_EDM.json": {
+   "sha256": "25ac6f4c34bf6733513de777b5f53e3dd9985ebc0a4b9cb01ce6c5f48c306bfc",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_FLA.json": {
+   "sha256": "7d3a391b157319e44c983e158677a2dfd851af74c152a61a40ab8fc4f0e2d8f3",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_LAK.json": {
+   "sha256": "e6744d31059d3a246ae3d441612b35c852f71c9571d106478d2c2b25170ca3f9",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_MIN.json": {
+   "sha256": "28c397daa119efa99ce9afd361d8268d845260168ea1d303a0d3f5e5a02e9537",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_MTL.json": {
+   "sha256": "c9343c6e345711b969088a16bdf9bbe0d37affeb91f88d4a224301b9d2d7954c",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_NJD.json": {
+   "sha256": "5d7383fb7511c7cd6608b3e4b3f697734be460f0700cdd4e8b49952e33387848",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_NSH.json": {
+   "sha256": "b69145eda9c60e2203076335f38818483f56d1ac54e0860aed273df94038b50e",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_NYI.json": {
+   "sha256": "6084b32482fa7f0add1776b4381bf4eeabb2f970e337c57ed3dcffb3f0a7df11",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_NYR.json": {
+   "sha256": "0deb23f8147ac0b8705d4559745d40721db4369dd6908b4b9642f2ca92dca438",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_OTT.json": {
+   "sha256": "756b0bcc5840026a72b3cc1efbc53e65b1863bf55b8fe252439b6517e4512d44",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_PHI.json": {
+   "sha256": "305abd83e8609edd47f82585b6df8b61a5dd1b0b6807acdbc7c74f0931bab984",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_PIT.json": {
+   "sha256": "ccd6598adf9aced26a64daf407a3a9366e5e5b0f117a317b6818be5f77e5e3b8",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_SEA.json": {
+   "sha256": "8eb3bd9b9c45e89800c2112d1a643d7e60966335bbfa1eadc40bd8d46ce739a5",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_SJS.json": {
+   "sha256": "28e313173ed45f5d815eb7bfffbf5c64fdbd1ed3834e2d1f2b05cd6bbb457eda",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_STL.json": {
+   "sha256": "5aed3364ca3a93257971f7270e6b3a709afddae12e876ed9c1917fb4692bc8c3",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_TBL.json": {
+   "sha256": "ba83a5f83f1c31adcf83fc2cf6261744342878c2bd5a2bcbf6d8f44690237e1e",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_TOR.json": {
+   "sha256": "b8b4b9933be5658834840934f656416d8044e182c4d65c09dbb14452d057fee5",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_UTA.json": {
+   "sha256": "77e68c8a1011a275c37ef61e9dce89d50d432eb8fb646baa92f3a2a7b1b52011",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_VAN.json": {
+   "sha256": "a543ba930dc645be7ba99b483b7e5e628e5e7dc4b4b533b0bfd936283804c465",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_VGK.json": {
+   "sha256": "712af71702fd640a559682ba641ff86515718d5596c600caa0a59a356affb219",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_WPG.json": {
+   "sha256": "f39cee32c5465f44461193c62149e39746e8d22af23e1c16942db4d8c938aa59",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/nhl_roster_WSH.json": {
+   "sha256": "8dcfdffae361ba1684ca2e40ff487a8b18c37dcdb38044d815e45b4457d050f7",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-28/rosters.csv": {
+   "sha256": "35586408a9aacc53377deb4b29fc9abde11c08270a1d73a3c1e736c06d94886e",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "data/raw/rosters/2026-09-29/moves_vs_2026-09-28.csv": {
+   "sha256": "7750ed2a6ec96c9767659f7a67b2467eaf3d6bf745391caaf96522438df586a7",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_ANA.json": {
+   "sha256": "63e627edd1c22f722328efc4a9e53ab3473520709b9128d27e6b6ab4622d2e6b",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_BOS.json": {
+   "sha256": "6d98bb1f1a495699cfcdb535c4f653c0dc31563fc2b955c9980cdc69e9ad0366",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_BUF.json": {
+   "sha256": "24c723d71d1e51dc6b72ec5b435506c4e5695fd2139d014818a814a1dc02d32e",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_CAR.json": {
+   "sha256": "54f986fa35bea10c379b81defd89d83ec29e431db20c07055fbfe1446a083c57",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_CBJ.json": {
+   "sha256": "d7ee8c1ab7a94ea9912c8a0cb68a1422551abf22069fbeeae7c08dde0a302823",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_CGY.json": {
+   "sha256": "95abf71e97d5dedbee5615091139177e1aaf224e64dc308f02ca5ea9c9ab48df",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_CHI.json": {
+   "sha256": "15c52b466c95c6e3ec892f73ea5093d2ddb7109277d042e170843fbd3ab8b1c5",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_COL.json": {
+   "sha256": "c20025a956612bbd17e0a551064c0c8ec6101f2694444ba063ed1d313a5a2bd4",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_DAL.json": {
+   "sha256": "31103d28978d8903e0843eaf3313ca1f15a75f26302d4b8804b41361be15ac5a",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_DET.json": {
+   "sha256": "acf7f186ff3e6bfa06182f35a9c785e825b3c2d09153f443e4277ae1e531f6b2",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_EDM.json": {
+   "sha256": "56e45eaee9e189bbe3bf21d19043f602aa3f6643cae645a14c7b553dda43bab9",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_FLA.json": {
+   "sha256": "7d3a391b157319e44c983e158677a2dfd851af74c152a61a40ab8fc4f0e2d8f3",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_LAK.json": {
+   "sha256": "c83a64b6e3929535b6c06690553f20ed259420d3dc4820f332cae5f68fbfd8ee",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_MIN.json": {
+   "sha256": "cbe7af93bd1ea929b65a3be4e125b47f92e4418d79e9d550fb8fc0a4144221d6",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_MTL.json": {
+   "sha256": "14e6de3d8a9deb3e477db3f6318504bee02b76602ab5cddec13c949c45f186c4",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_NJD.json": {
+   "sha256": "2caa62b40bf8af3892ca44ed21aa5724ac17647b737d7e18de14529d22c6db49",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_NSH.json": {
+   "sha256": "5d212668ade3516e863ad18b4899f963bbae519f4bce0c73671209f05d180be7",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_NYI.json": {
+   "sha256": "cf01240067600abe51c1ea90136c72972034aef2dd3ecabcaeca121e54de92ac",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_NYR.json": {
+   "sha256": "0deb23f8147ac0b8705d4559745d40721db4369dd6908b4b9642f2ca92dca438",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_OTT.json": {
+   "sha256": "511251c6c92b66f3d7e49cf71fa9c7017a6c8d5156be98fc05530f877a8f7f49",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_PHI.json": {
+   "sha256": "05ad5ae215f312ba4e9c303bbe609031585e76256e58329753938a9151e6473c",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_PIT.json": {
+   "sha256": "ccd6598adf9aced26a64daf407a3a9366e5e5b0f117a317b6818be5f77e5e3b8",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_SEA.json": {
+   "sha256": "8eb3bd9b9c45e89800c2112d1a643d7e60966335bbfa1eadc40bd8d46ce739a5",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_SJS.json": {
+   "sha256": "1e3ecc9d4ef0279dd431590613acc0415a27e137d67e86861390b456de0a3ab3",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_STL.json": {
+   "sha256": "5aed3364ca3a93257971f7270e6b3a709afddae12e876ed9c1917fb4692bc8c3",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_TBL.json": {
+   "sha256": "d4e8f4ce5dbe85e1225b6deba3802d9def9f12f8407cc1de77d820c9110d81e1",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_TOR.json": {
+   "sha256": "ab23103c6b5f2137a2f27c6d4d78f9f93d411705e79b248112d02f543d04b16f",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_UTA.json": {
+   "sha256": "77e68c8a1011a275c37ef61e9dce89d50d432eb8fb646baa92f3a2a7b1b52011",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_VAN.json": {
+   "sha256": "5dcaab6be28ee614b845189d7dba88a39f0d01142f6ae810c98c533c6aa20e97",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_VGK.json": {
+   "sha256": "712af71702fd640a559682ba641ff86515718d5596c600caa0a59a356affb219",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_WPG.json": {
+   "sha256": "b6cd1b7bb0be37850c5032f2d047cdf10d028dda084fd62043ca565e2c6c5f13",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/nhl_roster_WSH.json": {
+   "sha256": "8dcfdffae361ba1684ca2e40ff487a8b18c37dcdb38044d815e45b4457d050f7",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "data/raw/rosters/2026-09-29/rosters.csv": {
+   "sha256": "80c25877b72951c4f5e42b02d5a9d74362ee9a13e4aa48dba6906b2c247c712a",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "neurhl/configs/injury_overrides_2027.csv": {
+   "sha256": "6d32a40db65548d46b18a1fe5c9eed2895ed1e839599eda63afc8062431bef5e",
+   "last_changed": "2026-09-29T14:34:05-04:00"
+  },
+  "neurhl/output/live/2027/2026-09-29/morning.csv": {
+   "sha256": "56f06c83a95021e9effa654da11a5a87c99ea2d834d4abc33fb39cc8d5cd7074",
+   "last_changed": "2026-09-29T11:00:29-04:00"
+  },
+  "neurhl/output/live/2027/2026-09-29/morning_lineups.json": {
+   "sha256": "bd916ba42b00662dc4d4002d0e56b88c9bc87e1ac664f3a609a81cf6f4bf7541",
+   "last_changed": "2026-09-29T11:00:29-04:00"
+  },
+  "neurhl/output/neurhl_1_0/availability_2027.csv": {
+   "sha256": "0c28bef2206dd06e235a2ab06fa3ea72c053ccf4006bf51211f454bbe9f881fe",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/availability_model_2027.json": {
+   "sha256": "27e7c69104fe6266976d952d9735267f1963f388390447098b719616f92dd5cb",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/availability_validation_2024.json": {
+   "sha256": "a21e84c3a05e03fb0e6d3a06ee165d447f2cdac8d87f3acea0847e1ad45d6dad",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/cal_20260929/checks.json": {
+   "sha256": "8e44928b82c31b89425a50fca750934f89dd77000efdf04653f9e73bfab48599",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/cal_20260929/games_2027.csv": {
+   "sha256": "c642e5b2c89aac5987bf7b6def2bba05a2e9fb3d0f1be1c9a6bec8d9d196aa6b",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/cal_20260929/goalies_2027.csv": {
+   "sha256": "bf1291ff42f3ae7748fb3d820d8a5be80709e48217c532c584262bc1fe3d172b",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/cal_20260929/player_games_2027.csv.gz": {
+   "sha256": "c185d7b4974a9542b795ac15c5b8fb17f181abc365b5d9ba52d7353c0c236964",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/cal_20260929/skaters_2027.csv": {
+   "sha256": "7b4254405e685c6eb5898f490fbc7dab9fe4554a85961aa1805a83918ac1e496",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/cal_20260929/teams_2027.csv": {
+   "sha256": "d2e3a2b2a0301798ada9bcb147913cfbc652e776d91edd6c43eae41d7d8e9fc4",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/checks_2027.json": {
+   "sha256": "ac389097708eb9cdf85c9f29dfd1d70d824f72b4a2fef4c10e81636ab9e1b097",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/consistency_2027.json": {
+   "sha256": "a3835c1989cb4de1a8e5b23fe9652483fb850757a59e73ee1f3c8383e6ceb77d",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/games_2027.csv": {
+   "sha256": "0e6ec35ca83c8919ecf6f90906d0f47137cf1385ba7d5bdf55c46ee38068fff1",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/goalies_2027.csv": {
+   "sha256": "046ce38daa7cad3aec9f5be4a3133f8a29c31dac9f176bfacbc9d679c6999ed2",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/player_games_2027.csv.gz": {
+   "sha256": "23f7c873fbdb1429a9b1a8191d6c6bce03e23cf96dd28c81cca0617c65353f1e",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/player_rates_2027.csv": {
+   "sha256": "6875cc0850961c5b82f93d7f179cdf6f038b55263846e37bbe03adcc4e785190",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/player_rates_validation.json": {
+   "sha256": "5dac1d5f371df2baa7361235fc25c9cc0941a3bf948ce669346693b4d0cd33ab",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/run_2027.json": {
+   "sha256": "3bedbc7d069e3480b7a0882f99c283cbe7973ad47bc40ea136900b89b1ce7ac2",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/skaters_2027.csv": {
+   "sha256": "946ea41d4b85f615710dfd457ee81a233a6b8a70ab9e40809bb1b77873cdf753",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/skaters_blend_20260929/run.json": {
+   "sha256": "1bd76d1e487967bff21d279f049abf8a8faed708d7c80efba334f4c375f861a2",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/skaters_blend_20260929/skaters_2027.csv": {
+   "sha256": "8ce690f3de7a473ceb4a69981b05cdbe1df1e1095acfa3a1c5c0654913d6f5fd",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/team_points_quantiles_2027.csv": {
+   "sha256": "7a1a7b606265499b0008067f0e95ce0252d253acd4a307e8743a6891d288f729",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/teams_2027.csv": {
+   "sha256": "969526a2592b85b5843d0360693da18569904413ac582231962865652921dd86",
+   "last_changed": "2026-09-29T00:24:12-04:00"
+  },
+  "neurhl/output/neurhl_1_0/v2_20260929/checks_2027.json": {
+   "sha256": "15fe41a29dc0a59e5b16a97a4668a1b67ba97a766f8d6441b15c9ba6beb66406",
+   "last_changed": "2026-09-29T14:53:40-04:00"
+  },
+  "neurhl/output/neurhl_1_0/v2_20260929/consistency_2027.json": {
+   "sha256": "c57172be9209cfce9f77ccf579be71f3e0cf631346b1099b3e953f4483b8d7ce",
+   "last_changed": "2026-09-29T14:53:40-04:00"
+  },
+  "neurhl/output/neurhl_1_0/v2_20260929/games_2027.csv": {
+   "sha256": "953203ba129ddac89cbd5d53d8dcc0df86c84fdf0b9a06191fc28f268fc3a1f6",
+   "last_changed": "2026-09-29T14:53:40-04:00"
+  },
+  "neurhl/output/neurhl_1_0/v2_20260929/goalies_2027.csv": {
+   "sha256": "552022c16ba5a2aec383b571c54a997b15073ce9d916236a44486c8743f0dc0c",
+   "last_changed": "2026-09-29T14:53:40-04:00"
+  },
+  "neurhl/output/neurhl_1_0/v2_20260929/player_games_2027.csv.gz": {
+   "sha256": "50b570e355e37c4fa8ae2fd8606c24b4da5e0595123a2fa30535fb1a609c627f",
+   "last_changed": "2026-09-29T14:53:40-04:00"
+  },
+  "neurhl/output/neurhl_1_0/v2_20260929/run_2027.json": {
+   "sha256": "1f2dfbe891ae182a936a061355c8ab1c2ebfcfcee856fe5e4f5036c512de969b",
+   "last_changed": "2026-09-29T14:53:40-04:00"
+  },
+  "neurhl/output/neurhl_1_0/v2_20260929/skaters_2027.csv": {
+   "sha256": "d5ece29ac9da07151a5752806b6fd842369b81674c0a7f78e07ec8e05ff671f2",
+   "last_changed": "2026-09-29T14:53:40-04:00"
+  },
+  "neurhl/output/neurhl_1_0/v2_20260929/team_points_quantiles_2027.csv": {
+   "sha256": "532c38d9941d145eef2e522978b46c84dc2c6ebbfb089ee916554040eaa95fc4",
+   "last_changed": "2026-09-29T14:53:40-04:00"
+  },
+  "neurhl/output/neurhl_1_0/v2_20260929/teams_2027.csv": {
+   "sha256": "76318fc6afa61240aedcfdcc32615c95d3872bd63175f13f8c7a7b1c7dafa613",
+   "last_changed": "2026-09-29T14:53:40-04:00"
+  },
+  "neurhl/output/neurhl_1_1/season/checks_2027.json": {
+   "sha256": "d30cac44cc7d441659afda5a31d0f5800e42776d539d5283e6340f6b85194ac4",
+   "last_changed": "2026-09-29T16:53:49-04:00"
+  },
+  "neurhl/output/neurhl_1_1/season/consistency_2027.json": {
+   "sha256": "af614b8b562c954668c27016eaa591c525e80eb6049eb21a9a0e2b6d30fe6055",
+   "last_changed": "2026-09-29T16:53:49-04:00"
+  },
+  "neurhl/output/neurhl_1_1/season/games_2027.csv": {
+   "sha256": "b2de83d093170b4db7e5fc362efd9f596edacfb8c930f96ea8c2748071bfdc3f",
+   "last_changed": "2026-09-29T16:53:49-04:00"
+  },
+  "neurhl/output/neurhl_1_1/season/goalies_2027.csv": {
+   "sha256": "bec7d2ceba2e553cc981abf748f603e788a36f3a44bd1a8f59dd296a5be171ac",
+   "last_changed": "2026-09-29T16:53:49-04:00"
+  },
+  "neurhl/output/neurhl_1_1/season/player_games_2027.csv.gz": {
+   "sha256": "61b7180c280e513c321489fa9547b400b3d68c0ac2a75031f5cbe59605729860",
+   "last_changed": "2026-09-29T16:53:49-04:00"
+  },
+  "neurhl/output/neurhl_1_1/season/run_2027.json": {
+   "sha256": "081126080f3899dafee374fa1b31648b62f6edc0b5d810c01f8d1e4b97d43db7",
+   "last_changed": "2026-09-29T16:53:49-04:00"
+  },
+  "neurhl/output/neurhl_1_1/season/skaters_2027.csv": {
+   "sha256": "3ff97bc121508dca443c5891781497aa97aab59b3e99cc967aa97d351245db45",
+   "last_changed": "2026-09-29T16:53:49-04:00"
+  },
+  "neurhl/output/neurhl_1_1/season/team_points_quantiles_2027.csv": {
+   "sha256": "34ec844503bc10881e44c486de28b874d833c919daa0f2b4ade54baae2c6b620",
+   "last_changed": "2026-09-29T16:53:49-04:00"
+  },
+  "neurhl/output/neurhl_1_1/season/teams_2027.csv": {
+   "sha256": "a29c652e2d0ad1bd38bc366c7f2058849f521d2c3639b7eeba2ce07f9633b626",
+   "last_changed": "2026-09-29T16:53:49-04:00"
+  }
+ },
+ "added_inputs": {
+  "hattrick/data_market_history.csv": "72531b9ad8dc86082e5845fdbd3700aa8a71df5c5d3031b178db3da034cd4efa",
+  "hattrick/data_injuries_2027.csv": "105629225933301f2b590d19143e9ff58d57a219e2a0d9bf5ea20b11d54a50d9",
+  "neurhl/output/preds (game ids, realised shots; unchanged since before the cutoff)": {
+   "g_gate_games.csv": "6569402137d5633b0cf303cd53b0968be59d0fb68bb1444d7d3e1743f3683844",
+   "g_iter_games_r11.csv": "691bb99b1da33aea8f3880e0c40e66adf672cd8b724be28e6b2a0e8abec85fb9",
+   "g_iter_ladder_games.csv": "77adcd4979e49e5225ec4adb162e99bf30d035a51d309de40d9935894be8a81f",
+   "g_seal_games.csv": "8ae53b46b6acb98e0bbf6b0e7dea877058a80ec80572a05529d3c261d97073a5",
+   "game_preds_2012.csv": "60378762c8f05d70c36fe7707d483d66ff00299a2f0ae091416f055506886c25",
+   "game_val_2012.csv": "179ed340f838feb038d833796abaf00a1cccaeabca2207138582952be9c7cc27",
+   "hier_restatement_games.csv": "bade99708544a7e09672bcd2a68bc2aa71d2132d3f812ab6afb6aeb3aa13a1f9",
+   "season_sim_2012.csv": "67871dc97a6dd5a59027045a190e245b37f50bfcb417b0e39ada6eebd124f5ed",
+   "season_sim_2013.csv": "37e7e31016d42d452d06f04285bead3012c34b149c3b7c18db53937b1799d3e6",
+   "season_sim_2014.csv": "d6c23bbe078f18e5289c932a2b87fd463baace833cf768cc5786290d81d1e16c",
+   "season_sim_2015.csv": "3d0abe365b717599c546400af69392c59157c43e78756c26e3a1fd64097aa516",
+   "season_sim_2016.csv": "f12bcff12957e29d0860c063ef708be2c9e0e1564de2583c67b986e1aac5097c",
+   "season_sim_2017.csv": "14ecfcc7bcd22c9dfdb860c676892d13c992631b0f0c88091b8850add0f6731e"
+  },
+  "data/raw/fastrhockey (sportsdataverse/fastRhockey-data, 2010-11..2023-24)": {
+   "nhl_schedule_2008.parquet": "0a5c795c09850ad8ae33475974c2c803dd0de95ba99dcea8e55d1b14a5563111",
+   "nhl_schedule_2009.parquet": "f3254f54c9b742f83299813ab1ab6db269cdb0cf823c6b75a38e5afb43e650af",
+   "nhl_schedule_2010.parquet": "b445bd8d706a4aa04cd1891b9e121042d135882b68bd418d0dbb9e28c841f00e",
+   "nhl_schedule_2011.parquet": "18acb580353e153674df8bbfe54386f63ad02fd048168e4ee3a61e7c97cff4ae",
+   "nhl_schedule_2012.parquet": "10e51f5b82d98b60bf01450c98282548af8fb528c94ca40bb4d5653a4bb24c7a",
+   "nhl_schedule_2013.parquet": "a358d468851ff06c6dfefc171061486b13ed68c4f68f076ac68894b1d76f828e",
+   "nhl_schedule_2014.parquet": "13b950ef73efdeb5a56a7c2deba30945ae8789457fd51af57596e3b7765c2d95",
+   "nhl_schedule_2015.parquet": "840f442d3d0ec08542047a5572c07055a4c91617ac8539cfd3ab5818a852a39a",
+   "nhl_schedule_2016.parquet": "1b7bf3a3376e230a117f546cd5372f50dd1e63bd0f358bce845b25fd9c750ab9",
+   "nhl_schedule_2017.parquet": "8fe655df61744dbfa6aa3bee618b94f77cc459a40a3d4b6a468711d51f7a16bf",
+   "nhl_schedule_2018.parquet": "255ab3be7f9adaf3b3e4591149529c89f923afd1ac623e932c682485fa0d673b",
+   "nhl_schedule_2019.parquet": "11a308487b5779c1f6f1666401b4bae42c14bc5cf2348885505deec097b97188",
+   "nhl_schedule_2020.parquet": "195900ab64b42a5a39793f5b51a71c9d5419a3c095012b80b6e0a78599750d13",
+   "nhl_schedule_2021.parquet": "262d4f5bc1ff0bacb5ff5c115d55cbe03e2eb62e7fef41e59732725c65d14b36",
+   "nhl_schedule_2022.parquet": "13adddb35aa7486f5cee1b7a5a9d3f5bb518e43b1760a97ff048378ff12c5909",
+   "nhl_schedule_2023.parquet": "801b3468bde2f3b8768b127b086495e6f47eac80b5fc6ae27e51cb9a6a5b88b4",
+   "nhl_schedule_2024.parquet": "57e6f59783567441ee6fb348f27927eec1fc0b008d1a387f198c4af091de4519",
+   "player_box_2010.parquet": "cb22a7bd9b9094c86a75d51ff29485836285757f2dba0a2c492e430b270cb2a1",
+   "player_box_2011.parquet": "77a7648e9180aaaaeab13b1e1bd44d9180fdc642d1b6ed88d4232fd78d2fab7f",
+   "player_box_2012.parquet": "512bf79e94ca5d59d01b96dae45e2333f5677c54572b1e042db8794e3a136d55",
+   "player_box_2013.parquet": "0143ec337dba6732fffb53cda8409967ab134a58e077f2d09136e8260d76dc93",
+   "player_box_2014.parquet": "6dea506e1903db98a72ba359fac8725d0311eae188be572fc738f20b2f50d7c2",
+   "player_box_2015.parquet": "77f8f5c34c416060354fe1743d682e5d10ef999ef122fdda8e2a656772d7bfbc",
+   "player_box_2016.parquet": "c80d38071ffd6e1efb1e3c035afeb2f9858f815ea07c076ddfbc6c356db2a8bf",
+   "player_box_2017.parquet": "33726b2e2bc0979124de3037c337c40dc0ec73eaeedd3dc1f55dcf2e5bf147a0",
+   "player_box_2018.parquet": "1c30851b39df460cf5df8511c2926d66ce01a6b832fe989b8a5c538e8ab31799",
+   "player_box_2019.parquet": "ce5d410e08b163ae3cf3d12ead2423a0ea6493757f7489a9172732d2c540458f",
+   "player_box_2020.parquet": "6eec78fe66c5035d17094a756debc6b71ba82a2d9c2977995e511660d6ce9297",
+   "player_box_2021.parquet": "a114c171c3ce422785f6199a6f2f37407cb8063e2521b77ebd26a36284fe5902",
+   "player_box_2022.parquet": "60b3a4460f2fa02c8f090274244fdcff3acabc342f872c1602022ffe1930e0cb",
+   "player_box_2023.parquet": "de781187ece0d6098c2ca468e61ced9fb4dbc1a87c179cba7b11ee34ece3b5f8",
+   "player_box_2024.parquet": "6725f5859d0d01bd73ac91797da69a4836b9c0e64505809c28095c5ca13d0686",
+   "team_box_2010.parquet": "d2c5e1b70d9fcf60697e64ba808a6a403382f7910818de3da637f8bca94d21fd",
+   "team_box_2011.parquet": "256aa1ff5af52a81ea54de4c97c6883d48bad710773475ad07ec83925822ffe4",
+   "team_box_2012.parquet": "0b5bfd718812bcbfe30b834e675a1190092202a9d8143813ff6d6574c0f797f6",
+   "team_box_2013.parquet": "736aba588e3bd775691f428f7b309a354eb0fbbe67b010679ce2a3503501f7ec",
+   "team_box_2014.parquet": "e7ce0a8f7ce3b17df31c0de5221f108bd61ccd996274f90ffb96a610ece88cbd",
+   "team_box_2015.parquet": "37c2facd4cc0ab55ae5a82801e0632dd14d72e883579b31f1f2665dafe539535",
+   "team_box_2016.parquet": "9b113a3ae4ce750a9878d56f61515263dd2db9b374bea53cd015c93095cbdb5e",
+   "team_box_2017.parquet": "062cd9777217a30c919682de1a58db47235bfbfbf4c6da0dd9b15ac873c5f589",
+   "team_box_2018.parquet": "2f9c6f8170260c7bf0c92adc6b4b65d8b76bbda9d981d1536d8bda31b6b196ef",
+   "team_box_2019.parquet": "4be0aea9bf5a8202aee180ec6464e46efde3c848b34fbceeabd6f41de9182ba8",
+   "team_box_2020.parquet": "37936c9f8d079265409356b85c1dfd116317ba9dc7932161bb19836ea75d50e1",
+   "team_box_2021.parquet": "8ad1ac4dc83c39c8d19f3344e11755825875205ac5fc809a16821a68b5046075",
+   "team_box_2022.parquet": "44138d6b5a6167650cdc3e2df5b2a73e0dfef4e5f7b7fc65d79f5406ebcf963f",
+   "team_box_2023.parquet": "67a9cd13287fd249558c887969013d5bc73279c15f2e5a3a022230af5d0642a3",
+   "team_box_2024.parquet": "a783e0433e852cc7ce38d21a1291595673b251bf5997fa2a525efa2541c46b75"
+  }
+ },
+ "code": {
+  "commit": "1578710109079bee7f3ae18c1cf44819c46054bd",
+  "dirty": [],
+  "files": {
+   "hattrick/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "hattrick/backtest/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "hattrick/backtest/gamefile_bt.py": "b8bcae42b35c0c5645236a9edde3f4c4aed982a94d9ba1196f588b15ed183f3d",
+   "hattrick/backtest/games_bt.py": "43441e01c939ac9e8f892a5aa1e5466fb3b4eebb94a67b4693e4bf6571b4999b",
+   "hattrick/backtest/goalies_bt.py": "a36d19a8a02bc74a9edef4ddfb4bd212db233d7cf65d055028b1667e997b4d5c",
+   "hattrick/backtest/players_bt.py": "50959f3c5aae2ae449928f528c48dba60fc44255e3b774682666bcde669a9be9",
+   "hattrick/backtest/teams_bt.py": "91960319cbe07ecd2e93171fe70c9dd8e6554c6a65c81179c5ca391d7cf26eee",
+   "hattrick/backtest/tune_games.py": "93d1498ca0f67ba88d07b9f178eada72086fcc00f01d964f0d7975b431cc5a3a",
+   "hattrick/calibrate.py": "c30727c02ce5eb752ff06afde29d973e80bfcd8d87af5fc9b2df52369dd7c234",
+   "hattrick/config.py": "ace4cc72cd308b920346e80199af9ae3c549c9ddecf1e8dbf383a027172cfb00",
+   "hattrick/data.py": "6b581fe5449f78ccca0a4ef37a2087cd92b9c46ff3e5826b45e8ed926fa2834c",
+   "hattrick/deploy.py": "435ad9c31da9873d281852e9528be0d150b78dc784a5015ded3aa5caadf26e01",
+   "hattrick/freeze.py": "9e64ec2676406b97f64dde0d068f3cdba3a3591e01141843c07caf81136e6a26",
+   "hattrick/gamemodel.py": "e8259b365d5ce350e8bc60e75237d72b3874b9ac23546ddf962108c655ad57a9",
+   "hattrick/gametable.py": "304252db2abb901d5ae75c9e6d907c7b2de2609c5b8de020d760d2a45f9c9f15",
+   "hattrick/goalies.py": "e0f2f0b3c42368d0066373df137275a0771c61c1e4a41446420afeabf429e494",
+   "hattrick/ingest.py": "3ac84fa078bf9bdff8a88fa84e71ae5678b4db62ee4f16cbd836658ec600b402",
+   "hattrick/inseason.py": "16a41aac0f02421a078ddb80995fe5f34f2417eef1e2e3933b3cd3ba3bd14937",
+   "hattrick/players.py": "b5914d822fdc9e3243983c14c00f3846ef1722f19eaecc81c35f046641a8702e",
+   "hattrick/ratings.py": "3f8ab369def6a4359f9755289ba8dd69bdfba5f725705565c3e2a7fefdb85783",
+   "hattrick/roster_delta.py": "bd4e5b1248a12ff5c094db2b3073e04dbb8be69a61dfb1a196154a2b9e3978c3",
+   "hattrick/score.py": "a07d4d0da54954b5e314dee5a3fcbe5e6afa924b123113b1bd09396f2a1853fc",
+   "hattrick/season.py": "1157b6c45d66ad0faa2a1464365255c2ee27b5cdc864ea4c35afbaf450b26d60",
+   "hattrick/site/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "hattrick/site/build_dashboard.py": "0f77bafee2a1de71d895a50b8cbb34227952b1819161154e1a3ac284591fb3aa",
+   "hattrick/snapshot.py": "c41904d35a16d422e2d0510804535f916bde6e6e9419ccc0f0491148dcd41cd7",
+   "hattrick/structural.py": "041d98b01d958e2569dd6b8cb911f92082a25204870efc88286afc12a9a7fd84",
+   "hattrick/team_components.py": "a84d488726f594eaea19e282ef68447169cae661550655b2d91c93ae38fb34c9",
+   "hattrick/team_points_map.py": "224ab672544185fcf23cb9203a20b2ac5d8fde0a19fabe8f32767778946eced5",
+   "hattrick/teams.py": "136d19a019123e5f971bc23d8c4bfa836fd8b7720c2c781f768b74d92247ee20",
+   "hattrick/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "hattrick/tests/test_freeze.py": "1e96bdf617d5a326693ab1bc42ee276136337e76ec2204d93f3a68dcd4ebbc0d",
+   "hattrick/tests/test_gamemodel.py": "94a0d0528c2a761daf90321754eb3e34569fa609aecb44a7d6623e6ba31f6cb7",
+   "hattrick/tests/test_inseason.py": "d699a4b8683113667ddf6e401b4c67ad74ab173bd24774db045d8580f56c21e9",
+   "hattrick/tests/test_players.py": "93a3af3ce6cb08aedb19bf4d2382c8398704699115215b8b7617a0680ed048d0",
+   "hattrick/tests/test_season.py": "f8fc4b8535f3f0cd663ec56ba2b3e878e6a66c3b709fca95bea2d9f05ac102a5"
+  }
+ },
+ "outputs": {
+  "game_adjustments_2027.csv": "fcd74d950c7bd3c9059b016019065a9a9e5cb8294fd8284d30b30c96b6d61cec",
+  "games_2027.csv": "e16c3f807c0b16d12589124b32a1dba412c1e47286c00f90b724fef8006541f3",
+  "goalie_rates_2027.csv": "f2e86bd0956172d6c01d70c3a369ac7f7fec9400e97085199793785b7daf9184",
+  "goalies_2027.csv": "4fe8ad7e80537ad607b5f79e229485234f99e44db8cdbd5f53b43431ec85f89d",
+  "player_rates_2027.csv": "16af11e87559be537308deaf08906b2d0540af394e99a9d0c53ae65c3638aed9",
+  "ratings_2027.csv": "5495be0e3e044918db71bdbd65ea8217a600b2aba9c5141dd19c306b5e5fb2b1",
+  "schedule_2027.csv": "30cfc5aa455e61d441adb3ac20eed18b24b6a8cd6c49e02f0f9decba208cdb50",
+  "skaters_2027.csv": "925684ccf7b88963b6c81e8a3244a88a8d31b9c51f133fecdc7dc3778a7e9f7b",
+  "team_components_2027.csv": "d56676a84d73c0bdbe1b488cdeab4fc84a78f54321c0ad16712d54cbc2c051df",
+  "teams_2027.csv": "16b35fecbba1c28ad43c514eed4172d2d955744456fdd85585e442b57c838328"
+ }
+}

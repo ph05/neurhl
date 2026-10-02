@@ -1,0 +1,254 @@
+{
+ "cutoff_utc": "2026-09-29T21:00:00+00:00",
+ "created_utc": "2026-10-01T00:37:30+00:00",
+ "code": "1578710109079bee7f3ae18c1cf44819c46054bd",
+ "code_dirty": [],
+ "status": "forecast from information dated before the cutoff; built after the first puck drop (see created_utc)",
+ "mu_fitted": 1.0707594857499656,
+ "b2b_goalie_gap": {
+  "ANA": 0.0002514604103417311,
+  "BOS": 0.0030118687576058067,
+  "BUF": -0.0009363334664593352,
+  "CAR": 1.857329233293393e-05,
+  "CBJ": -0.0034715920721205273,
+  "CGY": -0.0017298880213588385,
+  "CHI": 0.0029379077317356894,
+  "COL": -0.0007331708378270067,
+  "DAL": -0.0011150717423004837,
+  "DET": 0.002656572779336297,
+  "EDM": -0.0004298879184757281,
+  "FLA": -0.0005562488513519055,
+  "LAK": -0.0001615509291947408,
+  "MIN": 0.0023331525396463773,
+  "MTL": -0.0016053343881463323,
+  "NJD": 0.0021457962591662377,
+  "NSH": -0.0021743751811604335,
+  "NYI": 0.0034821985413029284,
+  "NYR": 0.004891465752103941,
+  "OTT": 0.003853626612773154,
+  "PHI": 0.00042179104595425074,
+  "PIT": -0.0017524854085804514,
+  "SEA": 0.0016588370100915025,
+  "SJS": 0.001670376941903434,
+  "STL": -0.00294330422608518,
+  "TBL": 0.003420875116418323,
+  "TOR": -0.002277054278463794,
+  "UTA": 0.0015752024615476186,
+  "VAN": -0.00020682406569990774,
+  "VGK": 0.00022951673474090736,
+  "WPG": 0.0005565653625439848,
+  "WSH": 0.005446621446758741
+ },
+ "news_moves": [
+  {
+   "player_id": 8475184,
+   "from_team": "ANA",
+   "to_team": "MTL",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8475755,
+   "from_team": "FLA",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8476278,
+   "from_team": "DAL",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8476891,
+   "from_team": NaN,
+   "to_team": "BUF",
+   "kind": "veteran addition"
+  },
+  {
+   "player_id": 8476897,
+   "from_team": "STL",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8476923,
+   "from_team": "CBJ",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8476994,
+   "from_team": "COL",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8477425,
+   "from_team": "CBJ",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8477998,
+   "from_team": "OTT",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8478904,
+   "from_team": "TOR",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8479293,
+   "from_team": "UTA",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8479378,
+   "from_team": NaN,
+   "to_team": "NYI",
+   "kind": "veteran addition"
+  },
+  {
+   "player_id": 8479390,
+   "from_team": "NYR",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8480009,
+   "from_team": NaN,
+   "to_team": "NYR",
+   "kind": "veteran addition"
+  },
+  {
+   "player_id": 8480196,
+   "from_team": "DET",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8480893,
+   "from_team": "CBJ",
+   "to_team": "TOR",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8481133,
+   "from_team": "FLA",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8482111,
+   "from_team": "NSH",
+   "to_team": "STL",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8482126,
+   "from_team": "TOR",
+   "to_team": "CBJ",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8482146,
+   "from_team": "NSH",
+   "to_team": "NJD",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8482172,
+   "from_team": "CHI",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8482447,
+   "from_team": "OTT",
+   "to_team": "VAN",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8482720,
+   "from_team": "TOR",
+   "to_team": "CBJ",
+   "kind": "switch"
+  },
+  {
+   "player_id": 8482762,
+   "from_team": "DET",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8482947,
+   "from_team": "COL",
+   "to_team": NaN,
+   "kind": "departure"
+  },
+  {
+   "player_id": 8483565,
+   "from_team": NaN,
+   "to_team": "TOR",
+   "kind": "veteran addition"
+  },
+  {
+   "player_id": 8478007,
+   "from_team": "CBJ",
+   "to_team": "TOR",
+   "kind": "switch (research file)"
+  }
+ ],
+ "points_per_goal_diff": 0.33181949620437207,
+ "blend_candidates": {
+  "mkt_rel82": 12.24101446494843,
+  "mkt_rel82+td_rel82": 12.214844259731922,
+  "mkt_rel82+tdr_rel82": 12.230912876737378,
+  "mkt_rel82+td_rel82+tdr_rel82": 12.225154899087089,
+  "mkt_rel82+bu_rel82": 12.254148229757215,
+  "mkt_rel82+td_rel82+bu_rel82": 12.232643627030981
+ },
+ "blend": {
+  "views": [
+   "mkt_rel82",
+   "td_rel82"
+  ],
+  "weights": {
+   "mkt_rel82": 0.7503529813596548,
+   "td_rel82": 0.24964701864034528
+  },
+  "loso_rmse_82": 12.214844259731922,
+  "loso_mae_82": 9.417104892555463,
+  "league_points_per_team_84": 93.27286585365853
+ },
+ "blend_seasons": [
+  2019,
+  2020,
+  2022,
+  2023,
+  2024
+ ],
+ "pre_market_injuries": {
+  "8478873": "Terry, hip surgery June",
+  "8484144": "Bedard, shoulder surgery July",
+  "8482093": "Jarvis, shoulder surgery late June",
+  "8477967": "Demko, hip surgery January",
+  "8480873": "Sandin, ACL surgery April"
+ },
+ "luck_sd_82": 8.314239436950322,
+ "talent_sd_82": 8.94851065119587,
+ "drift_sd": 0.12328828005937953,
+ "rating_sd_net_mean": 0.11230571422239705,
+ "league_level": {
+  "gf_per_team_game_target": 3.081554878048781,
+  "mu_used": 1.053313303802515,
+  "var_log_rate": 0.017686173837329656
+ },
+ "sims": 40000,
+ "seed": 20260929,
+ "P_mu": 1.053313303802515
+}

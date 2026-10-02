@@ -1,0 +1,131 @@
+{
+ "fixed_utc": "2026-10-01T03:41:41+00:00",
+ "tuning_seasons": [
+  2014,
+  2015,
+  2016,
+  2017
+ ],
+ "chosen": {
+  "gs": {
+   "stage": 2,
+   "family": "to_base_noint",
+   "lambda": 1.0,
+   "tune_ll": 0.6717455466345507,
+   "baseline_in_season_ll": 0.6717433801969644,
+   "gain": 2.166437586215153e-06,
+   "elo_ll": 0.6753727572688409,
+   "preseason_ll": 0.678548546535518,
+   "weights_by_season": {
+    "2014": {
+     "a": 0.0,
+     "b_in": 1.0024884990210408,
+     "b_pre": 0.003938910513523374,
+     "b_elo": 0.0007896898170878585,
+     "n_train": 1230,
+     "train_seasons": [
+      2012
+     ]
+    },
+    "2015": {
+     "a": 0.0,
+     "b_in": 1.000555632602549,
+     "b_pre": 0.0015267411335525088,
+     "b_elo": 0.0006121449806048163,
+     "n_train": 2460,
+     "train_seasons": [
+      2012,
+      2014
+     ]
+    },
+    "2016": {
+     "a": 0.0,
+     "b_in": 1.0008808568611707,
+     "b_pre": 0.0011618137078865526,
+     "b_elo": 0.0011140534337355623,
+     "n_train": 3690,
+     "train_seasons": [
+      2012,
+      2014,
+      2015
+     ]
+    },
+    "2017": {
+     "a": 0.0,
+     "b_in": 1.0003828475718481,
+     "b_pre": 0.0006462696302847264,
+     "b_elo": 0.0003863674557609442,
+     "n_train": 4920,
+     "train_seasons": [
+      2012,
+      2014,
+      2015,
+      2016
+     ]
+    }
+   }
+  },
+  "go": {
+   "stage": 2,
+   "family": "to_base_noint",
+   "lambda": 1.0,
+   "tune_ll": 0.6742040120892098,
+   "baseline_in_season_ll": 0.6742045588853172,
+   "gain": -5.467961073923888e-07,
+   "elo_ll": 0.6753727572688409,
+   "preseason_ll": 0.6785541929877967,
+   "weights_by_season": {
+    "2014": {
+     "a": 0.0,
+     "b_in": 1.0022760620071467,
+     "b_pre": 0.004653988282663347,
+     "b_elo": 0.0016993016476305987,
+     "n_train": 1230,
+     "train_seasons": [
+      2012
+     ]
+    },
+    "2015": {
+     "a": 0.0,
+     "b_in": 1.0007101356281467,
+     "b_pre": 0.0021902399293505445,
+     "b_elo": 0.0013741051796556012,
+     "n_train": 2460,
+     "train_seasons": [
+      2012,
+      2014
+     ]
+    },
+    "2016": {
+     "a": 0.0,
+     "b_in": 1.0014678298855408,
+     "b_pre": 0.0017165781018432036,
+     "b_elo": 0.0017559593561212296,
+     "n_train": 3690,
+     "train_seasons": [
+      2012,
+      2014,
+      2015
+     ]
+    },
+    "2017": {
+     "a": 0.0,
+     "b_in": 1.000464268336101,
+     "b_pre": 0.0009401764020173787,
+     "b_elo": 0.0006860498283723777,
+     "n_train": 4920,
+     "train_seasons": [
+      2012,
+      2014,
+      2015,
+      2016
+     ]
+    }
+   }
+  }
+ },
+ "pre_test_note": {
+  "written_utc": "2026-10-01T03:41:49+00:00",
+  "text": "Written after tuning and before the 2018 confirmation and the test. In 2014-2017 no stack configuration beat the in-season probability alone by a meaningful margin: every less regularised configuration was worse, and the chosen one (intercept fixed at 0, slopes shrunk to (1,0,0) with lambda = 1, the largest in the grid) has weights within 0.005 of (1,0,0) and a tuning-window difference of +0.000002 (gs) and -0.0000005 (go). The test is still run once with this configuration, as the plan requires, and judged by the plan's rule (95% CI excludes 0) without any change; its magnitude is reported beside it."
+ }
+}

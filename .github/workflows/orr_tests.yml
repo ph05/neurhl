@@ -1,0 +1,39 @@
+# ORR test suites on every push that touches the model (orr/).
+name: orr-tests
+
+on:
+  push:
+    paths: ["orr/**", ".github/workflows/orr_tests.yml"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install numpy "pandas>=2" pyarrow scipy scikit-learn requests
+      - uses: actions/cache@v4
+        with:
+          path: |
+            data/raw/fastrhockey
+            orr/cache
+          key: orr-inputs-${{ hashFiles('orr/output/freeze_2027/manifest_2027.json', 'orr/config.py') }}
+      - name: Inputs
+        run: |
+          python -m orr.fetch_boxes
+          python -m orr.snapshot
+      - name: Test suites
+        run: |
+          set -e
+          for t in test_season test_players test_gamemodel test_inseason test_freeze test_player_update test_live_1_3 test_live_1_4 test_live_1_5 test_live_1_6 test_live_1_7 test_live_1_8 test_live_1_9 test_live_2_0; do
+            echo "== $t"; python -m orr.tests.$t
+          done

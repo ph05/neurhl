@@ -1,0 +1,40 @@
+{
+ "item": "X3 ORR 1.1 integration and full in-season hindcast (orr/PLAN_1_1.md)",
+ "declared_utc": "2026-10-01T03:59:19+00:00",
+ "accepted_items_integrated": [
+  "X1"
+ ],
+ "not_accepted_not_integrated": [
+  "X2",
+  "L1",
+  "L2",
+  "L3",
+  "M1",
+  "M2",
+  "M3"
+ ],
+ "combination": "ORR 1.1 = the shipped in-season loop + X1 (skater lineup offsets with the fixed X1 configuration beta_x=0.45, beta_st=0, beta_t=0.6, TOI scale 300, expected-lineup half-life 10 team games, shot_mult=0; known starting goalies through the existing goalie layer, use_goalie). No other item was accepted, so the combination is X1 alone.",
+ "test": "orr/backtest/inseason_bt_1_1.py, run ONCE after the integration checks below pass. Gate games 2019-24 (neurhl/output/preds/g_gate_games.csv, n=6289). Two variants: goals+shots (frozen ratings_hp.json) and goals-only (use_shots=False). Each arm: team-history-start run -> walk-forward OT/SO parameters -> shipped run from the preseason pipeline's ratings (gamefile_bt, views mkt_rel82+td_rel82) with those OT/SO parameters, exactly as orr/backtest/inseason_bt.py. Arms per variant: shipped (ORR 1.0 loop: no starters, no lineups) and ORR 1.1 (core ratings.run_filter with use_goalie=True and lineup=orr.lineups.backtest_offsets()). Comparators: NeurHL-G (p_stack) and NeurHL Elo (p_elo). Paired bootstrap 95% CIs from orr.backtest.games_bt.paired, pooled and by season.",
+ "rule_plan": "Accept if the combined loop improves on the current shipped loop (same variant) with a 95% CI that excludes 0. Otherwise ship only the individually accepted items that do not hurt in combination.",
+ "rule_reading_declared_before_run": "The plan re-runs the backtest in both variants and the rule names no single variant, so X3 is ACCEPTED only if, in BOTH variants, the CI of (ORR 1.1 - shipped, same variant) lies entirely below 0. Each variant's verdict is reported separately. If X3 is not accepted, X1 (the only accepted item) still ships in ORR 1.1, default ON, provided it 'does not hurt in combination', declared as: its pooled point estimate vs the shipped loop is <= 0 in both variants; otherwise it ships default OFF.",
+ "secondary_reported_not_for_acceptance": [
+  "ORR 1.1 vs NeurHL-G and vs NeurHL Elo (both variants)",
+  "per-season differences",
+  "the hypothesis' 'better than any accepted item alone' is trivially an identity here: the combination IS the single accepted item"
+ ],
+ "integration_checks_before_test (no test-window scoring)": [
+  "core ratings.run_filter(lineup=None) == X1's copy of the original run_filter (lfilter.run_filter_lineup, lineup=None) on tuning season 2016, to machine precision",
+  "core ratings.run_filter(use_goalie=True, lineup=lo) == X1 lfilter.run_filter_lineup(use_goalie=True, lineup=lo) on 2016",
+  "orr.lineups.backtest_offsets() == X1 lineups.offsets(wide(10), 0.45, 0, 0.6) for every gid (offsets only, no outcomes)",
+  "live InSeasonFilter.update_day with gdiff_h/gdiff_a and lo_h/lo_a reproduces run_filter's pregame linear predictors on tuning season 2016"
+ ],
+ "live": "orr/inseason.py runs ORR 1.1 by default (settings recorded in run_<date>.json); --model 1.0 restores the 1.0 loop. Past games' starters and lineups enter the update; today's lineups and starters enter the forecast. Live lineups: NeurHL's committed pregame lineup files (neurhl/output/live/2027/<date>/pregame_<gid>_lineups.json, else morning, else preview) plus an optional --goalies starters file that overrides them. Skater values: players.project(2027, load_params()) as in X1.",
+ "windows": "No tuning in X3: every parameter is X1's fixed configuration. The gate window is scored once.",
+ "amendments": [
+  {
+   "utc": "2026-10-01T04:06:20+00:00",
+   "before_any_test_run": true,
+   "text": "Bootstrap procedure fixed: games_bt.paired draws from one module-level RNG (seed C.SEED), so a CI depends on call order. The decision uses the standard paired() calls in the order coded in inseason_bt_1_1.score(): the goals+shots primary comparison is the first bootstrap call of the process and the goals-only primary the fifth (the same positions as in X1's test.py). As a sensitivity check only (not for the decision), each primary comparison is also bootstrapped with 20,000 resamples after all standard calls."
+  }
+ ]
+}

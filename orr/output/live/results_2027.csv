@@ -1,0 +1,9 @@
+game_id,date,home,away,home_g,away_g,last_period,source,shots_home,shots_away
+2026020001,2026-09-29,CAR,FLA,0,1,OT,NHL API via neurhl/output/live/results_2027.csv,,
+2026020002,2026-09-29,TOR,MTL,2,3,REG,NHL API via neurhl/output/live/results_2027.csv,,
+2026020003,2026-09-29,BOS,NYR,3,0,REG,NHL API via neurhl/output/live/results_2027.csv,,
+2026020004,2026-09-29,EDM,VAN,5,6,OT,NHL API via neurhl/output/live/results_2027.csv,,
+2026020005,2026-09-29,VGK,CHI,5,2,REG,NHL API via neurhl/output/live/results_2027.csv,,
+2026020006,2026-09-30,PHI,PIT,0,7,REG,NHL API via neurhl/output/live/results_2027.csv,,
+2026020007,2026-09-30,COL,LAK,8,4,REG,NHL API via neurhl/output/live/results_2027.csv,,
+2026020008,2026-09-30,TOR,NYI,2,1,REG,NHL API via neurhl/output/live/results_2027.csv,,

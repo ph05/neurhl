@@ -1,0 +1,72 @@
+{
+ "protocol": "Calibration of rest-of-season skater intervals (ORR 1.7).\n\n1.6's interval for rest-of-season points is the conjugate negative-binomial\npredictive of the Gamma posterior on the player's points rate, for a FIXED\nnumber of games. 1.7 adds two terms, simulated per player:\n  * games-played variance: games ~ Binomial(team games left, q), with q the\n    player's preseason games share;\n  * a rate-variance multiplier v: the Gamma posterior's variance times v (same\n    mean).\nAt 25/50/75% of a season (by game id) every projected skater's remaining\npoints are predicted (prior: the strict preseason projection, updated with\nhis box-score games so far as in 1.2) and scored with the 80% interval score\n(width + 2/0.2 * miss) and coverage. Tuned on 2012 and 2014-2017 over GRID;\nthe test (2022, 2023) runs once. Pre-declared rule: the tuned configuration\nis adopted (params/ros_interval.json) only if its test interval score beats\n1.6's (v = 1, no games variance).\n\nRun: python3 -m orr.backtest.ros_interval_bt\n",
+ "ledger": [
+  {
+   "v": 1.0,
+   "games_var": false,
+   "tune_score": 25.03610181523172,
+   "tune_cover80": 0.6412128587364365
+  },
+  {
+   "v": 1.0,
+   "games_var": true,
+   "tune_score": 24.79410810262651,
+   "tune_cover80": 0.6504411317310618
+  },
+  {
+   "v": 1.5,
+   "games_var": false,
+   "tune_score": 24.278328769901634,
+   "tune_cover80": 0.6683906297535747
+  },
+  {
+   "v": 1.5,
+   "games_var": true,
+   "tune_score": 24.118355136395902,
+   "tune_cover80": 0.6766048068147247
+  },
+  {
+   "v": 2.0,
+   "games_var": false,
+   "tune_score": 23.836831964303823,
+   "tune_cover80": 0.6912077882567691
+  },
+  {
+   "v": 2.0,
+   "games_var": true,
+   "tune_score": 23.58963593955988,
+   "tune_cover80": 0.6984078693844438
+  },
+  {
+   "v": 3.0,
+   "games_var": false,
+   "tune_score": 23.14111144914309,
+   "tune_cover80": 0.7323800831558666
+  },
+  {
+   "v": 3.0,
+   "games_var": true,
+   "tune_score": 22.951698610688574,
+   "tune_cover80": 0.7405942602170166
+  }
+ ],
+ "best": {
+  "v": 3.0,
+  "games_var": true,
+  "tune_score": 22.951698610688574,
+  "tune_cover80": 0.7405942602170166
+ },
+ "test": {
+  "n": 4272,
+  "score_best": 25.53024344569288,
+  "cover_best": 0.7258895131086143,
+  "score_1_6": 28.286446629213486,
+  "cover_1_6": 0.6205524344569289,
+  "diff": -2.7562031835205985,
+  "ci95": [
+   -3.0680617977528075,
+   -2.426694756554307
+  ]
+ },
+ "adopted": true
+}

@@ -1,0 +1,425 @@
+{
+ "id": "X2",
+ "title": "Comparables (PECOTA-style) skater projections",
+ "accepted": false,
+ "rule": "Accept if pooled sample-A and sample-B MAE both improve by at least 0.05 (strict protocol, held-out 2022-26).",
+ "test": {
+  "protocol": "strict (players_bt), held-out 2022-26, run once",
+  "A": {
+   "orr": 9.505620472381116,
+   "x2": 9.51665422551351,
+   "diff": 0.011033753132393187,
+   "ci95_paired_bootstrap": [
+    -0.009217915613006,
+    0.0319534718952674
+   ],
+   "n": 2958,
+   "seasons_improved": 0,
+   "neurhl_pooled": 9.5426
+  },
+  "B": {
+   "orr": 9.315873906424576,
+   "x2": 9.320728878609668,
+   "diff": 0.004854972185091455,
+   "ci95_paired_bootstrap": [
+    -0.015893288262405523,
+    0.02600317894059264
+   ],
+   "n": 2938,
+   "seasons_improved": 3,
+   "neurhl_v2_blend_pooled": 9.0816
+  },
+  "all": {
+   "n": 3649,
+   "orr": 9.336377307657933,
+   "x2": 9.33340430529522,
+   "diff": -0.0029730023627134727,
+   "ci95": [
+    -0.020255816690401243,
+    0.014778591545057377
+   ],
+   "seasons_improved": 4
+  },
+  "per_season": {
+   "2022": {
+    "orr": {
+     "A": 9.8561,
+     "B": 9.8561,
+     "all": 9.6513
+    },
+    "x2": {
+     "A": 9.8642,
+     "B": 9.8642,
+     "all": 9.6405
+    },
+    "n": {
+     "A": 589,
+     "B": 589,
+     "all": 686
+    },
+    "neurhl_A": 10.466,
+    "neurhl_B_blend": 9.981
+   },
+   "2023": {
+    "orr": {
+     "A": 9.6203,
+     "B": 9.1753,
+     "all": 9.7003
+    },
+    "x2": {
+     "A": 9.6263,
+     "B": 9.1744,
+     "all": 9.6979
+    },
+    "n": {
+     "A": 603,
+     "B": 600,
+     "all": 672
+    },
+    "neurhl_A": 9.597,
+    "neurhl_B_blend": 8.95
+   },
+   "2024": {
+    "orr": {
+     "A": 9.4531,
+     "B": 9.3424,
+     "all": 9.6069
+    },
+    "x2": {
+     "A": 9.4782,
+     "B": 9.3615,
+     "all": 9.6219
+    },
+    "n": {
+     "A": 594,
+     "B": 589,
+     "all": 656
+    },
+    "neurhl_A": 9.166,
+    "neurhl_B_blend": 8.917
+   },
+   "2025": {
+    "orr": {
+     "A": 9.0692,
+     "B": 8.798,
+     "all": 8.8094
+    },
+    "x2": {
+     "A": 9.0826,
+     "B": 8.7974,
+     "all": 8.8034
+    },
+    "n": {
+     "A": 586,
+     "B": 579,
+     "all": 811
+    },
+    "neurhl_A": 9.092,
+    "neurhl_B_blend": 8.515
+   },
+   "2026": {
+    "orr": {
+     "A": 9.5251,
+     "B": 9.4026,
+     "all": 9.0806
+    },
+    "x2": {
+     "A": 9.5275,
+     "B": 9.401,
+     "all": 9.0725
+    },
+    "n": {
+     "A": 586,
+     "B": 581,
+     "all": 824
+    },
+    "neurhl_A": 9.394,
+    "neurhl_B_blend": 9.037
+   }
+  },
+  "baseline_reproduces_players_bt_json": true,
+  "test_runs": 1
+ },
+ "confirm_2018_19": {
+  "A": {
+   "n": 1126,
+   "orr": 9.4208212194567,
+   "x2": 9.465509864298445,
+   "diff": 0.04468864484174517,
+   "ci95": [
+    0.013573151691317661,
+    0.07635070518471136
+   ],
+   "seasons_improved": 0
+  },
+  "B": {
+   "n": 1124,
+   "orr": 9.278269413665646,
+   "x2": 9.317338559879945,
+   "diff": 0.03906914621429891,
+   "ci95": [
+    0.007488011880298502,
+    0.07044040947823343
+   ],
+   "seasons_improved": 0
+  },
+  "all": {
+   "n": 1272,
+   "orr": 9.254268599041243,
+   "x2": 9.286154811954635,
+   "diff": 0.03188621291339189,
+   "ci95": [
+    0.003959096092170366,
+    0.060459684334688034
+   ],
+   "seasons_improved": 0
+  },
+  "per_season": {
+   "2018": {
+    "orr": {
+     "A": 9.5551,
+     "B": 9.5551,
+     "all": 9.3571
+    },
+    "x2": {
+     "A": 9.5955,
+     "B": 9.5955,
+     "all": 9.3839
+    },
+    "n": {
+     "A": 568,
+     "B": 568,
+     "all": 646
+    },
+    "neurhl_A": null,
+    "neurhl_B_blend": null
+   },
+   "2019": {
+    "orr": {
+     "A": 9.2842,
+     "B": 8.9955,
+     "all": 9.1481
+    },
+    "x2": {
+     "A": 9.3332,
+     "B": 9.0331,
+     "all": 9.1853
+    },
+    "n": {
+     "A": 558,
+     "B": 556,
+     "all": 626
+    },
+    "neurhl_A": null,
+    "neurhl_B_blend": null
+   }
+  }
+ },
+ "tuning": {
+  "objective": "mean of pooled strict sample-A and sample-B points MAE, V = 2012, 2014-2017 (V=2011 logged as a diagnostic: its pool is one transition)",
+  "searches": {
+   "s1_own_baseline": "classic PECOTA change from the player's own 3-season baseline",
+   "s2_orr_baseline": "change measured from ORR's walk-forward projection of each comparable (residual comparables); added after s1, tuning window only"
+  },
+  "grid": {
+   "k": [
+    25,
+    50,
+    100,
+    200,
+    400
+   ],
+   "w_age": [
+    0.5,
+    1,
+    2,
+    4
+   ],
+   "w_rate": [
+    0.5,
+    1,
+    2
+   ],
+   "w_shot": [
+    0,
+    0.5,
+    1
+   ],
+   "w_use": [
+    0,
+    0.5,
+    1,
+    2
+   ],
+   "w_exp": [
+    0,
+    0.5,
+    1
+   ],
+   "w": [
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.7,
+    1.0
+   ]
+  },
+  "method": "coordinate descent over comparables parameters (up to 2 sweeps per search), every blend weight evaluated for each; selection = lowest objective over all logged (config, w>0)",
+  "n_configurations": 427,
+  "n_comp_configs": 61,
+  "chosen": {
+   "comp_params": {
+    "k": 25,
+    "w_age": 2.0,
+    "w_rate": 1.0,
+    "w_shot": 0.5,
+    "w_use": 2.0,
+    "w_exp": 0.5,
+    "baseline": "orr"
+   },
+   "w": 0.2,
+   "search": "s2_orr_baseline"
+  },
+  "tune_chosen": {
+   "A": 8.54226,
+   "B": 8.3959,
+   "obj": 8.46908,
+   "all": 8.60685,
+   "per_season": {
+    "2012": {
+     "A": 8.9388,
+     "B": 8.7886,
+     "all": 9.2305
+    },
+    "2014": {
+     "A": 8.7623,
+     "B": 8.6254,
+     "all": 8.6586
+    },
+    "2015": {
+     "A": 8.058,
+     "B": 7.8863,
+     "all": 8.0972
+    },
+    "2016": {
+     "A": 8.2806,
+     "B": 8.0049,
+     "all": 8.4472
+    },
+    "2017": {
+     "A": 8.6852,
+     "B": 8.6852,
+     "all": 8.5862
+    }
+   }
+  },
+  "tune_baseline": {
+   "A": 8.55581,
+   "B": 8.41744,
+   "obj": 8.48662,
+   "all": 8.63246,
+   "per_season": {
+    "2012": {
+     "A": 8.9632,
+     "B": 8.812,
+     "all": 9.2805
+    },
+    "2014": {
+     "A": 8.7779,
+     "B": 8.6525,
+     "all": 8.6935
+    },
+    "2015": {
+     "A": 8.0706,
+     "B": 7.9162,
+     "all": 8.1083
+    },
+    "2016": {
+     "A": 8.2665,
+     "B": 8.0024,
+     "all": 8.4429
+    },
+    "2017": {
+     "A": 8.7146,
+     "B": 8.7146,
+     "all": 8.622
+    }
+   }
+  },
+  "best_by_search": {
+   "s1_own_baseline": {
+    "comp_params": {
+     "k": 200,
+     "w_age": 2.0,
+     "w_rate": 2.0,
+     "w_shot": 0.5,
+     "w_use": 0.0,
+     "w_exp": 0.0,
+     "baseline": "own"
+    },
+    "w": 0.1,
+    "obj": 8.48494,
+    "A": 8.55759,
+    "B": 8.4123
+   },
+   "s2_orr_baseline": {
+    "comp_params": {
+     "k": 25,
+     "w_age": 2.0,
+     "w_rate": 1.0,
+     "w_shot": 0.5,
+     "w_use": 2.0,
+     "w_exp": 0.5,
+     "baseline": "orr"
+    },
+    "w": 0.2,
+    "obj": 8.46908,
+    "A": 8.54226,
+    "B": 8.3959
+   }
+  },
+  "fixed_constants": {
+   "LAG_W": [
+    1.0,
+    0.7,
+    0.5
+   ],
+   "K_FEAT_MIN": 150.0,
+   "K_BASE_MIN": 150.0,
+   "K_OUT_MIN": 300.0,
+   "MIN_TOI_HIST": 100.0,
+   "MIN_TOI_OUT": 20.0,
+   "MASK_TOI": 50.0,
+   "Y_CLIP": 5.0,
+   "F_CLIP": [
+    0.3333333333333333,
+    3.0
+   ],
+   "ORR_MIN_OUT_SEASON": 2011,
+   "W_GRID": [
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.7,
+    1.0
+   ]
+  }
+ },
+ "files": [
+  "orr/experiments/X2/comps.py",
+  "orr/experiments/X2/run.py",
+  "orr/experiments/X2/ledger.json",
+  "orr/experiments/X2/config.json",
+  "orr/experiments/X2/config_search1.json",
+  "orr/experiments/X2/confirm.json",
+  "orr/experiments/X2/test.json",
+  "orr/experiments/X2/tune.log",
+  "orr/experiments/X2/tune_s2.log"
+ ],
+ "integrate": "",
+ "notes": "REPORT.md not written: the subagent environment blocks writing report .md files; the report text was returned to the orchestrator in the structured result. Search 2 (orr baseline) was added after search 1, on the tuning window only. 2018-19 used once (confirm, failed); 2022-26 test run once; the test's ORR column reproduces players_bt.json exactly."
+}
