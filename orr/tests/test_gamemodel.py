@@ -176,12 +176,16 @@ def test_walk_forward_filter_never_reads_future():
     from orr import structural as S
     hp = R.HP()
     cut = pd.Timestamp("2015-01-15")
-    base = R.run_filter(hp, [2015], first=2014)
-    pre_base = R.preseason_table(2015)
     orig = S.game_frame
     bad = _corrupted_frame(cut)
     try:
+        # Both arms are computed fresh in this process. The disk cache may have been
+        # built on another machine (CI restores it), whose BLAS kernels differ in the
+        # last bits, and that would break the bit-identical comparison below.
         S._DISK_CACHE = False
+        _clear_caches()
+        base = R.run_filter(hp, [2015], first=2014)
+        pre_base = R.preseason_table(2015)
         S.game_frame = lambda: bad             # module-level lookups see this
         R.S.game_frame = S.game_frame
         _clear_caches()
