@@ -1,0 +1,120 @@
+{
+ "2026020015": {
+  "game_id": 2026020015,
+  "date": "2026-10-01",
+  "start_utc": "2026-10-02T02:00:00+00:00",
+  "as_of": "2026-10-02T00:50:10.318060+00:00",
+  "roster_snapshot": "2026-09-29",
+  "notes": [],
+  "home": {
+   "team": "VAN",
+   "forwards": [
+    8478498,
+    8480012,
+    8483476,
+    8483499,
+    8482079,
+    8478444,
+    8482055,
+    8484136,
+    8481024,
+    8483395,
+    8481032,
+    8475848
+   ],
+   "defense": [
+    8484798,
+    8479425,
+    8476467,
+    8484240,
+    8483678,
+    8474568
+   ],
+   "skaters": [
+    8478498,
+    8480012,
+    8483476,
+    8483499,
+    8482079,
+    8478444,
+    8482055,
+    8484136,
+    8481024,
+    8483395,
+    8481032,
+    8475848,
+    8484798,
+    8479425,
+    8476467,
+    8484240,
+    8483678,
+    8474568
+   ],
+   "goalie": 8480947,
+   "lineup_source": "DF_CONFIRMED",
+   "goalie_source": "DF_LIKELY",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Filip Chytil, Thatcher Demko, Mackenzie MacEachern, Akil Thomas, Jack Thompson",
+    "DF lines 2026-10-01/2030 'Ben Kuzma' updated 10-01 19:24Z"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  },
+  "away": {
+   "team": "EDM",
+   "forwards": [
+    8481617,
+    8478402,
+    8477934,
+    8479368,
+    8482703,
+    8477953,
+    8480029,
+    8486161,
+    8478472,
+    8483455,
+    8484509,
+    8479365
+   ],
+   "defense": [
+    8475218,
+    8480803,
+    8478854,
+    8476473,
+    8478013,
+    8482166
+   ],
+   "skaters": [
+    8481617,
+    8478402,
+    8477934,
+    8479368,
+    8482703,
+    8477953,
+    8480029,
+    8486161,
+    8478472,
+    8483455,
+    8484509,
+    8479365,
+    8475218,
+    8480803,
+    8478854,
+    8476473,
+    8478013,
+    8482166
+   ],
+   "goalie": 8482221,
+   "lineup_source": "DF_CONFIRMED",
+   "goalie_source": "DF_CONFIRMED",
+   "notes": [
+    "boxscore lineup not published",
+    "MoneyPuck injured excluded: Zach Hyman, Frederik Andersen, Ryan Nugent-Hopkins, Matt Savoie, Jason Dickinson, Mattias Janmark, Alec Regula",
+    "DF lines 2026-10-01/2030 'Jason Gregor' updated 10-01 19:00Z"
+   ],
+   "n_f": 12,
+   "n_d": 6
+  }
+ }
+}

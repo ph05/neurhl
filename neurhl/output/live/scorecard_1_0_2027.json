@@ -1,19 +1,19 @@
 {
- "as_of": "2026-09-30",
- "games_played": 5,
+ "as_of": "2026-10-01",
+ "games_played": 8,
  "final": false,
  "games": {
-  "n_games": 5,
-  "neurhl_1_0": 0.7262421961034218,
-  "elo": 0.7390857931273624,
-  "freeze_0925": 0.8564248581831535,
-  "diff_vs_elo": -0.012843597023940745,
-  "diff_vs_0925": -0.1301826620797315,
-  "home_win_rate": 0.4
+  "n_games": 8,
+  "neurhl_1_0": 0.7034757518175232,
+  "elo": 0.6908768024764286,
+  "freeze_0925": 0.7245708757280201,
+  "diff_vs_elo": 0.012598949341094644,
+  "diff_vs_0925": -0.021095123910496914,
+  "home_win_rate": 0.5
  },
  "standings": {
   "final": false,
-  "teams": 10,
-  "pace_mae_neurhl_1_0": 66.04281
+  "teams": 15,
+  "pace_mae_neurhl_1_0": 66.20371333333334
  }
 }

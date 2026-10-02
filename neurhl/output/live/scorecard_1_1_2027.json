@@ -1,31 +1,86 @@
 {
- "as_of": "2026-09-30",
+ "as_of": "2026-10-01",
  "status": "interim",
  "note": "interim: descriptive only; inference once, after 2027-04-10",
  "r_hat": 98.68,
  "b_hat": 0.7015,
  "M": 2.9708738327026367,
- "games": 5,
+ "games": 8,
  "goals": {
-  "n_team_games": 10,
-  "mean_new": -2.190800841815885,
-  "mean_frozen": -2.226745442153319,
-  "diff": 0.03594460033743472,
-  "se_team_clustered": 0.040248109803306995
+  "n_team_games": 16,
+  "mean_new": -2.4273912952474586,
+  "mean_frozen": -2.454456792490823,
+  "diff": 0.027065497243364725,
+  "se_team_clustered": 0.034599134027690784
  },
  "sog": {
-  "available": false
+  "n_team_games": 16,
+  "mean_new": -3.359345064434275,
+  "mean_frozen": -3.3288243076853474,
+  "diff": -0.03052075674892807,
+  "se_team_clustered": 0.06793730732082531,
+  "available": true,
+  "coverage80_frozen": 0.8125,
+  "coverage80_cal": 0.8125
+ },
+ "sog_prequential": {
+  "n_team_games": 16,
+  "mean_new": -3.3593095178573154,
+  "mean_frozen": -3.359345064434275,
+  "diff": 3.5546576959921694e-05,
+  "se_team_clustered": 6.406202951273485e-05,
+  "r_latest": 98.3893221190434
  },
  "xg": {
-  "available": false
+  "n_team_games": 16,
+  "mean_new": -1.3001717048148609,
+  "mean_frozen": -1.2852815931662847,
+  "diff": -0.014890111648576232,
+  "se_team_clustered": 0.0519899349063119,
+  "available": true,
+  "k_hat": 11.86,
+  "coverage80_frozen": 0.8125,
+  "coverage80_cal": 0.75
+ },
+ "xg_prequential": {
+  "n_team_games": 16,
+  "mean_new": -1.300461226174828,
+  "mean_frozen": -1.3001717048148609,
+  "diff": -0.000289521359967404,
+  "se_team_clustered": 0.00030677258791529465,
+  "k_latest": 11.879404447231908
  },
  "xg_slope": {
-  "available": false
+  "n_team_games": 16,
+  "mean_new": -1.2932438293936632,
+  "mean_frozen": -1.2852815931662847,
+  "diff": -0.007962236227378655,
+  "se_team_clustered": 0.047902537632701137,
+  "available": true,
+  "b_x": 0.7849,
+  "k_x": 11.98,
+  "centre_M": 3.2471875,
+  "coverage80_cal": 0.75
  },
  "pp_opps": {
-  "available": false
+  "n_team_games": 16,
+  "mean_new": -1.8907700326969703,
+  "mean_frozen": -1.898991901511741,
+  "diff": 0.008221868814770633,
+  "se_team_clustered": 0.06604176899315345,
+  "available": true,
+  "n_hat": 10
  },
  "skater_sog": {
-  "available": false
+  "n_team_games": 285,
+  "mean_new": -4.031578947368421,
+  "mean_frozen": -3.8947368421052633,
+  "diff": -0.1368421052631579,
+  "se_team_clustered": 0.06003004160208899,
+  "available": true,
+  "r_s": 18.75,
+  "score": "negative interval score (alpha 0.2)",
+  "coverage80_frozen": 0.9333333333333333,
+  "coverage80_cal": 0.9403508771929825
  }
 }
