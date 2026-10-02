@@ -1,7 +1,7 @@
 {
  "protocol": "orr/EVALUATION_2027.md",
- "evaluated_utc": "2026-10-02T02:01:03+00:00",
- "games_played": 8,
+ "evaluated_utc": "2026-10-02T18:35:50+00:00",
+ "games_played": 16,
  "season_complete": false,
  "files_sha256": {
   "orr/output/freeze_2027/teams_2027.csv": "16b35fecbba1c28ad43c514eed4172d2d955744456fdd85585e442b57c838328",
@@ -17,19 +17,26 @@
   "neurhl/output/neurhl_1_1/season/skaters_2027.csv": "3ff97bc121508dca443c5891781497aa97aab59b3e99cc967aa97d351245db45"
  },
  "P1_daily_vs_neurhl_G": {
-  "status": "pending",
-  "reason": "no eligible games for both orr_inseason and neurhl_G_pregame yet"
+  "status": "interim",
+  "n": 8,
+  "diff": -0.006808224730768614,
+  "ci95": [
+   -0.044241515126071156,
+   0.03237869702669822
+  ],
+  "verdict": "(interim, not a verdict) no difference shown",
+  "brier_diff": -0.004154902037500005
  },
  "P2_preseason_vs_neurhl_1_1": {
   "status": "interim",
-  "n": 1,
-  "diff": 0.0570694015926137,
+  "n": 9,
+  "diff": 0.011493949194931415,
   "ci95": [
-   0.0570694015926137,
-   0.0570694015926137
+   -0.02184966371365731,
+   0.04231382543117906
   ],
-  "verdict": "(interim, not a verdict) NeurHL better",
-  "brier_diff": 0.026414402299999945
+  "verdict": "(interim, not a verdict) no difference shown",
+  "brier_diff": 0.004745795411111093
  },
  "P3_teams_vs_neurhl_1_1": {
   "status": "pending",
@@ -42,14 +49,14 @@
  "secondary": {
   "P2_vs_neurhl_1_0": {
    "status": "interim",
-   "n": 1,
-   "diff": 0.05256530352862404,
+   "n": 9,
+   "diff": 0.008212994104281161,
    "ci95": [
-    0.05256530352862404,
-    0.05256530352862404
+    -0.024839797371379795,
+    0.03920468629059326
    ],
-   "verdict": "(interim, not a verdict) NeurHL better",
-   "brier_diff": 0.024372513499999984
+   "verdict": "(interim, not a verdict) no difference shown",
+   "brier_diff": 0.003229869966666644
   },
   "P3_vs_neurhl_1_0": {
    "status": "pending",
@@ -60,12 +67,26 @@
    "reason": "regular season not complete or no box scores"
   },
   "daily_vs_neurhl_H": {
-   "status": "pending",
-   "reason": "no eligible games for both orr_inseason and neurhl_H_pregame yet"
+   "status": "interim",
+   "n": 8,
+   "diff": -0.00980944057611171,
+   "ci95": [
+    -0.06897560457553456,
+    0.05055161280076641
+   ],
+   "verdict": "(interim, not a verdict) no difference shown",
+   "brier_diff": -0.0062863199625
   },
   "daily_vs_elo": {
-   "status": "pending",
-   "reason": "no eligible games for both orr_inseason and elo_pregame yet"
+   "status": "interim",
+   "n": 8,
+   "diff": -0.04992537068350779,
+   "ci95": [
+    -0.1104105150647107,
+    0.01637063595052767
+   ],
+   "verdict": "(interim, not a verdict) no difference shown",
+   "brier_diff": -0.02444003456250001
   },
   "goalie_sv_vs_neurhl_1_0": {
    "status": "pending",
