@@ -1,22 +1,22 @@
 {
- "as_of": "2026-10-01",
- "games_played": 8,
+ "as_of": "2026-10-02",
+ "games_played": 16,
  "final": false,
  "note": "interim: descriptive only",
  "team_goals": {
   "frozen": {
-   "mae_goals_for": 2.114426587301587,
-   "mae_goals_against": 2.1329583333333333
+   "mae_goals_for": 1.906769142857143,
+   "mae_goals_against": 1.9565252380952385
   },
   "cal": {
-   "mae_goals_for": 2.1217883333333334,
-   "mae_goals_against": 2.1342507142857143
+   "mae_goals_for": 1.9002893333333335,
+   "mae_goals_against": 1.9540601428571431
   },
   "unit": "regulation goals per game (pace)"
  },
  "seasons": {
   "v2_20260929": {
-   "pace_mae": 66.74297999999997
+   "pace_mae": 63.042716
   }
  }
 }

@@ -1,18 +1,18 @@
 {
- "as_of": "2026-10-01",
- "games_played": 8,
+ "as_of": "2026-10-02",
+ "games_played": 16,
  "final": false,
  "L1_games": {
-  "n_games": 8,
-  "neurhl": 0.7245712063774528,
-  "elo": 0.6957783487363189,
-  "diff": 0.02879285764113379,
-  "home_win_rate": 0.5
+  "n_games": 16,
+  "neurhl": 0.6689173689128377,
+  "elo": 0.6840734738323959,
+  "diff": -0.015156104919558235,
+  "home_win_rate": 0.5625
  },
  "L2_standings": {
   "final": false,
-  "teams": 15,
-  "pace_mae_neurhl": 67.41774333333333,
-  "pace_mae_howe": 65.57816666666666
+  "teams": 25,
+  "pace_mae_neurhl": 64.15,
+  "pace_mae_howe": 63.132656
  }
 }
