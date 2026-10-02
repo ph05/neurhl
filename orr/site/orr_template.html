@@ -57,7 +57,7 @@
   <a href="#standings">Standings</a><a href="#odds">Playoff odds</a><a href="#teamstats">Team stats</a>
   <a href="#today">Today</a><a href="#games">Games</a><a href="#skaters">Skaters</a><a href="#goalies">Goalies</a>
   <a href="#scoring">Accuracy</a><a href="#method">Methodology</a><a href="#files">Files</a>
-  <a href="compare.html">ORR vs NeurHL</a><a href="changelog.html">Changelog</a>
+  <a href="compare.html">ORR vs NeurHL</a><a href="changelog.html">Changelog</a><a href="model.html">Model card</a>
   <a href="https://github.com/ph05/neurhl/tree/claude/gallant-maxwell-rbw7u6/orr">Repository</a>
 </nav>
 
@@ -108,12 +108,15 @@
 <p class="note">GAA is goals against per game played. Goals against are reconciled to the team's goals against, net of empty-net and shootout goals.</p>
 
 <h2 id="scoring">Model accuracy</h2>
+<h3>Held-out results, every layer</h3>
+<p class="note">Each row is one layer or feature, scored once on seasons its tuning never saw. Features that failed are included; they ship switched off. The <a href="model.html">model card</a> lists every switch and its state.</p>
+<div class="wrap"><table id="t_ev"></table></div>
+<div id="summary"></div>
 <div id="scoring_live"></div>
 <div id="running"></div>
 <div id="reliab"></div>
 <div id="paired"></div>
 <div id="preliab"></div>
-<div class="wrap"><table id="t_ev"></table></div>
 
 <h2 id="method">Methodology</h2>
 <dl>
@@ -353,7 +356,22 @@
   // ---- scoring and evidence
   const L = D.live || {};
   const lr = (L.rows || []).map(r => `${esc(r.name)} ${Number(r.log_loss).toFixed(3)} (${r.n} games)`).join("; ");
-  $("scoring_live").innerHTML = `<p>${(L.games_played || 0)} regular-season games played so far. Season accuracy is evaluated once, after the last regular-season game (2027-04-10); figures during the season are provisional.${lr ? " Log loss on games played after each forecast's publication: " + lr + "." : ""} The table lists out-of-sample results on earlier seasons, on the same games or players as the comparison.</p>`;
+  $("scoring_live").innerHTML = `<p>${(L.games_played || 0)} regular-season games played so far. Season accuracy is evaluated once, after the last regular-season game (2027-04-10); figures during the season are provisional.${lr ? " Log loss on games played after each forecast's publication: " + lr + "." : ""}</p>`;
+  // ORR 2.0: one summary table, then the preregistered season-end evaluation
+  if ((L.summary || []).length) {
+    $("summary").innerHTML = '<h3>Season scorecard</h3><p class="note">Every forecast on the games it is eligible for (published before puck drop), through ' + esc(L.as_of || "") + '. "Δ vs ORR daily" is the other forecast\'s log loss minus ORR\'s on the games both forecast; positive favours ORR. Lower log loss and Brier are better.</p><div class="wrap"><table id="t_sum"></table></div><div id="prereg"></div>';
+    const f3 = x => x == null ? "" : Number(x).toFixed(3);
+    table($("t_sum"), [{ k: "model", h: "Forecast", l: 1 }, { k: "n", h: "Games" }, { k: "log_loss", h: "Log loss", f: f3 },
+      { k: "brier", h: "Brier", f: f3 }, { k: "acc", h: "Picked winner", f: x => x == null ? "" : (100 * x).toFixed(0) + "%" },
+      { k: "vs", h: "Δ vs ORR daily", f: x => x == null ? "" : (x < 0 ? "+" : "") + (-x).toFixed(4) },
+      { k: "verdict", h: "Verdict", l: 1 }], L.summary, { sort: "log_loss", asc: true });
+  }
+  if ((L.prereg || []).length) {
+    $("prereg").innerHTML = '<h3>Preregistered season-end evaluation</h3><p class="note">Fixed on 2026-10-02 in <a href="https://github.com/ph05/neurhl/blob/claude/gallant-maxwell-rbw7u6/orr/EVALUATION_2027.md">orr/EVALUATION_2027.md</a>. Verdicts are read only after the last regular-season game. Until then each line says "pending" or "interim". Last run ' + esc((L.evaluated || "").slice(0, 16)) + ' UTC.</p><div class="wrap"><table id="t_pre"></table></div>';
+    table($("t_pre"), [{ k: "id", h: "", l: 1 }, { k: "what", h: "Comparison", l: 1 }, { k: "status", h: "Status", l: 1 },
+      { k: "n", h: "N" }, { k: "diff", h: "ORR − NeurHL", f: x => x == null ? "" : (x > 0 ? "+" : "") + Number(x).toFixed(4) },
+      { k: "verdict", h: "Verdict / reason", l: 1 }], L.prereg);
+  }
   // running log loss by date and reliability (1.5)
   const RN = L.running || {};
   const rdates = [...new Set(Object.values(RN).flat().map(r => r.date))].sort();
@@ -390,7 +408,7 @@
   }
   table($("t_ev"), [{ k: "c", h: "Comparison", l: 1 }, { k: "w", h: "Seasons", l: 1 }, { k: "n", h: "N" }, { k: "d", h: "Difference" },
     { k: "ci", h: "95% CI", l: 1 }, { k: "p", h: "p" }], D.evidence || []);
-  $("t_ev").insertAdjacentHTML("afterend", '<p class="note">Negative differences favour ORR (lower log loss or error). Full results, including where ORR loses, are in orr/RESULTS.md in the repository.</p>');
+  $("t_ev").insertAdjacentHTML("afterend", '<p class="note">Negative differences favour ORR, or the feature over its baseline (lower log loss, error or CRPS). Full results, including where ORR loses, are in orr/RESULTS.md in the repository.</p>');
 
   // ---- files
   const sha = D.sha256 || {};
