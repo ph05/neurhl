@@ -269,7 +269,10 @@ def main():
                                   "p90": int(round(r.points_p90)), "w": _r(r.w), "l": _r(r.l), "otl": _r(r.otl),
                                   "rw": _r(r.rw), "gf": _r(r.gf), "ga": _r(r.ga), "po": _r(r.playoff_pct),
                                   "div_p": _r(r.division_pct), "pres": _r(r.presidents_pct), "r2": _r(r.round2_pct),
-                                  "cf": _r(r.conf_final_pct), "fin": _r(r.cup_final_pct), "cup": _r(r.cup_pct)}
+                                  "cf": _r(r.conf_final_pct), "fin": _r(r.cup_final_pct), "cup": _r(r.cup_pct),
+                                  "flag": " ".join(f"{k} {getattr(r, k + '_flag')}" for k in ("playoff", "division", "presidents")
+                                                   if isinstance(getattr(r, k + "_flag", None), str) and getattr(r, k + "_flag")),
+                                  "magic": _r(getattr(r, "magic_number", None), 0)}
     # ORR 1.8: in-season team shots from the rest-of-season player and goalie files
     if lf:
         pr_f, gr_f = lf[-1].parent / f"players_ros_{live_date}.csv", lf[-1].parent / f"goalies_ros_{live_date}.csv"
@@ -329,12 +332,17 @@ def main():
     data = {"meta": {"release": f"{MODELS[DEFAULT_MODEL]['version']} in-season (preseason file: ORR 1.0)", "cutoff": "2026-09-29 17:00 ET", "draws": 400, "sims": st.get("sims", 40000),
                      "tests": "7/7"},
             "live": {"as_of": card.get("through", "")[:10], "games_played": card.get("games_played", 0), "rows": live_rows,
-                     "running": card.get("running", {}), "reliability": card.get("reliability", [])},
+                     "running": card.get("running", {}), "reliability": card.get("reliability", []),
+                     "paired": card.get("paired", {}), "player_reliability": card.get("player_reliability", {})},
             "movers": movers,
             "teams": teams, "teams_x": tx, "tonight": tonight(g.set_index("game_id").p_home_win, elo),
             "games": games, "skaters_x": skx, "has_td": td is not None, "odds_history": odds_history, "goalies": gx, "evidence": evidence(),
             "has_gtd": gtd is not None, "daily_files": daily_files, "teams_live": teams_live,
             "live_date": live_date, "daily_models": daily_models,
+            "fresh": {"results_through": card.get("through", "")[:10],
+                      "forecast_created": max(((_rd(f) or {}).get("created_utc", "") for f in (C.OUT / "live").glob("*/run_*.json")),
+                                              default=""),
+                      "built": pd.Timestamp.now("UTC").isoformat(timespec="minutes")},
             "sha256": {f"orr/output/freeze_2027/{f}": hashlib.sha256((F / f).read_bytes()).hexdigest() for f in HASHED}}
     blob = json.dumps(data, separators=(",", ":"), default=lambda o: None if isinstance(o, float) and np.isnan(o) else o)
     html = (SITE / "orr_template.html").read_text().replace("__ORR_DATA__", blob.replace("</", "<\\/"))

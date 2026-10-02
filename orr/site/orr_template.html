@@ -52,6 +52,7 @@
 <body>
 <h1>ORR: 2026-27 NHL projections</h1>
 <div class="meta" id="meta"></div>
+<div class="note" id="fresh"></div>
 <nav>
   <a href="#standings">Standings</a><a href="#odds">Playoff odds</a><a href="#teamstats">Team stats</a>
   <a href="#today">Today</a><a href="#games">Games</a><a href="#skaters">Skaters</a><a href="#goalies">Goalies</a>
@@ -110,6 +111,8 @@
 <div id="scoring_live"></div>
 <div id="running"></div>
 <div id="reliab"></div>
+<div id="paired"></div>
+<div id="preliab"></div>
 <div class="wrap"><table id="t_ev"></table></div>
 
 <h2 id="method">Methodology</h2>
@@ -180,6 +183,16 @@
     `results through <b>${esc((D.live && D.live.as_of) || "")}</b> (${(D.live && D.live.games_played) || 0} games)`
   ].join(" &middot; ");
 
+  // ---- freshness (1.9)
+  const FR = D.fresh || {};
+  if (FR.built) {
+    const age = (t) => t ? (new Date(FR.built) - new Date(t)) / 36e5 : null;
+    const fa = age(FR.forecast_created), ra = FR.results_through ? age(FR.results_through + "T23:59:59Z") : null;
+    const stale = (fa != null && fa > 36) || (ra != null && ra > 36);
+    $("fresh").innerHTML = `Results through <b>${esc(FR.results_through || "none")}</b> · latest forecast ${esc((FR.forecast_created || "none").slice(0, 16).replace("T", " "))} UTC · page built ${esc(FR.built.slice(0, 16).replace("T", " "))} UTC` +
+      (stale ? ` · <b>Stale: the daily run is more than 36 hours old.</b>` : "");
+  }
+
   // ---- teams
   const T0 = {}; (D.teams || []).forEach(t => T0[t.ab] = t);
   const TX = (D.teams_x || []).map(t => Object.assign({}, t, { name: (T0[t.ab] || {}).name || t.ab,
@@ -201,7 +214,9 @@
       { k: "name", h: "Team", l: 1 }, { k: "pts", h: "PTS", f: f1 }, { k: "p10", h: "P10" }, { k: "p50", h: "P50" }, { k: "p90", h: "P90" },
       { k: "w", h: "W", f: f1 }, { k: "l", h: "L", f: f1 }, { k: "otl", h: "OTL", f: f1 }, { k: "diff", h: "DIFF", f: f0, t: "Goals for minus against" },
       { k: "po", h: "PO%", f: f1 }, { k: "howe", h: "HOWE", f: f1, t: "HOWE projected points" },
-      { k: "sos", h: "SOS left", f: x => x == null ? "" : (x > 0 ? "+" : "") + Number(x).toFixed(1),
+      { k: "flag", h: "Status", l: 1, t: "clinched / eliminated in every simulated season (playoffs, division, Presidents' Trophy)" },
+    { k: "magic", h: "Magic #", t: "Points needed so the conference's ninth-placed team cannot pass (current points; a guide, not the official number)" },
+    { k: "sos", h: "SOS left", f: x => x == null ? "" : (x > 0 ? "+" : "") + Number(x).toFixed(1),
         t: "Remaining strength of schedule: opponents' mean net rating in the games left, x100 (log goal-rate units). Higher is harder. From the latest daily run." }
     ], divs[d], { sort: "pts" }));
 
@@ -350,6 +365,23 @@
     $("running").innerHTML = '<h3>Running log loss by date</h3><p class="note">Cumulative log loss through each date, on the games each forecast is eligible for (published before puck drop); the number of games is in brackets. Lower is better.</p><div class="wrap"><table id="t_run"></table></div>';
     table($("t_run"), [{ k: "model", h: "Forecast", l: 1 }].concat(rdates.map(dt => ({ k: dt, h: dt,
       f: (v, x) => v == null ? "" : `${Number(v).toFixed(3)} (${x["n_" + dt]})` }))), rows, { sort: rdates[rdates.length - 1], asc: true });
+  }
+  const PV = L.paired || {};
+  if (Object.keys(PV).length) {
+    const nm2 = { "neurhl_1.0": "NeurHL 1.0", "neurhl_1.1": "NeurHL 1.1", "neurhl_1.2": "NeurHL 1.2", "neurhl_1.3": "NeurHL 1.3",
+      neurhl_0925_freeze: "NeurHL 09-25", neurhl_G_pregame: "NeurHL-G pregame", neurhl_H_pregame: "NeurHL-H pregame", elo_pregame: "Elo pregame" };
+    $("paired").innerHTML = '<h3>ORR daily vs NeurHL, same games</h3><p class="note">Log loss of ORR\'s daily forecast minus the other forecast, on games where both were published before puck drop. Negative favours ORR. A verdict needs at least 50 games.</p><div class="wrap"><table id="t_pair"></table></div>';
+    table($("t_pair"), [{ k: "m", h: "Versus", l: 1 }, { k: "n", h: "Games" }, { k: "diff", h: "Difference", f: x => (x > 0 ? "+" : "") + Number(x).toFixed(4) },
+      { k: "ci", h: "95% CI", l: 1 }, { k: "verdict", h: "Verdict", l: 1 }],
+      Object.entries(PV).map(([m, v]) => ({ m: nm2[m] || m, n: v.n, diff: v.diff, ci: `${v.ci95[0].toFixed(4)} to ${v.ci95[1].toFixed(4)}`, verdict: v.verdict })));
+  }
+  const PR = L.player_reliability || {};
+  if (Object.keys(PR).length) {
+    const rows = [];
+    Object.entries(PR).forEach(([k, v]) => (v.bins || []).forEach(b => rows.push({ what: { goal: "P(goal)", point: "P(point)", sog3: "P(3+ SOG)" }[k] || k, ...b })));
+    $("preliab").innerHTML = '<h3>Player forecasts: predicted vs actual</h3><div class="wrap"><table id="t_prel"></table></div>';
+    table($("t_prel"), [{ k: "what", h: "Forecast", l: 1 }, { k: "bin", h: "Bin", l: 1 }, { k: "n", h: "Player-games" },
+      { k: "mean_p", h: "Mean forecast", f: pc }, { k: "rate", h: "Actual rate", f: pc }], rows);
   }
   if ((L.reliability || []).length) {
     $("reliab").innerHTML = '<h3>Reliability of ORR daily game probabilities</h3><div class="wrap"><table id="t_rel"></table></div>';

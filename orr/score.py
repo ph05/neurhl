@@ -257,6 +257,73 @@ def reliability(ep: pd.DataFrame, model: str = "orr_inseason") -> list:
              "home_win_rate": float(g.y.mean())} for iv, g in x.groupby("bin", observed=True)]
 
 
+def paired_vs_neurhl(ep: pd.DataFrame, ours: str = "orr_inseason", nb: int = 2000) -> dict:
+    """ORR 1.9: ORR's daily forecasts minus each NeurHL forecast in log loss on
+    the games where both are eligible, with a paired bootstrap 95% CI and a
+    plain verdict."""
+    if not len(ep) or ours not in set(ep.model):
+        return {}
+    ll = ep.assign(ll=-(ep.y * np.log(ep.p.clip(1e-6, 1 - 1e-6)) + (1 - ep.y) * np.log((1 - ep.p).clip(1e-6, 1 - 1e-6))))
+    w = ll.pivot_table(index="game_id", columns="model", values="ll")
+    out = {}
+    rng = np.random.default_rng(7)
+    for m in w.columns:
+        if m == ours or not (m.startswith("neurhl") or m.endswith("pregame")):
+            continue
+        d = (w[ours] - w[m]).dropna().to_numpy()
+        if not len(d):
+            continue
+        bs = np.array([d[rng.integers(0, len(d), len(d))].mean() for _ in range(nb)])
+        lo, hi = float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))
+        verdict = ("too few games" if len(d) < 50 else "ORR ahead" if hi < 0 else "NeurHL ahead" if lo > 0 else "level")
+        out[m] = {"n": int(len(d)), "diff": float(d.mean()), "ci95": [lo, hi], "verdict": verdict}
+    return out
+
+
+def player_reliability(boxes_path=None) -> dict:
+    """ORR 1.9: daily player-line probabilities (P(goal), P(point), P(3+ SOG),
+    dress-weighted) scored against the box scores: log loss and predicted vs
+    actual rate by bin. A forecast counts only if its run was created before
+    the game's puck drop; a player missing from the box score scores 0."""
+    from orr import player_update as PU
+    bp = Path(boxes_path) if boxes_path else PU.BOXES_LIVE
+    if not bp.exists():
+        return {}
+    b = pd.read_csv(bp)
+    b = b[b.pos != "G"]
+    rows = []
+    for f in sorted((C.OUT / "live").glob("*/players_*.csv")):
+        if "_ros_" in f.name:
+            continue
+        run = f.parent / f"run_{f.parent.name}.json"
+        if not run.exists():
+            continue
+        created = pd.Timestamp(json.loads(run.read_text())["created_utc"]).tz_convert(None)
+        pl = pd.read_csv(f)
+        pl = pl[[created < _game_deadline(g, f.parent.name) for g in pl.game_id]]
+        rows.append(pl)
+    if not rows:
+        return {}
+    pl = pd.concat(rows).drop_duplicates(["game_id", "player_id"], keep="last")
+    pl = pl[pl.game_id.isin(set(b.game_id))]
+    if not len(pl):
+        return {}
+    m = pl.merge(b[["game_id", "player_id", "g", "a", "sog"]], on=["game_id", "player_id"], how="left").fillna(
+        {"g": 0, "a": 0, "sog": 0})
+    out = {}
+    for name, col, y in (("goal", "p_goal", m.g >= 1), ("point", "p_point", (m.g + m.a) >= 1),
+                         ("sog3", "p_sog3", m.sog >= 3)):
+        if col not in m:
+            continue
+        p, yy = m[col].clip(1e-6, 1 - 1e-6).to_numpy(), y.astype(int).to_numpy()
+        bins = pd.cut(m[col], [0, 0.1, 0.2, 0.3, 0.45, 0.6, 1.0], include_lowest=True)
+        out[name] = {"n": int(len(m)), "log_loss": float(-(yy * np.log(p) + (1 - yy) * np.log(1 - p)).mean()),
+                     "mean_p": float(p.mean()), "rate": float(yy.mean()),
+                     "bins": [{"bin": f"{iv.left:.2f}-{iv.right:.2f}", "n": int(len(g)), "mean_p": float(g[col].mean()),
+                               "rate": float(y[g.index].mean())} for iv, g in m.groupby(bins, observed=True)]}
+    return out
+
+
 def _team_points_so_far(res):
     rows = []
     for side, other, sign in (("home", "away", 1), ("away", "home", -1)):
@@ -335,6 +402,7 @@ def main():
     card = {"through": str(res.date.max()), "games_played": int(len(res)),
             "games": score_games(res), "teams_interim": score_teams_interim(res),
             "running": running_by_date(ep), "reliability": reliability(ep),
+            "paired": paired_vs_neurhl(ep), "player_reliability": player_reliability(),
             "teams_final": score_teams_final(res)}
     Path(a.out).write_text(json.dumps(card, indent=1))
     g = pd.DataFrame(card["games"]).T

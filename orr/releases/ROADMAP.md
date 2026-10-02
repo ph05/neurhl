@@ -2,6 +2,23 @@
 
 A version ships every cycle. Each cycle opens with a brainstorm, and every feature considered there is planned into the next version. A feature that fails its backtest still ships, but behind a switch with the result documented; it is not silently dropped. Release notes are in this folder.
 
+## 2.0 (planned): one system, accountable
+
+Brainstorm, held after 1.9 shipped. Every item is planned into 2.0:
+
+1. **Model card page.** A website page, `docs/orr/model.html`, that summarises ORR as one system:
+   - each layer and what feeds it;
+   - every switch, with its state and the version that added it;
+   - the evidence behind each layer, with links;
+   - the preregistered evaluation.
+2. **Preregistered season-end evaluation.** Commit now, before the season has meaningfully started, the exact protocol by which ORR is judged against NeurHL in April 2027:
+   - files and their SHA-256;
+   - metrics: game log loss on eligible games, team points MAE/CRPS, skater points MAE (all players and ≥40 GP), goalie save % MAE;
+   - paired bootstrap CIs and the verdict rules;
+   - `orr/evaluate_2027.py`, implementing it, plus a dry run on today's data.
+3. **Reproducibility check.** `python3 -m orr.reproduce --date D` checks out the code version named in `run_D.json`, re-runs that day's forecast in a temporary worktree from the same inputs, and compares the outputs, to within simulation tolerance for the standings.
+4. **Combined summary on the website.** The accuracy section opens with one table of every backtested layer and its headline result against NeurHL, drawn from the backtest files, replacing the scattered rows.
+
 ## 1.9 (planned): is ORR beating NeurHL?
 
 Brainstorm, held after 1.8 shipped. Every item is planned into 1.9:
