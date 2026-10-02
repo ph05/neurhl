@@ -238,6 +238,8 @@
   ]
  },
  "reliability": [],
+ "paired": {},
+ "player_reliability": {},
  "teams_final": {
   "status": "season not complete"
  }

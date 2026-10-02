@@ -65,6 +65,15 @@ LIVE = C.OUT / "live"
 
 # model versions: ORR 1.1 = 1.0 + the accepted pre-registered item X1
 MODELS = {
+    "1.9": {"version": "ORR 1.9", "past_starters": True, "lineups": True, "player_update": True,
+            "box_first": True, "goalie_update": True, "player_calibration": True,
+            "standings_drift": True, "start_share_update": True, "absence": True, "standings_sharp": True,
+            "sog_dist": True, "sos": True, "ros_file": True, "ros_interval": True, "goalie_ros": True,
+            "forecast_diff": True, "clinch": True,
+            "accepted_items": ["X1", "1.2: in-season skater rates", "1.3: box-score lineups, goalie talent",
+                               "1.4: standings drift, start shares", "1.5: shot distributions",
+                               "1.6: remaining SOS, rest-of-season player file", "1.7-1.8: rest-of-season intervals",
+                               "1.8: goalie rest-of-season file, forecast diff", "1.9: clinch flags, magic numbers"]},
     "1.8": {"version": "ORR 1.8", "past_starters": True, "lineups": True, "player_update": True,
             "box_first": True, "goalie_update": True, "player_calibration": True,
             "standings_drift": True, "start_share_update": True, "absence": True, "standings_sharp": True,
@@ -108,7 +117,7 @@ MODELS = {
     "1.0": {"version": "ORR 1.0", "past_starters": False, "lineups": False,
             "accepted_items": []},
 }
-DEFAULT_MODEL = "1.8"
+DEFAULT_MODEL = "1.9"
 
 
 def _sha(p: Path) -> str:
@@ -360,6 +369,35 @@ def goalies_ros(fz: dict, day: pd.Timestamp, results: pd.DataFrame, sims: int = 
                         ).sort_values("starts_ros", ascending=False)
 
 
+def clinch_table(standings: pd.DataFrame, sch: pd.DataFrame, res: pd.DataFrame) -> pd.DataFrame:
+    """ORR 1.9: flags from the simulation (clinched = every simulated season,
+    eliminated = none) for the playoffs, the division and the Presidents'
+    Trophy, plus a playoff magic number: the points a team in its conference's
+    top eight needs so that the ninth-placed team cannot pass it even by
+    winning every remaining game (current points; ties and the wildcard format
+    are ignored, so it is a guide, not the official number)."""
+    total = C.GAMES_PER_TEAM[C.TARGET_SEASON]
+    pts = (pd.concat([pd.Series(np.where(res.home_g > res.away_g, 2, np.where(res.extra != "REG", 1, 0)), index=res.home.to_numpy()),
+                      pd.Series(np.where(res.away_g > res.home_g, 2, np.where(res.extra != "REG", 1, 0)), index=res.away.to_numpy())])
+           .groupby(level=0).sum() if len(res) else pd.Series(dtype=float))
+    gp = pd.concat([res.home, res.away]).value_counts() if len(res) else pd.Series(dtype=float)
+    t = standings[["team", "conf", "playoff_pct", "division_pct", "presidents_pct"]].copy()
+    t["pts_now"] = t.team.map(pts).fillna(0)
+    t["max_pts"] = t.pts_now + 2 * (total - t.team.map(gp).fillna(0))
+    flag = lambda x: np.where(x >= 100 - 1e-9, "clinched", np.where(x <= 1e-9, "eliminated", ""))
+    t["playoff_flag"], t["division_flag"], t["presidents_flag"] = flag(t.playoff_pct), flag(t.division_pct), flag(t.presidents_pct)
+    mn = []
+    for r in t.itertuples():
+        conf = t[t.conf == r.conf].sort_values("pts_now", ascending=False).reset_index(drop=True)
+        rank = int(conf.index[conf.team == r.team][0])
+        if rank < 8 and len(conf) > 8:
+            mn.append(max(0.0, conf.loc[8, "max_pts"] - r.pts_now + 1))
+        else:
+            mn.append(np.nan)
+    t["magic_number"] = mn
+    return t[["team", "pts_now", "playoff_flag", "division_flag", "presidents_flag", "magic_number"]]
+
+
 def merge_starters(file_st: pd.DataFrame | None, lineup_st: pd.DataFrame | None) -> pd.DataFrame | None:
     """game_id, goalie_home, goalie_away: the starters file where it names a
     goalie, else the lineup files' starter (NaN = unknown)."""
@@ -510,6 +548,8 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     sim = S.simulate(sch, sim_r, model, n_sims=sims, seed=seed, completed=done,
                      game_adj=sim_adj, drift_sd=fz.get("drift_sd", 0.05) * np.sqrt(left) * k_drift, rho_od=rho)
     standings = S.summarise(sim)
+    if cfg.get("clinch"):       # ORR 1.9: clinch / elimination flags and playoff magic number
+        standings = standings.merge(clinch_table(standings, sch, res), on="team", how="left")
     if cfg.get("sos"):          # ORR 1.6: remaining strength of schedule
         standings = standings.merge(remaining_sos(sch, done, cur), on="team", how="left")
     ros = players_ros(fz, day, res, interval_cal=bool(cfg.get("ros_interval"))) if cfg.get("ros_file") else None
