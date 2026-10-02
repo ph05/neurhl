@@ -1,7 +1,7 @@
 {
  "date": "2026-10-02",
- "created_utc": "2026-10-02T00:35:03+00:00",
- "code": "99bd79b",
+ "created_utc": "2026-10-02T02:00:33+00:00",
+ "code": "47ebc98",
  "results_through": "2026-09-30 00:00:00",
  "n_results": 8,
  "sims": 20000,
@@ -27,9 +27,9 @@
   "absent_players": 0,
   "start_shares_updated": true
  },
- "model": "ORR 1.9",
+ "model": "ORR 2.0",
  "settings": {
-  "version": "ORR 1.9",
+  "version": "ORR 2.0",
   "past_starters": true,
   "lineups": true,
   "player_update": true,
@@ -56,7 +56,8 @@
    "1.6: remaining SOS, rest-of-season player file",
    "1.7-1.8: rest-of-season intervals",
    "1.8: goalie rest-of-season file, forecast diff",
-   "1.9: clinch flags, magic numbers"
+   "1.9: clinch flags, magic numbers",
+   "2.0: preregistered evaluation, reproducibility check, model card"
   ],
   "lineup_hp": {
    "beta_x": 0.45,
@@ -146,6 +147,14 @@
    {
     "path": "/tmp/claude-0/-home-user-neurhl/3d07af1c-5d5a-5d32-9e5e-017a2574dcf3/scratchpad/upstream/neurhl/output/live/2027/2026-10-01/pregame_2026020014_lineups.json",
     "sha256": "9c98e797cf6349ceafd6dc0057b2ba36795d836b376321096f9958c4a91db163"
+   },
+   {
+    "path": "/tmp/claude-0/-home-user-neurhl/3d07af1c-5d5a-5d32-9e5e-017a2574dcf3/scratchpad/upstream/neurhl/output/live/2027/2026-10-01/pregame_2026020015_lineups.json",
+    "sha256": "f6647e17791fc3e671f5f677120d9b35e67c3a6ed828fcfe743c3f0ce8a182e4"
+   },
+   {
+    "path": "/tmp/claude-0/-home-user-neurhl/3d07af1c-5d5a-5d32-9e5e-017a2574dcf3/scratchpad/upstream/neurhl/output/live/2027/2026-10-01/pregame_2026020016_lineups.json",
+    "sha256": "6f492f9b1d74551d4be61f8ca02b74110c67de02b751562069f8cffbbbd8f591"
    },
    {
     "path": "/tmp/claude-0/-home-user-neurhl/3d07af1c-5d5a-5d32-9e5e-017a2574dcf3/scratchpad/upstream/neurhl/output/live/2027/2026-10-01/morning_lineups.json",
