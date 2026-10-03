@@ -1,21 +1,15 @@
 {
  "date": "2026-10-03",
- "created_utc": "2026-10-03T00:34:36+00:00",
- "code": "390cb57",
- "results_through": "2026-10-01 00:00:00",
- "n_results": 16,
+ "created_utc": "2026-10-03T17:29:26+00:00",
+ "code": "9343492",
+ "results_through": "2026-10-02 00:00:00",
+ "n_results": 21,
  "sims": 20000,
  "seed": 20260929,
- "missing_results_before_date": [
-  2026020017,
-  2026020018,
-  2026020019,
-  2026020020,
-  2026020021
- ],
- "rho_od": -0.7512845624708664,
+ "missing_results_before_date": [],
+ "rho_od": -0.7341259940271494,
  "sd_anchor": 0.8602405472597555,
- "home_ice": 0.06770424735918638,
+ "home_ice": 0.06696027764081823,
  "orr_1_5": {
   "sd_mult": 1.0
  },
@@ -66,15 +60,15 @@
   }
  },
  "orr_1_1": {
-  "results_with_both_starters": 16,
-  "results_with_lineup_offset": 5,
+  "results_with_both_starters": 21,
+  "results_with_lineup_offset": 7,
   "today_lineup_offsets": 0,
   "today_starters_known": 0
  },
  "inputs": {
   "results": {
    "path": "/home/runner/work/neurhl/neurhl/orr/output/live/results_2027.csv",
-   "sha256": "4b34e1eeb24db5b66f21ffb4aa0d6d62c89c9d5faae27b99b18eb64d15210cab"
+   "sha256": "d103f6b04991bc320612ce21fee5275afdf4269de326ef2aca21a9739de5ed92"
   },
   "lineups": [
    {
