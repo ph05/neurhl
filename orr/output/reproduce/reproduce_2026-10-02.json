@@ -161,8 +161,7 @@
  "run_fields_differ": [
   "home_ice",
   "orr_1_1",
-  "rho_od",
-  "sd_anchor"
+  "rho_od"
  ],
  "verdict": "differs"
 }

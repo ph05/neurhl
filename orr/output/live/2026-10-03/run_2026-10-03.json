@@ -1,15 +1,15 @@
 {
  "date": "2026-10-03",
- "created_utc": "2026-10-03T17:29:26+00:00",
- "code": "9343492",
+ "created_utc": "2026-10-03T23:56:20+00:00",
+ "code": "da39df3",
  "results_through": "2026-10-02 00:00:00",
  "n_results": 21,
  "sims": 20000,
  "seed": 20260929,
  "missing_results_before_date": [],
- "rho_od": -0.7341259940271494,
- "sd_anchor": 0.8602405472597555,
- "home_ice": 0.06696027764081823,
+ "rho_od": -0.7341259943793337,
+ "sd_anchor": 0.86024054701838,
+ "home_ice": 0.06696027764080661,
  "orr_1_5": {
   "sd_mult": 1.0
  },
@@ -61,7 +61,7 @@
  },
  "orr_1_1": {
   "results_with_both_starters": 21,
-  "results_with_lineup_offset": 7,
+  "results_with_lineup_offset": 8,
   "today_lineup_offsets": 0,
   "today_starters_known": 0
  },
