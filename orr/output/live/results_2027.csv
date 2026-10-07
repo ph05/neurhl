@@ -1,12 +1,12 @@
 game_id,date,home,away,home_g,away_g,last_period,source,shots_home,shots_away
-2026020001,2026-09-29,CAR,FLA,0,1,OT,NHL API via neurhl/output/live/results_2027.csv,,
-2026020002,2026-09-29,TOR,MTL,2,3,REG,NHL API via neurhl/output/live/results_2027.csv,,
-2026020003,2026-09-29,BOS,NYR,3,0,REG,NHL API via neurhl/output/live/results_2027.csv,,
-2026020004,2026-09-29,EDM,VAN,5,6,OT,NHL API via neurhl/output/live/results_2027.csv,,
-2026020005,2026-09-29,VGK,CHI,5,2,REG,NHL API via neurhl/output/live/results_2027.csv,,
-2026020006,2026-09-30,PHI,PIT,0,7,REG,NHL API via neurhl/output/live/results_2027.csv,,
-2026020007,2026-09-30,COL,LAK,8,4,REG,NHL API via neurhl/output/live/results_2027.csv,,
-2026020008,2026-09-30,TOR,NYI,2,1,REG,NHL API via neurhl/output/live/results_2027.csv,,
+2026020001,2026-09-29,CAR,FLA,0,1,OT,api-web.nhle.com,15.0,20.0
+2026020002,2026-09-29,TOR,MTL,2,3,REG,api-web.nhle.com,28.0,24.0
+2026020003,2026-09-29,BOS,NYR,3,0,REG,api-web.nhle.com,23.0,24.0
+2026020004,2026-09-29,EDM,VAN,5,6,OT,api-web.nhle.com,37.0,23.0
+2026020005,2026-09-29,VGK,CHI,5,2,REG,api-web.nhle.com,37.0,26.0
+2026020006,2026-09-30,PHI,PIT,0,7,REG,api-web.nhle.com,19.0,38.0
+2026020007,2026-09-30,COL,LAK,8,4,REG,api-web.nhle.com,29.0,31.0
+2026020008,2026-09-30,TOR,NYI,2,1,REG,api-web.nhle.com,26.0,27.0
 2026020009,2026-10-01,NJD,PHI,3,2,OT,api-web.nhle.com,44.0,25.0
 2026020010,2026-10-01,NYR,TBL,5,1,REG,api-web.nhle.com,25.0,24.0
 2026020011,2026-10-01,CBJ,BUF,6,3,REG,api-web.nhle.com,23.0,26.0
@@ -20,3 +20,34 @@ game_id,date,home,away,home_g,away_g,last_period,source,shots_home,shots_away
 2026020019,2026-10-02,WPG,BOS,3,4,OT,api-web.nhle.com,33.0,30.0
 2026020020,2026-10-02,DAL,STL,0,4,REG,api-web.nhle.com,25.0,24.0
 2026020021,2026-10-02,VGK,ANA,3,4,REG,api-web.nhle.com,30.0,20.0
+2026020022,2026-10-03,BUF,CHI,4,3,REG,api-web.nhle.com,28.0,15.0
+2026020023,2026-10-03,TOR,OTT,2,3,REG,api-web.nhle.com,29.0,29.0
+2026020024,2026-10-03,TBL,WSH,3,1,REG,api-web.nhle.com,30.0,21.0
+2026020025,2026-10-03,PHI,CAR,2,3,OT,api-web.nhle.com,18.0,40.0
+2026020026,2026-10-03,PIT,MTL,6,5,OT,api-web.nhle.com,30.0,25.0
+2026020027,2026-10-03,CBJ,UTA,1,4,REG,api-web.nhle.com,19.0,31.0
+2026020028,2026-10-03,EDM,SEA,3,1,REG,api-web.nhle.com,26.0,20.0
+2026020029,2026-10-03,NYI,NJD,6,0,REG,api-web.nhle.com,32.0,37.0
+2026020030,2026-10-03,NSH,DAL,2,1,REG,api-web.nhle.com,26.0,30.0
+2026020031,2026-10-03,MIN,BOS,4,1,REG,api-web.nhle.com,30.0,27.0
+2026020032,2026-10-03,COL,STL,6,1,REG,api-web.nhle.com,36.0,26.0
+2026020033,2026-10-03,VAN,CGY,4,1,REG,api-web.nhle.com,26.0,24.0
+2026020034,2026-10-03,SJS,LAK,5,4,OT,api-web.nhle.com,25.0,35.0
+2026020035,2026-10-04,DET,WPG,2,3,REG,api-web.nhle.com,36.0,27.0
+2026020036,2026-10-04,NYR,UTA,4,2,REG,api-web.nhle.com,22.0,30.0
+2026020037,2026-10-04,ANA,FLA,3,2,OT,api-web.nhle.com,20.0,31.0
+2026020038,2026-10-04,SEA,CGY,6,1,REG,api-web.nhle.com,27.0,33.0
+2026020039,2026-10-04,VAN,VGK,2,3,REG,api-web.nhle.com,20.0,28.0
+2026020040,2026-10-05,TBL,PHI,4,1,REG,api-web.nhle.com,36.0,15.0
+2026020041,2026-10-05,BOS,OTT,1,4,REG,api-web.nhle.com,19.0,24.0
+2026020042,2026-10-05,PIT,WPG,2,3,REG,api-web.nhle.com,31.0,35.0
+2026020043,2026-10-05,DAL,SJS,5,0,REG,api-web.nhle.com,26.0,13.0
+2026020044,2026-10-06,TOR,NSH,5,4,OT,api-web.nhle.com,37.0,25.0
+2026020045,2026-10-06,MTL,CAR,4,6,REG,api-web.nhle.com,20.0,33.0
+2026020046,2026-10-06,DET,OTT,5,3,REG,api-web.nhle.com,36.0,25.0
+2026020047,2026-10-06,NJD,UTA,3,5,REG,api-web.nhle.com,33.0,31.0
+2026020048,2026-10-06,NYR,NYI,5,2,REG,api-web.nhle.com,24.0,19.0
+2026020049,2026-10-06,BUF,MIN,3,2,OT,api-web.nhle.com,28.0,20.0
+2026020050,2026-10-06,CHI,STL,4,2,REG,api-web.nhle.com,21.0,28.0
+2026020051,2026-10-06,SEA,VGK,2,6,REG,api-web.nhle.com,27.0,28.0
+2026020052,2026-10-06,LAK,FLA,1,2,REG,api-web.nhle.com,20.0,28.0

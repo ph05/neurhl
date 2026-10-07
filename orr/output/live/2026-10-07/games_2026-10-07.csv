@@ -1,0 +1,4 @@
+game_id,date,home,away,p_home_win,p_home_reg,p_away_reg,p_ot,exp_goals_home,exp_goals_away,goalie_home,goalie_away,lineup_adj_h,lineup_adj_a,model,created_utc,p_prev,d_p,prev_source,change_reason
+2026020053,2026-10-07,WSH,PIT,0.57745,0.45755,0.31632,0.22613,3.35497,2.89805,,,0.00000,0.00000,ORR 2.0,2026-10-07T15:30:58+00:00,0.60790,-0.03045,preseason file,results since the preseason file
+2026020054,2026-10-07,WPG,COL,0.37944,0.27580,0.49817,0.22603,2.63156,3.34202,,,0.00000,0.00000,ORR 2.0,2026-10-07T15:30:58+00:00,0.39007,-0.01063,preseason file,results since the preseason file
+2026020055,2026-10-07,ANA,EDM,0.40118,0.29642,0.47917,0.22441,2.81160,3.40313,,,0.00000,0.00000,ORR 2.0,2026-10-07T15:30:58+00:00,0.45561,-0.05443,preseason file,results since the preseason file
