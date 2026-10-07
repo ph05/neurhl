@@ -2,6 +2,13 @@
 
 ORR (Odds, Ratings & Rosters) is versioned by what it forecasts in-season. The scored 2026-27 preseason forecast (`orr/output/freeze_2027/`, ORR 1.0) is frozen; later versions change the daily in-season forecasts from the day they ship, and each forecast counts only for games after its publication. Release notes with evidence are in `orr/releases/`.
 
+## 2.0.1 (2026-10-07): the daily job runs again
+
+- **Daily job fixed.** From 2026-10-04, once every team had played, `evaluate_2027.py` wrote a numpy bool that JSON cannot encode. Every run then stopped after forecasting and before saving. The ORR daily forecasts for 10-04 to the morning of 10-07 were made but never published, so ORR has no eligible daily forecast for those games. The results are fetched again.
+- **Opening-night box scores.** The 8 games of 09-29 and 09-30 came from NeurHL's results file without box scores or shots, and ingest never fetched them, so every player's season totals missed those games. Ingest now fetches any game that lacks either.
+- **Re-runs made reliable.** Each forecast now records the SHA-256 of the box scores it read and the git tree of its code. `orr.reproduce` restores the exact box scores, and finds the code even after a rewrite of the repository's history (`orr/output/reproduce/rewritten_commits.json` covers the rewrite of 2026-10). A dry run of the whole daily job on a synthetic full-league season re-runs identically.
+- **A change to the daily workflow runs it once on `main`.**
+
 ## 2.0 (2026-10-02): one system, accountable
 
 - **Preregistered season-end evaluation** against NeurHL (`orr/EVALUATION_2027.md`, `orr/evaluate_2027.py`). It records the SHA-256 of every evaluated file and has four primary comparisons, each with a paired-bootstrap CI. A verdict counts only after the last regular-season game.
