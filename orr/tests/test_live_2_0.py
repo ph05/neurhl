@@ -5,6 +5,7 @@ Run: python3 -m orr.tests.test_live_2_0
 """
 import hashlib
 import io
+import json
 import tempfile
 from pathlib import Path
 
@@ -79,7 +80,10 @@ def test_season_end_comparisons_run_on_a_complete_season():
 def test_season_complete_needs_every_game():
     teams = [f"T{i}" for i in range(32)]
     res = pd.DataFrame({"home": teams[:16], "away": teams[16:]})
-    assert not EV.season_complete(res)
+    # every team has played: the check must return a Python bool, which json can write
+    # (a numpy bool broke the daily Action from 2026-10-04)
+    assert EV.season_complete(res) is False
+    json.dumps({"season_complete": EV.season_complete(res)})
 
 
 def test_reproduce_compare_ignores_only_the_time_stamp():

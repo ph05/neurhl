@@ -57,7 +57,7 @@ def game_comparison(ep: pd.DataFrame, a: str, b: str, final: bool = False) -> di
 
 def season_complete(res: pd.DataFrame) -> bool:
     gp = pd.concat([res.home, res.away]).value_counts()
-    return len(gp) == 32 and gp.min() >= C.GAMES_PER_TEAM[C.TARGET_SEASON]
+    return bool(len(gp) == 32 and gp.min() >= C.GAMES_PER_TEAM[C.TARGET_SEASON])   # numpy bool is not JSON
 
 
 def team_comparison(res: pd.DataFrame, ours: str, theirs: str) -> dict:
@@ -140,7 +140,7 @@ def main():
                          "daily_vs_neurhl_H": game_comparison(ep, "orr_inseason", "neurhl_H_pregame", fin),
                          "daily_vs_elo": game_comparison(ep, "orr_inseason", "elo_pregame", fin),
                          "goalie_sv_vs_neurhl_1_0": goalie_comparison(boxes, "neurhl_1.0", res)}}
-    OUT.write_text(json.dumps(out, indent=1))
+    OUT.write_text(json.dumps(out, indent=1, default=lambda o: o.item() if isinstance(o, np.generic) else str(o)))
     for k, v in out.items():
         if k.startswith("P"):
             print(k, json.dumps(v)[:160])
