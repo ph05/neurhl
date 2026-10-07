@@ -95,18 +95,30 @@ def save(new: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def complete_ids() -> set:
+    """Games the API has nothing more to add to: stored with shots on goal and a box score.
+    Games added by hand or merged from another file (the opening nights came from
+    NeurHL's results file) lack both, so they are fetched again."""
+    r = load()
+    if not len(r) or "shots_home" not in r:
+        return set()
+    with_shots = set(r.game_id[r.shots_home.notna() & r.shots_away.notna()])
+    boxed = set(pd.read_csv(BOXES, usecols=["game_id"]).game_id) if BOXES.exists() else set()
+    return with_shots & boxed
+
+
 def fetch_api(through: dt.date) -> pd.DataFrame:
     import requests
-    have_ids = set(load().game_id)
+    have_ids = complete_ids()
     sch = pd.read_csv(C.OUT / f"freeze_{C.TARGET_SEASON}" / f"schedule_{C.TARGET_SEASON}.csv")
     rows = []
     for ds in sorted(set(sch.date.astype(str))):
-        # skip a date only when every one of its games is already stored
+        # skip a date only when every one of its games is complete (shots and box score)
         if ds > through.isoformat() or set(sch[sch.date.astype(str) == ds].game_id) <= have_ids:
             continue
         js = requests.get(SCORE_URL.format(d=ds), timeout=30).json()
         for g in js.get("games", []):
-            if g.get("gameType") == 2 and g.get("gameState") in ("OFF", "FINAL"):
+            if g.get("gameType") == 2 and g.get("gameState") in ("OFF", "FINAL") and g["id"] not in have_ids:
                 rows.append({"game_id": g["id"], "date": ds, "home": g["homeTeam"]["abbrev"],
                              "away": g["awayTeam"]["abbrev"], "home_g": g["homeTeam"]["score"],
                              "away_g": g["awayTeam"]["score"],

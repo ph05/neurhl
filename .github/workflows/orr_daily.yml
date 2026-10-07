@@ -13,6 +13,9 @@ on:
     - cron: "30 13 * * *"   # morning: last night's results, first forecast before any afternoon game
     - cron: "30 21 * * *"   # evening: refresh with posted lineups before evening puck drops
   workflow_dispatch: {}
+  push:                     # a change to this job runs it once on main, so the change is checked at once
+    branches: [main]
+    paths: [".github/workflows/orr_daily.yml"]
 
 permissions:
   contents: write
