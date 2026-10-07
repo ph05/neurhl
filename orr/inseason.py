@@ -605,6 +605,9 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
                             "today_lineup_offsets": int((t.lo_h != 0).sum()),
                             "today_starters_known": int(known.sum())},
                 "inputs": {"results": {"path": str(results_path), "sha256": _sha(results_path)},
+                           # box scores feed player rates, past lineups, goalie talent and start shares
+                           **({"boxes": {"path": str(PU.BOXES_LIVE.relative_to(C.ROOT)), "sha256": _sha(PU.BOXES_LIVE)}}
+                              if PU.BOXES_LIVE.exists() else {}),
                            **({"goalies": {"path": goalies_path, "sha256": _sha(goalies_path)}}
                               if goalies_path else {}),
                            **({"lineups": [{"path": str(Path(f).relative_to(C.ROOT))

@@ -94,6 +94,22 @@ def test_reproduce_finds_code_after_a_history_rewrite():
             RP.REWRITES = saved
 
 
+def test_reproduce_restores_the_box_scores_a_run_read():
+    """A re-run must read the box scores the run read, not whatever its code checkout holds."""
+    import hashlib
+    head = _git("rev-parse", "HEAD")
+    data = subprocess.run(["git", "show", f"HEAD:{RP.BOXES}"], cwd=C.ROOT, capture_output=True, check=True).stdout
+    want = hashlib.sha256(data).hexdigest()
+    with tempfile.TemporaryDirectory() as d:
+        wt = Path(d)
+        (wt / RP.BOXES).parent.mkdir(parents=True)
+        (wt / RP.BOXES).write_text("stale")
+        r = RP.restore_boxes({"inputs": {"boxes": {"sha256": want}}}, head, wt)
+        assert r["matched"] and hashlib.sha256((wt / RP.BOXES).read_bytes()).hexdigest() == want
+        r = RP.restore_boxes({"inputs": {"boxes": {"sha256": "0" * 64}}}, head, wt)
+        assert r["matched"] is False and not (wt / RP.BOXES).exists()
+
+
 def test_every_committed_run_can_be_reproduced_from_this_history():
     """The code named by each published daily run is still in the repository, directly,
     by its tree, or through orr/output/reproduce/rewritten_commits.json."""
