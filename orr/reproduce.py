@@ -7,9 +7,12 @@ code commit, the model, the seed, the number of simulations, and the
 SHA-256 of the results file and of each lineup file it read. This command:
 
   1. checks out that code commit in a temporary git worktree, with the
-     ignored working inputs (orr/cache, data/raw/fastrhockey) linked in;
-  2. rebuilds the inputs: the results file from git history, chosen by its
-     SHA-256, and exactly the recorded lineup files, each checked by its
+     ignored working inputs (orr/cache, data/raw/fastrhockey) linked in. If a
+     history rewrite removed the commit, the code is found by its git tree
+     (recorded in run files since 2026-10-07) or through
+     orr/output/reproduce/rewritten_commits.json (old commit -> rewritten commit);
+  2. rebuilds the inputs: the results file and the box scores from git history,
+     chosen by their SHA-256, and exactly the recorded lineup files, each checked by its
      SHA-256 (taken from the recorded paths, --lineup-dir, or NeurHL's
      origin/main);
   3. re-runs the day with the recorded model, seed and simulations;
@@ -40,7 +43,9 @@ from orr import config as C
 ROOT = C.ROOT
 LINKED = ("orr/cache", "data/raw/fastrhockey")
 RESULTS = "orr/output/live/results_2027.csv"
+BOXES = "orr/output/live/boxes_2027.csv"
 OUT = C.OUT / "reproduce"
+REWRITES = OUT / "rewritten_commits.json"
 STAMPS = ("created_utc",)          # when the file was made: expected to differ
 
 
@@ -53,17 +58,45 @@ def sha(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
 
-def results_bytes(want: str, data_commit: str) -> tuple[bytes | None, str]:
-    """The results file whose SHA-256 is ``want``: first as committed with the
-    run, then any earlier committed version."""
-    for c in [data_commit] + git("log", "--format=%H", data_commit, "--", RESULTS).split():
+def file_by_sha(rel: str, want: str, data_commit: str) -> tuple[bytes | None, str]:
+    """The committed version of ``rel`` whose SHA-256 is ``want``: first as committed
+    with the run, then any earlier committed version."""
+    for c in [data_commit] + git("log", "--format=%H", data_commit, "--", rel).split():
         try:
-            b = git("show", f"{c}:{RESULTS}", binary=True)
+            b = git("show", f"{c}:{rel}", binary=True)
         except subprocess.CalledProcessError:
             continue
         if sha(b) == want:
             return b, c
     return None, ""
+
+
+def results_bytes(want: str, data_commit: str) -> tuple[bytes | None, str]:
+    return file_by_sha(RESULTS, want, data_commit)
+
+
+def restore_boxes(run: dict, data_commit: str, wt: Path) -> dict:
+    """Put the box scores the run read into the checkout. Runs record their SHA-256
+    (since 2026-10-07). For earlier runs the version committed with the run is used:
+    the daily job commits its box scores with its forecast, and runs made before the
+    first box scores had none."""
+    dest = wt / BOXES
+    rec = (run.get("inputs") or {}).get("boxes")
+    if rec:
+        b, c = file_by_sha(BOXES, rec["sha256"], data_commit)
+        out = {"recorded": True, "matched": b is not None, "from_commit": c}
+    else:
+        try:
+            b, c = git("show", f"{data_commit}:{BOXES}", binary=True), data_commit
+        except subprocess.CalledProcessError:
+            b, c = None, ""
+        out = {"recorded": False, "matched": None, "from_commit": c}
+    if b is None:
+        dest.unlink(missing_ok=True)
+    else:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(b)
+    return out
 
 
 def lineup_sources(recorded: list[dict], override: str | None) -> list[Path]:
@@ -117,6 +150,34 @@ def gather_lineups(recorded: list[dict], override: str | None, dest: Path, tmp: 
     return rows
 
 
+def _exists(obj: str) -> bool:
+    return subprocess.run(["git", "cat-file", "-e", obj], cwd=ROOT, capture_output=True).returncode == 0
+
+
+def resolve_code(run: dict) -> tuple[str, str]:
+    """('commit', sha) or ('tree', sha): where the run's recorded code can be checked out."""
+    code = str(run["code"])
+    if _exists(code + "^{commit}"):
+        return "commit", code
+    tree = run.get("code_tree")
+    if tree and _exists(str(tree) + "^{tree}"):
+        return "tree", str(tree)
+    rewrites = json.loads(REWRITES.read_text()) if REWRITES.exists() else {}
+    for old, new in rewrites.items():
+        if old.startswith(code) and _exists(new + "^{commit}"):
+            return "commit", new
+    raise SystemExit(f"code {code} is not in this repository's history and has no recorded tree")
+
+
+def checkout(kind: str, ref: str, wt: Path) -> None:
+    if kind == "commit":
+        git("worktree", "add", "--detach", str(wt), ref)
+    else:
+        wt.mkdir(parents=True)
+        with tarfile.open(fileobj=io.BytesIO(git("archive", ref, binary=True))) as t:
+            t.extractall(wt)
+
+
 def compare(a: bytes, b: bytes) -> dict:
     if a == b:
         return {"identical": True, "max_abs_diff": 0.0}
@@ -148,9 +209,10 @@ def main():
     model = str(run.get("model", "")).replace("ORR ", "")
     tmp = Path(tempfile.mkdtemp(prefix=f"orr_reproduce_{D}_"))
     wt = tmp / "worktree"
-    report = {"date": D, "code": code, "data_commit": data_commit, "model": model,
-              "sims": run["sims"], "seed": run["seed"]}
-    git("worktree", "add", "--detach", str(wt), code)
+    kind, ref = resolve_code(run)
+    report = {"date": D, "code": code, "checked_out": {"kind": kind, "ref": ref}, "data_commit": data_commit,
+              "model": model, "sims": run["sims"], "seed": run["seed"]}
+    checkout(kind, ref, wt)
     try:
         for p in LINKED:
             (wt / p).parent.mkdir(parents=True, exist_ok=True)
@@ -160,6 +222,7 @@ def main():
         report["results"] = {"matched": res_b is not None, "from_commit": res_c}
         res_path = tmp / "results.csv"
         res_path.write_bytes(res_b if res_b is not None else git("show", f"{data_commit}:{RESULTS}", binary=True))
+        report["boxes"] = restore_boxes(run, data_commit, wt)
         lu_dir = tmp / "lineups" / "2027"
         lu_dir.mkdir(parents=True)
         report["lineups"] = gather_lineups(run["inputs"].get("lineups", []), a.lineup_dir, lu_dir, tmp)
@@ -185,14 +248,16 @@ def main():
         new_run = wt / "orr" / "output" / "live" / D / f"run_{D}.json"
         if new_run.exists():
             nr = json.loads(new_run.read_text())
-            skip = {"created_utc", "inputs", "code"}
+            skip = {"created_utc", "inputs", "code", "code_tree"}
             report["run_fields_differ"] = sorted(k for k in set(run) | set(nr)
                                                  if k not in skip and run.get(k) != nr.get(k))
     finally:
         if not a.keep:
-            git("worktree", "remove", "--force", str(wt))
+            if kind == "commit":
+                git("worktree", "remove", "--force", str(wt))
             shutil.rmtree(tmp, ignore_errors=True)
-    inputs_ok = report["results"]["matched"] and all(x["matched"] for x in report["lineups"])
+    inputs_ok = (report["results"]["matched"] and all(x["matched"] for x in report["lineups"])
+                 and report.get("boxes", {}).get("matched") is not False)
     fs = report.get("files", {})
     if report.get("exit_code") or not fs:
         v = "failed to run"
@@ -209,8 +274,10 @@ def main():
     print(f"{D}: code {code}, model {model}: {report['verdict']}")
     for f, x in fs.items():
         print(f"  {f}: {'identical' if x.get('identical') else x}")
-    print(f"  results matched: {report['results']['matched']}; lineup files matched: "
-          f"{sum(x['matched'] for x in report['lineups'])}/{len(report['lineups'])}")
+    bx = report.get("boxes", {})
+    print(f"  results matched: {report['results']['matched']}; box scores: "
+          f"{'matched' if bx.get('matched') else 'as committed with the run' if bx.get('matched') is None else 'NOT matched'}; "
+          f"lineup files matched: {sum(x['matched'] for x in report['lineups'])}/{len(report['lineups'])}")
 
 
 if __name__ == "__main__":

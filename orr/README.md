@@ -52,6 +52,7 @@ Start from the strongest cheap signal, add what it misses, and never be more con
   - a model card (`docs/orr/model.html`).
 
   See `orr/CHANGELOG.md` and `orr/releases/`.
+- **ORR 2.0 vs NeurHL 1.3:** a side-by-side comparison of design, backtests, 2026-27 forecasts and the live record is in `orr/COMPARISON_ORR2_NeurHL13.md`.
 
 ## Pipeline
 

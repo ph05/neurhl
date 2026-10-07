@@ -144,6 +144,15 @@ def _code_commit() -> str:
         return "unknown"
 
 
+def _code_tree() -> str:
+    """The git tree of HEAD: the code's content, unchanged by any rewrite of commit metadata."""
+    try:
+        return subprocess.run(["git", "-C", str(C.ROOT), "rev-parse", "HEAD^{tree}"],
+                              capture_output=True, text=True, check=True).stdout.strip()
+    except subprocess.CalledProcessError:
+        return "unknown"
+
+
 def load_freeze() -> dict:
     st = json.loads((FREEZE / "state_2027.json").read_text())
     st["ratings"] = pd.read_csv(FREEZE / "ratings_2027.csv")
@@ -579,7 +588,7 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
     if gros is not None:
         gros.to_csv(outdir / f"goalies_ros_{date}.csv", index=False, float_format="%.4f")
     cur.to_csv(outdir / f"ratings_{date}.csv", index=False, float_format="%.5f")
-    run_meta = {"date": date, "created_utc": created, "code": _code_commit(),
+    run_meta = {"date": date, "created_utc": created, "code": _code_commit(), "code_tree": _code_tree(),
                 "results_through": str(res.date.max()) if len(res) else None,
                 "n_results": int(len(res)), "sims": sims, "seed": seed,
                 "missing_results_before_date": sorted(map(int, set(sch[sch.date < day].game_id) - set(res.game_id))),
@@ -596,6 +605,9 @@ def run(date: str, results_path: str, goalies_path: str | None, sims: int, seed:
                             "today_lineup_offsets": int((t.lo_h != 0).sum()),
                             "today_starters_known": int(known.sum())},
                 "inputs": {"results": {"path": str(results_path), "sha256": _sha(results_path)},
+                           # box scores feed player rates, past lineups, goalie talent and start shares
+                           **({"boxes": {"path": str(PU.BOXES_LIVE.relative_to(C.ROOT)), "sha256": _sha(PU.BOXES_LIVE)}}
+                              if PU.BOXES_LIVE.exists() else {}),
                            **({"goalies": {"path": goalies_path, "sha256": _sha(goalies_path)}}
                               if goalies_path else {}),
                            **({"lineups": [{"path": str(Path(f).relative_to(C.ROOT))
