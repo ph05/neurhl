@@ -1,0 +1,170 @@
+{
+ "date": "2026-10-08",
+ "created_utc": "2026-10-08T01:06:56+00:00",
+ "code": "101ede1",
+ "code_tree": "d9d1e616c5ce49909804e099dfa43f565515556e",
+ "results_through": "2026-10-06 00:00:00",
+ "n_results": 52,
+ "sims": 20000,
+ "seed": 20260929,
+ "missing_results_before_date": [
+  2026020053,
+  2026020054,
+  2026020055
+ ],
+ "rho_od": -0.6554020219867895,
+ "sd_anchor": 0.8602405472597555,
+ "home_ice": 0.06757821140998942,
+ "orr_1_5": {
+  "sd_mult": 1.0
+ },
+ "orr_1_4": {
+  "drift_k": 0.5,
+  "absent_players": 0,
+  "start_shares_updated": true
+ },
+ "model": "ORR 2.0",
+ "settings": {
+  "version": "ORR 2.0",
+  "past_starters": true,
+  "lineups": true,
+  "player_update": true,
+  "box_first": true,
+  "goalie_update": true,
+  "player_calibration": true,
+  "standings_drift": true,
+  "start_share_update": true,
+  "absence": true,
+  "standings_sharp": true,
+  "sog_dist": true,
+  "sos": true,
+  "ros_file": true,
+  "ros_interval": true,
+  "goalie_ros": true,
+  "forecast_diff": true,
+  "clinch": true,
+  "accepted_items": [
+   "X1",
+   "1.2: in-season skater rates",
+   "1.3: box-score lineups, goalie talent",
+   "1.4: standings drift, start shares",
+   "1.5: shot distributions",
+   "1.6: remaining SOS, rest-of-season player file",
+   "1.7-1.8: rest-of-season intervals",
+   "1.8: goalie rest-of-season file, forecast diff",
+   "1.9: clinch flags, magic numbers",
+   "2.0: preregistered evaluation, reproducibility check, model card"
+  ],
+  "lineup_hp": {
+   "beta_x": 0.45,
+   "beta_st": 0.0,
+   "beta_t": 0.6,
+   "toi_scale": 300.0,
+   "halflife": 10.0,
+   "use_goalie": true
+  }
+ },
+ "orr_1_1": {
+  "results_with_both_starters": 52,
+  "results_with_lineup_offset": 35,
+  "today_lineup_offsets": 0,
+  "today_starters_known": 0
+ },
+ "inputs": {
+  "results": {
+   "path": "/home/runner/work/neurhl/neurhl/orr/output/live/results_2027.csv",
+   "sha256": "fc709195e5b5dfe36f22c614cc7df29fb50f3c73c87c4c0b8040d92e78e72486"
+  },
+  "boxes": {
+   "path": "orr/output/live/boxes_2027.csv",
+   "sha256": "c2de2f5fe0353f7fbfd5c803c74e028c2c126333b4e2c445a2f3e45e7afd3704"
+  },
+  "lineups": [
+   {
+    "path": "neurhl/output/live/2027/2026-09-29/pregame_2026020001_lineups.json",
+    "sha256": "31e2ef59aa51c39d522b32d9c417e1ba37e9f1f3ab4849ac0b942a111b8da991"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-09-29/pregame_2026020002_lineups.json",
+    "sha256": "29fe64757c0aa71ed56ffc23803f25120bd0672336124852dacb7d9cc9961a7e"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-09-29/pregame_2026020003_lineups.json",
+    "sha256": "10ceb2ba9e51175fba09aaeff378fa5f8e2360b85a65bfcdf8e97578b16103ec"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-09-29/pregame_2026020004_lineups.json",
+    "sha256": "69f4fcce370c5e685c448f76ed96a23c973747c5a5906b47caf0502ac4756e88"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-09-29/pregame_2026020005_lineups.json",
+    "sha256": "e0e07ae1d4a96a9647a5acacdea85dd77c0b4ba05e0c0ceb518152080a729ad4"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-09-29/morning_lineups.json",
+    "sha256": "bd916ba42b00662dc4d4002d0e56b88c9bc87e1ac664f3a609a81cf6f4bf7541"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-09-29/preview_lineups.json",
+    "sha256": "addc9c701956247ccb63d8a6bec6aa8786e0cf6f046250229db85ea264a36f67"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-09-30/pregame_2026020006_lineups.json",
+    "sha256": "d8071dffe0ab7cd9e213eaae8170004a71f3d86854fbb19906717f49351ffb92"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-09-30/pregame_2026020007_lineups.json",
+    "sha256": "6b4b8b57d9b49cbadf1ab55f73251842c8f422257fc3c1d23cb1dbc88bb57149"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-09-30/pregame_2026020008_lineups.json",
+    "sha256": "642969d1c54924e9cec557f7291b33c07c61f9972fda0b1408978fb4a91d151e"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-09-30/morning_lineups.json",
+    "sha256": "4b1751ce2b3a2e2a19c98deef18997a1886fd11545c4a73ca487bb0bb8f8fb7f"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-10-01/pregame_2026020009_lineups.json",
+    "sha256": "9762f457593fc6b397bd783c33acdbff1d64b2f3fa8eb6f8c70eb9f43010045a"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-10-01/pregame_2026020010_lineups.json",
+    "sha256": "87a7fb247c9f9ed4bdb95067d4d4e3526517604488efdbbb4f16071ac9deb546"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-10-01/pregame_2026020011_lineups.json",
+    "sha256": "ca4b586c266464b74b989f0e031d546d1e858f6380f62a78eb964932315c3b25"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-10-01/pregame_2026020012_lineups.json",
+    "sha256": "e1d7b432a7a1b11296ad3ab75bbd1e33e92ec09f4c400f31c20e52267193bf3c"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-10-01/pregame_2026020013_lineups.json",
+    "sha256": "f1d6f39e1814d839abae6128c9240037cc06a70d91c939a64121634f9a0abef4"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-10-01/pregame_2026020014_lineups.json",
+    "sha256": "9c98e797cf6349ceafd6dc0057b2ba36795d836b376321096f9958c4a91db163"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-10-01/pregame_2026020015_lineups.json",
+    "sha256": "f6647e17791fc3e671f5f677120d9b35e67c3a6ed828fcfe743c3f0ce8a182e4"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-10-01/pregame_2026020016_lineups.json",
+    "sha256": "6f492f9b1d74551d4be61f8ca02b74110c67de02b751562069f8cffbbbd8f591"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-10-01/morning_lineups.json",
+    "sha256": "befdc021dd86d751f70f2a85e488f264a291e6e8a69c75f946e9eff9df341177"
+   },
+   {
+    "path": "neurhl/output/live/2027/2026-10-02/morning_lineups.json",
+    "sha256": "446b086f6d9c381821b54f12db6cd183a5d8f32791ddda138a075fa16d92e405"
+   }
+  ],
+  "freeze_state": "40ce19c0d0dc09d0dad7c5988bd8639e3ff455253e443cf0ac10e2b7a9628b98"
+ }
+}
