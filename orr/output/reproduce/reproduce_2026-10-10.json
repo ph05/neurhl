@@ -1,0 +1,164 @@
+{
+ "date": "2026-10-10",
+ "code": "4ca70ab",
+ "checked_out": {
+  "kind": "commit",
+  "ref": "4ca70ab"
+ },
+ "data_commit": "4c24cf208543fc0ccbbd615ceac34bbf7d25883c",
+ "model": "2.0",
+ "sims": 20000,
+ "seed": 20260929,
+ "results": {
+  "matched": true,
+  "from_commit": "4c24cf208543fc0ccbbd615ceac34bbf7d25883c"
+ },
+ "boxes": {
+  "recorded": true,
+  "matched": true,
+  "from_commit": "4c24cf208543fc0ccbbd615ceac34bbf7d25883c"
+ },
+ "lineups": [
+  {
+   "file": "2026-09-29/pregame_2026020001_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-09-29/pregame_2026020001_lineups.json"
+  },
+  {
+   "file": "2026-09-29/pregame_2026020002_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-09-29/pregame_2026020002_lineups.json"
+  },
+  {
+   "file": "2026-09-29/pregame_2026020003_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-09-29/pregame_2026020003_lineups.json"
+  },
+  {
+   "file": "2026-09-29/pregame_2026020004_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-09-29/pregame_2026020004_lineups.json"
+  },
+  {
+   "file": "2026-09-29/pregame_2026020005_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-09-29/pregame_2026020005_lineups.json"
+  },
+  {
+   "file": "2026-09-29/morning_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-09-29/morning_lineups.json"
+  },
+  {
+   "file": "2026-09-29/preview_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-09-29/preview_lineups.json"
+  },
+  {
+   "file": "2026-09-30/pregame_2026020006_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-09-30/pregame_2026020006_lineups.json"
+  },
+  {
+   "file": "2026-09-30/pregame_2026020007_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-09-30/pregame_2026020007_lineups.json"
+  },
+  {
+   "file": "2026-09-30/pregame_2026020008_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-09-30/pregame_2026020008_lineups.json"
+  },
+  {
+   "file": "2026-09-30/morning_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-09-30/morning_lineups.json"
+  },
+  {
+   "file": "2026-10-01/pregame_2026020009_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-10-01/pregame_2026020009_lineups.json"
+  },
+  {
+   "file": "2026-10-01/pregame_2026020010_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-10-01/pregame_2026020010_lineups.json"
+  },
+  {
+   "file": "2026-10-01/pregame_2026020011_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-10-01/pregame_2026020011_lineups.json"
+  },
+  {
+   "file": "2026-10-01/pregame_2026020012_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-10-01/pregame_2026020012_lineups.json"
+  },
+  {
+   "file": "2026-10-01/pregame_2026020013_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-10-01/pregame_2026020013_lineups.json"
+  },
+  {
+   "file": "2026-10-01/pregame_2026020014_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-10-01/pregame_2026020014_lineups.json"
+  },
+  {
+   "file": "2026-10-01/pregame_2026020015_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-10-01/pregame_2026020015_lineups.json"
+  },
+  {
+   "file": "2026-10-01/pregame_2026020016_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-10-01/pregame_2026020016_lineups.json"
+  },
+  {
+   "file": "2026-10-01/morning_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-10-01/morning_lineups.json"
+  },
+  {
+   "file": "2026-10-02/morning_lineups.json",
+   "matched": true,
+   "source": "neurhl/output/live/2027/2026-10-02/morning_lineups.json"
+  }
+ ],
+ "exit_code": 0,
+ "files": {
+  "games_2026-10-10.csv": {
+   "identical": true,
+   "max_abs_diff": 0.0,
+   "ignored": [
+    "created_utc"
+   ]
+  },
+  "goalies_ros_2026-10-10.csv": {
+   "identical": true,
+   "max_abs_diff": 0.0
+  },
+  "players_2026-10-10.csv": {
+   "identical": true,
+   "max_abs_diff": 0.0
+  },
+  "players_ros_2026-10-10.csv": {
+   "identical": true,
+   "max_abs_diff": 0.0
+  },
+  "ratings_2026-10-10.csv": {
+   "identical": true,
+   "max_abs_diff": 0.0
+  },
+  "standings_2026-10-10.csv": {
+   "identical": true,
+   "max_abs_diff": 0.0
+  }
+ },
+ "run_fields_differ": [
+  "home_ice",
+  "rho_od",
+  "sd_anchor"
+ ],
+ "verdict": "identical"
+}
