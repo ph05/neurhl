@@ -84,3 +84,4 @@ game_id,date,home,away,home_g,away_g,last_period,source,shots_home,shots_away
 2026020083,2026-10-10,VGK,LAK,2,1,OT,api-web.nhle.com,32.0,27.0
 2026020084,2026-10-11,WSH,SEA,3,5,REG,api-web.nhle.com,36.0,27.0
 2026020085,2026-10-11,NYR,VAN,6,2,REG,api-web.nhle.com,25.0,21.0
+2026020086,2026-10-11,PHI,CAR,1,4,REG,api-web.nhle.com,19.0,30.0
