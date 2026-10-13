@@ -155,6 +155,10 @@
    "max_abs_diff": 0.0
   }
  },
- "run_fields_differ": [],
+ "run_fields_differ": [
+  "home_ice",
+  "rho_od",
+  "sd_anchor"
+ ],
  "verdict": "identical"
 }
