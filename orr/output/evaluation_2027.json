@@ -1,7 +1,7 @@
 {
  "protocol": "orr/EVALUATION_2027.md",
- "evaluated_utc": "2026-10-14T23:59:51+00:00",
- "games_played": 105,
+ "evaluated_utc": "2026-10-15T17:50:42+00:00",
+ "games_played": 107,
  "season_complete": false,
  "files_sha256": {
   "orr/output/freeze_2027/teams_2027.csv": "16b35fecbba1c28ad43c514eed4172d2d955744456fdd85585e442b57c838328",
@@ -29,14 +29,14 @@
  },
  "P2_preseason_vs_neurhl_1_1": {
   "status": "interim",
-  "n": 98,
-  "diff": 0.009509111124349422,
+  "n": 100,
+  "diff": 0.008345902024615208,
   "ci95": [
-   -0.006656378737985578,
-   0.025524522178301184
+   -0.007921733601125793,
+   0.023411735059473138
   ],
   "verdict": "(interim, not a verdict) no difference shown",
-  "brier_diff": 0.004326174582653056
+  "brier_diff": 0.0037639931709999947
  },
  "P3_teams_vs_neurhl_1_1": {
   "status": "pending",
@@ -49,14 +49,14 @@
  "secondary": {
   "P2_vs_neurhl_1_0": {
    "status": "interim",
-   "n": 98,
-   "diff": 0.00783658621464452,
+   "n": 100,
+   "diff": 0.006340281882624006,
    "ci95": [
-    -0.010570124190602282,
-    0.025606264789118836
+    -0.011582235127385434,
+    0.023652715588378222
    ],
    "verdict": "(interim, not a verdict) no difference shown",
-   "brier_diff": 0.0035423957489795843
+   "brier_diff": 0.002811469817999993
   },
   "P3_vs_neurhl_1_0": {
    "status": "pending",

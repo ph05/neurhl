@@ -104,3 +104,5 @@ game_id,date,home,away,home_g,away_g,last_period,source,shots_home,shots_away
 2026020103,2026-10-13,ANA,CGY,2,4,REG,api-web.nhle.com,25.0,36.0
 2026020104,2026-10-13,LAK,EDM,1,4,REG,api-web.nhle.com,40.0,17.0
 2026020105,2026-10-13,SJS,BOS,3,6,REG,api-web.nhle.com,38.0,26.0
+2026020106,2026-10-14,WSH,MTL,5,4,REG,api-web.nhle.com,24.0,29.0
+2026020107,2026-10-14,COL,DAL,2,3,SO,api-web.nhle.com,27.0,22.0
