@@ -1,16 +1,16 @@
 {
  "date": "2026-10-14",
- "created_utc": "2026-10-14T18:07:00+00:00",
- "code": "f604363",
- "code_tree": "a3942150755767e624d006a3729b80caa15aeb17",
+ "created_utc": "2026-10-14T23:59:38+00:00",
+ "code": "57aee6d",
+ "code_tree": "aeb44ec8ce3ab6ba89345ffc42e0bf775b60cb75",
  "results_through": "2026-10-13 00:00:00",
  "n_results": 105,
  "sims": 20000,
  "seed": 20260929,
  "missing_results_before_date": [],
- "rho_od": -0.5471214397460161,
- "sd_anchor": 0.86024054701838,
- "home_ice": 0.06624347461961828,
+ "rho_od": -0.5471214393774392,
+ "sd_anchor": 0.8602405472597555,
+ "home_ice": 0.0662434746196559,
  "orr_1_5": {
   "sd_mult": 1.0
  },
