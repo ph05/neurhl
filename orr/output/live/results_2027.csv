@@ -139,3 +139,14 @@ game_id,date,home,away,home_g,away_g,last_period,source,shots_home,shots_away
 2026020138,2026-10-19,PHI,COL,3,2,REG,api-web.nhle.com,24.0,26.0
 2026020139,2026-10-19,TOR,SJS,3,1,REG,api-web.nhle.com,32.0,31.0
 2026020140,2026-10-19,UTA,PIT,5,4,REG,api-web.nhle.com,29.0,19.0
+2026020141,2026-10-20,MTL,SJS,3,4,OT,api-web.nhle.com,34.0,30.0
+2026020142,2026-10-20,NJD,COL,4,3,REG,api-web.nhle.com,41.0,34.0
+2026020143,2026-10-20,NYI,ANA,3,2,REG,api-web.nhle.com,25.0,17.0
+2026020144,2026-10-20,WSH,LAK,2,5,REG,api-web.nhle.com,32.0,26.0
+2026020145,2026-10-20,CBJ,TOR,2,6,REG,api-web.nhle.com,38.0,22.0
+2026020146,2026-10-20,STL,WPG,2,1,REG,api-web.nhle.com,28.0,33.0
+2026020147,2026-10-20,DAL,BOS,3,2,OT,api-web.nhle.com,25.0,20.0
+2026020148,2026-10-20,EDM,MIN,4,3,OT,api-web.nhle.com,32.0,30.0
+2026020149,2026-10-20,SEA,DET,4,3,SO,api-web.nhle.com,27.0,25.0
+2026020150,2026-10-20,VAN,CAR,3,6,REG,api-web.nhle.com,17.0,44.0
+2026020151,2026-10-20,VGK,TBL,2,6,REG,api-web.nhle.com,34.0,21.0
