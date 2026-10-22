@@ -1,19 +1,16 @@
 {
  "date": "2026-10-22",
- "created_utc": "2026-10-22T00:03:41+00:00",
- "code": "b212a2b",
- "code_tree": "fb3b905b65a2e117cad974c8464fb0f23f4eefac",
- "results_through": "2026-10-20 00:00:00",
- "n_results": 151,
+ "created_utc": "2026-10-22T18:06:10+00:00",
+ "code": "911cddc",
+ "code_tree": "80dc56b06ff1b8e674156773a0a0c811a312b1b0",
+ "results_through": "2026-10-21 00:00:00",
+ "n_results": 153,
  "sims": 20000,
  "seed": 20260929,
- "missing_results_before_date": [
-  2026020152,
-  2026020153
- ],
- "rho_od": -0.4660115721207153,
+ "missing_results_before_date": [],
+ "rho_od": -0.45732541565353035,
  "sd_anchor": 0.8602405472597555,
- "home_ice": 0.06593838244492939,
+ "home_ice": 0.06591420838104303,
  "orr_1_5": {
   "sd_mult": 1.0
  },
@@ -64,19 +61,19 @@
   }
  },
  "orr_1_1": {
-  "results_with_both_starters": 151,
-  "results_with_lineup_offset": 134,
+  "results_with_both_starters": 153,
+  "results_with_lineup_offset": 136,
   "today_lineup_offsets": 0,
   "today_starters_known": 0
  },
  "inputs": {
   "results": {
    "path": "/home/runner/work/neurhl/neurhl/orr/output/live/results_2027.csv",
-   "sha256": "85bb1715f660bbc60cffe12cbd4b23b74e065c7f438b879f5cf99f4f3ddad298"
+   "sha256": "9ad218590466f1cd99f0628f26482f0c9c3bc7f3593032aaee95e811e4a585f4"
   },
   "boxes": {
    "path": "orr/output/live/boxes_2027.csv",
-   "sha256": "43ecf3a8e62c2857901de74b09b40db8d905f69874f47c386399e9489fc4f818"
+   "sha256": "383391f9bb2a5edb76a3493c1310e6dc48d019beae7f6b55ec3260895b35842f"
   },
   "lineups": [
    {
