@@ -164,3 +164,5 @@ game_id,date,home,away,home_g,away_g,last_period,source,shots_home,shots_away
 2026020163,2026-10-22,EDM,CAR,6,5,SO,api-web.nhle.com,21.0,27.0
 2026020164,2026-10-22,SEA,UTA,5,3,REG,api-web.nhle.com,23.0,36.0
 2026020165,2026-10-22,VAN,DET,2,5,REG,api-web.nhle.com,13.0,31.0
+2026020166,2026-10-23,CHI,MTL,1,4,REG,api-web.nhle.com,21.0,28.0
+2026020167,2026-10-23,COL,TBL,6,3,REG,api-web.nhle.com,24.0,34.0
