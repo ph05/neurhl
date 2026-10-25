@@ -166,3 +166,15 @@ game_id,date,home,away,home_g,away_g,last_period,source,shots_home,shots_away
 2026020165,2026-10-22,VAN,DET,2,5,REG,api-web.nhle.com,13.0,31.0
 2026020166,2026-10-23,CHI,MTL,1,4,REG,api-web.nhle.com,21.0,28.0
 2026020167,2026-10-23,COL,TBL,6,3,REG,api-web.nhle.com,24.0,34.0
+2026020168,2026-10-24,PHI,ANA,4,5,REG,api-web.nhle.com,32.0,26.0
+2026020169,2026-10-24,NJD,LAK,3,1,REG,api-web.nhle.com,26.0,13.0
+2026020170,2026-10-24,BOS,SJS,6,4,REG,api-web.nhle.com,35.0,27.0
+2026020171,2026-10-24,OTT,NYR,7,4,REG,api-web.nhle.com,24.0,28.0
+2026020172,2026-10-24,PIT,NSH,3,2,OT,api-web.nhle.com,37.0,26.0
+2026020173,2026-10-24,WSH,BUF,4,3,OT,api-web.nhle.com,34.0,21.0
+2026020174,2026-10-24,CBJ,VGK,2,1,OT,api-web.nhle.com,20.0,27.0
+2026020175,2026-10-24,STL,CAR,0,4,REG,api-web.nhle.com,24.0,39.0
+2026020176,2026-10-24,EDM,TOR,2,7,REG,api-web.nhle.com,32.0,31.0
+2026020177,2026-10-24,UTA,TBL,5,4,OT,api-web.nhle.com,28.0,32.0
+2026020178,2026-10-24,CGY,DET,4,1,REG,api-web.nhle.com,25.0,29.0
+2026020179,2026-10-24,SEA,MIN,1,5,REG,api-web.nhle.com,24.0,36.0
