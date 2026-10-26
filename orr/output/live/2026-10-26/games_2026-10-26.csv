@@ -1,0 +1,4 @@
+game_id,date,home,away,p_home_win,p_home_reg,p_away_reg,p_ot,exp_goals_home,exp_goals_away,goalie_home,goalie_away,lineup_adj_h,lineup_adj_a,model,created_utc,p_prev,d_p,prev_source,change_reason
+2026020185,2026-10-26,NYR,LAK,0.53826,0.41443,0.34566,0.23991,2.95785,2.74458,,,0.00000,0.00000,ORR 2.0,2026-10-26T19:28:50+00:00,0.51601,0.02225,preseason file,results since the preseason file
+2026020186,2026-10-26,CGY,TOR,0.39769,0.29353,0.48272,0.22375,2.80690,3.42012,,,0.00000,0.00000,ORR 2.0,2026-10-26T19:28:50+00:00,0.43130,-0.03361,preseason file,results since the preseason file
+2026020187,2026-10-26,EDM,DET,0.58635,0.46299,0.30582,0.23120,3.22105,2.72279,,,0.00000,0.00000,ORR 2.0,2026-10-26T19:28:50+00:00,0.62718,-0.04083,preseason file,results since the preseason file
