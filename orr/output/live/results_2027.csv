@@ -183,3 +183,6 @@ game_id,date,home,away,home_g,away_g,last_period,source,shots_home,shots_away
 2026020182,2026-10-25,WPG,MTL,1,2,REG,api-web.nhle.com,34.0,21.0
 2026020183,2026-10-25,NSH,COL,6,2,REG,api-web.nhle.com,35.0,21.0
 2026020184,2026-10-25,VAN,MIN,2,4,REG,api-web.nhle.com,17.0,34.0
+2026020185,2026-10-26,NYR,LAK,3,6,REG,api-web.nhle.com,26.0,26.0
+2026020186,2026-10-26,CGY,TOR,5,2,REG,api-web.nhle.com,34.0,28.0
+2026020187,2026-10-26,EDM,DET,3,4,SO,api-web.nhle.com,27.0,28.0
